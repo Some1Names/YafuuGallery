@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum Role {
+  reader
+  author
+  admin
+}
+
+enum Language {
+  th
+  en
+  ja
+}
+
+enum ArcStatus {
+  ongoing
+  completed
+}
+
+// ---------- User ----------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  display_name String
+  role         Role      @default(reader)
+  avatar_url   String?
+  created_at   DateTime  @default(now())
+
+  // relations
+  manga            Manga[]        @relation("AuthoredManga")
+  translations      Translation[] @relation("TranslatedBy")
+  comments          Comment[]
+  bookmarks         Bookmark[]
+  reading_progress  ReadingProgress[]
+}
+
+// ---------- Manga ----------
+
+model Manga {
+  id              String   @id @default(cuid())
+  author_id       String
+  manga_title     String
+  manga_synopsis  String
+  cover_image_url String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  author     User       @relation("AuthoredManga", fields: [author_id], references: [id])
+  arcs       Arc[]
+  chapters   Chapter[]
+  bookmarks  Bookmark[]
+
+  @@index([author_id])
+}
+
+// ---------- Arc ----------
+
+model Arc {
+  id         String    @id @default(cuid())
+  manga_id   String
+  arc_name   String
+  arc_order  Int
+  arc_status ArcStatus @default(ongoing)
+  created_at DateTime  @default(now())
+
+  manga    Manga     @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+
+  // total_chapters and total_view are intentionally NOT stored here —
+  // compute them at query time:
+  //   total_chapters = chapters.length
+  //   total_view     = sum(chapters[].view_count)
+
+  @@index([manga_id])
+  @@unique([manga_id, arc_order])
+}
+
+// ---------- Chapter ----------
+
+model Chapter {
+  id              String   @id @default(cuid())
+  manga_id        String
+  arc_id          String?
+  chapter_number  Float
+  chapter_name    String
+  published_date  DateTime
+  view_count      Int      @default(0)
+  comment_count   Int      @default(0)
+  created_at      DateTime @default(now())
+
+  manga    Manga            @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  arc      Arc?             @relation(fields: [arc_id], references: [id], onDelete: SetNull)
+  translations      Translation[]
+  comments          Comment[]
+  reading_progress  ReadingProgress[]
+
+  @@index([manga_id])
+  @@index([arc_id])
+  @@unique([manga_id, chapter_number])
+}
+
+// ---------- Translation ----------
+
+model Translation {
+  id             String   @id @default(cuid())
+  chapter_id     String
+  language       Language
+  file_url       String
+  translator_id  String?
+  created_at     DateTime @default(now())
+
+  chapter    Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  translator User?   @relation("TranslatedBy", fields: [translator_id], references: [id])
+
+  @@unique([chapter_id, language])
+  @@index([chapter_id])
+}
+
+// ---------- Comment ----------
+
+model Comment {
+  id         String    @id @default(cuid())
+  user_id    String
+  chapter_id String
+  body       String
+  hidden_at  DateTime?
+  created_at DateTime  @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+
+  @@index([chapter_id])
+  @@index([user_id])
+}
+
+// ---------- Bookmark ----------
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  user_id    String
+  manga_id   String
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  manga Manga @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, manga_id])
+  @@index([manga_id])
+}
+
+// ---------- Reading Progress ----------
+
+model ReadingProgress {
+  id             String   @id @default(cuid())
+  user_id        String
+  chapter_id     String
+  last_page_read Int      @default(0)
+  completed      Boolean  @default(false)
+  updated_at     DateTime @updatedAt
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, chapter_id])
+  @@index([chapter_id])
+}
