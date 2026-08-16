@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums ----------
+
+enum Role {
+  reader
+  author
+  admin
+}
+
+enum Language {
+  th
+  en
+  ja
+}
+
+enum ArcStatus {
+  ongoing
+  completed
+}
+
+// ---------- User ----------
+// name/image/emailVerified are named to match NextAuth's PrismaAdapter
+// expectations exactly — renaming these breaks the adapter silently.
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  role          Role      @default(reader)
+  created_at    DateTime  @default(now())
+
+  // NextAuth adapter relations
+  accounts Account[]
+  sessions Session[]
+
+  // app relations
+  manga            Manga[]           @relation("AuthoredManga")
+  translations     Translation[]     @relation("TranslatedBy")
+  comments         Comment[]
+  bookmarks        Bookmark[]
+  reading_progress ReadingProgress[]
+}
+
+// ---------- NextAuth adapter tables ----------
+// Required as-is by @auth/prisma-adapter — field names and shape are fixed.
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------- Manga ----------
+
+model Manga {
+  id               String   @id @default(cuid())
+  author_id        String
+  manga_title      String
+  manga_synopsis   String
+  cover_image_url  String? // poster-style cover, used in browse grids / cards
+  banner_image_url String? // wide hero image, used on the detail page
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  author    User       @relation("AuthoredManga", fields: [author_id], references: [id])
+  arcs      Arc[]
+  chapters  Chapter[]
+  bookmarks Bookmark[]
+
+  @@index([author_id])
+}
+
+// ---------- Arc ----------
+
+model Arc {
+  id            String    @id @default(cuid())
+  manga_id      String
+  arc_name      String
+  arc_order     Int
+  arc_status    ArcStatus @default(ongoing)
+  arc_image_url String? // cover image shown when browsing by arc
+  created_at    DateTime  @default(now())
+
+  manga    Manga     @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+
+  // total_chapters and total_view are intentionally NOT stored here —
+  // compute them at query time:
+  //   total_chapters = chapters.length
+  //   total_view     = sum(chapters[].view_count)
+
+  @@unique([manga_id, arc_order])
+  @@index([manga_id])
+}
+
+// ---------- Chapter ----------
+
+model Chapter {
+  id              String   @id @default(cuid())
+  manga_id        String
+  arc_id          String?
+  chapter_number  Float
+  chapter_name    String
+  cover_image_url String? // thumbnail shown in the chapter list
+  published_date  DateTime
+  view_count      Int      @default(0)
+  comment_count   Int      @default(0)
+  created_at      DateTime @default(now())
+
+  manga            Manga             @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  arc              Arc?              @relation(fields: [arc_id], references: [id], onDelete: SetNull)
+  translations     Translation[]
+  comments         Comment[]
+  reading_progress ReadingProgress[]
+
+  @@unique([manga_id, chapter_number])
+  @@index([manga_id])
+  @@index([arc_id])
+}
+
+// ---------- Translation ----------
+
+model Translation {
+  id            String   @id @default(cuid())
+  chapter_id    String
+  language      Language
+  file_url      String
+  translator_id String?
+  created_at    DateTime @default(now())
+
+  chapter    Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  translator User?   @relation("TranslatedBy", fields: [translator_id], references: [id])
+
+  @@unique([chapter_id, language])
+  @@index([chapter_id])
+}
+
+// ---------- Comment ----------
+
+model Comment {
+  id         String    @id @default(cuid())
+  user_id    String
+  chapter_id String
+  body       String
+  hidden_at  DateTime?
+  created_at DateTime  @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+
+  @@index([chapter_id])
+  @@index([user_id])
+}
+
+// ---------- Bookmark ----------
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  user_id    String
+  manga_id   String
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  manga Manga @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, manga_id])
+  @@index([manga_id])
+}
+
+// ---------- Reading Progress ----------
+
+model ReadingProgress {
+  id             String   @id @default(cuid())
+  user_id        String
+  chapter_id     String
+  last_page_read Int      @default(0)
+  completed      Boolean  @default(false)
+  updated_at     DateTime @updatedAt
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, chapter_id])
+  @@index([chapter_id])
+}
+
+model Test {
+  id         String   @id
+  name       String
+  email      String   @unique
+  created_at DateTime @default(now())
+}
