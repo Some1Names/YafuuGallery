@@ -127,6 +127,7 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   image: 'image',
   role: 'role',
+  password_hash: 'password_hash',
   created_at: 'created_at'
 };
 
@@ -217,6 +218,13 @@ exports.Prisma.BookmarkScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.ChapterBookmarkScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  chapter_id: 'chapter_id',
+  created_at: 'created_at'
+};
+
 exports.Prisma.ReadingProgressScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -224,13 +232,6 @@ exports.Prisma.ReadingProgressScalarFieldEnum = {
   last_page_read: 'last_page_read',
   completed: 'completed',
   updated_at: 'updated_at'
-};
-
-exports.Prisma.TestScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  created_at: 'created_at'
 };
 
 exports.Prisma.SortOrder = {
@@ -275,8 +276,8 @@ exports.Prisma.ModelName = {
   Translation: 'Translation',
   Comment: 'Comment',
   Bookmark: 'Bookmark',
-  ReadingProgress: 'ReadingProgress',
-  Test: 'Test'
+  ChapterBookmark: 'ChapterBookmark',
+  ReadingProgress: 'ReadingProgress'
 };
 
 /**

@@ -37,6 +37,7 @@ model User {
   name          String?
   image         String?
   role          Role      @default(reader)
+  password_hash String? // null for OAuth-only users — they never set a password
   created_at    DateTime  @default(now())
 
   // NextAuth adapter relations
@@ -44,11 +45,12 @@ model User {
   sessions Session[]
 
   // app relations
-  manga            Manga[]           @relation("AuthoredManga")
-  translations     Translation[]     @relation("TranslatedBy")
-  comments         Comment[]
-  bookmarks        Bookmark[]
-  reading_progress ReadingProgress[]
+  manga             Manga[]           @relation("AuthoredManga")
+  translations      Translation[]     @relation("TranslatedBy")
+  comments          Comment[]
+  bookmarks         Bookmark[]
+  chapter_bookmarks ChapterBookmark[]
+  reading_progress  ReadingProgress[]
 }
 
 // ---------- NextAuth adapter tables ----------
@@ -147,11 +149,12 @@ model Chapter {
   comment_count   Int      @default(0)
   created_at      DateTime @default(now())
 
-  manga            Manga             @relation(fields: [manga_id], references: [id], onDelete: Cascade)
-  arc              Arc?              @relation(fields: [arc_id], references: [id], onDelete: SetNull)
-  translations     Translation[]
-  comments         Comment[]
-  reading_progress ReadingProgress[]
+  manga             Manga             @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  arc               Arc?              @relation(fields: [arc_id], references: [id], onDelete: SetNull)
+  translations      Translation[]
+  comments          Comment[]
+  reading_progress  ReadingProgress[]
+  chapter_bookmarks ChapterBookmark[]
 
   @@unique([manga_id, chapter_number])
   @@index([manga_id])
@@ -207,7 +210,22 @@ model Bookmark {
   @@index([manga_id])
 }
 
-// ---------- Reading Progress ----------
+// ---------- Chapter Bookmark ----------
+// Separate from Bookmark (which is manga-level) — this is "favorite this
+// specific chapter", a different relationship with its own unique pair.
+
+model ChapterBookmark {
+  id         String   @id @default(cuid())
+  user_id    String
+  chapter_id String
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, chapter_id])
+  @@index([chapter_id])
+}
 
 model ReadingProgress {
   id             String   @id @default(cuid())
@@ -222,11 +240,4 @@ model ReadingProgress {
 
   @@unique([user_id, chapter_id])
   @@index([chapter_id])
-}
-
-model Test {
-  id         String   @id
-  name       String
-  email      String   @unique
-  created_at DateTime @default(now())
 }

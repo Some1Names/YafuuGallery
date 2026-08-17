@@ -1,51 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Anton, Work_Sans, Space_Mono } from "next/font/google";
+import { signupSchema, type SignupFormValues } from "@/lib/signup-schema";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
 const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default function SignUpPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const passwordValid = password.length >= 8;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    mode: "onBlur",
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const password = watch("password", "");
 
-    if (!passwordValid) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
+  async function onSubmit(values: SignupFormValues) {
+    setServerError(null);
 
-    setIsSubmitting(true);
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(values),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Something went wrong. Please try again.");
+        setServerError(data?.error ?? "Something went wrong. Please try again.");
         return;
       }
 
       window.location.href = "/login";
     } catch {
-      setError("Network error — please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setServerError("Network error — please try again.");
     }
   }
 
@@ -57,16 +57,9 @@ export default function SignUpPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a] border-r-2 border-[#050505] relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              'url("/wide.png")',
-          }}
+          style={{ backgroundImage: 'url("/wide.png")' }}
         />
-
-        <Link
-          href="/"
-          className="relative text-2xl tracking-wide text-black"
-        >
+        <Link href="/" className="relative text-2xl tracking-wide text-black">
           YafuuGallery
         </Link>
       </div>
@@ -82,8 +75,7 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={() => {
-              // requires next-auth/react's signIn — wired up once Google
-              // OAuth is reconnected: signIn("google")
+              // signIn("google") from next-auth/react, once Google OAuth is reconnected
             }}
             className="w-full flex items-center justify-center gap-2 border border-[#050505] rounded-md py-2.5 text-sm text-[#ece6d8] hover:bg-[#1b1a1c] transition-colors duration-200"
           >
@@ -96,7 +88,7 @@ export default function SignUpPage() {
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div>
               <label htmlFor="name" className="block text-sm text-[#b6b0a2] mb-1.5">
                 Name
@@ -104,12 +96,12 @@ export default function SignUpPage() {
               <input
                 id="name"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+                {...register("name")}
                 placeholder="e.g. Uefa"
+                aria-invalid={!!errors.name}
                 className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
               />
+              {errors.name && <p className="text-xs text-[#9c1d25] mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
@@ -119,12 +111,12 @@ export default function SignUpPage() {
               <input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register("email")}
                 placeholder="e.g. you@example.com"
+                aria-invalid={!!errors.email}
                 className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
               />
+              {errors.email && <p className="text-xs text-[#9c1d25] mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
@@ -135,10 +127,9 @@ export default function SignUpPage() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...register("password")}
                   placeholder="Enter your password"
+                  aria-invalid={!!errors.password}
                   className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 pr-10 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
                 />
                 <button
@@ -152,14 +143,15 @@ export default function SignUpPage() {
               </div>
               <span
                 className={
-                  "text-xs mt-1 block " + (password.length > 0 && !passwordValid ? "text-[#9c1d25]" : "text-[#6b655e]")
+                  "text-xs mt-1 block " +
+                  (errors.password ? "text-[#9c1d25]" : "text-[#6b655e]")
                 }
               >
-                Must be at least 8 characters.
+                {errors.password?.message ?? "Must be at least 8 characters."}
               </span>
             </div>
 
-            {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+            {serverError && <p className="text-sm text-[#9c1d25]">{serverError}</p>}
 
             <button
               type="submit"

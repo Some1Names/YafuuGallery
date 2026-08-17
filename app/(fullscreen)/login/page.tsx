@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 
@@ -21,19 +22,14 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      // once the Credentials provider is wired up in auth.ts, this becomes:
-      // const result = await signIn("credentials", { email, password, redirect: false });
-      // if (result?.error) setError("Invalid email or password.");
-      // else window.location.href = "/";
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Invalid email or password.");
+      if (result?.error) {
+        setError("Invalid email or password.");
         return;
       }
 
@@ -73,9 +69,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => {
-              // signIn("google") from next-auth/react, once Google OAuth is reconnected
-            }}
+            onClick={() => signIn("google", { callbackUrl: "/" })}
             className="w-full flex items-center justify-center gap-2 border border-[#050505] rounded-md py-2.5 text-sm text-[#ece6d8] hover:bg-[#1b1a1c] transition-colors duration-200"
           >
             Continue with Google

@@ -64,15 +64,15 @@ export type Comment = $Result.DefaultSelection<Prisma.$CommentPayload>
  */
 export type Bookmark = $Result.DefaultSelection<Prisma.$BookmarkPayload>
 /**
+ * Model ChapterBookmark
+ * 
+ */
+export type ChapterBookmark = $Result.DefaultSelection<Prisma.$ChapterBookmarkPayload>
+/**
  * Model ReadingProgress
  * 
  */
 export type ReadingProgress = $Result.DefaultSelection<Prisma.$ReadingProgressPayload>
-/**
- * Model Test
- * 
- */
-export type Test = $Result.DefaultSelection<Prisma.$TestPayload>
 
 /**
  * Enums
@@ -339,6 +339,16 @@ export class PrismaClient<
   get bookmark(): Prisma.BookmarkDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.chapterBookmark`: Exposes CRUD operations for the **ChapterBookmark** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ChapterBookmarks
+    * const chapterBookmarks = await prisma.chapterBookmark.findMany()
+    * ```
+    */
+  get chapterBookmark(): Prisma.ChapterBookmarkDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.readingProgress`: Exposes CRUD operations for the **ReadingProgress** model.
     * Example usage:
     * ```ts
@@ -347,16 +357,6 @@ export class PrismaClient<
     * ```
     */
   get readingProgress(): Prisma.ReadingProgressDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.test`: Exposes CRUD operations for the **Test** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Tests
-    * const tests = await prisma.test.findMany()
-    * ```
-    */
-  get test(): Prisma.TestDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -814,8 +814,8 @@ export namespace Prisma {
     Translation: 'Translation',
     Comment: 'Comment',
     Bookmark: 'Bookmark',
-    ReadingProgress: 'ReadingProgress',
-    Test: 'Test'
+    ChapterBookmark: 'ChapterBookmark',
+    ReadingProgress: 'ReadingProgress'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -831,7 +831,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "manga" | "arc" | "chapter" | "translation" | "comment" | "bookmark" | "readingProgress" | "test"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "manga" | "arc" | "chapter" | "translation" | "comment" | "bookmark" | "chapterBookmark" | "readingProgress"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1575,6 +1575,80 @@ export namespace Prisma {
           }
         }
       }
+      ChapterBookmark: {
+        payload: Prisma.$ChapterBookmarkPayload<ExtArgs>
+        fields: Prisma.ChapterBookmarkFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ChapterBookmarkFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ChapterBookmarkFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          findFirst: {
+            args: Prisma.ChapterBookmarkFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ChapterBookmarkFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          findMany: {
+            args: Prisma.ChapterBookmarkFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>[]
+          }
+          create: {
+            args: Prisma.ChapterBookmarkCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          createMany: {
+            args: Prisma.ChapterBookmarkCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ChapterBookmarkCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>[]
+          }
+          delete: {
+            args: Prisma.ChapterBookmarkDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          update: {
+            args: Prisma.ChapterBookmarkUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          deleteMany: {
+            args: Prisma.ChapterBookmarkDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ChapterBookmarkUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ChapterBookmarkUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>[]
+          }
+          upsert: {
+            args: Prisma.ChapterBookmarkUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ChapterBookmarkPayload>
+          }
+          aggregate: {
+            args: Prisma.ChapterBookmarkAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateChapterBookmark>
+          }
+          groupBy: {
+            args: Prisma.ChapterBookmarkGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ChapterBookmarkGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ChapterBookmarkCountArgs<ExtArgs>
+            result: $Utils.Optional<ChapterBookmarkCountAggregateOutputType> | number
+          }
+        }
+      }
       ReadingProgress: {
         payload: Prisma.$ReadingProgressPayload<ExtArgs>
         fields: Prisma.ReadingProgressFieldRefs
@@ -1646,80 +1720,6 @@ export namespace Prisma {
           count: {
             args: Prisma.ReadingProgressCountArgs<ExtArgs>
             result: $Utils.Optional<ReadingProgressCountAggregateOutputType> | number
-          }
-        }
-      }
-      Test: {
-        payload: Prisma.$TestPayload<ExtArgs>
-        fields: Prisma.TestFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.TestFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.TestFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          findFirst: {
-            args: Prisma.TestFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.TestFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          findMany: {
-            args: Prisma.TestFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>[]
-          }
-          create: {
-            args: Prisma.TestCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          createMany: {
-            args: Prisma.TestCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.TestCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>[]
-          }
-          delete: {
-            args: Prisma.TestDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          update: {
-            args: Prisma.TestUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          deleteMany: {
-            args: Prisma.TestDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.TestUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.TestUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>[]
-          }
-          upsert: {
-            args: Prisma.TestUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TestPayload>
-          }
-          aggregate: {
-            args: Prisma.TestAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateTest>
-          }
-          groupBy: {
-            args: Prisma.TestGroupByArgs<ExtArgs>
-            result: $Utils.Optional<TestGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.TestCountArgs<ExtArgs>
-            result: $Utils.Optional<TestCountAggregateOutputType> | number
           }
         }
       }
@@ -1856,8 +1856,8 @@ export namespace Prisma {
     translation?: TranslationOmit
     comment?: CommentOmit
     bookmark?: BookmarkOmit
+    chapterBookmark?: ChapterBookmarkOmit
     readingProgress?: ReadingProgressOmit
-    test?: TestOmit
   }
 
   /* Types for Logging */
@@ -1944,6 +1944,7 @@ export namespace Prisma {
     translations: number
     comments: number
     bookmarks: number
+    chapter_bookmarks: number
     reading_progress: number
   }
 
@@ -1954,6 +1955,7 @@ export namespace Prisma {
     translations?: boolean | UserCountOutputTypeCountTranslationsArgs
     comments?: boolean | UserCountOutputTypeCountCommentsArgs
     bookmarks?: boolean | UserCountOutputTypeCountBookmarksArgs
+    chapter_bookmarks?: boolean | UserCountOutputTypeCountChapter_bookmarksArgs
     reading_progress?: boolean | UserCountOutputTypeCountReading_progressArgs
   }
 
@@ -2008,6 +2010,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountBookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BookmarkWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountChapter_bookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChapterBookmarkWhereInput
   }
 
   /**
@@ -2106,12 +2115,14 @@ export namespace Prisma {
     translations: number
     comments: number
     reading_progress: number
+    chapter_bookmarks: number
   }
 
   export type ChapterCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     translations?: boolean | ChapterCountOutputTypeCountTranslationsArgs
     comments?: boolean | ChapterCountOutputTypeCountCommentsArgs
     reading_progress?: boolean | ChapterCountOutputTypeCountReading_progressArgs
+    chapter_bookmarks?: boolean | ChapterCountOutputTypeCountChapter_bookmarksArgs
   }
 
   // Custom InputTypes
@@ -2146,6 +2157,13 @@ export namespace Prisma {
     where?: ReadingProgressWhereInput
   }
 
+  /**
+   * ChapterCountOutputType without action
+   */
+  export type ChapterCountOutputTypeCountChapter_bookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChapterBookmarkWhereInput
+  }
+
 
   /**
    * Models
@@ -2168,6 +2186,7 @@ export namespace Prisma {
     name: string | null
     image: string | null
     role: $Enums.Role | null
+    password_hash: string | null
     created_at: Date | null
   }
 
@@ -2178,6 +2197,7 @@ export namespace Prisma {
     name: string | null
     image: string | null
     role: $Enums.Role | null
+    password_hash: string | null
     created_at: Date | null
   }
 
@@ -2188,6 +2208,7 @@ export namespace Prisma {
     name: number
     image: number
     role: number
+    password_hash: number
     created_at: number
     _all: number
   }
@@ -2200,6 +2221,7 @@ export namespace Prisma {
     name?: true
     image?: true
     role?: true
+    password_hash?: true
     created_at?: true
   }
 
@@ -2210,6 +2232,7 @@ export namespace Prisma {
     name?: true
     image?: true
     role?: true
+    password_hash?: true
     created_at?: true
   }
 
@@ -2220,6 +2243,7 @@ export namespace Prisma {
     name?: true
     image?: true
     role?: true
+    password_hash?: true
     created_at?: true
     _all?: true
   }
@@ -2303,6 +2327,7 @@ export namespace Prisma {
     name: string | null
     image: string | null
     role: $Enums.Role
+    password_hash: string | null
     created_at: Date
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
@@ -2330,6 +2355,7 @@ export namespace Prisma {
     name?: boolean
     image?: boolean
     role?: boolean
+    password_hash?: boolean
     created_at?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
@@ -2337,6 +2363,7 @@ export namespace Prisma {
     translations?: boolean | User$translationsArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
+    chapter_bookmarks?: boolean | User$chapter_bookmarksArgs<ExtArgs>
     reading_progress?: boolean | User$reading_progressArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -2348,6 +2375,7 @@ export namespace Prisma {
     name?: boolean
     image?: boolean
     role?: boolean
+    password_hash?: boolean
     created_at?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -2358,6 +2386,7 @@ export namespace Prisma {
     name?: boolean
     image?: boolean
     role?: boolean
+    password_hash?: boolean
     created_at?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -2368,10 +2397,11 @@ export namespace Prisma {
     name?: boolean
     image?: boolean
     role?: boolean
+    password_hash?: boolean
     created_at?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "emailVerified" | "name" | "image" | "role" | "created_at", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "emailVerified" | "name" | "image" | "role" | "password_hash" | "created_at", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
@@ -2379,6 +2409,7 @@ export namespace Prisma {
     translations?: boolean | User$translationsArgs<ExtArgs>
     comments?: boolean | User$commentsArgs<ExtArgs>
     bookmarks?: boolean | User$bookmarksArgs<ExtArgs>
+    chapter_bookmarks?: boolean | User$chapter_bookmarksArgs<ExtArgs>
     reading_progress?: boolean | User$reading_progressArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -2394,6 +2425,7 @@ export namespace Prisma {
       translations: Prisma.$TranslationPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
       bookmarks: Prisma.$BookmarkPayload<ExtArgs>[]
+      chapter_bookmarks: Prisma.$ChapterBookmarkPayload<ExtArgs>[]
       reading_progress: Prisma.$ReadingProgressPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2403,6 +2435,7 @@ export namespace Prisma {
       name: string | null
       image: string | null
       role: $Enums.Role
+      password_hash: string | null
       created_at: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -2804,6 +2837,7 @@ export namespace Prisma {
     translations<T extends User$translationsArgs<ExtArgs> = {}>(args?: Subset<T, User$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends User$commentsArgs<ExtArgs> = {}>(args?: Subset<T, User$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     bookmarks<T extends User$bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, User$bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    chapter_bookmarks<T extends User$chapter_bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, User$chapter_bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reading_progress<T extends User$reading_progressArgs<ExtArgs> = {}>(args?: Subset<T, User$reading_progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReadingProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2840,6 +2874,7 @@ export namespace Prisma {
     readonly name: FieldRef<"User", 'String'>
     readonly image: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
+    readonly password_hash: FieldRef<"User", 'String'>
     readonly created_at: FieldRef<"User", 'DateTime'>
   }
     
@@ -3375,6 +3410,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: BookmarkScalarFieldEnum | BookmarkScalarFieldEnum[]
+  }
+
+  /**
+   * User.chapter_bookmarks
+   */
+  export type User$chapter_bookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    where?: ChapterBookmarkWhereInput
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    cursor?: ChapterBookmarkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChapterBookmarkScalarFieldEnum | ChapterBookmarkScalarFieldEnum[]
   }
 
   /**
@@ -9224,6 +9283,7 @@ export namespace Prisma {
     translations?: boolean | Chapter$translationsArgs<ExtArgs>
     comments?: boolean | Chapter$commentsArgs<ExtArgs>
     reading_progress?: boolean | Chapter$reading_progressArgs<ExtArgs>
+    chapter_bookmarks?: boolean | Chapter$chapter_bookmarksArgs<ExtArgs>
     _count?: boolean | ChapterCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["chapter"]>
 
@@ -9277,6 +9337,7 @@ export namespace Prisma {
     translations?: boolean | Chapter$translationsArgs<ExtArgs>
     comments?: boolean | Chapter$commentsArgs<ExtArgs>
     reading_progress?: boolean | Chapter$reading_progressArgs<ExtArgs>
+    chapter_bookmarks?: boolean | Chapter$chapter_bookmarksArgs<ExtArgs>
     _count?: boolean | ChapterCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ChapterIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9296,6 +9357,7 @@ export namespace Prisma {
       translations: Prisma.$TranslationPayload<ExtArgs>[]
       comments: Prisma.$CommentPayload<ExtArgs>[]
       reading_progress: Prisma.$ReadingProgressPayload<ExtArgs>[]
+      chapter_bookmarks: Prisma.$ChapterBookmarkPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9707,6 +9769,7 @@ export namespace Prisma {
     translations<T extends Chapter$translationsArgs<ExtArgs> = {}>(args?: Subset<T, Chapter$translationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TranslationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     comments<T extends Chapter$commentsArgs<ExtArgs> = {}>(args?: Subset<T, Chapter$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reading_progress<T extends Chapter$reading_progressArgs<ExtArgs> = {}>(args?: Subset<T, Chapter$reading_progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReadingProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    chapter_bookmarks<T extends Chapter$chapter_bookmarksArgs<ExtArgs> = {}>(args?: Subset<T, Chapter$chapter_bookmarksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10235,6 +10298,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ReadingProgressScalarFieldEnum | ReadingProgressScalarFieldEnum[]
+  }
+
+  /**
+   * Chapter.chapter_bookmarks
+   */
+  export type Chapter$chapter_bookmarksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    where?: ChapterBookmarkWhereInput
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    cursor?: ChapterBookmarkWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ChapterBookmarkScalarFieldEnum | ChapterBookmarkScalarFieldEnum[]
   }
 
   /**
@@ -13502,6 +13589,1064 @@ export namespace Prisma {
 
 
   /**
+   * Model ChapterBookmark
+   */
+
+  export type AggregateChapterBookmark = {
+    _count: ChapterBookmarkCountAggregateOutputType | null
+    _min: ChapterBookmarkMinAggregateOutputType | null
+    _max: ChapterBookmarkMaxAggregateOutputType | null
+  }
+
+  export type ChapterBookmarkMinAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    chapter_id: string | null
+    created_at: Date | null
+  }
+
+  export type ChapterBookmarkMaxAggregateOutputType = {
+    id: string | null
+    user_id: string | null
+    chapter_id: string | null
+    created_at: Date | null
+  }
+
+  export type ChapterBookmarkCountAggregateOutputType = {
+    id: number
+    user_id: number
+    chapter_id: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type ChapterBookmarkMinAggregateInputType = {
+    id?: true
+    user_id?: true
+    chapter_id?: true
+    created_at?: true
+  }
+
+  export type ChapterBookmarkMaxAggregateInputType = {
+    id?: true
+    user_id?: true
+    chapter_id?: true
+    created_at?: true
+  }
+
+  export type ChapterBookmarkCountAggregateInputType = {
+    id?: true
+    user_id?: true
+    chapter_id?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type ChapterBookmarkAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChapterBookmark to aggregate.
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChapterBookmarks to fetch.
+     */
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ChapterBookmarkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChapterBookmarks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChapterBookmarks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ChapterBookmarks
+    **/
+    _count?: true | ChapterBookmarkCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ChapterBookmarkMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ChapterBookmarkMaxAggregateInputType
+  }
+
+  export type GetChapterBookmarkAggregateType<T extends ChapterBookmarkAggregateArgs> = {
+        [P in keyof T & keyof AggregateChapterBookmark]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateChapterBookmark[P]>
+      : GetScalarType<T[P], AggregateChapterBookmark[P]>
+  }
+
+
+
+
+  export type ChapterBookmarkGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ChapterBookmarkWhereInput
+    orderBy?: ChapterBookmarkOrderByWithAggregationInput | ChapterBookmarkOrderByWithAggregationInput[]
+    by: ChapterBookmarkScalarFieldEnum[] | ChapterBookmarkScalarFieldEnum
+    having?: ChapterBookmarkScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ChapterBookmarkCountAggregateInputType | true
+    _min?: ChapterBookmarkMinAggregateInputType
+    _max?: ChapterBookmarkMaxAggregateInputType
+  }
+
+  export type ChapterBookmarkGroupByOutputType = {
+    id: string
+    user_id: string
+    chapter_id: string
+    created_at: Date
+    _count: ChapterBookmarkCountAggregateOutputType | null
+    _min: ChapterBookmarkMinAggregateOutputType | null
+    _max: ChapterBookmarkMaxAggregateOutputType | null
+  }
+
+  type GetChapterBookmarkGroupByPayload<T extends ChapterBookmarkGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ChapterBookmarkGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ChapterBookmarkGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ChapterBookmarkGroupByOutputType[P]>
+            : GetScalarType<T[P], ChapterBookmarkGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ChapterBookmarkSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    chapter_id?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chapterBookmark"]>
+
+  export type ChapterBookmarkSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    chapter_id?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chapterBookmark"]>
+
+  export type ChapterBookmarkSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    chapter_id?: boolean
+    created_at?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["chapterBookmark"]>
+
+  export type ChapterBookmarkSelectScalar = {
+    id?: boolean
+    user_id?: boolean
+    chapter_id?: boolean
+    created_at?: boolean
+  }
+
+  export type ChapterBookmarkOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "chapter_id" | "created_at", ExtArgs["result"]["chapterBookmark"]>
+  export type ChapterBookmarkInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }
+  export type ChapterBookmarkIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }
+  export type ChapterBookmarkIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    chapter?: boolean | ChapterDefaultArgs<ExtArgs>
+  }
+
+  export type $ChapterBookmarkPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ChapterBookmark"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      chapter: Prisma.$ChapterPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      user_id: string
+      chapter_id: string
+      created_at: Date
+    }, ExtArgs["result"]["chapterBookmark"]>
+    composites: {}
+  }
+
+  type ChapterBookmarkGetPayload<S extends boolean | null | undefined | ChapterBookmarkDefaultArgs> = $Result.GetResult<Prisma.$ChapterBookmarkPayload, S>
+
+  type ChapterBookmarkCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ChapterBookmarkFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ChapterBookmarkCountAggregateInputType | true
+    }
+
+  export interface ChapterBookmarkDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ChapterBookmark'], meta: { name: 'ChapterBookmark' } }
+    /**
+     * Find zero or one ChapterBookmark that matches the filter.
+     * @param {ChapterBookmarkFindUniqueArgs} args - Arguments to find a ChapterBookmark
+     * @example
+     * // Get one ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ChapterBookmarkFindUniqueArgs>(args: SelectSubset<T, ChapterBookmarkFindUniqueArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ChapterBookmark that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ChapterBookmarkFindUniqueOrThrowArgs} args - Arguments to find a ChapterBookmark
+     * @example
+     * // Get one ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ChapterBookmarkFindUniqueOrThrowArgs>(args: SelectSubset<T, ChapterBookmarkFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChapterBookmark that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkFindFirstArgs} args - Arguments to find a ChapterBookmark
+     * @example
+     * // Get one ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ChapterBookmarkFindFirstArgs>(args?: SelectSubset<T, ChapterBookmarkFindFirstArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ChapterBookmark that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkFindFirstOrThrowArgs} args - Arguments to find a ChapterBookmark
+     * @example
+     * // Get one ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ChapterBookmarkFindFirstOrThrowArgs>(args?: SelectSubset<T, ChapterBookmarkFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ChapterBookmarks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ChapterBookmarks
+     * const chapterBookmarks = await prisma.chapterBookmark.findMany()
+     * 
+     * // Get first 10 ChapterBookmarks
+     * const chapterBookmarks = await prisma.chapterBookmark.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const chapterBookmarkWithIdOnly = await prisma.chapterBookmark.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ChapterBookmarkFindManyArgs>(args?: SelectSubset<T, ChapterBookmarkFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ChapterBookmark.
+     * @param {ChapterBookmarkCreateArgs} args - Arguments to create a ChapterBookmark.
+     * @example
+     * // Create one ChapterBookmark
+     * const ChapterBookmark = await prisma.chapterBookmark.create({
+     *   data: {
+     *     // ... data to create a ChapterBookmark
+     *   }
+     * })
+     * 
+     */
+    create<T extends ChapterBookmarkCreateArgs>(args: SelectSubset<T, ChapterBookmarkCreateArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ChapterBookmarks.
+     * @param {ChapterBookmarkCreateManyArgs} args - Arguments to create many ChapterBookmarks.
+     * @example
+     * // Create many ChapterBookmarks
+     * const chapterBookmark = await prisma.chapterBookmark.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ChapterBookmarkCreateManyArgs>(args?: SelectSubset<T, ChapterBookmarkCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ChapterBookmarks and returns the data saved in the database.
+     * @param {ChapterBookmarkCreateManyAndReturnArgs} args - Arguments to create many ChapterBookmarks.
+     * @example
+     * // Create many ChapterBookmarks
+     * const chapterBookmark = await prisma.chapterBookmark.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ChapterBookmarks and only return the `id`
+     * const chapterBookmarkWithIdOnly = await prisma.chapterBookmark.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ChapterBookmarkCreateManyAndReturnArgs>(args?: SelectSubset<T, ChapterBookmarkCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ChapterBookmark.
+     * @param {ChapterBookmarkDeleteArgs} args - Arguments to delete one ChapterBookmark.
+     * @example
+     * // Delete one ChapterBookmark
+     * const ChapterBookmark = await prisma.chapterBookmark.delete({
+     *   where: {
+     *     // ... filter to delete one ChapterBookmark
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ChapterBookmarkDeleteArgs>(args: SelectSubset<T, ChapterBookmarkDeleteArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ChapterBookmark.
+     * @param {ChapterBookmarkUpdateArgs} args - Arguments to update one ChapterBookmark.
+     * @example
+     * // Update one ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ChapterBookmarkUpdateArgs>(args: SelectSubset<T, ChapterBookmarkUpdateArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ChapterBookmarks.
+     * @param {ChapterBookmarkDeleteManyArgs} args - Arguments to filter ChapterBookmarks to delete.
+     * @example
+     * // Delete a few ChapterBookmarks
+     * const { count } = await prisma.chapterBookmark.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ChapterBookmarkDeleteManyArgs>(args?: SelectSubset<T, ChapterBookmarkDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChapterBookmarks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ChapterBookmarks
+     * const chapterBookmark = await prisma.chapterBookmark.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ChapterBookmarkUpdateManyArgs>(args: SelectSubset<T, ChapterBookmarkUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ChapterBookmarks and returns the data updated in the database.
+     * @param {ChapterBookmarkUpdateManyAndReturnArgs} args - Arguments to update many ChapterBookmarks.
+     * @example
+     * // Update many ChapterBookmarks
+     * const chapterBookmark = await prisma.chapterBookmark.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ChapterBookmarks and only return the `id`
+     * const chapterBookmarkWithIdOnly = await prisma.chapterBookmark.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ChapterBookmarkUpdateManyAndReturnArgs>(args: SelectSubset<T, ChapterBookmarkUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ChapterBookmark.
+     * @param {ChapterBookmarkUpsertArgs} args - Arguments to update or create a ChapterBookmark.
+     * @example
+     * // Update or create a ChapterBookmark
+     * const chapterBookmark = await prisma.chapterBookmark.upsert({
+     *   create: {
+     *     // ... data to create a ChapterBookmark
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ChapterBookmark we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ChapterBookmarkUpsertArgs>(args: SelectSubset<T, ChapterBookmarkUpsertArgs<ExtArgs>>): Prisma__ChapterBookmarkClient<$Result.GetResult<Prisma.$ChapterBookmarkPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ChapterBookmarks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkCountArgs} args - Arguments to filter ChapterBookmarks to count.
+     * @example
+     * // Count the number of ChapterBookmarks
+     * const count = await prisma.chapterBookmark.count({
+     *   where: {
+     *     // ... the filter for the ChapterBookmarks we want to count
+     *   }
+     * })
+    **/
+    count<T extends ChapterBookmarkCountArgs>(
+      args?: Subset<T, ChapterBookmarkCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ChapterBookmarkCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ChapterBookmark.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ChapterBookmarkAggregateArgs>(args: Subset<T, ChapterBookmarkAggregateArgs>): Prisma.PrismaPromise<GetChapterBookmarkAggregateType<T>>
+
+    /**
+     * Group by ChapterBookmark.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ChapterBookmarkGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ChapterBookmarkGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ChapterBookmarkGroupByArgs['orderBy'] }
+        : { orderBy?: ChapterBookmarkGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ChapterBookmarkGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChapterBookmarkGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ChapterBookmark model
+   */
+  readonly fields: ChapterBookmarkFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ChapterBookmark.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ChapterBookmarkClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    chapter<T extends ChapterDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChapterDefaultArgs<ExtArgs>>): Prisma__ChapterClient<$Result.GetResult<Prisma.$ChapterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ChapterBookmark model
+   */
+  interface ChapterBookmarkFieldRefs {
+    readonly id: FieldRef<"ChapterBookmark", 'String'>
+    readonly user_id: FieldRef<"ChapterBookmark", 'String'>
+    readonly chapter_id: FieldRef<"ChapterBookmark", 'String'>
+    readonly created_at: FieldRef<"ChapterBookmark", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ChapterBookmark findUnique
+   */
+  export type ChapterBookmarkFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter, which ChapterBookmark to fetch.
+     */
+    where: ChapterBookmarkWhereUniqueInput
+  }
+
+  /**
+   * ChapterBookmark findUniqueOrThrow
+   */
+  export type ChapterBookmarkFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter, which ChapterBookmark to fetch.
+     */
+    where: ChapterBookmarkWhereUniqueInput
+  }
+
+  /**
+   * ChapterBookmark findFirst
+   */
+  export type ChapterBookmarkFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter, which ChapterBookmark to fetch.
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChapterBookmarks to fetch.
+     */
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChapterBookmarks.
+     */
+    cursor?: ChapterBookmarkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChapterBookmarks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChapterBookmarks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChapterBookmarks.
+     */
+    distinct?: ChapterBookmarkScalarFieldEnum | ChapterBookmarkScalarFieldEnum[]
+  }
+
+  /**
+   * ChapterBookmark findFirstOrThrow
+   */
+  export type ChapterBookmarkFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter, which ChapterBookmark to fetch.
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChapterBookmarks to fetch.
+     */
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ChapterBookmarks.
+     */
+    cursor?: ChapterBookmarkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChapterBookmarks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChapterBookmarks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChapterBookmarks.
+     */
+    distinct?: ChapterBookmarkScalarFieldEnum | ChapterBookmarkScalarFieldEnum[]
+  }
+
+  /**
+   * ChapterBookmark findMany
+   */
+  export type ChapterBookmarkFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter, which ChapterBookmarks to fetch.
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ChapterBookmarks to fetch.
+     */
+    orderBy?: ChapterBookmarkOrderByWithRelationInput | ChapterBookmarkOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ChapterBookmarks.
+     */
+    cursor?: ChapterBookmarkWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ChapterBookmarks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ChapterBookmarks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ChapterBookmarks.
+     */
+    distinct?: ChapterBookmarkScalarFieldEnum | ChapterBookmarkScalarFieldEnum[]
+  }
+
+  /**
+   * ChapterBookmark create
+   */
+  export type ChapterBookmarkCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ChapterBookmark.
+     */
+    data: XOR<ChapterBookmarkCreateInput, ChapterBookmarkUncheckedCreateInput>
+  }
+
+  /**
+   * ChapterBookmark createMany
+   */
+  export type ChapterBookmarkCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ChapterBookmarks.
+     */
+    data: ChapterBookmarkCreateManyInput | ChapterBookmarkCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ChapterBookmark createManyAndReturn
+   */
+  export type ChapterBookmarkCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * The data used to create many ChapterBookmarks.
+     */
+    data: ChapterBookmarkCreateManyInput | ChapterBookmarkCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ChapterBookmark update
+   */
+  export type ChapterBookmarkUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ChapterBookmark.
+     */
+    data: XOR<ChapterBookmarkUpdateInput, ChapterBookmarkUncheckedUpdateInput>
+    /**
+     * Choose, which ChapterBookmark to update.
+     */
+    where: ChapterBookmarkWhereUniqueInput
+  }
+
+  /**
+   * ChapterBookmark updateMany
+   */
+  export type ChapterBookmarkUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ChapterBookmarks.
+     */
+    data: XOR<ChapterBookmarkUpdateManyMutationInput, ChapterBookmarkUncheckedUpdateManyInput>
+    /**
+     * Filter which ChapterBookmarks to update
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * Limit how many ChapterBookmarks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChapterBookmark updateManyAndReturn
+   */
+  export type ChapterBookmarkUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * The data used to update ChapterBookmarks.
+     */
+    data: XOR<ChapterBookmarkUpdateManyMutationInput, ChapterBookmarkUncheckedUpdateManyInput>
+    /**
+     * Filter which ChapterBookmarks to update
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * Limit how many ChapterBookmarks to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ChapterBookmark upsert
+   */
+  export type ChapterBookmarkUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ChapterBookmark to update in case it exists.
+     */
+    where: ChapterBookmarkWhereUniqueInput
+    /**
+     * In case the ChapterBookmark found by the `where` argument doesn't exist, create a new ChapterBookmark with this data.
+     */
+    create: XOR<ChapterBookmarkCreateInput, ChapterBookmarkUncheckedCreateInput>
+    /**
+     * In case the ChapterBookmark was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ChapterBookmarkUpdateInput, ChapterBookmarkUncheckedUpdateInput>
+  }
+
+  /**
+   * ChapterBookmark delete
+   */
+  export type ChapterBookmarkDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+    /**
+     * Filter which ChapterBookmark to delete.
+     */
+    where: ChapterBookmarkWhereUniqueInput
+  }
+
+  /**
+   * ChapterBookmark deleteMany
+   */
+  export type ChapterBookmarkDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ChapterBookmarks to delete
+     */
+    where?: ChapterBookmarkWhereInput
+    /**
+     * Limit how many ChapterBookmarks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ChapterBookmark without action
+   */
+  export type ChapterBookmarkDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ChapterBookmark
+     */
+    select?: ChapterBookmarkSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ChapterBookmark
+     */
+    omit?: ChapterBookmarkOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ChapterBookmarkInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model ReadingProgress
    */
 
@@ -14620,993 +15765,6 @@ export namespace Prisma {
 
 
   /**
-   * Model Test
-   */
-
-  export type AggregateTest = {
-    _count: TestCountAggregateOutputType | null
-    _min: TestMinAggregateOutputType | null
-    _max: TestMaxAggregateOutputType | null
-  }
-
-  export type TestMinAggregateOutputType = {
-    id: string | null
-    name: string | null
-    email: string | null
-    created_at: Date | null
-  }
-
-  export type TestMaxAggregateOutputType = {
-    id: string | null
-    name: string | null
-    email: string | null
-    created_at: Date | null
-  }
-
-  export type TestCountAggregateOutputType = {
-    id: number
-    name: number
-    email: number
-    created_at: number
-    _all: number
-  }
-
-
-  export type TestMinAggregateInputType = {
-    id?: true
-    name?: true
-    email?: true
-    created_at?: true
-  }
-
-  export type TestMaxAggregateInputType = {
-    id?: true
-    name?: true
-    email?: true
-    created_at?: true
-  }
-
-  export type TestCountAggregateInputType = {
-    id?: true
-    name?: true
-    email?: true
-    created_at?: true
-    _all?: true
-  }
-
-  export type TestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Test to aggregate.
-     */
-    where?: TestWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Tests to fetch.
-     */
-    orderBy?: TestOrderByWithRelationInput | TestOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: TestWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Tests from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Tests.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Tests
-    **/
-    _count?: true | TestCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: TestMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: TestMaxAggregateInputType
-  }
-
-  export type GetTestAggregateType<T extends TestAggregateArgs> = {
-        [P in keyof T & keyof AggregateTest]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateTest[P]>
-      : GetScalarType<T[P], AggregateTest[P]>
-  }
-
-
-
-
-  export type TestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TestWhereInput
-    orderBy?: TestOrderByWithAggregationInput | TestOrderByWithAggregationInput[]
-    by: TestScalarFieldEnum[] | TestScalarFieldEnum
-    having?: TestScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: TestCountAggregateInputType | true
-    _min?: TestMinAggregateInputType
-    _max?: TestMaxAggregateInputType
-  }
-
-  export type TestGroupByOutputType = {
-    id: string
-    name: string
-    email: string
-    created_at: Date
-    _count: TestCountAggregateOutputType | null
-    _min: TestMinAggregateOutputType | null
-    _max: TestMaxAggregateOutputType | null
-  }
-
-  type GetTestGroupByPayload<T extends TestGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<TestGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof TestGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], TestGroupByOutputType[P]>
-            : GetScalarType<T[P], TestGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type TestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    email?: boolean
-    created_at?: boolean
-  }, ExtArgs["result"]["test"]>
-
-  export type TestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    email?: boolean
-    created_at?: boolean
-  }, ExtArgs["result"]["test"]>
-
-  export type TestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    email?: boolean
-    created_at?: boolean
-  }, ExtArgs["result"]["test"]>
-
-  export type TestSelectScalar = {
-    id?: boolean
-    name?: boolean
-    email?: boolean
-    created_at?: boolean
-  }
-
-  export type TestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "created_at", ExtArgs["result"]["test"]>
-
-  export type $TestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Test"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      name: string
-      email: string
-      created_at: Date
-    }, ExtArgs["result"]["test"]>
-    composites: {}
-  }
-
-  type TestGetPayload<S extends boolean | null | undefined | TestDefaultArgs> = $Result.GetResult<Prisma.$TestPayload, S>
-
-  type TestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<TestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: TestCountAggregateInputType | true
-    }
-
-  export interface TestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Test'], meta: { name: 'Test' } }
-    /**
-     * Find zero or one Test that matches the filter.
-     * @param {TestFindUniqueArgs} args - Arguments to find a Test
-     * @example
-     * // Get one Test
-     * const test = await prisma.test.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends TestFindUniqueArgs>(args: SelectSubset<T, TestFindUniqueArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Test that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {TestFindUniqueOrThrowArgs} args - Arguments to find a Test
-     * @example
-     * // Get one Test
-     * const test = await prisma.test.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends TestFindUniqueOrThrowArgs>(args: SelectSubset<T, TestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Test that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestFindFirstArgs} args - Arguments to find a Test
-     * @example
-     * // Get one Test
-     * const test = await prisma.test.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends TestFindFirstArgs>(args?: SelectSubset<T, TestFindFirstArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Test that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestFindFirstOrThrowArgs} args - Arguments to find a Test
-     * @example
-     * // Get one Test
-     * const test = await prisma.test.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends TestFindFirstOrThrowArgs>(args?: SelectSubset<T, TestFindFirstOrThrowArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Tests that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Tests
-     * const tests = await prisma.test.findMany()
-     * 
-     * // Get first 10 Tests
-     * const tests = await prisma.test.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const testWithIdOnly = await prisma.test.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends TestFindManyArgs>(args?: SelectSubset<T, TestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Test.
-     * @param {TestCreateArgs} args - Arguments to create a Test.
-     * @example
-     * // Create one Test
-     * const Test = await prisma.test.create({
-     *   data: {
-     *     // ... data to create a Test
-     *   }
-     * })
-     * 
-     */
-    create<T extends TestCreateArgs>(args: SelectSubset<T, TestCreateArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Tests.
-     * @param {TestCreateManyArgs} args - Arguments to create many Tests.
-     * @example
-     * // Create many Tests
-     * const test = await prisma.test.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends TestCreateManyArgs>(args?: SelectSubset<T, TestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Tests and returns the data saved in the database.
-     * @param {TestCreateManyAndReturnArgs} args - Arguments to create many Tests.
-     * @example
-     * // Create many Tests
-     * const test = await prisma.test.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Tests and only return the `id`
-     * const testWithIdOnly = await prisma.test.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends TestCreateManyAndReturnArgs>(args?: SelectSubset<T, TestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Test.
-     * @param {TestDeleteArgs} args - Arguments to delete one Test.
-     * @example
-     * // Delete one Test
-     * const Test = await prisma.test.delete({
-     *   where: {
-     *     // ... filter to delete one Test
-     *   }
-     * })
-     * 
-     */
-    delete<T extends TestDeleteArgs>(args: SelectSubset<T, TestDeleteArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Test.
-     * @param {TestUpdateArgs} args - Arguments to update one Test.
-     * @example
-     * // Update one Test
-     * const test = await prisma.test.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends TestUpdateArgs>(args: SelectSubset<T, TestUpdateArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Tests.
-     * @param {TestDeleteManyArgs} args - Arguments to filter Tests to delete.
-     * @example
-     * // Delete a few Tests
-     * const { count } = await prisma.test.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends TestDeleteManyArgs>(args?: SelectSubset<T, TestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Tests.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Tests
-     * const test = await prisma.test.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends TestUpdateManyArgs>(args: SelectSubset<T, TestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Tests and returns the data updated in the database.
-     * @param {TestUpdateManyAndReturnArgs} args - Arguments to update many Tests.
-     * @example
-     * // Update many Tests
-     * const test = await prisma.test.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Tests and only return the `id`
-     * const testWithIdOnly = await prisma.test.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TestUpdateManyAndReturnArgs>(args: SelectSubset<T, TestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Test.
-     * @param {TestUpsertArgs} args - Arguments to update or create a Test.
-     * @example
-     * // Update or create a Test
-     * const test = await prisma.test.upsert({
-     *   create: {
-     *     // ... data to create a Test
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Test we want to update
-     *   }
-     * })
-     */
-    upsert<T extends TestUpsertArgs>(args: SelectSubset<T, TestUpsertArgs<ExtArgs>>): Prisma__TestClient<$Result.GetResult<Prisma.$TestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Tests.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestCountArgs} args - Arguments to filter Tests to count.
-     * @example
-     * // Count the number of Tests
-     * const count = await prisma.test.count({
-     *   where: {
-     *     // ... the filter for the Tests we want to count
-     *   }
-     * })
-    **/
-    count<T extends TestCountArgs>(
-      args?: Subset<T, TestCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], TestCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Test.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends TestAggregateArgs>(args: Subset<T, TestAggregateArgs>): Prisma.PrismaPromise<GetTestAggregateType<T>>
-
-    /**
-     * Group by Test.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TestGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends TestGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: TestGroupByArgs['orderBy'] }
-        : { orderBy?: TestGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, TestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Test model
-   */
-  readonly fields: TestFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Test.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__TestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Test model
-   */
-  interface TestFieldRefs {
-    readonly id: FieldRef<"Test", 'String'>
-    readonly name: FieldRef<"Test", 'String'>
-    readonly email: FieldRef<"Test", 'String'>
-    readonly created_at: FieldRef<"Test", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * Test findUnique
-   */
-  export type TestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter, which Test to fetch.
-     */
-    where: TestWhereUniqueInput
-  }
-
-  /**
-   * Test findUniqueOrThrow
-   */
-  export type TestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter, which Test to fetch.
-     */
-    where: TestWhereUniqueInput
-  }
-
-  /**
-   * Test findFirst
-   */
-  export type TestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter, which Test to fetch.
-     */
-    where?: TestWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Tests to fetch.
-     */
-    orderBy?: TestOrderByWithRelationInput | TestOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Tests.
-     */
-    cursor?: TestWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Tests from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Tests.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Tests.
-     */
-    distinct?: TestScalarFieldEnum | TestScalarFieldEnum[]
-  }
-
-  /**
-   * Test findFirstOrThrow
-   */
-  export type TestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter, which Test to fetch.
-     */
-    where?: TestWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Tests to fetch.
-     */
-    orderBy?: TestOrderByWithRelationInput | TestOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Tests.
-     */
-    cursor?: TestWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Tests from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Tests.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Tests.
-     */
-    distinct?: TestScalarFieldEnum | TestScalarFieldEnum[]
-  }
-
-  /**
-   * Test findMany
-   */
-  export type TestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter, which Tests to fetch.
-     */
-    where?: TestWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Tests to fetch.
-     */
-    orderBy?: TestOrderByWithRelationInput | TestOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Tests.
-     */
-    cursor?: TestWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Tests from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Tests.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Tests.
-     */
-    distinct?: TestScalarFieldEnum | TestScalarFieldEnum[]
-  }
-
-  /**
-   * Test create
-   */
-  export type TestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * The data needed to create a Test.
-     */
-    data: XOR<TestCreateInput, TestUncheckedCreateInput>
-  }
-
-  /**
-   * Test createMany
-   */
-  export type TestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Tests.
-     */
-    data: TestCreateManyInput | TestCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Test createManyAndReturn
-   */
-  export type TestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * The data used to create many Tests.
-     */
-    data: TestCreateManyInput | TestCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Test update
-   */
-  export type TestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * The data needed to update a Test.
-     */
-    data: XOR<TestUpdateInput, TestUncheckedUpdateInput>
-    /**
-     * Choose, which Test to update.
-     */
-    where: TestWhereUniqueInput
-  }
-
-  /**
-   * Test updateMany
-   */
-  export type TestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Tests.
-     */
-    data: XOR<TestUpdateManyMutationInput, TestUncheckedUpdateManyInput>
-    /**
-     * Filter which Tests to update
-     */
-    where?: TestWhereInput
-    /**
-     * Limit how many Tests to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Test updateManyAndReturn
-   */
-  export type TestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * The data used to update Tests.
-     */
-    data: XOR<TestUpdateManyMutationInput, TestUncheckedUpdateManyInput>
-    /**
-     * Filter which Tests to update
-     */
-    where?: TestWhereInput
-    /**
-     * Limit how many Tests to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Test upsert
-   */
-  export type TestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * The filter to search for the Test to update in case it exists.
-     */
-    where: TestWhereUniqueInput
-    /**
-     * In case the Test found by the `where` argument doesn't exist, create a new Test with this data.
-     */
-    create: XOR<TestCreateInput, TestUncheckedCreateInput>
-    /**
-     * In case the Test was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<TestUpdateInput, TestUncheckedUpdateInput>
-  }
-
-  /**
-   * Test delete
-   */
-  export type TestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-    /**
-     * Filter which Test to delete.
-     */
-    where: TestWhereUniqueInput
-  }
-
-  /**
-   * Test deleteMany
-   */
-  export type TestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Tests to delete
-     */
-    where?: TestWhereInput
-    /**
-     * Limit how many Tests to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Test without action
-   */
-  export type TestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Test
-     */
-    select?: TestSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Test
-     */
-    omit?: TestOmit<ExtArgs> | null
-  }
-
-
-  /**
    * Enums
    */
 
@@ -15627,6 +15785,7 @@ export namespace Prisma {
     name: 'name',
     image: 'image',
     role: 'role',
+    password_hash: 'password_hash',
     created_at: 'created_at'
   };
 
@@ -15747,6 +15906,16 @@ export namespace Prisma {
   export type BookmarkScalarFieldEnum = (typeof BookmarkScalarFieldEnum)[keyof typeof BookmarkScalarFieldEnum]
 
 
+  export const ChapterBookmarkScalarFieldEnum: {
+    id: 'id',
+    user_id: 'user_id',
+    chapter_id: 'chapter_id',
+    created_at: 'created_at'
+  };
+
+  export type ChapterBookmarkScalarFieldEnum = (typeof ChapterBookmarkScalarFieldEnum)[keyof typeof ChapterBookmarkScalarFieldEnum]
+
+
   export const ReadingProgressScalarFieldEnum: {
     id: 'id',
     user_id: 'user_id',
@@ -15757,16 +15926,6 @@ export namespace Prisma {
   };
 
   export type ReadingProgressScalarFieldEnum = (typeof ReadingProgressScalarFieldEnum)[keyof typeof ReadingProgressScalarFieldEnum]
-
-
-  export const TestScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    email: 'email',
-    created_at: 'created_at'
-  };
-
-  export type TestScalarFieldEnum = (typeof TestScalarFieldEnum)[keyof typeof TestScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -15916,6 +16075,7 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     image?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
+    password_hash?: StringNullableFilter<"User"> | string | null
     created_at?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
@@ -15923,6 +16083,7 @@ export namespace Prisma {
     translations?: TranslationListRelationFilter
     comments?: CommentListRelationFilter
     bookmarks?: BookmarkListRelationFilter
+    chapter_bookmarks?: ChapterBookmarkListRelationFilter
     reading_progress?: ReadingProgressListRelationFilter
   }
 
@@ -15933,6 +16094,7 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
     role?: SortOrder
+    password_hash?: SortOrderInput | SortOrder
     created_at?: SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
@@ -15940,6 +16102,7 @@ export namespace Prisma {
     translations?: TranslationOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
     bookmarks?: BookmarkOrderByRelationAggregateInput
+    chapter_bookmarks?: ChapterBookmarkOrderByRelationAggregateInput
     reading_progress?: ReadingProgressOrderByRelationAggregateInput
   }
 
@@ -15953,6 +16116,7 @@ export namespace Prisma {
     name?: StringNullableFilter<"User"> | string | null
     image?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
+    password_hash?: StringNullableFilter<"User"> | string | null
     created_at?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
@@ -15960,6 +16124,7 @@ export namespace Prisma {
     translations?: TranslationListRelationFilter
     comments?: CommentListRelationFilter
     bookmarks?: BookmarkListRelationFilter
+    chapter_bookmarks?: ChapterBookmarkListRelationFilter
     reading_progress?: ReadingProgressListRelationFilter
   }, "id" | "email">
 
@@ -15970,6 +16135,7 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
     role?: SortOrder
+    password_hash?: SortOrderInput | SortOrder
     created_at?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -15986,6 +16152,7 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+    password_hash?: StringNullableWithAggregatesFilter<"User"> | string | null
     created_at?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
@@ -16344,6 +16511,7 @@ export namespace Prisma {
     translations?: TranslationListRelationFilter
     comments?: CommentListRelationFilter
     reading_progress?: ReadingProgressListRelationFilter
+    chapter_bookmarks?: ChapterBookmarkListRelationFilter
   }
 
   export type ChapterOrderByWithRelationInput = {
@@ -16362,6 +16530,7 @@ export namespace Prisma {
     translations?: TranslationOrderByRelationAggregateInput
     comments?: CommentOrderByRelationAggregateInput
     reading_progress?: ReadingProgressOrderByRelationAggregateInput
+    chapter_bookmarks?: ChapterBookmarkOrderByRelationAggregateInput
   }
 
   export type ChapterWhereUniqueInput = Prisma.AtLeast<{
@@ -16384,6 +16553,7 @@ export namespace Prisma {
     translations?: TranslationListRelationFilter
     comments?: CommentListRelationFilter
     reading_progress?: ReadingProgressListRelationFilter
+    chapter_bookmarks?: ChapterBookmarkListRelationFilter
   }, "id" | "manga_id_chapter_number">
 
   export type ChapterOrderByWithAggregationInput = {
@@ -16601,6 +16771,60 @@ export namespace Prisma {
     created_at?: DateTimeWithAggregatesFilter<"Bookmark"> | Date | string
   }
 
+  export type ChapterBookmarkWhereInput = {
+    AND?: ChapterBookmarkWhereInput | ChapterBookmarkWhereInput[]
+    OR?: ChapterBookmarkWhereInput[]
+    NOT?: ChapterBookmarkWhereInput | ChapterBookmarkWhereInput[]
+    id?: StringFilter<"ChapterBookmark"> | string
+    user_id?: StringFilter<"ChapterBookmark"> | string
+    chapter_id?: StringFilter<"ChapterBookmark"> | string
+    created_at?: DateTimeFilter<"ChapterBookmark"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    chapter?: XOR<ChapterScalarRelationFilter, ChapterWhereInput>
+  }
+
+  export type ChapterBookmarkOrderByWithRelationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    chapter_id?: SortOrder
+    created_at?: SortOrder
+    user?: UserOrderByWithRelationInput
+    chapter?: ChapterOrderByWithRelationInput
+  }
+
+  export type ChapterBookmarkWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    user_id_chapter_id?: ChapterBookmarkUser_idChapter_idCompoundUniqueInput
+    AND?: ChapterBookmarkWhereInput | ChapterBookmarkWhereInput[]
+    OR?: ChapterBookmarkWhereInput[]
+    NOT?: ChapterBookmarkWhereInput | ChapterBookmarkWhereInput[]
+    user_id?: StringFilter<"ChapterBookmark"> | string
+    chapter_id?: StringFilter<"ChapterBookmark"> | string
+    created_at?: DateTimeFilter<"ChapterBookmark"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    chapter?: XOR<ChapterScalarRelationFilter, ChapterWhereInput>
+  }, "id" | "user_id_chapter_id">
+
+  export type ChapterBookmarkOrderByWithAggregationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    chapter_id?: SortOrder
+    created_at?: SortOrder
+    _count?: ChapterBookmarkCountOrderByAggregateInput
+    _max?: ChapterBookmarkMaxOrderByAggregateInput
+    _min?: ChapterBookmarkMinOrderByAggregateInput
+  }
+
+  export type ChapterBookmarkScalarWhereWithAggregatesInput = {
+    AND?: ChapterBookmarkScalarWhereWithAggregatesInput | ChapterBookmarkScalarWhereWithAggregatesInput[]
+    OR?: ChapterBookmarkScalarWhereWithAggregatesInput[]
+    NOT?: ChapterBookmarkScalarWhereWithAggregatesInput | ChapterBookmarkScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ChapterBookmark"> | string
+    user_id?: StringWithAggregatesFilter<"ChapterBookmark"> | string
+    chapter_id?: StringWithAggregatesFilter<"ChapterBookmark"> | string
+    created_at?: DateTimeWithAggregatesFilter<"ChapterBookmark"> | Date | string
+  }
+
   export type ReadingProgressWhereInput = {
     AND?: ReadingProgressWhereInput | ReadingProgressWhereInput[]
     OR?: ReadingProgressWhereInput[]
@@ -16667,53 +16891,6 @@ export namespace Prisma {
     updated_at?: DateTimeWithAggregatesFilter<"ReadingProgress"> | Date | string
   }
 
-  export type TestWhereInput = {
-    AND?: TestWhereInput | TestWhereInput[]
-    OR?: TestWhereInput[]
-    NOT?: TestWhereInput | TestWhereInput[]
-    id?: StringFilter<"Test"> | string
-    name?: StringFilter<"Test"> | string
-    email?: StringFilter<"Test"> | string
-    created_at?: DateTimeFilter<"Test"> | Date | string
-  }
-
-  export type TestOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    email?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type TestWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    email?: string
-    AND?: TestWhereInput | TestWhereInput[]
-    OR?: TestWhereInput[]
-    NOT?: TestWhereInput | TestWhereInput[]
-    name?: StringFilter<"Test"> | string
-    created_at?: DateTimeFilter<"Test"> | Date | string
-  }, "id" | "email">
-
-  export type TestOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    email?: SortOrder
-    created_at?: SortOrder
-    _count?: TestCountOrderByAggregateInput
-    _max?: TestMaxOrderByAggregateInput
-    _min?: TestMinOrderByAggregateInput
-  }
-
-  export type TestScalarWhereWithAggregatesInput = {
-    AND?: TestScalarWhereWithAggregatesInput | TestScalarWhereWithAggregatesInput[]
-    OR?: TestScalarWhereWithAggregatesInput[]
-    NOT?: TestScalarWhereWithAggregatesInput | TestScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Test"> | string
-    name?: StringWithAggregatesFilter<"Test"> | string
-    email?: StringWithAggregatesFilter<"Test"> | string
-    created_at?: DateTimeWithAggregatesFilter<"Test"> | Date | string
-  }
-
   export type UserCreateInput = {
     id?: string
     email: string
@@ -16721,6 +16898,7 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
@@ -16728,6 +16906,7 @@ export namespace Prisma {
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -16738,6 +16917,7 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
@@ -16745,6 +16925,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -16755,6 +16936,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
@@ -16762,6 +16944,7 @@ export namespace Prisma {
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -16772,6 +16955,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -16779,6 +16963,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -16789,6 +16974,7 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
   }
 
@@ -16799,6 +16985,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -16809,6 +16996,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -17181,6 +17369,7 @@ export namespace Prisma {
     translations?: TranslationCreateNestedManyWithoutChapterInput
     comments?: CommentCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateInput = {
@@ -17197,6 +17386,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
     comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUpdateInput = {
@@ -17213,6 +17403,7 @@ export namespace Prisma {
     translations?: TranslationUpdateManyWithoutChapterNestedInput
     comments?: CommentUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateInput = {
@@ -17229,6 +17420,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
     comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterCreateManyInput = {
@@ -17437,6 +17629,53 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ChapterBookmarkCreateInput = {
+    id?: string
+    created_at?: Date | string
+    user: UserCreateNestedOneWithoutChapter_bookmarksInput
+    chapter: ChapterCreateNestedOneWithoutChapter_bookmarksInput
+  }
+
+  export type ChapterBookmarkUncheckedCreateInput = {
+    id?: string
+    user_id: string
+    chapter_id: string
+    created_at?: Date | string
+  }
+
+  export type ChapterBookmarkUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutChapter_bookmarksNestedInput
+    chapter?: ChapterUpdateOneRequiredWithoutChapter_bookmarksNestedInput
+  }
+
+  export type ChapterBookmarkUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    chapter_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChapterBookmarkCreateManyInput = {
+    id?: string
+    user_id: string
+    chapter_id: string
+    created_at?: Date | string
+  }
+
+  export type ChapterBookmarkUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChapterBookmarkUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    chapter_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ReadingProgressCreateInput = {
     id?: string
     last_page_read?: number
@@ -17496,55 +17735,6 @@ export namespace Prisma {
     last_page_read?: IntFieldUpdateOperationsInput | number
     completed?: BoolFieldUpdateOperationsInput | boolean
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TestCreateInput = {
-    id: string
-    name: string
-    email: string
-    created_at?: Date | string
-  }
-
-  export type TestUncheckedCreateInput = {
-    id: string
-    name: string
-    email: string
-    created_at?: Date | string
-  }
-
-  export type TestUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TestUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TestCreateManyInput = {
-    id: string
-    name: string
-    email: string
-    created_at?: Date | string
-  }
-
-  export type TestUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TestUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -17642,6 +17832,12 @@ export namespace Prisma {
     none?: BookmarkWhereInput
   }
 
+  export type ChapterBookmarkListRelationFilter = {
+    every?: ChapterBookmarkWhereInput
+    some?: ChapterBookmarkWhereInput
+    none?: ChapterBookmarkWhereInput
+  }
+
   export type ReadingProgressListRelationFilter = {
     every?: ReadingProgressWhereInput
     some?: ReadingProgressWhereInput
@@ -17677,6 +17873,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ChapterBookmarkOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ReadingProgressOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -17688,6 +17888,7 @@ export namespace Prisma {
     name?: SortOrder
     image?: SortOrder
     role?: SortOrder
+    password_hash?: SortOrder
     created_at?: SortOrder
   }
 
@@ -17698,6 +17899,7 @@ export namespace Prisma {
     name?: SortOrder
     image?: SortOrder
     role?: SortOrder
+    password_hash?: SortOrder
     created_at?: SortOrder
   }
 
@@ -17708,6 +17910,7 @@ export namespace Prisma {
     name?: SortOrder
     image?: SortOrder
     role?: SortOrder
+    password_hash?: SortOrder
     created_at?: SortOrder
   }
 
@@ -18264,6 +18467,32 @@ export namespace Prisma {
     created_at?: SortOrder
   }
 
+  export type ChapterBookmarkUser_idChapter_idCompoundUniqueInput = {
+    user_id: string
+    chapter_id: string
+  }
+
+  export type ChapterBookmarkCountOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    chapter_id?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type ChapterBookmarkMaxOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    chapter_id?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type ChapterBookmarkMinOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    chapter_id?: SortOrder
+    created_at?: SortOrder
+  }
+
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -18317,27 +18546,6 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type TestCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    email?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type TestMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    email?: SortOrder
-    created_at?: SortOrder
-  }
-
-  export type TestMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    email?: SortOrder
-    created_at?: SortOrder
-  }
-
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -18378,6 +18586,13 @@ export namespace Prisma {
     connectOrCreate?: BookmarkCreateOrConnectWithoutUserInput | BookmarkCreateOrConnectWithoutUserInput[]
     createMany?: BookmarkCreateManyUserInputEnvelope
     connect?: BookmarkWhereUniqueInput | BookmarkWhereUniqueInput[]
+  }
+
+  export type ChapterBookmarkCreateNestedManyWithoutUserInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput> | ChapterBookmarkCreateWithoutUserInput[] | ChapterBookmarkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutUserInput | ChapterBookmarkCreateOrConnectWithoutUserInput[]
+    createMany?: ChapterBookmarkCreateManyUserInputEnvelope
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
   }
 
   export type ReadingProgressCreateNestedManyWithoutUserInput = {
@@ -18427,6 +18642,13 @@ export namespace Prisma {
     connectOrCreate?: BookmarkCreateOrConnectWithoutUserInput | BookmarkCreateOrConnectWithoutUserInput[]
     createMany?: BookmarkCreateManyUserInputEnvelope
     connect?: BookmarkWhereUniqueInput | BookmarkWhereUniqueInput[]
+  }
+
+  export type ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput> | ChapterBookmarkCreateWithoutUserInput[] | ChapterBookmarkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutUserInput | ChapterBookmarkCreateOrConnectWithoutUserInput[]
+    createMany?: ChapterBookmarkCreateManyUserInputEnvelope
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
   }
 
   export type ReadingProgressUncheckedCreateNestedManyWithoutUserInput = {
@@ -18540,6 +18762,20 @@ export namespace Prisma {
     deleteMany?: BookmarkScalarWhereInput | BookmarkScalarWhereInput[]
   }
 
+  export type ChapterBookmarkUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput> | ChapterBookmarkCreateWithoutUserInput[] | ChapterBookmarkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutUserInput | ChapterBookmarkCreateOrConnectWithoutUserInput[]
+    upsert?: ChapterBookmarkUpsertWithWhereUniqueWithoutUserInput | ChapterBookmarkUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ChapterBookmarkCreateManyUserInputEnvelope
+    set?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    disconnect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    delete?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    update?: ChapterBookmarkUpdateWithWhereUniqueWithoutUserInput | ChapterBookmarkUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ChapterBookmarkUpdateManyWithWhereWithoutUserInput | ChapterBookmarkUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
+  }
+
   export type ReadingProgressUpdateManyWithoutUserNestedInput = {
     create?: XOR<ReadingProgressCreateWithoutUserInput, ReadingProgressUncheckedCreateWithoutUserInput> | ReadingProgressCreateWithoutUserInput[] | ReadingProgressUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ReadingProgressCreateOrConnectWithoutUserInput | ReadingProgressCreateOrConnectWithoutUserInput[]
@@ -18636,6 +18872,20 @@ export namespace Prisma {
     update?: BookmarkUpdateWithWhereUniqueWithoutUserInput | BookmarkUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: BookmarkUpdateManyWithWhereWithoutUserInput | BookmarkUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: BookmarkScalarWhereInput | BookmarkScalarWhereInput[]
+  }
+
+  export type ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput> | ChapterBookmarkCreateWithoutUserInput[] | ChapterBookmarkUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutUserInput | ChapterBookmarkCreateOrConnectWithoutUserInput[]
+    upsert?: ChapterBookmarkUpsertWithWhereUniqueWithoutUserInput | ChapterBookmarkUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: ChapterBookmarkCreateManyUserInputEnvelope
+    set?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    disconnect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    delete?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    update?: ChapterBookmarkUpdateWithWhereUniqueWithoutUserInput | ChapterBookmarkUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: ChapterBookmarkUpdateManyWithWhereWithoutUserInput | ChapterBookmarkUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
   }
 
   export type ReadingProgressUncheckedUpdateManyWithoutUserNestedInput = {
@@ -18929,6 +19179,13 @@ export namespace Prisma {
     connect?: ReadingProgressWhereUniqueInput | ReadingProgressWhereUniqueInput[]
   }
 
+  export type ChapterBookmarkCreateNestedManyWithoutChapterInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput> | ChapterBookmarkCreateWithoutChapterInput[] | ChapterBookmarkUncheckedCreateWithoutChapterInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutChapterInput | ChapterBookmarkCreateOrConnectWithoutChapterInput[]
+    createMany?: ChapterBookmarkCreateManyChapterInputEnvelope
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+  }
+
   export type TranslationUncheckedCreateNestedManyWithoutChapterInput = {
     create?: XOR<TranslationCreateWithoutChapterInput, TranslationUncheckedCreateWithoutChapterInput> | TranslationCreateWithoutChapterInput[] | TranslationUncheckedCreateWithoutChapterInput[]
     connectOrCreate?: TranslationCreateOrConnectWithoutChapterInput | TranslationCreateOrConnectWithoutChapterInput[]
@@ -18948,6 +19205,13 @@ export namespace Prisma {
     connectOrCreate?: ReadingProgressCreateOrConnectWithoutChapterInput | ReadingProgressCreateOrConnectWithoutChapterInput[]
     createMany?: ReadingProgressCreateManyChapterInputEnvelope
     connect?: ReadingProgressWhereUniqueInput | ReadingProgressWhereUniqueInput[]
+  }
+
+  export type ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput> | ChapterBookmarkCreateWithoutChapterInput[] | ChapterBookmarkUncheckedCreateWithoutChapterInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutChapterInput | ChapterBookmarkCreateOrConnectWithoutChapterInput[]
+    createMany?: ChapterBookmarkCreateManyChapterInputEnvelope
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -19018,6 +19282,20 @@ export namespace Prisma {
     deleteMany?: ReadingProgressScalarWhereInput | ReadingProgressScalarWhereInput[]
   }
 
+  export type ChapterBookmarkUpdateManyWithoutChapterNestedInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput> | ChapterBookmarkCreateWithoutChapterInput[] | ChapterBookmarkUncheckedCreateWithoutChapterInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutChapterInput | ChapterBookmarkCreateOrConnectWithoutChapterInput[]
+    upsert?: ChapterBookmarkUpsertWithWhereUniqueWithoutChapterInput | ChapterBookmarkUpsertWithWhereUniqueWithoutChapterInput[]
+    createMany?: ChapterBookmarkCreateManyChapterInputEnvelope
+    set?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    disconnect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    delete?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    update?: ChapterBookmarkUpdateWithWhereUniqueWithoutChapterInput | ChapterBookmarkUpdateWithWhereUniqueWithoutChapterInput[]
+    updateMany?: ChapterBookmarkUpdateManyWithWhereWithoutChapterInput | ChapterBookmarkUpdateManyWithWhereWithoutChapterInput[]
+    deleteMany?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
+  }
+
   export type TranslationUncheckedUpdateManyWithoutChapterNestedInput = {
     create?: XOR<TranslationCreateWithoutChapterInput, TranslationUncheckedCreateWithoutChapterInput> | TranslationCreateWithoutChapterInput[] | TranslationUncheckedCreateWithoutChapterInput[]
     connectOrCreate?: TranslationCreateOrConnectWithoutChapterInput | TranslationCreateOrConnectWithoutChapterInput[]
@@ -19058,6 +19336,20 @@ export namespace Prisma {
     update?: ReadingProgressUpdateWithWhereUniqueWithoutChapterInput | ReadingProgressUpdateWithWhereUniqueWithoutChapterInput[]
     updateMany?: ReadingProgressUpdateManyWithWhereWithoutChapterInput | ReadingProgressUpdateManyWithWhereWithoutChapterInput[]
     deleteMany?: ReadingProgressScalarWhereInput | ReadingProgressScalarWhereInput[]
+  }
+
+  export type ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput = {
+    create?: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput> | ChapterBookmarkCreateWithoutChapterInput[] | ChapterBookmarkUncheckedCreateWithoutChapterInput[]
+    connectOrCreate?: ChapterBookmarkCreateOrConnectWithoutChapterInput | ChapterBookmarkCreateOrConnectWithoutChapterInput[]
+    upsert?: ChapterBookmarkUpsertWithWhereUniqueWithoutChapterInput | ChapterBookmarkUpsertWithWhereUniqueWithoutChapterInput[]
+    createMany?: ChapterBookmarkCreateManyChapterInputEnvelope
+    set?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    disconnect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    delete?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    connect?: ChapterBookmarkWhereUniqueInput | ChapterBookmarkWhereUniqueInput[]
+    update?: ChapterBookmarkUpdateWithWhereUniqueWithoutChapterInput | ChapterBookmarkUpdateWithWhereUniqueWithoutChapterInput[]
+    updateMany?: ChapterBookmarkUpdateManyWithWhereWithoutChapterInput | ChapterBookmarkUpdateManyWithWhereWithoutChapterInput[]
+    deleteMany?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
   }
 
   export type ChapterCreateNestedOneWithoutTranslationsInput = {
@@ -19148,6 +19440,34 @@ export namespace Prisma {
     upsert?: MangaUpsertWithoutBookmarksInput
     connect?: MangaWhereUniqueInput
     update?: XOR<XOR<MangaUpdateToOneWithWhereWithoutBookmarksInput, MangaUpdateWithoutBookmarksInput>, MangaUncheckedUpdateWithoutBookmarksInput>
+  }
+
+  export type UserCreateNestedOneWithoutChapter_bookmarksInput = {
+    create?: XOR<UserCreateWithoutChapter_bookmarksInput, UserUncheckedCreateWithoutChapter_bookmarksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutChapter_bookmarksInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ChapterCreateNestedOneWithoutChapter_bookmarksInput = {
+    create?: XOR<ChapterCreateWithoutChapter_bookmarksInput, ChapterUncheckedCreateWithoutChapter_bookmarksInput>
+    connectOrCreate?: ChapterCreateOrConnectWithoutChapter_bookmarksInput
+    connect?: ChapterWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutChapter_bookmarksNestedInput = {
+    create?: XOR<UserCreateWithoutChapter_bookmarksInput, UserUncheckedCreateWithoutChapter_bookmarksInput>
+    connectOrCreate?: UserCreateOrConnectWithoutChapter_bookmarksInput
+    upsert?: UserUpsertWithoutChapter_bookmarksInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutChapter_bookmarksInput, UserUpdateWithoutChapter_bookmarksInput>, UserUncheckedUpdateWithoutChapter_bookmarksInput>
+  }
+
+  export type ChapterUpdateOneRequiredWithoutChapter_bookmarksNestedInput = {
+    create?: XOR<ChapterCreateWithoutChapter_bookmarksInput, ChapterUncheckedCreateWithoutChapter_bookmarksInput>
+    connectOrCreate?: ChapterCreateOrConnectWithoutChapter_bookmarksInput
+    upsert?: ChapterUpsertWithoutChapter_bookmarksInput
+    connect?: ChapterWhereUniqueInput
+    update?: XOR<XOR<ChapterUpdateToOneWithWhereWithoutChapter_bookmarksInput, ChapterUpdateWithoutChapter_bookmarksInput>, ChapterUncheckedUpdateWithoutChapter_bookmarksInput>
   }
 
   export type UserCreateNestedOneWithoutReading_progressInput = {
@@ -19620,6 +19940,28 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ChapterBookmarkCreateWithoutUserInput = {
+    id?: string
+    created_at?: Date | string
+    chapter: ChapterCreateNestedOneWithoutChapter_bookmarksInput
+  }
+
+  export type ChapterBookmarkUncheckedCreateWithoutUserInput = {
+    id?: string
+    chapter_id: string
+    created_at?: Date | string
+  }
+
+  export type ChapterBookmarkCreateOrConnectWithoutUserInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    create: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput>
+  }
+
+  export type ChapterBookmarkCreateManyUserInputEnvelope = {
+    data: ChapterBookmarkCreateManyUserInput | ChapterBookmarkCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ReadingProgressCreateWithoutUserInput = {
     id?: string
     last_page_read?: number
@@ -19818,6 +20160,32 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"Bookmark"> | Date | string
   }
 
+  export type ChapterBookmarkUpsertWithWhereUniqueWithoutUserInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    update: XOR<ChapterBookmarkUpdateWithoutUserInput, ChapterBookmarkUncheckedUpdateWithoutUserInput>
+    create: XOR<ChapterBookmarkCreateWithoutUserInput, ChapterBookmarkUncheckedCreateWithoutUserInput>
+  }
+
+  export type ChapterBookmarkUpdateWithWhereUniqueWithoutUserInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    data: XOR<ChapterBookmarkUpdateWithoutUserInput, ChapterBookmarkUncheckedUpdateWithoutUserInput>
+  }
+
+  export type ChapterBookmarkUpdateManyWithWhereWithoutUserInput = {
+    where: ChapterBookmarkScalarWhereInput
+    data: XOR<ChapterBookmarkUpdateManyMutationInput, ChapterBookmarkUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type ChapterBookmarkScalarWhereInput = {
+    AND?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
+    OR?: ChapterBookmarkScalarWhereInput[]
+    NOT?: ChapterBookmarkScalarWhereInput | ChapterBookmarkScalarWhereInput[]
+    id?: StringFilter<"ChapterBookmark"> | string
+    user_id?: StringFilter<"ChapterBookmark"> | string
+    chapter_id?: StringFilter<"ChapterBookmark"> | string
+    created_at?: DateTimeFilter<"ChapterBookmark"> | Date | string
+  }
+
   export type ReadingProgressUpsertWithWhereUniqueWithoutUserInput = {
     where: ReadingProgressWhereUniqueInput
     update: XOR<ReadingProgressUpdateWithoutUserInput, ReadingProgressUncheckedUpdateWithoutUserInput>
@@ -19853,12 +20221,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     sessions?: SessionCreateNestedManyWithoutUserInput
     manga?: MangaCreateNestedManyWithoutAuthorInput
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -19869,12 +20239,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -19901,12 +20273,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUpdateManyWithoutUserNestedInput
     manga?: MangaUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -19917,12 +20291,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -19933,12 +20309,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     manga?: MangaCreateNestedManyWithoutAuthorInput
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -19949,12 +20327,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -19981,12 +20361,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     manga?: MangaUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -19997,12 +20379,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -20013,12 +20397,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -20029,12 +20415,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -20086,6 +20474,7 @@ export namespace Prisma {
     translations?: TranslationCreateNestedManyWithoutChapterInput
     comments?: CommentCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateWithoutMangaInput = {
@@ -20101,6 +20490,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
     comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterCreateOrConnectWithoutMangaInput = {
@@ -20153,12 +20543,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -20169,12 +20561,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -20299,6 +20693,7 @@ export namespace Prisma {
     translations?: TranslationCreateNestedManyWithoutChapterInput
     comments?: CommentCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateWithoutArcInput = {
@@ -20314,6 +20709,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
     comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterCreateOrConnectWithoutArcInput = {
@@ -20513,6 +20909,28 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ChapterBookmarkCreateWithoutChapterInput = {
+    id?: string
+    created_at?: Date | string
+    user: UserCreateNestedOneWithoutChapter_bookmarksInput
+  }
+
+  export type ChapterBookmarkUncheckedCreateWithoutChapterInput = {
+    id?: string
+    user_id: string
+    created_at?: Date | string
+  }
+
+  export type ChapterBookmarkCreateOrConnectWithoutChapterInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    create: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput>
+  }
+
+  export type ChapterBookmarkCreateManyChapterInputEnvelope = {
+    data: ChapterBookmarkCreateManyChapterInput | ChapterBookmarkCreateManyChapterInput[]
+    skipDuplicates?: boolean
+  }
+
   export type MangaUpsertWithoutChaptersInput = {
     update: XOR<MangaUpdateWithoutChaptersInput, MangaUncheckedUpdateWithoutChaptersInput>
     create: XOR<MangaCreateWithoutChaptersInput, MangaUncheckedCreateWithoutChaptersInput>
@@ -20629,6 +21047,22 @@ export namespace Prisma {
     data: XOR<ReadingProgressUpdateManyMutationInput, ReadingProgressUncheckedUpdateManyWithoutChapterInput>
   }
 
+  export type ChapterBookmarkUpsertWithWhereUniqueWithoutChapterInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    update: XOR<ChapterBookmarkUpdateWithoutChapterInput, ChapterBookmarkUncheckedUpdateWithoutChapterInput>
+    create: XOR<ChapterBookmarkCreateWithoutChapterInput, ChapterBookmarkUncheckedCreateWithoutChapterInput>
+  }
+
+  export type ChapterBookmarkUpdateWithWhereUniqueWithoutChapterInput = {
+    where: ChapterBookmarkWhereUniqueInput
+    data: XOR<ChapterBookmarkUpdateWithoutChapterInput, ChapterBookmarkUncheckedUpdateWithoutChapterInput>
+  }
+
+  export type ChapterBookmarkUpdateManyWithWhereWithoutChapterInput = {
+    where: ChapterBookmarkScalarWhereInput
+    data: XOR<ChapterBookmarkUpdateManyMutationInput, ChapterBookmarkUncheckedUpdateManyWithoutChapterInput>
+  }
+
   export type ChapterCreateWithoutTranslationsInput = {
     id?: string
     chapter_number: number
@@ -20642,6 +21076,7 @@ export namespace Prisma {
     arc?: ArcCreateNestedOneWithoutChaptersInput
     comments?: CommentCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateWithoutTranslationsInput = {
@@ -20657,6 +21092,7 @@ export namespace Prisma {
     created_at?: Date | string
     comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterCreateOrConnectWithoutTranslationsInput = {
@@ -20671,12 +21107,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     manga?: MangaCreateNestedManyWithoutAuthorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -20687,12 +21125,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -20725,6 +21165,7 @@ export namespace Prisma {
     arc?: ArcUpdateOneWithoutChaptersNestedInput
     comments?: CommentUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateWithoutTranslationsInput = {
@@ -20740,6 +21181,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type UserUpsertWithoutTranslationsInput = {
@@ -20760,12 +21202,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     manga?: MangaUpdateManyWithoutAuthorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -20776,12 +21220,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -20792,12 +21238,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     manga?: MangaCreateNestedManyWithoutAuthorInput
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -20808,12 +21256,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -20835,6 +21285,7 @@ export namespace Prisma {
     arc?: ArcCreateNestedOneWithoutChaptersInput
     translations?: TranslationCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateWithoutCommentsInput = {
@@ -20850,6 +21301,7 @@ export namespace Prisma {
     created_at?: Date | string
     translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterCreateOrConnectWithoutCommentsInput = {
@@ -20875,12 +21327,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     manga?: MangaUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -20891,12 +21345,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -20924,6 +21380,7 @@ export namespace Prisma {
     arc?: ArcUpdateOneWithoutChaptersNestedInput
     translations?: TranslationUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateWithoutCommentsInput = {
@@ -20939,6 +21396,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type UserCreateWithoutBookmarksInput = {
@@ -20948,12 +21406,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     manga?: MangaCreateNestedManyWithoutAuthorInput
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
   }
 
@@ -20964,12 +21424,14 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
     reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -21027,12 +21489,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     manga?: MangaUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
   }
 
@@ -21043,12 +21507,14 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -21089,13 +21555,14 @@ export namespace Prisma {
     chapters?: ChapterUncheckedUpdateManyWithoutMangaNestedInput
   }
 
-  export type UserCreateWithoutReading_progressInput = {
+  export type UserCreateWithoutChapter_bookmarksInput = {
     id?: string
     email: string
     emailVerified?: Date | string | null
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
@@ -21103,6 +21570,175 @@ export namespace Prisma {
     translations?: TranslationCreateNestedManyWithoutTranslatorInput
     comments?: CommentCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    reading_progress?: ReadingProgressCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutChapter_bookmarksInput = {
+    id?: string
+    email: string
+    emailVerified?: Date | string | null
+    name?: string | null
+    image?: string | null
+    role?: $Enums.Role
+    password_hash?: string | null
+    created_at?: Date | string
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    manga?: MangaUncheckedCreateNestedManyWithoutAuthorInput
+    translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
+    comments?: CommentUncheckedCreateNestedManyWithoutUserInput
+    bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutChapter_bookmarksInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutChapter_bookmarksInput, UserUncheckedCreateWithoutChapter_bookmarksInput>
+  }
+
+  export type ChapterCreateWithoutChapter_bookmarksInput = {
+    id?: string
+    chapter_number: number
+    chapter_name: string
+    cover_image_url?: string | null
+    published_date: Date | string
+    view_count?: number
+    comment_count?: number
+    created_at?: Date | string
+    manga: MangaCreateNestedOneWithoutChaptersInput
+    arc?: ArcCreateNestedOneWithoutChaptersInput
+    translations?: TranslationCreateNestedManyWithoutChapterInput
+    comments?: CommentCreateNestedManyWithoutChapterInput
+    reading_progress?: ReadingProgressCreateNestedManyWithoutChapterInput
+  }
+
+  export type ChapterUncheckedCreateWithoutChapter_bookmarksInput = {
+    id?: string
+    manga_id: string
+    arc_id?: string | null
+    chapter_number: number
+    chapter_name: string
+    cover_image_url?: string | null
+    published_date: Date | string
+    view_count?: number
+    comment_count?: number
+    created_at?: Date | string
+    translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
+    comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
+    reading_progress?: ReadingProgressUncheckedCreateNestedManyWithoutChapterInput
+  }
+
+  export type ChapterCreateOrConnectWithoutChapter_bookmarksInput = {
+    where: ChapterWhereUniqueInput
+    create: XOR<ChapterCreateWithoutChapter_bookmarksInput, ChapterUncheckedCreateWithoutChapter_bookmarksInput>
+  }
+
+  export type UserUpsertWithoutChapter_bookmarksInput = {
+    update: XOR<UserUpdateWithoutChapter_bookmarksInput, UserUncheckedUpdateWithoutChapter_bookmarksInput>
+    create: XOR<UserCreateWithoutChapter_bookmarksInput, UserUncheckedCreateWithoutChapter_bookmarksInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutChapter_bookmarksInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutChapter_bookmarksInput, UserUncheckedUpdateWithoutChapter_bookmarksInput>
+  }
+
+  export type UserUpdateWithoutChapter_bookmarksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    manga?: MangaUpdateManyWithoutAuthorNestedInput
+    translations?: TranslationUpdateManyWithoutTranslatorNestedInput
+    comments?: CommentUpdateManyWithoutUserNestedInput
+    bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    reading_progress?: ReadingProgressUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutChapter_bookmarksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    manga?: MangaUncheckedUpdateManyWithoutAuthorNestedInput
+    translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
+    bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    reading_progress?: ReadingProgressUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ChapterUpsertWithoutChapter_bookmarksInput = {
+    update: XOR<ChapterUpdateWithoutChapter_bookmarksInput, ChapterUncheckedUpdateWithoutChapter_bookmarksInput>
+    create: XOR<ChapterCreateWithoutChapter_bookmarksInput, ChapterUncheckedCreateWithoutChapter_bookmarksInput>
+    where?: ChapterWhereInput
+  }
+
+  export type ChapterUpdateToOneWithWhereWithoutChapter_bookmarksInput = {
+    where?: ChapterWhereInput
+    data: XOR<ChapterUpdateWithoutChapter_bookmarksInput, ChapterUncheckedUpdateWithoutChapter_bookmarksInput>
+  }
+
+  export type ChapterUpdateWithoutChapter_bookmarksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chapter_number?: FloatFieldUpdateOperationsInput | number
+    chapter_name?: StringFieldUpdateOperationsInput | string
+    cover_image_url?: NullableStringFieldUpdateOperationsInput | string | null
+    published_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    view_count?: IntFieldUpdateOperationsInput | number
+    comment_count?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    manga?: MangaUpdateOneRequiredWithoutChaptersNestedInput
+    arc?: ArcUpdateOneWithoutChaptersNestedInput
+    translations?: TranslationUpdateManyWithoutChapterNestedInput
+    comments?: CommentUpdateManyWithoutChapterNestedInput
+    reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+  }
+
+  export type ChapterUncheckedUpdateWithoutChapter_bookmarksInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    manga_id?: StringFieldUpdateOperationsInput | string
+    arc_id?: NullableStringFieldUpdateOperationsInput | string | null
+    chapter_number?: FloatFieldUpdateOperationsInput | number
+    chapter_name?: StringFieldUpdateOperationsInput | string
+    cover_image_url?: NullableStringFieldUpdateOperationsInput | string | null
+    published_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    view_count?: IntFieldUpdateOperationsInput | number
+    comment_count?: IntFieldUpdateOperationsInput | number
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
+    reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+  }
+
+  export type UserCreateWithoutReading_progressInput = {
+    id?: string
+    email: string
+    emailVerified?: Date | string | null
+    name?: string | null
+    image?: string | null
+    role?: $Enums.Role
+    password_hash?: string | null
+    created_at?: Date | string
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    manga?: MangaCreateNestedManyWithoutAuthorInput
+    translations?: TranslationCreateNestedManyWithoutTranslatorInput
+    comments?: CommentCreateNestedManyWithoutUserInput
+    bookmarks?: BookmarkCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReading_progressInput = {
@@ -21112,6 +21748,7 @@ export namespace Prisma {
     name?: string | null
     image?: string | null
     role?: $Enums.Role
+    password_hash?: string | null
     created_at?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
@@ -21119,6 +21756,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedCreateNestedManyWithoutTranslatorInput
     comments?: CommentUncheckedCreateNestedManyWithoutUserInput
     bookmarks?: BookmarkUncheckedCreateNestedManyWithoutUserInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReading_progressInput = {
@@ -21139,6 +21777,7 @@ export namespace Prisma {
     arc?: ArcCreateNestedOneWithoutChaptersInput
     translations?: TranslationCreateNestedManyWithoutChapterInput
     comments?: CommentCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterUncheckedCreateWithoutReading_progressInput = {
@@ -21154,6 +21793,7 @@ export namespace Prisma {
     created_at?: Date | string
     translations?: TranslationUncheckedCreateNestedManyWithoutChapterInput
     comments?: CommentUncheckedCreateNestedManyWithoutChapterInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedCreateNestedManyWithoutChapterInput
   }
 
   export type ChapterCreateOrConnectWithoutReading_progressInput = {
@@ -21179,6 +21819,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
@@ -21186,6 +21827,7 @@ export namespace Prisma {
     translations?: TranslationUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReading_progressInput = {
@@ -21195,6 +21837,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    password_hash?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
@@ -21202,6 +21845,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedUpdateManyWithoutTranslatorNestedInput
     comments?: CommentUncheckedUpdateManyWithoutUserNestedInput
     bookmarks?: BookmarkUncheckedUpdateManyWithoutUserNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ChapterUpsertWithoutReading_progressInput = {
@@ -21228,6 +21872,7 @@ export namespace Prisma {
     arc?: ArcUpdateOneWithoutChaptersNestedInput
     translations?: TranslationUpdateManyWithoutChapterNestedInput
     comments?: CommentUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateWithoutReading_progressInput = {
@@ -21243,6 +21888,7 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
     comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type AccountCreateManyUserInput = {
@@ -21294,6 +21940,12 @@ export namespace Prisma {
   export type BookmarkCreateManyUserInput = {
     id?: string
     manga_id: string
+    created_at?: Date | string
+  }
+
+  export type ChapterBookmarkCreateManyUserInput = {
+    id?: string
+    chapter_id: string
     created_at?: Date | string
   }
 
@@ -21467,6 +22119,24 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ChapterBookmarkUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    chapter?: ChapterUpdateOneRequiredWithoutChapter_bookmarksNestedInput
+  }
+
+  export type ChapterBookmarkUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chapter_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChapterBookmarkUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    chapter_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ReadingProgressUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     last_page_read?: IntFieldUpdateOperationsInput | number
@@ -21560,6 +22230,7 @@ export namespace Prisma {
     translations?: TranslationUpdateManyWithoutChapterNestedInput
     comments?: CommentUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateWithoutMangaInput = {
@@ -21575,6 +22246,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
     comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateManyWithoutMangaInput = {
@@ -21632,6 +22304,7 @@ export namespace Prisma {
     translations?: TranslationUpdateManyWithoutChapterNestedInput
     comments?: CommentUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateWithoutArcInput = {
@@ -21647,6 +22320,7 @@ export namespace Prisma {
     translations?: TranslationUncheckedUpdateManyWithoutChapterNestedInput
     comments?: CommentUncheckedUpdateManyWithoutChapterNestedInput
     reading_progress?: ReadingProgressUncheckedUpdateManyWithoutChapterNestedInput
+    chapter_bookmarks?: ChapterBookmarkUncheckedUpdateManyWithoutChapterNestedInput
   }
 
   export type ChapterUncheckedUpdateManyWithoutArcInput = {
@@ -21683,6 +22357,12 @@ export namespace Prisma {
     last_page_read?: number
     completed?: boolean
     updated_at?: Date | string
+  }
+
+  export type ChapterBookmarkCreateManyChapterInput = {
+    id?: string
+    user_id: string
+    created_at?: Date | string
   }
 
   export type TranslationUpdateWithoutChapterInput = {
@@ -21755,6 +22435,24 @@ export namespace Prisma {
     last_page_read?: IntFieldUpdateOperationsInput | number
     completed?: BoolFieldUpdateOperationsInput | boolean
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChapterBookmarkUpdateWithoutChapterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutChapter_bookmarksNestedInput
+  }
+
+  export type ChapterBookmarkUncheckedUpdateWithoutChapterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ChapterBookmarkUncheckedUpdateManyWithoutChapterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    user_id?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 
