@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import type { ChapterItem } from "./types";
 
@@ -8,7 +9,10 @@ interface ChapterRowProps {
 
 export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowProps) {
   return (
-    <div className="h-27 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200">
+    <Link
+      href={`/viewer/${chapter.id}`}
+      className="h-27 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
+    >
       <div className="relative w-50 h-full overflow-hidden shrink-0 bg-[#ece6d8]">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -35,6 +39,6 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
         </div>
         <div className="text-sm mt-1 text-[#ece6d8]/90 truncate">{chapter.chapter_name}</div>
       </div>
-    </div>
+    </Link>
   );
 }
