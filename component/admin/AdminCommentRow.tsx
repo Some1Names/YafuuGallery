@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 interface AdminCommentRowProps {
   commentId: string;
@@ -19,12 +20,13 @@ export default function AdminCommentRow({
   createdAt,
   initialHidden,
 }: AdminCommentRowProps) {
+  const router = useRouter();
   const [hidden, setHidden] = useState(initialHidden);
   const [isPending, startTransition] = useTransition();
 
-  function toggle() {
+  function toggleHide() {
     const previous = hidden;
-    setHidden(!hidden); // optimistic
+    setHidden(!hidden);
 
     startTransition(async () => {
       const res = await fetch(`/api/admin/comments/${commentId}/hide`, { method: "POST" });
@@ -35,6 +37,12 @@ export default function AdminCommentRow({
       const data = await res.json();
       setHidden(data.hidden);
     });
+  }
+
+  async function remove() {
+    if (!confirm("Permanently delete this comment? This can't be undone.")) return;
+    const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" });
+    if (res.ok) router.refresh();
   }
 
   return (
@@ -51,14 +59,23 @@ export default function AdminCommentRow({
         </div>
         <p className="text-sm text-[#ece6d8]">{body}</p>
       </div>
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={isPending}
-        className="shrink-0 text-xs font-mono px-3 py-1.5 border border-[#050505] rounded hover:border-[#b6b0a2] text-[#b6b0a2] hover:text-[#ece6d8] disabled:opacity-50 transition-colors duration-200"
-      >
-        {hidden ? "Unhide" : "Hide"}
-      </button>
+      <div className="flex gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={toggleHide}
+          disabled={isPending}
+          className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded hover:border-[#b6b0a2] text-[#b6b0a2] hover:text-[#ece6d8] disabled:opacity-50 transition-colors duration-200"
+        >
+          {hidden ? "Unhide" : "Hide"}
+        </button>
+        <button
+          type="button"
+          onClick={remove}
+          className="text-xs font-mono px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 }

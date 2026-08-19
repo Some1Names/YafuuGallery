@@ -1,10 +1,10 @@
 import Navbar from "@/component/Navbar";
 import Footer from "@/component/Footer";
-// import { auth } from "@/auth"; // uncomment once auth is wired back up
+import { auth } from "@/auth";
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
-  // const session = await auth();
-  const user = null; // = session?.user ?? null, once auth resumes
+  const session = await auth();
+  const user = session?.user ?? null;
 
   return (
     <div className="min-h-screen flex flex-col">

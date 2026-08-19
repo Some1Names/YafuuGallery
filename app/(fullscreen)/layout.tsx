@@ -1,4 +1,7 @@
-// No navbar, deliberately. Reader and auth pages get the full viewport.
+import AuthProvider from "@/component/AuthProvider";
+
 export default function FullscreenLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <body className="bg-[#0a0a0a]">
+  <AuthProvider>{children}</AuthProvider>
+</body>
 }

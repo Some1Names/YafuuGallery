@@ -65,7 +65,7 @@ export default async function MangaDetailPage({
         >
             <MangaBackground imageUrl="/mangabg.png" />
 
-            <div className="relative z-10 w-full max-w-295 text-[#ece6d8]">
+            <div className="relative z-10 w-full max-w-350 text-[#ece6d8]">
 
                 <Breadcrumb mangaTitle={manga.manga_title} />
 
