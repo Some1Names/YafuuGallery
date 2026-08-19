@@ -1,6 +1,7 @@
 import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 import MangaBackground from "@/component/titles/MangaBackground";
 import MangaHero from "@/component/titles/MangaHero";
@@ -27,6 +28,10 @@ export default async function MangaDetailPage({
     const sortOrder: "asc" | "desc" = sort === "desc" ? "desc" : "asc";
     const activeView: "chapters" | "arcs" = view === "arcs" ? "arcs" : "chapters";
 
+    const session = await auth();
+
+    // manga must be fetched FIRST — the bookmark lookup needs manga.id,
+    // which doesn't exist until this resolves
     const manga = await prisma.manga.findUnique({
         where: { id },
         include: {
@@ -47,6 +52,14 @@ export default async function MangaDetailPage({
     if (!manga) {
         notFound();
     }
+
+    const bookmark = session?.user?.id
+        ? await prisma.bookmark.findUnique({
+            where: {
+                user_id_manga_id: { user_id: session.user.id, manga_id: manga.id },
+            },
+        })
+        : null;
 
     let allChapters = [...manga.arcs.flatMap((arc) => arc.chapters), ...manga.chapters];
 
@@ -88,9 +101,11 @@ export default async function MangaDetailPage({
                     </div>
 
                     <MangaSidebar
+                        mangaId={manga.id}
                         title={manga.manga_title}
                         author={manga.author.name ?? "Unknown"}
                         synopsis={manga.manga_synopsis}
+                        isFavorited={bookmark !== null}
                     />
                 </div>
             </div>

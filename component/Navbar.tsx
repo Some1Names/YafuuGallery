@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+
+interface NavbarProps {
+  user?: {
+    name: string | null;
+    image: string | null;
+  } | null;
+}
 
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/favorites", label: "Favorites" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
-  const user = session?.user;
 
   return (
     <nav className="sticky top-0 z-30 bg-[#212023]/75 backdrop-blur border-b-2 border-[#27262a]">
@@ -44,12 +48,8 @@ export default function Navbar() {
             );
           })}
 
-          {/* Profile / Sign up — while the session is still resolving on
-              first load, render nothing here rather than flashing
-              "Sign up" then swapping to the profile a moment later */}
-          {status === "loading" ? (
-            <span className="w-7 h-7 rounded-full bg-[#1b1a1c] border border-[#050505] animate-pulse" />
-          ) : user ? (
+          {/* Profile / Sign up */}
+          {user ? (
             <Link
               href="/profile"
               className={

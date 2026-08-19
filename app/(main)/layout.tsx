@@ -4,7 +4,13 @@ import { auth } from "@/auth";
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  const user = session?.user ?? null;
+
+  // session.user.name/image can be `undefined` per NextAuth's default type,
+  // but Navbar expects `string | null` — normalize here so Navbar's prop
+  // type can stay strict instead of loosening it to match NextAuth's shape
+  const user = session?.user
+    ? { name: session.user.name ?? null, image: session.user.image ?? null }
+    : null;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Manga Reader",
-  description: "Read manga online",
+  title: {
+    default: "YafuuGallery",
+    template: "%s | YafuuGallery",
+  },
+  description:
+    "Read original manga, explore stories, and follow every chapter.",
 };
 
 // Bare wrapper only — no Navbar here anymore. What renders below this is

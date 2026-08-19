@@ -1,0 +1,57 @@
+"use client";
+
+import { useState, useTransition } from "react";
+
+interface MangaFavoriteButtonProps {
+  mangaId: string;
+  initialFavorited: boolean;
+}
+
+// Same optimistic-toggle pattern as ChapterFavoriteButton — mirrors it
+// deliberately for consistency, just pointed at the manga-level route.
+export default function MangaFavoriteButton({ mangaId, initialFavorited }: MangaFavoriteButtonProps) {
+  const [favorited, setFavorited] = useState(initialFavorited);
+  const [isPending, startTransition] = useTransition();
+
+  function toggle() {
+    const next = !favorited;
+    setFavorited(next);
+
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/manga/${mangaId}/favorite`, { method: "POST" });
+
+        if (res.status === 401) {
+          setFavorited(!next);
+          alert("Sign in to favorite manga.");
+          return;
+        }
+        if (!res.ok) {
+          setFavorited(!next);
+          return;
+        }
+
+        const data = await res.json();
+        setFavorited(data.favorited);
+      } catch {
+        setFavorited(!next);
+      }
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={isPending}
+      className={
+        "px-4 py-2 text-sm font-mono transition-colors duration-200 disabled:opacity-50 " +
+        (favorited
+          ? "bg-[#9c1d25] text-[#ece6d8] hover:bg-[#9c1d25]/85"
+          : "bg-white text-black hover:bg-white/70")
+      }
+    >
+      {favorited ? "✓ Added to Favorites" : "+ Add to Favorites"}
+    </button>
+  );
+}

@@ -1,10 +1,14 @@
+import MangaFavoriteButton from "@/component/titles/MangaFavoriteButton";
+
 interface MangaSidebarProps {
+  mangaId: string;
   title: string;
   author: string;
   synopsis: string;
+  isFavorited: boolean;
 }
 
-export default function MangaSidebar({ title, author, synopsis }: MangaSidebarProps) {
+export default function MangaSidebar({ mangaId, title, author, synopsis, isFavorited }: MangaSidebarProps) {
   return (
     <div>
       <h1 className="text-5xl mt-1 font-(family-name:--font-display)">{title}</h1>
@@ -14,9 +18,7 @@ export default function MangaSidebar({ title, author, synopsis }: MangaSidebarPr
 
       <p className="text-base leading-relaxed max-w-md mb-5 text-[#ece6d8]/90">{synopsis}</p>
 
-      <button className="bg-white px-4 py-2 text-sm text-black font-mono cursor-pointer hover:bg-white/70 transition-all duration-200">
-        + Add to Favorites
-      </button>
+      <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />
     </div>
   );
 }

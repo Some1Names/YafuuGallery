@@ -22,7 +22,7 @@ export default function FavoriteChapterRow({
   return (
     <div className="h-20 group flex items-center gap-8 bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200">
       <Link
-        href={`/manga/titles/${mangaId}/chapter/${chapterId}`}
+        href={`/viewer/${chapterId}`}
         className="relative w-36 h-full overflow-hidden shrink-0 bg-[#ece6d8]"
       >
         <div
@@ -42,7 +42,7 @@ export default function FavoriteChapterRow({
           </Link>
           <ChapterFavoriteButton chapterId={chapterId} initialFavorited={true} />
         </div>
-        <Link href={`/manga/titles/${mangaId}/chapter/${chapterId}`} className="block">
+        <Link href={`/viewer/${chapterId}`} className="block">
           <span className="text-base text-[#ece6d8] group-hover:text-[#f2f0f0] transition-colors duration-200 font-(family-name:--font-display)">
             #{String(chapterNumber).padStart(3, "0")}
           </span>
