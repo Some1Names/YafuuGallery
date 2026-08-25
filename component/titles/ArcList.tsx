@@ -7,7 +7,7 @@ export default function ArcList({ arcs }: { arcs: ArcItem[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3 sm:gap-4">
       {arcs.map((arc) => (
         <ArcRow key={arc.id} arc={arc} />
       ))}

@@ -30,8 +30,6 @@ export default async function MangaDetailPage({
 
     const session = await auth();
 
-    // manga must be fetched FIRST — the bookmark lookup needs manga.id,
-    // which doesn't exist until this resolves
     const manga = await prisma.manga.findUnique({
         where: { id },
         include: {
@@ -74,32 +72,24 @@ export default async function MangaDetailPage({
 
     return (
         <div
-            className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-5 py-20 flex justify-center font-(family-name:--font-body)`}
+            className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center font-(family-name:--font-body)`}
         >
-            <MangaBackground imageUrl="/mangabg.png" />
+            <div className="hidden sm:block">
+                <MangaBackground imageUrl="/mangabg.png" />
+            </div>
 
             <div className="relative z-10 w-full max-w-350 text-[#ece6d8]">
 
-                <Breadcrumb mangaTitle={manga.manga_title} />
+                <div className="px-4 sm:px-0">
+                    <Breadcrumb mangaTitle={manga.manga_title} />
+                </div>
 
                 <MangaHero imageUrl={manga.cover_image_url} />
 
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12.5">
-                    <div>
-                        <ChapterArcTabs
-                            activeView={activeView}
-                            chapterCount={allChapters.length}
-                            sortOrder={sortOrder}
-                            filteredArc={filteredArc}
-                        />
-
-                        {activeView === "chapters" ? (
-                            <ChapterList chapters={allChapters} />
-                        ) : (
-                            <ArcList arcs={manga.arcs} />
-                        )}
-                    </div>
-
+                {/* Sidebar content — title, author, synopsis, favorite
+                    button — now a full-width section right below the hero,
+                    not a narrow side column anymore */}
+                <div className="px-4 sm:px-0 mb-8 sm:mb-12">
                     <MangaSidebar
                         mangaId={manga.id}
                         title={manga.manga_title}
@@ -107,6 +97,23 @@ export default async function MangaDetailPage({
                         synopsis={manga.manga_synopsis}
                         isFavorited={bookmark !== null}
                     />
+                </div>
+
+                {/* Chapters / Arcs — full width now that the sidebar no
+                    longer shares a row with it */}
+                <div className="px-4 sm:px-0 pb-8 sm:pb-0">
+                    <ChapterArcTabs
+                        activeView={activeView}
+                        chapterCount={allChapters.length}
+                        sortOrder={sortOrder}
+                        filteredArc={filteredArc}
+                    />
+
+                    {activeView === "chapters" ? (
+                        <ChapterList chapters={allChapters} />
+                    ) : (
+                        <ArcList arcs={manga.arcs} />
+                    )}
                 </div>
             </div>
         </div>

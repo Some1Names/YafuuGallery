@@ -43,19 +43,21 @@ export default async function BrowsePage() {
     <div className="bg-[#0a0a0a] min-h-screen">
 
       {/* Hero */}
-      <section className="relative min-h-150 pt-28">
+      <section className="relative min-h-100 sm:min-h-125 md:min-h-150 pt-0 sm:pt-24 md:pt-28">
+        {/* background image hidden on phone — the featured box itself
+            becomes the hero there, edge to edge, no separate backdrop */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="hidden sm:block absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('/mangabg.png')`,
           }}
         />
 
-        <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
+        <div className="hidden sm:block absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
 
         {featured && (
           <div
-            className="relative max-w-350 mx-auto px-8 py-20 rounded-lg shadow-lg bg-cover bg-center overflow-hidden"
+            className="relative max-w-350 mx-auto px-4 sm:px-6 md:px-8 py-14 md:py-20 rounded-none sm:rounded-lg shadow-none sm:shadow-lg bg-cover bg-center overflow-hidden"
             style={{
               backgroundImage: `url('${featured.banner_image_url ?? "/wide.png"}')`,
             }}
@@ -63,33 +65,37 @@ export default async function BrowsePage() {
             {/* Scrim: guarantees text/button contrast no matter how bright
                 the banner image is — a light banner would otherwise wash
                 out the white text and the white "Start Reading" button */}
-            <div className="absolute inset-0 bg-linear-to-r from-black/70  to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/70 to-transparent" />
 
-            <div className="relative z-10 flex flex-col gap-2 items-start px-10">
+            <div className="relative z-10 flex flex-col gap-2 items-start px-4 sm:px-6 md:px-10">
               <div className="flex flex-col gap-2 items-start">
-                <p className="text-[#b6b0a2] font-mono text-sm ">FEATURED MANGA</p>
-                <h1 className="text-5xl font-bold text-white max-w-xl">{featured.manga_title}</h1>
+                <p className="text-[#b6b0a2] font-mono text-xs sm:text-sm">FEATURED MANGA</p>
+                <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl">
+                  {featured.manga_title}
+                </h1>
               </div>
 
-              <p className="text-[#b6b0a2] max-w-lg mt-6 line-clamp-3">{featured.manga_synopsis}</p>
+              <p className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3">
+                {featured.manga_synopsis}
+              </p>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto mt-2">
                 {featured.chapters[0] ? (
                   <Link
                     href={`/manga/titles/${featured.id}/chapter/${featured.chapters[0].id}`}
-                    className="bg-white text-black px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+                    className="bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
                   >
                     Start Reading
                   </Link>
                 ) : (
-                  <span className="bg-white/40 text-black/60 px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+                  <span className="bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
                     No chapters yet
                   </span>
                 )}
 
                 <Link
                   href={`/manga/titles/${featured.id}`}
-                  className="bg-black/20 border border-white/40 text-white px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
+                  className="bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
                 >
                   View Manga
                 </Link>
@@ -100,16 +106,16 @@ export default async function BrowsePage() {
       </section>
 
       {/* Latest Updates */}
-      <section className="px-8 pt-8 pb-28">
+      <section className="px-4 sm:px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
         <div className="max-w-350 mx-auto">
 
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-end justify-between mb-6 sm:mb-8">
             <div>
-              <p className="text-[#b6b0a2] font-mono text-sm">
+              <p className="text-[#b6b0a2] font-mono text-xs sm:text-sm">
                 RECENTLY UPDATED
               </p>
 
-              <h2 className="text-3xl text-white font-bold">
+              <h2 className="text-2xl sm:text-3xl text-white font-bold">
                 Latest Manga
               </h2>
             </div>
@@ -119,7 +125,7 @@ export default async function BrowsePage() {
                 dedicated /manga/browse page, point this there. */}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {mangaList.map((manga) => {
               const latest = manga.chapters[0];
 

@@ -11,9 +11,9 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
   return (
     <Link
       href={`/viewer/${chapter.id}`}
-      className="h-27 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
+      className="h-24 sm:h-30 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
     >
-      <div className="relative w-50 h-full overflow-hidden shrink-0 bg-[#ece6d8]">
+      <div className="relative w-40 sm:w-54 h-full overflow-hidden shrink-0 bg-[#ece6d8]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/placeholder.png')" }}
@@ -24,10 +24,10 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
       <div className="min-w-0 w-full pr-8">
         <div className="flex items-center justify-between gap-4 w-full">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg text-[#ece6d8] group-hover:text-[#f2f0f0] transition-colors duration-200 font-(family-name:--font-display)">
+            <span className="text-md sm:text-lg text-[#ece6d8] group-hover:text-[#f2f0f0] transition-colors duration-200">
               #{String(chapter.chapter_number).padStart(3, "0")}
             </span>
-            <span className="text-[11px] text-[#b6b0a2] font-mono">
+            <span className="text-xs sm:text-sm text-[#b6b0a2] font-mono">
               {chapter.published_date.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",

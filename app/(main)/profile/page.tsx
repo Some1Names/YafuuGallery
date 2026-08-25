@@ -123,7 +123,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] px-8 py-12">
-      <div className="max-w-350 mx-auto">
+      <div className="max-w-225 mx-auto">
         <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-8">Profile</h1>
 
         {/* Identity + edit form */}
@@ -135,18 +135,11 @@ export default async function ProfilePage() {
             role={user.role}
             createdAt={user.created_at}
             authoredCount={authoredCount}
+            stats={stats}
           />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {stats.map((s) => (
-            <div key={s.label} className="border border-[#050505] rounded-md p-4 bg-[#1b1a1c]">
-              <div className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">{s.value}</div>
-              <div className="text-xs text-[#b6b0a2] font-mono uppercase mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
+        {/* Stats now render inside ProfileEditForm's card, styled to match */}
 
         {/* Recently read — 2 columns on phone (only the 2 most recent
             actually show, rest are hidden below the md breakpoint rather

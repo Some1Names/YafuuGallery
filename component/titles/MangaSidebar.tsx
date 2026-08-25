@@ -11,14 +11,18 @@ interface MangaSidebarProps {
 export default function MangaSidebar({ mangaId, title, author, synopsis, isFavorited }: MangaSidebarProps) {
   return (
     <div>
-      <h1 className="text-5xl mt-1 font-(family-name:--font-display)">{title}</h1>
-      <p className="text-[#b6b0a2] text-lg mt-2">{author}</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-(family-name:--font-display)">{title}</h1>
+          <p className="text-[#b6b0a2] text-base sm:text-lg mt-2">{author}</p>
+        </div>
 
-      <div className="w-full h-px bg-white/20 my-8" />
+        <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />
+      </div>
 
-      <p className="text-base leading-relaxed max-w-md mb-5 text-[#ece6d8]/90">{synopsis}</p>
+      <div className="w-full h-px bg-white/20 my-6 sm:my-8" />
 
-      <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />
+      <p className="text-base leading-relaxed max-w-2xl text-[#ece6d8]/90">{synopsis}</p>
     </div>
   );
 }
