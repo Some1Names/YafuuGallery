@@ -13,7 +13,7 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
       href={`/viewer/${chapter.id}`}
       className="h-24 sm:h-30 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
     >
-      <div className="relative w-40 sm:w-54 h-full overflow-hidden shrink-0 bg-[#ece6d8]">
+      <div className="relative w-40 sm:w-54 h-full overflow-hidden shrink-0 bg-[#1b1a1c]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/placeholder.png')" }}

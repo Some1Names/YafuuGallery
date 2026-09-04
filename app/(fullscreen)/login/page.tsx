@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 
@@ -22,13 +22,9 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+      const { error: signInError } = await authClient.signIn.email({ email, password });
 
-      if (result?.error) {
+      if (signInError) {
         setError("Invalid email or password.");
         return;
       }
@@ -69,7 +65,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
             className="w-full flex items-center justify-center gap-2 border border-[#050505] rounded-md py-2.5 text-sm text-[#ece6d8] hover:bg-[#1b1a1c] transition-colors duration-200"
           >
             Continue with Google

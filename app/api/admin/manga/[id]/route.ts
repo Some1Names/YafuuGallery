@@ -18,7 +18,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json().catch(() => null);
-  const { manga_title, manga_synopsis } = body ?? {};
+  const { manga_title, manga_synopsis, cover_image_url, banner_image_url } = body ?? {};
 
   if (!manga_title || !manga_synopsis) {
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
@@ -26,7 +26,12 @@ export async function PATCH(
 
   const manga = await prisma.manga.update({
     where: { id },
-    data: { manga_title, manga_synopsis },
+    data: {
+      manga_title,
+      manga_synopsis,
+      ...(cover_image_url !== undefined ? { cover_image_url: cover_image_url || null } : {}),
+      ...(banner_image_url !== undefined ? { banner_image_url: banner_image_url || null } : {}),
+    },
   });
 
   return NextResponse.json(manga);

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { signupSchema, type SignupFormValues } from "@/lib/signup-schema";
+import { authClient } from "@/lib/auth-client";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
@@ -31,15 +32,14 @@ export default function SignUpPage() {
     setServerError(null);
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+      const { error } = await authClient.signUp.email({
+        email: values.email,
+        password: values.password,
+        name: values.name,
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setServerError(data?.error ?? "Something went wrong. Please try again.");
+      if (error) {
+        setServerError(error.message ?? "Something went wrong. Please try again.");
         return;
       }
 
@@ -74,9 +74,7 @@ export default function SignUpPage() {
 
           <button
             type="button"
-            onClick={() => {
-              // signIn("google") from next-auth/react, once Google OAuth is reconnected
-            }}
+            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
             className="w-full flex items-center justify-center gap-2 border border-[#050505] rounded-md py-2.5 text-sm text-[#ece6d8] hover:bg-[#1b1a1c] transition-colors duration-200"
           >
             Continue with Google
@@ -91,13 +89,13 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div>
               <label htmlFor="name" className="block text-sm text-[#b6b0a2] mb-1.5">
-                Name
+                Username
               </label>
               <input
                 id="name"
                 type="text"
                 {...register("name")}
-                placeholder="e.g. Uefa"
+                placeholder="e.g. uefa123"
                 aria-invalid={!!errors.name}
                 className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
               />

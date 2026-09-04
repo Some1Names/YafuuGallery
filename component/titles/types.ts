@@ -9,5 +9,5 @@ export interface ArcItem {
   id: string;
   arc_name: string;
   arc_status: string;
-  chapters: { id: string }[];
+  chapters: ChapterItem[];
 }

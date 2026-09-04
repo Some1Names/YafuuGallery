@@ -57,7 +57,7 @@ export default async function BrowsePage() {
 
         {featured && (
           <div
-            className="relative max-w-350 mx-auto px-4 sm:px-6 md:px-8 py-14 md:py-20 rounded-none sm:rounded-lg shadow-none sm:shadow-lg bg-cover bg-center overflow-hidden"
+            className="relative max-w-350 mx-auto px-6 md:px-8 py-14 md:py-20 rounded-none sm:rounded-lg shadow-none sm:shadow-lg bg-cover bg-center overflow-hidden"
             style={{
               backgroundImage: `url('${featured.banner_image_url ?? "/wide.png"}')`,
             }}
@@ -67,7 +67,7 @@ export default async function BrowsePage() {
                 out the white text and the white "Start Reading" button */}
             <div className="absolute inset-0 bg-linear-to-r from-black/70 to-transparent" />
 
-            <div className="relative z-10 flex flex-col gap-2 items-start px-4 sm:px-6 md:px-10">
+            <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10">
               <div className="flex flex-col gap-2 items-start">
                 <p className="text-[#b6b0a2] font-mono text-xs sm:text-sm">FEATURED MANGA</p>
                 <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl">
@@ -106,7 +106,7 @@ export default async function BrowsePage() {
       </section>
 
       {/* Latest Updates */}
-      <section className="px-4 sm:px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
+      <section className="px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
         <div className="max-w-350 mx-auto">
 
           <div className="flex items-end justify-between mb-6 sm:mb-8">

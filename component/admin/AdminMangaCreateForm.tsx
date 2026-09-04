@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminImageUploadButton from "./AdminImageUploadButton";
 
 interface AdminMangaCreateFormProps {
   authors: { id: string; name: string | null; email: string }[];
@@ -12,6 +13,8 @@ export default function AdminMangaCreateForm({ authors }: AdminMangaCreateFormPr
   const [title, setTitle] = useState("");
   const [synopsis, setSynopsis] = useState("");
   const [authorId, setAuthorId] = useState(authors[0]?.id ?? "");
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +27,13 @@ export default function AdminMangaCreateForm({ authors }: AdminMangaCreateFormPr
       const res = await fetch("/api/admin/manga", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ manga_title: title, manga_synopsis: synopsis, author_id: authorId }),
+        body: JSON.stringify({
+          manga_title: title,
+          manga_synopsis: synopsis,
+          author_id: authorId,
+          cover_image_url: coverImageUrl,
+          banner_image_url: bannerImageUrl,
+        }),
       });
 
       if (!res.ok) {
@@ -35,6 +44,8 @@ export default function AdminMangaCreateForm({ authors }: AdminMangaCreateFormPr
 
       setTitle("");
       setSynopsis("");
+      setCoverImageUrl(null);
+      setBannerImageUrl(null);
       router.refresh(); // re-runs the server component's data fetch
     } catch {
       setError("Network error — please try again.");
@@ -45,6 +56,21 @@ export default function AdminMangaCreateForm({ authors }: AdminMangaCreateFormPr
 
   return (
     <form onSubmit={handleSubmit} className="border border-[#050505] rounded-md p-4 bg-[#1b1a1c] flex flex-col gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-[8rem_1fr] gap-3">
+        <AdminImageUploadButton
+          label="Cover"
+          value={coverImageUrl}
+          onChange={setCoverImageUrl}
+          aspectClassName="aspect-2/3"
+        />
+        <AdminImageUploadButton
+          label="Banner"
+          value={bannerImageUrl}
+          onChange={setBannerImageUrl}
+          aspectClassName="aspect-32/9"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3">
         <input
           value={title}

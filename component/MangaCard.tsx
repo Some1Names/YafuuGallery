@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 
 interface MangaCardProps {
   id: string;
@@ -8,6 +9,9 @@ interface MangaCardProps {
   latestChapterNumber: number | null;
   latestChapterName: string | null;
   updatedAt: Date;
+  // omit entirely to hide the heart badge — only pages that already know
+  // the viewer's favorite state (e.g. the favorites page) should pass this
+  isFavorited?: boolean;
 }
 
 function timeAgo(date: Date): string {
@@ -37,6 +41,8 @@ function timeAgo(date: Date): string {
   return rtf.format(-Math.round(value), unit);
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 export default function MangaCard({
   id,
   title,
@@ -45,7 +51,10 @@ export default function MangaCard({
   latestChapterNumber,
   latestChapterName,
   updatedAt,
+  isFavorited,
 }: MangaCardProps) {
+  const isStale = Date.now() - updatedAt.getTime() > WEEK_MS;
+
   return (
     <Link href={`/manga/titles/${id}`} className="group flex flex-col gap-2 cursor-pointer">
       {/* Cover */}
@@ -58,7 +67,12 @@ export default function MangaCard({
         />
 
         {/* Last Updated */}
-        <div className="absolute top-0 left-0 px-3 py-2 bg-red-500 text-white text-sm font-bold rounded-br-xl">
+        <div
+          className={
+            "absolute top-0 left-0 px-3 py-2 text-white text-sm font-bold rounded-br-xl " +
+            (isStale ? "bg-gray-500" : "bg-red-500")
+          }
+        >
           ⏲ {timeAgo(updatedAt)}
         </div>
 
@@ -78,6 +92,14 @@ export default function MangaCard({
             </div>
           )}
         </div>
+
+        {/* Favorite toggle — rendered after the hover overlay so it stays
+            on top and clickable even while hovering the card */}
+        {isFavorited !== undefined && (
+          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[#0a0a0a]/60 backdrop-blur-sm flex items-center justify-center">
+            <MangaFavoriteButton mangaId={id} initialFavorited={isFavorited} variant="icon" />
+          </div>
+        )}
       </div>
 
       {/* Base Info */}

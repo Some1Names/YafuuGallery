@@ -5,9 +5,7 @@ import { auth } from "@/auth";
 
 import MangaBackground from "@/component/titles/MangaBackground";
 import MangaHero from "@/component/titles/MangaHero";
-import ChapterArcTabs from "@/component/titles/ChapterArcTabs";
-import ChapterList from "@/component/titles/ChapterList";
-import ArcList from "@/component/titles/ArcList";
+import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import Breadcrumb from "@/component/titles/Breadcrumb";
 
@@ -17,16 +15,10 @@ const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], varia
 
 export default async function MangaDetailPage({
     params,
-    searchParams,
 }: {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{ sort?: string; view?: string; arc?: string }>;
 }) {
     const { id } = await params;
-    const { sort, view, arc: arcFilterId } = await searchParams;
-
-    const sortOrder: "asc" | "desc" = sort === "desc" ? "desc" : "asc";
-    const activeView: "chapters" | "arcs" = view === "arcs" ? "arcs" : "chapters";
 
     const session = await auth();
 
@@ -51,24 +43,23 @@ export default async function MangaDetailPage({
         notFound();
     }
 
-    const bookmark = session?.user?.id
-        ? await prisma.bookmark.findUnique({
-            where: {
-                user_id_manga_id: { user_id: session.user.id, manga_id: manga.id },
-            },
-        })
-        : null;
+    const [bookmark, favoritedChapters] = await Promise.all([
+        session?.user?.id
+            ? prisma.bookmark.findUnique({
+                where: {
+                    user_id_manga_id: { user_id: session.user.id, manga_id: manga.id },
+                },
+            })
+            : null,
+        session?.user?.id
+            ? prisma.chapterBookmark.findMany({
+                where: { user_id: session.user.id, chapter: { manga_id: manga.id } },
+                select: { chapter_id: true },
+            })
+            : [],
+    ]);
 
-    let allChapters = [...manga.arcs.flatMap((arc) => arc.chapters), ...manga.chapters];
-
-    const filteredArc = arcFilterId ? manga.arcs.find((a) => a.id === arcFilterId) : null;
-    if (filteredArc) {
-        allChapters = filteredArc.chapters;
-    }
-
-    allChapters = allChapters.sort((a, b) =>
-        sortOrder === "asc" ? a.chapter_number - b.chapter_number : b.chapter_number - a.chapter_number
-    );
+    const favoritedChapterIds = favoritedChapters.map((f) => f.chapter_id);
 
     return (
         <div
@@ -80,40 +71,34 @@ export default async function MangaDetailPage({
 
             <div className="relative z-10 w-full max-w-350 text-[#ece6d8]">
 
-                <div className="px-4 sm:px-0">
+                <div className="px-6 sm:px-0">
                     <Breadcrumb mangaTitle={manga.manga_title} />
                 </div>
 
                 <MangaHero imageUrl={manga.cover_image_url} />
 
-                {/* Sidebar content — title, author, synopsis, favorite
-                    button — now a full-width section right below the hero,
-                    not a narrow side column anymore */}
-                <div className="px-4 sm:px-0 mb-8 sm:mb-12">
-                    <MangaSidebar
-                        mangaId={manga.id}
-                        title={manga.manga_title}
-                        author={manga.author.name ?? "Unknown"}
-                        synopsis={manga.manga_synopsis}
-                        isFavorited={bookmark !== null}
-                    />
-                </div>
+                {/* Mobile: title/synopsis/favorite stack above the
+                    Chapters/Arcs tabs, same order as always. From sm up,
+                    they move into a right-hand column that starts level
+                    with the tabs row, with the tabs + list taking the left. */}
+                <div className="sm:flex sm:gap-8 sm:items-start">
+                    <div className="px-6 sm:px-0 mb-8 sm:mb-0 sm:order-2 sm:w-80 md:w-96 sm:shrink-0">
+                        <MangaSidebar
+                            mangaId={manga.id}
+                            title={manga.manga_title}
+                            author={manga.author.name ?? "Unknown"}
+                            synopsis={manga.manga_synopsis}
+                            isFavorited={bookmark !== null}
+                        />
+                    </div>
 
-                {/* Chapters / Arcs — full width now that the sidebar no
-                    longer shares a row with it */}
-                <div className="px-4 sm:px-0 pb-8 sm:pb-0">
-                    <ChapterArcTabs
-                        activeView={activeView}
-                        chapterCount={allChapters.length}
-                        sortOrder={sortOrder}
-                        filteredArc={filteredArc}
-                    />
-
-                    {activeView === "chapters" ? (
-                        <ChapterList chapters={allChapters} />
-                    ) : (
-                        <ArcList arcs={manga.arcs} />
-                    )}
+                    <div className="px-6 sm:px-0 pb-8 sm:pb-0 sm:order-1 sm:flex-1 min-w-0">
+                        <ChapterArcSection
+                            arcs={manga.arcs}
+                            looseChapters={manga.chapters}
+                            favoritedChapterIds={favoritedChapterIds}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

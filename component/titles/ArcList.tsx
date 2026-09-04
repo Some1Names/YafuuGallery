@@ -1,7 +1,12 @@
 import ArcRow from "./ArcRow";
 import type { ArcItem } from "./types";
 
-export default function ArcList({ arcs }: { arcs: ArcItem[] }) {
+interface ArcListProps {
+  arcs: ArcItem[];
+  onSelectArc: (arcId: string) => void;
+}
+
+export default function ArcList({ arcs, onSelectArc }: ArcListProps) {
   if (arcs.length === 0) {
     return <p className="text-sm text-[#b6b0a2] font-mono">No arcs yet.</p>;
   }
@@ -9,7 +14,7 @@ export default function ArcList({ arcs }: { arcs: ArcItem[] }) {
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
       {arcs.map((arc) => (
-        <ArcRow key={arc.id} arc={arc} />
+        <ArcRow key={arc.id} arc={arc} onSelect={onSelectArc} />
       ))}
     </div>
   );

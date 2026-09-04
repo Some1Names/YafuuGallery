@@ -1,13 +1,18 @@
-import Link from "next/link";
 import type { ArcItem } from "./types";
 
-export default function ArcRow({ arc }: { arc: ArcItem }) {
+interface ArcRowProps {
+  arc: ArcItem;
+  onSelect: (arcId: string) => void;
+}
+
+export default function ArcRow({ arc, onSelect }: ArcRowProps) {
   return (
-    <Link
-      href={`?view=chapters&arc=${arc.id}`}
-      className="h-24 sm:h-30 group flex items-center gap-8 cursor-pointer bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
+    <button
+      type="button"
+      onClick={() => onSelect(arc.id)}
+      className="h-24 sm:h-30 group flex items-center gap-8 cursor-pointer text-left bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
     >
-      <div className="relative w-40 sm:w-54 h-full overflow-hidden shrink-0 bg-[#ece6d8]">
+      <div className="relative w-40 sm:w-54 h-full overflow-hidden shrink-0 bg-[#1b1a1c]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('/arcimage.png')" }}
@@ -24,6 +29,6 @@ export default function ArcRow({ arc }: { arc: ArcItem }) {
         </div>
         <div className="text-sm mt-1 text-[#ece6d8]/90 truncate">{arc.chapters.length} chapters</div>
       </div>
-    </Link>
+    </button>
   );
 }

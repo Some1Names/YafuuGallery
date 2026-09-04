@@ -10,14 +10,20 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => null);
-  const { manga_title, manga_synopsis, author_id } = body ?? {};
+  const { manga_title, manga_synopsis, author_id, cover_image_url, banner_image_url } = body ?? {};
 
   if (!manga_title || !manga_synopsis || !author_id) {
     return NextResponse.json({ error: "manga_title, manga_synopsis, and author_id are required" }, { status: 400 });
   }
 
   const manga = await prisma.manga.create({
-    data: { manga_title, manga_synopsis, author_id },
+    data: {
+      manga_title,
+      manga_synopsis,
+      author_id,
+      cover_image_url: cover_image_url || null,
+      banner_image_url: banner_image_url || null,
+    },
   });
 
   return NextResponse.json(manga, { status: 201 });
