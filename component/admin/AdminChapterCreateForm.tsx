@@ -105,7 +105,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs }: AdminChapterCr
       <button
         type="submit"
         disabled={isSubmitting}
-        className="self-start px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] text-xs font-mono font-semibold rounded disabled:opacity-50 transition-colors duration-200"
+        className="self-start px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] text-xs font-semibold rounded disabled:opacity-50 transition-colors duration-200"
       >
         {isSubmitting ? "Creating…" : "+ Create chapter"}
       </button>

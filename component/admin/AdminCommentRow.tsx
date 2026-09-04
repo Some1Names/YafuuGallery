@@ -52,7 +52,7 @@ export default function AdminCommentRow({
       }`}
     >
       <div className="min-w-0">
-        <div className="text-xs text-[#b6b0a2] font-mono mb-1">
+        <div className="text-xs text-[#b6b0a2] mb-1">
           {userName} · {chapterLabel} ·{" "}
           {createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           {hidden && <span className="text-[#9c1d25]"> · hidden</span>}
@@ -64,14 +64,14 @@ export default function AdminCommentRow({
           type="button"
           onClick={toggleHide}
           disabled={isPending}
-          className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded hover:border-[#b6b0a2] text-[#b6b0a2] hover:text-[#ece6d8] disabled:opacity-50 transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-[#050505] rounded hover:border-[#b6b0a2] text-[#b6b0a2] hover:text-[#ece6d8] disabled:opacity-50 transition-colors duration-200"
         >
           {hidden ? "Unhide" : "Hide"}
         </button>
         <button
           type="button"
           onClick={remove}
-          className="text-xs font-mono px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
         >
           Delete
         </button>

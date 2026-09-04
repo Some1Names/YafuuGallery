@@ -19,7 +19,7 @@ export default function AdminUserDeleteButton({ userId, userLabel }: { userId: s
   return (
     <button
       onClick={remove}
-      className="text-xs font-mono px-2 py-1 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+      className="text-xs px-2 py-1 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
     >
       Delete
     </button>

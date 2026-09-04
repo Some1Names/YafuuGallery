@@ -25,7 +25,7 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
           <span className="text-md sm:text-lg text-[#ece6d8] group-hover:text-[#f2f0f2] transition-colors duration-200">
             {arc.arc_name}
           </span>
-          <span className="text-[11px] text-[#b6b0a2] font-mono uppercase">{arc.arc_status}</span>
+          <span className="text-[11px] text-[#b6b0a2] uppercase">{arc.arc_status}</span>
         </div>
         <div className="text-sm mt-1 text-[#ece6d8]/90 truncate">{arc.chapters.length} chapters</div>
       </div>

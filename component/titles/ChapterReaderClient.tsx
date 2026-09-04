@@ -2,17 +2,12 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Columns2, Rows2, ChevronDown, Languages } from "lucide-react";
 import Link from "next/link";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 type ReadingMode = "vertical" | "horizontal";
 
@@ -184,7 +179,7 @@ export default function ChapterReaderClient({
 
   return (
     <div
-      className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} bg-[#0a0a0a] text-[#ece6d8] font-(family-name:--font-body) ${
+      className={`bg-[#0a0a0a] text-[#ece6d8] ${
         isFullscreen ? "h-screen overflow-hidden" : "min-h-screen"
       }`}
     >
@@ -217,7 +212,7 @@ export default function ChapterReaderClient({
                 aria-haspopup="listbox"
                 className="flex gap-1.5 px-2.5 py-1.5 border border-[#050505] rounded text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
               >
-                <span className="font-mono text-sm font-bold">
+                <span className="text-sm font-bold">
                   #{String(chapterNumber).padStart(3, "0")}
                 </span>
                 <ChevronDown
@@ -241,7 +236,7 @@ export default function ChapterReaderClient({
                         c.chapter_number === chapterNumber ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
                       }`}
                     >
-                      <span className="font-mono shrink-0">
+                      <span className="shrink-0">
                         #{String(c.chapter_number).padStart(3, "0")}
                       </span>
                       <span className="truncate">{c.chapter_name}</span>
@@ -256,7 +251,7 @@ export default function ChapterReaderClient({
 
           <div className="flex items-center gap-3 shrink-0">
             {mode === "horizontal" && (
-              <span className="text-sm text-[#b6b0a2] font-mono px-2.5 py-1.5 border border-[#050505] rounded bg-[#0a0a0a]/60">
+              <span className="text-sm text-[#b6b0a2] px-2.5 py-1.5 border border-[#050505] rounded bg-[#0a0a0a]/60">
                 {pageCounterText}
               </span>
             )}
@@ -280,7 +275,7 @@ export default function ChapterReaderClient({
                 aria-pressed={mode === "vertical"}
                 aria-label="Vertical reading mode"
                 title="Vertical"
-                className={`px-3 py-2 transition-colors font-mono ${
+                className={`px-3 py-2 transition-colors ${
                   mode === "vertical"
                     ? "bg-[#ece6d8] text-[#0a0a0a]"
                     : "bg-[#1b1a1c] text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]"
@@ -294,7 +289,7 @@ export default function ChapterReaderClient({
                 aria-pressed={mode === "horizontal"}
                 aria-label="Horizontal reading mode"
                 title="Horizontal"
-                className={`px-3 py-2 transition-colors border-l border-[#050505] font-mono ${
+                className={`px-3 py-2 transition-colors border-l border-[#050505] ${
                   mode === "horizontal"
                     ? "bg-[#ece6d8] text-[#0a0a0a]"
                     : "bg-[#1b1a1c] text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]"
@@ -319,8 +314,8 @@ export default function ChapterReaderClient({
           key={pdfUrl}
           file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={<div className="text-center text-[#b6b0a2] py-20 font-mono">Loading chapter…</div>}
-          error={<div className="text-center text-[#b6b0a2] py-20 font-mono">Couldn't load this chapter.</div>}
+          loading={<div className="text-center text-[#b6b0a2] py-20">Loading chapter…</div>}
+          error={<div className="text-center text-[#b6b0a2] py-20">Couldn't load this chapter.</div>}
         >
           {mode === "vertical" ? (
             <div className="flex flex-col items-center">

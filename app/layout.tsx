@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
+import { Inter, Archivo_Black } from "next/font/google";
 import "./globals.css";
+
+// Loaded once here instead of per-page — every page and component gets
+// --font-body/--font-display for free via the CSS variables on <body>.
+const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
+const archivoBlack = Archivo_Black({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-[#0a0a0a]">{children}</body>
+      <body className={`${inter.variable} ${archivoBlack.variable} bg-[#0a0a0a]`}>{children}</body>
     </html>
   );
 }

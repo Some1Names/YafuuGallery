@@ -1,13 +1,8 @@
 import { redirect } from "next/navigation";
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default async function AdminPage() {
   const session = await auth();
@@ -104,7 +99,7 @@ export default async function AdminPage() {
 
   return (
     <div
-      className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12 font-(family-name:--font-body)`}
+      className="relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12"
     >
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
@@ -122,7 +117,7 @@ export default async function AdminPage() {
           {stats.map((s) => (
             <div key={s.label} className="border border-[#050505] rounded-md p-4 bg-[#1b1a1c]/60">
               <div className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">{s.value}</div>
-              <div className="text-xs text-[#b6b0a2] font-mono uppercase mt-1">{s.label}</div>
+              <div className="text-xs text-[#b6b0a2] uppercase mt-1">{s.label}</div>
             </div>
           ))}
         </div>

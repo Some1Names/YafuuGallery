@@ -1,15 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import FavoriteChapterCard from "@/component/titles/FavoriteChapterCard";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default async function FavoritesPage({
   searchParams,
@@ -74,13 +69,11 @@ export default async function FavoritesPage({
   }
 
   const tabClass = (isActive: boolean) =>
-    "px-4 py-1.5 rounded text-sm font-mono transition-colors duration-200 " +
+    "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
     (isActive ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]");
 
   return (
-    <div
-      className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-6 sm:px-8 py-12 font-(family-name:--font-body)`}
-    >
+    <div className="relative min-h-screen bg-[#0a0a0a] px-6 sm:px-8 py-12">
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
       </div>
@@ -110,7 +103,7 @@ export default async function FavoritesPage({
         {activeTab === "manga" ? (
           bookmarkedManga.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-              <p className="text-[#b6b0a2] font-mono text-sm">
+              <p className="text-[#b6b0a2] text-sm">
                 No manga bookmarked yet — hit &quot;Add to Favorites&quot; on a manga page to see it here.
               </p>
             </div>
@@ -136,7 +129,7 @@ export default async function FavoritesPage({
           )
         ) : favoritedChapters.length === 0 ? (
           <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-            <p className="text-[#b6b0a2] font-mono text-sm">
+            <p className="text-[#b6b0a2] text-sm">
               No favorited chapters yet — tap the heart on any chapter to see it here.
             </p>
           </div>

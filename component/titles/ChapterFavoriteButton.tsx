@@ -57,7 +57,7 @@ export default function ChapterFavoriteButton({
       aria-pressed={favorited}
       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
       className={
-        "text-sm font-mono transition-colors duration-200 disabled:opacity-50 " +
+        "text-sm transition-colors duration-200 disabled:opacity-50 " +
         (favorited ? "text-[#9c1d25]" : "text-[#b6b0a2] hover:text-[#ece6d8]")
       }
     >

@@ -75,7 +75,7 @@ export default function MangaFavoriteButton({
       onClick={toggle}
       disabled={isPending}
       className={
-        "px-4 py-2 text-sm font-mono transition-colors duration-200 disabled:opacity-50 " +
+        "px-4 py-2 text-sm transition-colors duration-200 disabled:opacity-50 " +
         (favorited
           ? "bg-[#9c1d25] text-[#ece6d8] hover:bg-[#9c1d25]/85"
           : "bg-white text-black hover:bg-white/70")

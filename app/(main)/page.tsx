@@ -69,7 +69,7 @@ export default async function BrowsePage() {
 
             <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10">
               <div className="flex flex-col gap-2 items-start">
-                <p className="text-[#b6b0a2] font-mono text-xs sm:text-sm">FEATURED MANGA</p>
+                <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
                 <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl">
                   {featured.manga_title}
                 </h1>
@@ -111,7 +111,7 @@ export default async function BrowsePage() {
 
           <div className="flex items-end justify-between mb-6 sm:mb-8">
             <div>
-              <p className="text-[#b6b0a2] font-mono text-xs sm:text-sm">
+              <p className="text-[#b6b0a2] text-xs sm:text-sm">
                 RECENTLY UPDATED
               </p>
 
@@ -145,7 +145,7 @@ export default async function BrowsePage() {
           </div>
 
           {mangaList.length === 0 && (
-            <p className="text-[#b6b0a2] text-center mt-12 font-mono">
+            <p className="text-[#b6b0a2] text-center mt-12">
               No manga published yet.
             </p>
           )}

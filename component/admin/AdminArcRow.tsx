@@ -88,13 +88,13 @@ export default function AdminArcRow({ id, name, order, status }: AdminArcRowProp
           <button
             onClick={save}
             disabled={isSaving}
-            className="text-xs font-mono px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] rounded disabled:opacity-50"
+            className="text-xs px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] rounded disabled:opacity-50"
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
           <button
             onClick={() => setIsEditing(false)}
-            className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2]"
+            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2]"
           >
             Cancel
           </button>
@@ -114,13 +114,13 @@ export default function AdminArcRow({ id, name, order, status }: AdminArcRowProp
       <div className="flex gap-2 shrink-0">
         <button
           onClick={() => setIsEditing(true)}
-          className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
         >
           Edit
         </button>
         <button
           onClick={remove}
-          className="text-xs font-mono px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
         >
           Delete
         </button>

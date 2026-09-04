@@ -3,11 +3,6 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -39,7 +34,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#0a0a0a] font-(family-name:--font-body)`}
+      className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#0a0a0a]"
     >
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a] border-r-2 border-[#050505] relative overflow-hidden">
@@ -73,7 +68,7 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 my-6">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-[#b6b0a2] font-mono">OR</span>
+            <span className="text-xs text-[#b6b0a2]">OR</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
@@ -115,7 +110,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#b6b0a2] hover:text-[#ece6d8] font-mono"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#b6b0a2] hover:text-[#ece6d8]"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}

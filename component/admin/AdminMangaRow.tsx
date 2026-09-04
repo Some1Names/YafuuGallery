@@ -117,13 +117,13 @@ export default function AdminMangaRow({
           <button
             onClick={save}
             disabled={isSaving}
-            className="text-xs font-mono px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] rounded disabled:opacity-50"
+            className="text-xs px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] rounded disabled:opacity-50"
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
           <button
             onClick={() => setIsEditing(false)}
-            className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2]"
+            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2]"
           >
             Cancel
           </button>
@@ -175,13 +175,13 @@ export default function AdminMangaRow({
         <div className="flex gap-2 shrink-0">
           <button
             onClick={() => setIsEditing(true)}
-            className="text-xs font-mono px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
           >
             Edit
           </button>
           <button
             onClick={remove}
-            className="text-xs font-mono px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+            className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
           >
             Delete
           </button>
@@ -191,14 +191,14 @@ export default function AdminMangaRow({
       {isExpanded && (
         <div className="border-t border-[#050505] p-3 flex flex-col gap-4 bg-[#0a0a0a]/40">
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-[#6b655e] font-mono">Arcs</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#6b655e]">Arcs</p>
             <AdminArcCreateForm
               mangaId={id}
               nextOrder={arcs.length === 0 ? 0 : Math.max(...arcs.map((a) => a.arc_order)) + 1}
             />
 
             {arcs.length === 0 ? (
-              <p className="text-xs text-[#6b655e] font-mono text-center py-4">
+              <p className="text-xs text-[#6b655e] text-center py-4">
                 No arcs yet — create one above.
               </p>
             ) : (
@@ -220,11 +220,11 @@ export default function AdminMangaRow({
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-[#6b655e] font-mono">Chapters</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#6b655e]">Chapters</p>
             <AdminChapterCreateForm mangaId={id} arcs={arcs} />
 
             {chapters.length === 0 ? (
-              <p className="text-xs text-[#6b655e] font-mono text-center py-4">
+              <p className="text-xs text-[#6b655e] text-center py-4">
                 No chapters yet — create one above.
               </p>
             ) : (

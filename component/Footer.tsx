@@ -15,7 +15,7 @@ export default function Footer() {
           <span className="text-lg tracking-wide text-[#ece6d8] font-(family-name:--font-display)">
             YafuuGallery
           </span>
-          <p className="text-xs text-[#b6b0a2] font-mono mt-1">
+          <p className="text-xs text-[#b6b0a2] mt-1">
             © {year} — By The &quot;ONE&quot; and Only YafuuYufaa.
           </p>
         </div>
@@ -25,7 +25,7 @@ export default function Footer() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] font-mono transition-colors duration-200"
+              className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
             >
               {link.label}
             </Link>
@@ -35,7 +35,7 @@ export default function Footer() {
             href="https://www.instagram.com/yafuuyufaa/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] font-mono transition-colors duration-200"
+            className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
           >
             Instagram
           </a>

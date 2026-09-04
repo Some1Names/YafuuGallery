@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-async function requireAdmin() {
-  const session = await auth();
-  return session?.user?.role === "admin";
-}
+import { canManageArc } from "@/lib/manga-access";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -22,11 +18,12 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdmin())) {
+  const { id } = await params;
+  const session = await auth();
+  if (!(await canManageArc(session?.user, id))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
   const body = await request.json().catch(() => null);
   const { arc_name, arc_order, arc_status } = body ?? {};
 
@@ -77,11 +74,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await requireAdmin())) {
+  const { id } = await params;
+  const session = await auth();
+  if (!(await canManageArc(session?.user, id))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;
   await prisma.arc.delete({ where: { id } });
 
   return NextResponse.json({ success: true });

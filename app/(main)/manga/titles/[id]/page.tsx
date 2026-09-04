@@ -1,4 +1,3 @@
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -8,10 +7,6 @@ import MangaHero from "@/component/titles/MangaHero";
 import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import Breadcrumb from "@/component/titles/Breadcrumb";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default async function MangaDetailPage({
     params,
@@ -63,7 +58,7 @@ export default async function MangaDetailPage({
 
     return (
         <div
-            className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center font-(family-name:--font-body)`}
+            className="relative min-h-screen bg-[#0a0a0a] px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center"
         >
             <div className="hidden sm:block">
                 <MangaBackground imageUrl="/mangabg.png" />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canManageManga } from "@/lib/manga-access";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -15,9 +16,6 @@ function isUniqueConstraintError(err: unknown): boolean {
 // POST /api/admin/arcs — create
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   const body = await request.json().catch(() => null);
   const { manga_id, arc_name, arc_order, arc_status } = body ?? {};
@@ -27,6 +25,10 @@ export async function POST(request: NextRequest) {
       { error: "manga_id, arc_name, and arc_order are required" },
       { status: 400 }
     );
+  }
+
+  if (!(await canManageManga(session?.user, manga_id))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const order = Number(arc_order);

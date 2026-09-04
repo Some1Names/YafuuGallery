@@ -70,14 +70,14 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
 
         {activeView === "chapters" && (
           <div className="flex items-center gap-3">
-            <span className="text-xs normal-case text-[#b6b0a2] font-mono">
+            <span className="text-xs normal-case text-[#b6b0a2]">
               {chapters.length} chapters
             </span>
 
             <button
               type="button"
               onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
-              className="flex items-center gap-1 text-xs normal-case text-[#b6b0a2] hover:text-[#ece6d8] border border-[#050505] rounded px-2 py-1 transition-colors duration-200 font-mono"
+              className="flex items-center gap-1 text-xs normal-case text-[#b6b0a2] hover:text-[#ece6d8] border border-[#050505] rounded px-2 py-1 transition-colors duration-200"
               title={sortOrder === "asc" ? "Sort: oldest first" : "Sort: newest first"}
             >
               Ch. #{sortOrder === "asc" ? "↑" : "↓"}
@@ -90,7 +90,7 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
         <button
           type="button"
           onClick={() => setFilteredArcId(null)}
-          className="inline-flex items-center gap-2 text-xs text-[#b6b0a2] hover:text-[#ece6d8] font-mono mb-4 transition-colors duration-200"
+          className="inline-flex items-center gap-2 text-xs text-[#b6b0a2] hover:text-[#ece6d8] mb-4 transition-colors duration-200"
         >
           ← All chapters
           <span className="text-[#ece6d8]">({filteredArc.arc_name})</span>

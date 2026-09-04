@@ -1,14 +1,9 @@
 import { redirect } from "next/navigation";
-import { Anton, Work_Sans, Space_Mono } from "next/font/google";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import ProfileEditForm from "@/component/profile/ProfileEditForm";
-import MangaCard from "@/component/MangaCard";
+import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import MangaBackground from "@/component/titles/MangaBackground";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const workSans = Work_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-mono" });
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -18,7 +13,7 @@ export default async function ProfilePage() {
 
   const userId = session.user.id;
 
-  const [user, bookmarkCount, chapterFavoriteCount, commentCount, recentProgressRaw] =
+  const [user, bookmarkCount, chapterFavoriteCount, commentCount, chaptersReadCount, recentProgressRaw] =
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -27,23 +22,18 @@ export default async function ProfilePage() {
       prisma.bookmark.count({ where: { user_id: userId } }),
       prisma.chapterBookmark.count({ where: { user_id: userId } }),
       prisma.comment.count({ where: { user_id: userId } }),
+      prisma.readingProgress.count({ where: { user_id: userId } }),
       prisma.readingProgress.findMany({
         where: { user_id: userId },
         orderBy: { updated_at: "desc" },
-        take: 5,
+        take: 4,
         include: {
           chapter: {
             select: {
               chapter_number: true,
               chapter_name: true,
-              manga: {
-                select: {
-                  id: true,
-                  manga_title: true,
-                  cover_image_url: true,
-                  author: { select: { name: true } },
-                },
-              },
+              cover_image_url: true,
+              manga: { select: { manga_title: true } },
             },
           },
         },
@@ -54,31 +44,29 @@ export default async function ProfilePage() {
 
   const recentProgress = recentProgressRaw.map((p) => ({
     id: p.id,
-    updated_at: p.updated_at,
-    chapter: { number: p.chapter.chapter_number, name: p.chapter.chapter_name },
-    manga: {
-      id: p.chapter.manga.id,
-      title: p.chapter.manga.manga_title,
-      author: p.chapter.manga.author.name ?? "Unknown",
-      cover: p.chapter.manga.cover_image_url,
-    },
+    chapterId: p.chapter_id,
+    chapterNumber: p.chapter.chapter_number,
+    chapterName: p.chapter.chapter_name,
+    coverImageUrl: p.chapter.cover_image_url,
+    mangaTitle: p.chapter.manga.manga_title,
   }));
 
   const stats = [
-    { label: "Manga favorited", value: bookmarkCount },
-    { label: "Chapters favorited", value: chapterFavoriteCount },
+    { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },
+    { label: "Chapters favorited", value: chapterFavoriteCount, href: "/favorites?tab=chapters" },
+    { label: "Chapters read", value: chaptersReadCount },
     { label: "Comments", value: commentCount },
   ];
 
   return (
     <div
-      className={`${anton.variable} ${workSans.variable} ${spaceMono.variable} relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12 font-(family-name:--font-body)`}
+      className="relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12"
     >
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
       </div>
 
-      <div className="relative z-10 max-w-225 mx-auto">
+      <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">Profile</h1>
           <p className="text-sm text-[#b6b0a2]">Manage your account and see your activity.</p>
@@ -100,33 +88,29 @@ export default async function ProfilePage() {
 
         {/* Stats now render inside ProfileEditForm's card, styled to match */}
 
-        {/* Recently read — 2 columns on phone (only the 2 most recent
-            actually show, rest are hidden below the md breakpoint rather
-            than just wrapping to more rows), 5 across on desktop */}
+        {/* Recently read — up to 4 chapters, any title. 2x2 on phone,
+            one row of 4 from sm up, so the last item never wraps alone. */}
         <section>
           <h2 className="text-xl text-[#ece6d8] font-(family-name:--font-display) mb-4">
             Continue reading
           </h2>
           {recentProgress.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-              <p className="text-[#b6b0a2] font-mono text-sm">
+              <p className="text-[#b6b0a2] text-sm">
                 No reading history yet — open a chapter to start tracking progress.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {recentProgress.map((p, i) => (
-                <div key={p.id} className={i >= 2 ? "hidden md:block" : ""}>
-                  <MangaCard
-                    id={p.manga.id}
-                    title={p.manga.title}
-                    author={p.manga.author}
-                    coverImageUrl={p.manga.cover}
-                    latestChapterNumber={p.chapter.number}
-                    latestChapterName={p.chapter.name}
-                    updatedAt={p.updated_at}
-                  />
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-7xl">
+              {recentProgress.map((p) => (
+                <ContinueReadingCard
+                  key={p.id}
+                  chapterId={p.chapterId}
+                  chapterNumber={p.chapterNumber}
+                  chapterName={p.chapterName}
+                  coverImageUrl={p.coverImageUrl}
+                  mangaTitle={p.mangaTitle}
+                />
               ))}
             </div>
           )}

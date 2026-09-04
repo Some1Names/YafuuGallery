@@ -78,7 +78,7 @@ export default function AdminDashboard({
   }
 
   const tabClass = (isActive: boolean) =>
-    "px-4 py-1.5 rounded text-sm font-mono transition-colors duration-200 " +
+    "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
     (isActive ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]");
 
   return (
@@ -111,7 +111,7 @@ export default function AdminDashboard({
 
           {mangaList.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
-              <p className="text-[#b6b0a2] font-mono text-sm">No manga yet — create one above.</p>
+              <p className="text-[#b6b0a2] text-sm">No manga yet — create one above.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -157,7 +157,7 @@ export default function AdminDashboard({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#1b1a1c] text-[#b6b0a2] font-mono text-xs uppercase">
+                  <tr className="bg-[#1b1a1c] text-[#b6b0a2] text-xs uppercase">
                     <th className="text-left px-4 py-2">Name</th>
                     <th className="text-left px-4 py-2">Email</th>
                     <th className="text-left px-4 py-2">Joined</th>
@@ -170,7 +170,7 @@ export default function AdminDashboard({
                     <tr key={u.id} className="border-t border-[#050505] hover:bg-[#1b1a1c]/40 transition-colors duration-200">
                       <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">{u.name ?? "—"}</td>
                       <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">{u.email}</td>
-                      <td className="px-4 py-2 text-[#b6b0a2] font-mono whitespace-nowrap">
+                      <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">
                         {u.created_at.toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -198,7 +198,7 @@ export default function AdminDashboard({
         <section>
           {recentComments.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
-              <p className="text-[#b6b0a2] font-mono text-sm">No comments yet.</p>
+              <p className="text-[#b6b0a2] text-sm">No comments yet.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">

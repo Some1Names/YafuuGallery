@@ -27,7 +27,7 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
             <span className="text-md sm:text-lg text-[#ece6d8] group-hover:text-[#f2f0f0] transition-colors duration-200">
               #{String(chapter.chapter_number).padStart(3, "0")}
             </span>
-            <span className="text-xs sm:text-sm text-[#b6b0a2] font-mono">
+            <span className="text-xs sm:text-sm text-[#b6b0a2]">
               {chapter.published_date.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",

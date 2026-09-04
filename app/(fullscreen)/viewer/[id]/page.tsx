@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import ChapterReaderClient from "@/component/titles/ChapterReaderClient";
 
 export default async function ViewerPage({
@@ -29,6 +30,18 @@ export default async function ViewerPage({
 
   if (!chapter) {
     notFound();
+  }
+
+  // Record/bump reading progress so "Continue reading" on the profile page
+  // has something to show — one row per (user, chapter), updated_at refreshed
+  // on every visit via Prisma's @updatedAt.
+  const session = await auth();
+  if (session?.user?.id) {
+    await prisma.readingProgress.upsert({
+      where: { user_id_chapter_id: { user_id: session.user.id, chapter_id: id } },
+      create: { user_id: session.user.id, chapter_id: id },
+      update: {},
+    });
   }
 
   return (

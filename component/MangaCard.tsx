@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 
 interface MangaCardProps {
@@ -69,11 +70,12 @@ export default function MangaCard({
         {/* Last Updated */}
         <div
           className={
-            "absolute top-0 left-0 px-3 py-2 text-white text-sm font-bold rounded-br-xl " +
+            "absolute top-0 left-0 flex items-center gap-1.5 px-3 py-2 text-white text-sm font-bold rounded-br-xl " +
             (isStale ? "bg-gray-500" : "bg-red-500")
           }
         >
-          ⏲ {timeAgo(updatedAt)}
+          <Clock className="w-4 h-4" />
+          {timeAgo(updatedAt)}
         </div>
 
         {/* Hover Overlay */}
