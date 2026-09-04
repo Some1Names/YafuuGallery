@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Manga Web
 
-## Getting Started
+A personal manga reading website built with **Next.js**, designed to provide a clean and responsive experience for browsing manga, viewing chapters, and managing manga content.
 
-First, run the development server:
+## ✨ Features
+
+* 📚 Browse available manga
+* 📖 Read manga chapters
+* 🔎 Manga and chapter navigation
+* ❤️ Favorite manga
+* 👤 User authentication
+* 📝 Manga and chapter management
+* 📱 Responsive design for desktop and mobile
+* ⚡ Server-side data fetching with Prisma
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* [Next.js](https://nextjs.org/)
+* React
+* TypeScript
+* Tailwind CSS
+* Lucide React
+
+### Backend
+
+* Next.js API Routes
+* Prisma ORM
+* PostgreSQL
+
+### Authentication & Security
+
+* Authentication with NextAuth/Auth.js
+* Password hashing with bcryptjs
+* Zod validation
+* React Hook Form
+
+## 📁 Project Structure
+
+```text
+.
+├── app/
+│   ├── api/              # Backend API routes
+│   ├── manga/            # Manga pages
+│   ├── browse/           # Manga browsing
+│   └── ...
+├── components/           # Reusable React components
+├── lib/                  # Utilities and shared logic
+├── prisma/
+│   └── schema.prisma     # Database schema
+├── public/               # Static assets
+├── .env                  # Environment variables
+└── package.json
+```
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repository-url>
+cd <your-project-folder>
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+DATABASE_URL="your-database-url"
+AUTH_SECRET="your-auth-secret"
+```
+
+Add any additional environment variables required by your project.
+
+### 4. Set up the database
+
+Run the Prisma migration:
+
+```bash
+npx prisma migrate dev
+```
+
+Then generate the Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+### 5. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser and visit:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🗄️ Database
 
-## Learn More
+The project uses **PostgreSQL** with **Prisma ORM**.
 
-To learn more about Next.js, take a look at the following resources:
+The database contains data such as:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* Users
+* Manga
+* Authors
+* Chapters
+* Favorites
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The Prisma schema can be found at:
 
-## Deploy on Vercel
+```text
+prisma/schema.prisma
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Design
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The website focuses on a dark, minimal reading experience with responsive layouts optimized for both desktop and mobile devices.
+
+## 📌 Project Status
+
+🚧 **Currently in development**
+
+More features and improvements are planned as development continues.
+
+## 📄 License
+
+This project is intended for personal use.
