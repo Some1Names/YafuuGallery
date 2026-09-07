@@ -25,7 +25,7 @@ export async function PATCH(
   }
 
   const body = await request.json().catch(() => null);
-  const { arc_name, arc_order, arc_status } = body ?? {};
+  const { arc_name, arc_order, arc_status, arc_image_url, arc_is_ex } = body ?? {};
 
   if (!arc_name || arc_order === undefined || arc_order === null) {
     return NextResponse.json(
@@ -43,6 +43,23 @@ export async function PATCH(
   }
 
   const status = arc_status === "completed" ? "completed" : "ongoing";
+  const isEx = arc_is_ex === true;
+
+  if (isEx) {
+    const arc = await prisma.arc.findUnique({ where: { id }, select: { manga_id: true } });
+    const existingEx = arc
+      ? await prisma.arc.findFirst({
+          where: { manga_id: arc.manga_id, arc_is_ex: true, id: { not: id } },
+          select: { id: true },
+        })
+      : null;
+    if (existingEx) {
+      return NextResponse.json(
+        { error: "This manga already has a special (ex) arc." },
+        { status: 409 }
+      );
+    }
+  }
 
   try {
     const arc = await prisma.arc.update({
@@ -50,7 +67,9 @@ export async function PATCH(
       data: {
         arc_name,
         arc_order: order,
+        arc_is_ex: isEx,
         arc_status: status,
+        arc_image_url: arc_image_url || null,
       },
     });
 

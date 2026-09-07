@@ -7987,6 +7987,7 @@ export namespace Prisma {
     manga_id: string | null
     arc_name: string | null
     arc_order: number | null
+    arc_is_ex: boolean | null
     arc_status: $Enums.ArcStatus | null
     arc_image_url: string | null
     created_at: Date | null
@@ -7997,6 +7998,7 @@ export namespace Prisma {
     manga_id: string | null
     arc_name: string | null
     arc_order: number | null
+    arc_is_ex: boolean | null
     arc_status: $Enums.ArcStatus | null
     arc_image_url: string | null
     created_at: Date | null
@@ -8007,6 +8009,7 @@ export namespace Prisma {
     manga_id: number
     arc_name: number
     arc_order: number
+    arc_is_ex: number
     arc_status: number
     arc_image_url: number
     created_at: number
@@ -8027,6 +8030,7 @@ export namespace Prisma {
     manga_id?: true
     arc_name?: true
     arc_order?: true
+    arc_is_ex?: true
     arc_status?: true
     arc_image_url?: true
     created_at?: true
@@ -8037,6 +8041,7 @@ export namespace Prisma {
     manga_id?: true
     arc_name?: true
     arc_order?: true
+    arc_is_ex?: true
     arc_status?: true
     arc_image_url?: true
     created_at?: true
@@ -8047,6 +8052,7 @@ export namespace Prisma {
     manga_id?: true
     arc_name?: true
     arc_order?: true
+    arc_is_ex?: true
     arc_status?: true
     arc_image_url?: true
     created_at?: true
@@ -8144,6 +8150,7 @@ export namespace Prisma {
     manga_id: string
     arc_name: string
     arc_order: number
+    arc_is_ex: boolean
     arc_status: $Enums.ArcStatus
     arc_image_url: string | null
     created_at: Date
@@ -8173,6 +8180,7 @@ export namespace Prisma {
     manga_id?: boolean
     arc_name?: boolean
     arc_order?: boolean
+    arc_is_ex?: boolean
     arc_status?: boolean
     arc_image_url?: boolean
     created_at?: boolean
@@ -8186,6 +8194,7 @@ export namespace Prisma {
     manga_id?: boolean
     arc_name?: boolean
     arc_order?: boolean
+    arc_is_ex?: boolean
     arc_status?: boolean
     arc_image_url?: boolean
     created_at?: boolean
@@ -8197,6 +8206,7 @@ export namespace Prisma {
     manga_id?: boolean
     arc_name?: boolean
     arc_order?: boolean
+    arc_is_ex?: boolean
     arc_status?: boolean
     arc_image_url?: boolean
     created_at?: boolean
@@ -8208,12 +8218,13 @@ export namespace Prisma {
     manga_id?: boolean
     arc_name?: boolean
     arc_order?: boolean
+    arc_is_ex?: boolean
     arc_status?: boolean
     arc_image_url?: boolean
     created_at?: boolean
   }
 
-  export type ArcOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "manga_id" | "arc_name" | "arc_order" | "arc_status" | "arc_image_url" | "created_at", ExtArgs["result"]["arc"]>
+  export type ArcOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "manga_id" | "arc_name" | "arc_order" | "arc_is_ex" | "arc_status" | "arc_image_url" | "created_at", ExtArgs["result"]["arc"]>
   export type ArcInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     manga?: boolean | MangaDefaultArgs<ExtArgs>
     chapters?: boolean | Arc$chaptersArgs<ExtArgs>
@@ -8237,6 +8248,7 @@ export namespace Prisma {
       manga_id: string
       arc_name: string
       arc_order: number
+      arc_is_ex: boolean
       arc_status: $Enums.ArcStatus
       arc_image_url: string | null
       created_at: Date
@@ -8669,6 +8681,7 @@ export namespace Prisma {
     readonly manga_id: FieldRef<"Arc", 'String'>
     readonly arc_name: FieldRef<"Arc", 'String'>
     readonly arc_order: FieldRef<"Arc", 'Int'>
+    readonly arc_is_ex: FieldRef<"Arc", 'Boolean'>
     readonly arc_status: FieldRef<"Arc", 'ArcStatus'>
     readonly arc_image_url: FieldRef<"Arc", 'String'>
     readonly created_at: FieldRef<"Arc", 'DateTime'>
@@ -15940,6 +15953,7 @@ export namespace Prisma {
     manga_id: 'manga_id',
     arc_name: 'arc_name',
     arc_order: 'arc_order',
+    arc_is_ex: 'arc_is_ex',
     arc_status: 'arc_status',
     arc_image_url: 'arc_image_url',
     created_at: 'created_at'
@@ -16563,6 +16577,7 @@ export namespace Prisma {
     manga_id?: StringFilter<"Arc"> | string
     arc_name?: StringFilter<"Arc"> | string
     arc_order?: IntFilter<"Arc"> | number
+    arc_is_ex?: BoolFilter<"Arc"> | boolean
     arc_status?: EnumArcStatusFilter<"Arc"> | $Enums.ArcStatus
     arc_image_url?: StringNullableFilter<"Arc"> | string | null
     created_at?: DateTimeFilter<"Arc"> | Date | string
@@ -16575,6 +16590,7 @@ export namespace Prisma {
     manga_id?: SortOrder
     arc_name?: SortOrder
     arc_order?: SortOrder
+    arc_is_ex?: SortOrder
     arc_status?: SortOrder
     arc_image_url?: SortOrderInput | SortOrder
     created_at?: SortOrder
@@ -16591,6 +16607,7 @@ export namespace Prisma {
     manga_id?: StringFilter<"Arc"> | string
     arc_name?: StringFilter<"Arc"> | string
     arc_order?: IntFilter<"Arc"> | number
+    arc_is_ex?: BoolFilter<"Arc"> | boolean
     arc_status?: EnumArcStatusFilter<"Arc"> | $Enums.ArcStatus
     arc_image_url?: StringNullableFilter<"Arc"> | string | null
     created_at?: DateTimeFilter<"Arc"> | Date | string
@@ -16603,6 +16620,7 @@ export namespace Prisma {
     manga_id?: SortOrder
     arc_name?: SortOrder
     arc_order?: SortOrder
+    arc_is_ex?: SortOrder
     arc_status?: SortOrder
     arc_image_url?: SortOrderInput | SortOrder
     created_at?: SortOrder
@@ -16621,6 +16639,7 @@ export namespace Prisma {
     manga_id?: StringWithAggregatesFilter<"Arc"> | string
     arc_name?: StringWithAggregatesFilter<"Arc"> | string
     arc_order?: IntWithAggregatesFilter<"Arc"> | number
+    arc_is_ex?: BoolWithAggregatesFilter<"Arc"> | boolean
     arc_status?: EnumArcStatusWithAggregatesFilter<"Arc"> | $Enums.ArcStatus
     arc_image_url?: StringNullableWithAggregatesFilter<"Arc"> | string | null
     created_at?: DateTimeWithAggregatesFilter<"Arc"> | Date | string
@@ -17483,6 +17502,7 @@ export namespace Prisma {
     id?: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -17495,6 +17515,7 @@ export namespace Prisma {
     manga_id: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -17505,6 +17526,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17517,6 +17539,7 @@ export namespace Prisma {
     manga_id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17528,6 +17551,7 @@ export namespace Prisma {
     manga_id: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -17537,6 +17561,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17547,6 +17572,7 @@ export namespace Prisma {
     manga_id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -18405,6 +18431,7 @@ export namespace Prisma {
     manga_id?: SortOrder
     arc_name?: SortOrder
     arc_order?: SortOrder
+    arc_is_ex?: SortOrder
     arc_status?: SortOrder
     arc_image_url?: SortOrder
     created_at?: SortOrder
@@ -18419,6 +18446,7 @@ export namespace Prisma {
     manga_id?: SortOrder
     arc_name?: SortOrder
     arc_order?: SortOrder
+    arc_is_ex?: SortOrder
     arc_status?: SortOrder
     arc_image_url?: SortOrder
     created_at?: SortOrder
@@ -18429,6 +18457,7 @@ export namespace Prisma {
     manga_id?: SortOrder
     arc_name?: SortOrder
     arc_order?: SortOrder
+    arc_is_ex?: SortOrder
     arc_status?: SortOrder
     arc_image_url?: SortOrder
     created_at?: SortOrder
@@ -20551,6 +20580,7 @@ export namespace Prisma {
     id?: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -20561,6 +20591,7 @@ export namespace Prisma {
     id?: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -20712,6 +20743,7 @@ export namespace Prisma {
     manga_id?: StringFilter<"Arc"> | string
     arc_name?: StringFilter<"Arc"> | string
     arc_order?: IntFilter<"Arc"> | number
+    arc_is_ex?: BoolFilter<"Arc"> | boolean
     arc_status?: EnumArcStatusFilter<"Arc"> | $Enums.ArcStatus
     arc_image_url?: StringNullableFilter<"Arc"> | string | null
     created_at?: DateTimeFilter<"Arc"> | Date | string
@@ -20926,6 +20958,7 @@ export namespace Prisma {
     id?: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -20937,6 +20970,7 @@ export namespace Prisma {
     manga_id: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -21099,6 +21133,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21110,6 +21145,7 @@ export namespace Prisma {
     manga_id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22305,6 +22341,7 @@ export namespace Prisma {
     id?: string
     arc_name: string
     arc_order: number
+    arc_is_ex?: boolean
     arc_status?: $Enums.ArcStatus
     arc_image_url?: string | null
     created_at?: Date | string
@@ -22332,6 +22369,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22342,6 +22380,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22352,6 +22391,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     arc_name?: StringFieldUpdateOperationsInput | string
     arc_order?: IntFieldUpdateOperationsInput | number
+    arc_is_ex?: BoolFieldUpdateOperationsInput | boolean
     arc_status?: EnumArcStatusFieldUpdateOperationsInput | $Enums.ArcStatus
     arc_image_url?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string

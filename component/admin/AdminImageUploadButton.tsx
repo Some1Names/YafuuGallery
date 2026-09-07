@@ -6,9 +6,11 @@ interface AdminImageUploadButtonProps {
   label: string;
   value: string | null;
   onChange: (url: string) => void;
-  // Tailwind aspect-ratio class — cover art and banners are shaped very
-  // differently (poster vs. wide), so let the caller pick.
-  aspectClassName?: string;
+  // Full control over the box's size/shape (width, height, aspect-ratio) —
+  // cover art and banners aren't just different aspect ratios but sometimes
+  // different sizing strategies entirely (fixed width vs. fixed height), so
+  // the caller owns the whole class string rather than just a ratio.
+  boxClassName?: string;
 }
 
 // Thin wrapper around the same /api/upload endpoint ProfileEditForm's
@@ -19,7 +21,7 @@ export default function AdminImageUploadButton({
   label,
   value,
   onChange,
-  aspectClassName = "aspect-square",
+  boxClassName = "w-full aspect-square",
 }: AdminImageUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -59,7 +61,7 @@ export default function AdminImageUploadButton({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className={`group relative block w-full ${aspectClassName} overflow-hidden rounded border border-[#050505] bg-[#0a0a0a]`}
+        className={`group relative block ${boxClassName} overflow-hidden rounded border border-[#050505] bg-[#0a0a0a]`}
       >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element

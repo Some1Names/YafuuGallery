@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const session = await auth();
 
   const body = await request.json().catch(() => null);
-  const { manga_id, arc_name, arc_order, arc_status } = body ?? {};
+  const { manga_id, arc_name, arc_order, arc_status, arc_image_url, arc_is_ex } = body ?? {};
 
   if (!manga_id || !arc_name || arc_order === undefined || arc_order === null) {
     return NextResponse.json(
@@ -40,6 +40,20 @@ export async function POST(request: NextRequest) {
   }
 
   const status = arc_status === "completed" ? "completed" : "ongoing";
+  const isEx = arc_is_ex === true;
+
+  if (isEx) {
+    const existingEx = await prisma.arc.findFirst({
+      where: { manga_id, arc_is_ex: true },
+      select: { id: true },
+    });
+    if (existingEx) {
+      return NextResponse.json(
+        { error: "This manga already has a special (ex) arc." },
+        { status: 409 }
+      );
+    }
+  }
 
   try {
     const arc = await prisma.arc.create({
@@ -47,7 +61,9 @@ export async function POST(request: NextRequest) {
         manga_id,
         arc_name,
         arc_order: order,
+        arc_is_ex: isEx,
         arc_status: status,
+        arc_image_url: arc_image_url || null,
       },
     });
 

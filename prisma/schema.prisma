@@ -136,6 +136,10 @@ model Arc {
   manga_id       String
   arc_name       String
   arc_order      Int
+  // A single arc per manga can be flagged as the special "ex" (bonus/omake)
+  // entry — independent of arc_order, so it can be dragged to sit anywhere
+  // in the list while always displaying "ex" instead of a position number.
+  arc_is_ex      Boolean   @default(false)
   arc_status     ArcStatus @default(ongoing)
   arc_image_url  String?   // cover image shown when browsing by arc
   created_at     DateTime  @default(now())

@@ -240,7 +240,7 @@ export default function ProfileEditForm({
               href={role === "admin" ? "/admin" : "/manage"}
               className="self-start shrink-0 text-xs uppercase tracking-wide px-3 py-1.5 rounded bg-[#232224] border border-[#050505] text-[#ece6d8] hover:bg-[#2a292c] hover:border-[#b6b0a2] transition-colors duration-200"
             >
-              Manage manga
+              {role === "admin" ? "Admin panel" : "Manage manga"}
             </Link>
           )}
         </div>

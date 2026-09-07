@@ -184,6 +184,7 @@ exports.Prisma.ArcScalarFieldEnum = {
   manga_id: 'manga_id',
   arc_name: 'arc_name',
   arc_order: 'arc_order',
+  arc_is_ex: 'arc_is_ex',
   arc_status: 'arc_status',
   arc_image_url: 'arc_image_url',
   created_at: 'created_at'

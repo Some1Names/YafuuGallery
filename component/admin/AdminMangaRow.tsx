@@ -3,25 +3,30 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, Heart, ChevronDown } from "lucide-react";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterCreateForm from "./AdminChapterCreateForm";
-import AdminChapterRow from "./AdminChapterRow";
+import AdminChapterList from "./AdminChapterList";
 import AdminArcCreateForm from "./AdminArcCreateForm";
-import AdminArcRow from "./AdminArcRow";
+import AdminArcList from "./AdminArcList";
 
 interface ChapterItem {
   id: string;
+  arcId: string | null;
   arcName: string | null;
   chapterNumber: number;
   chapterName: string;
   publishedDate: Date;
+  coverImageUrl: string | null;
 }
 
 interface ArcOption {
   id: string;
   arc_name: string;
   arc_order: number;
+  arc_is_ex: boolean;
   arc_status: "ongoing" | "completed";
+  arc_image_url: string | null;
 }
 
 interface AdminMangaRowProps {
@@ -30,12 +35,16 @@ interface AdminMangaRowProps {
   synopsis: string;
   authorName: string;
   chapterCount: number;
+  viewCount: number;
+  favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
   chapters: ChapterItem[];
   arcs: ArcOption[];
   isExpanded: boolean;
   onToggleExpand: () => void;
+  isEditing: boolean;
+  onToggleEdit: () => void;
 }
 
 export default function AdminMangaRow({
@@ -44,20 +53,54 @@ export default function AdminMangaRow({
   synopsis,
   authorName,
   chapterCount,
+  viewCount,
+  favoriteCount,
   coverImageUrl,
   bannerImageUrl,
   chapters,
   arcs,
   isExpanded,
   onToggleExpand,
+  isEditing,
+  onToggleEdit,
 }: AdminMangaRowProps) {
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
   const [editSynopsis, setEditSynopsis] = useState(synopsis);
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
   const [editBannerImageUrl, setEditBannerImageUrl] = useState(bannerImageUrl);
   const [isSaving, setIsSaving] = useState(false);
+
+  // The arc create form and an arc row's edit form are mutually
+  // exclusive — opening one closes the other, so at most one arc-related
+  // form is ever visible at a time.
+  const [arcCreateOpen, setArcCreateOpen] = useState(false);
+  const [editingArcId, setEditingArcId] = useState<string | null>(null);
+
+  function handleArcCreateOpenChange(open: boolean) {
+    setArcCreateOpen(open);
+    if (open) setEditingArcId(null);
+  }
+
+  function handleToggleArcEdit(arcId: string) {
+    setEditingArcId((current) => (current === arcId ? null : arcId));
+    setArcCreateOpen(false);
+  }
+
+  // Same mutual-exclusion pattern for the Chapters section, independent
+  // of the Arc section's own state above.
+  const [chapterCreateOpen, setChapterCreateOpen] = useState(false);
+  const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
+
+  function handleChapterCreateOpenChange(open: boolean) {
+    setChapterCreateOpen(open);
+    if (open) setEditingChapterId(null);
+  }
+
+  function handleToggleChapterEdit(chapterId: string) {
+    setEditingChapterId((current) => (current === chapterId ? null : chapterId));
+    setChapterCreateOpen(false);
+  }
 
   async function save() {
     setIsSaving(true);
@@ -73,7 +116,7 @@ export default function AdminMangaRow({
     });
     setIsSaving(false);
     if (res.ok) {
-      setIsEditing(false);
+      onToggleEdit();
       router.refresh();
     }
   }
@@ -86,161 +129,180 @@ export default function AdminMangaRow({
 
   if (isEditing) {
     return (
-      <div className="border border-[#9c1d25] rounded-md p-3 bg-[#1b1a1c] flex flex-col gap-2">
-        <div className="grid grid-cols-2 sm:grid-cols-[6rem_1fr] gap-3">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          save();
+        }}
+        className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4"
+      >
+        <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Edit Manga Title</h3>
+
+        {/* Same layout as the create form — one shared grid, 3fr:16fr
+            columns, label/field rows col-span the full row on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-[3fr_16fr] gap-x-7 gap-y-4">
           <AdminImageUploadButton
             label="Cover"
             value={editCoverImageUrl}
             onChange={setEditCoverImageUrl}
-            aspectClassName="aspect-2/3"
+            boxClassName="w-full aspect-2/3"
           />
           <AdminImageUploadButton
             label="Banner"
             value={editBannerImageUrl}
             onChange={setEditBannerImageUrl}
-            aspectClassName="aspect-32/9"
+            boxClassName="w-full aspect-32/9"
+          />
+
+          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+            Manga Title
+          </label>
+          <input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            required
+            className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+          />
+
+          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+            Synopsis
+          </label>
+          <textarea
+            value={editSynopsis}
+            onChange={(e) => setEditSynopsis(e.target.value)}
+            required
+            rows={3}
+            className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] resize-none"
           />
         </div>
 
-        <input
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          className="bg-[#0a0a0a] border border-[#050505] rounded px-2 py-1 text-sm text-[#ece6d8]"
-        />
-        <textarea
-          value={editSynopsis}
-          onChange={(e) => setEditSynopsis(e.target.value)}
-          rows={2}
-          className="bg-[#0a0a0a] border border-[#050505] rounded px-2 py-1 text-sm text-[#ece6d8] resize-none"
-        />
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-end">
           <button
-            onClick={save}
-            disabled={isSaving}
-            className="text-xs px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] rounded disabled:opacity-50"
-          >
-            {isSaving ? "Saving…" : "Save"}
-          </button>
-          <button
-            onClick={() => setIsEditing(false)}
-            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2]"
+            type="button"
+            onClick={onToggleEdit}
+            className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
           >
             Cancel
           </button>
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+          >
+            {isSaving ? "Saving…" : "Save"}
+          </button>
         </div>
-      </div>
+      </form>
     );
   }
 
   return (
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
-      <div className="p-3 flex items-center gap-4">
-        {/* Expand/collapse — the chapter CRUD for this manga lives below,
-            revealed here instead of a separate top-level Chapters tab */}
-        <button
-          type="button"
-          onClick={onToggleExpand}
-          aria-expanded={isExpanded}
-          aria-label={isExpanded ? "Hide chapters" : "Show chapters"}
-          className={
-            "shrink-0 text-[#6b655e] hover:text-[#ece6d8] transition-transform duration-200 " +
-            (isExpanded ? "rotate-90" : "")
-          }
-        >
-          ▸
-        </button>
-
-        <div className="w-10 h-14 shrink-0 rounded overflow-hidden bg-[#0a0a0a] border border-[#050505]">
+      {/* Cover — flush against the row's left/top/bottom edges. Stretches
+          (flex default) to match whatever height the content column needs,
+          so there's never a gap below it; object-cover on the img crops it
+          to fill that box without distorting the art. */}
+      <div className="flex">
+        <div className="w-24 sm:w-32 shrink-0 bg-[#0a0a0a]">
           {coverImageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={coverImageUrl} alt="" className="w-full h-full object-cover" />
           )}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <Link href={`/manga/titles/${id}`} className="text-sm text-[#ece6d8] hover:underline font-medium">
-            {title}
-          </Link>
-          <p className="text-xs text-[#b6b0a2] mt-0.5">
-            {authorName} ·{" "}
+        <div className="min-w-0 flex-1 flex flex-col">
+          {/* Header row */}
+          <div className="p-8 flex-1 flex items-start gap-4">
+            <div className="min-w-0 flex-1">
+              <Link href={`/manga/titles/${id}`} className="text-lg text-[#ece6d8] hover:underline font-medium">
+                {title}
+              </Link>
+              <p className="text-sm text-[#b6b0a2] mt-0.5">{authorName}</p>
+              <div className="flex items-center gap-4 mt-2 text-xs text-[#6b655e]">
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  {viewCount.toLocaleString()}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5" />
+                  {favoriteCount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={onToggleEdit}
+                className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+              >
+                Edit
+              </button>
+              <button
+                onClick={remove}
+                className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+
+          {/* Divider + footer row — the arc/chapter CRUD for this manga
+              lives below, revealed here instead of a separate top-level
+              Chapters tab */}
+          <div className="px-8 py-3 border-t border-[#050505] flex items-center justify-between gap-4">
+            <p className="text-xs text-[#b6b0a2]">
+              {chapterCount} {chapterCount === 1 ? "chapter" : "chapters"}
+            </p>
             <button
               type="button"
               onClick={onToggleExpand}
-              className="hover:text-[#ece6d8] hover:underline transition-colors duration-200"
+              aria-expanded={isExpanded}
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              className="p-1.5 text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
             >
-              {chapterCount} chapters
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+              />
             </button>
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
-          >
-            Edit
-          </button>
-          <button
-            onClick={remove}
-            className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
-          >
-            Delete
-          </button>
+          </div>
         </div>
       </div>
 
       {isExpanded && (
         <div className="border-t border-[#050505] p-3 flex flex-col gap-4 bg-[#0a0a0a]/40">
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-[#6b655e]">Arcs</p>
+            <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Arc</h3>
             <AdminArcCreateForm
               mangaId={id}
-              nextOrder={arcs.length === 0 ? 0 : Math.max(...arcs.map((a) => a.arc_order)) + 1}
+              totalCount={arcs.length}
+              hasEx={arcs.some((a) => a.arc_is_ex)}
+              isOpen={arcCreateOpen}
+              onOpenChange={handleArcCreateOpenChange}
             />
 
-            {arcs.length === 0 ? (
-              <p className="text-xs text-[#6b655e] text-center py-4">
-                No arcs yet — create one above.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {arcs
-                  .slice()
-                  .sort((a, b) => a.arc_order - b.arc_order)
-                  .map((a) => (
-                    <AdminArcRow
-                      key={a.id}
-                      id={a.id}
-                      name={a.arc_name}
-                      order={a.arc_order}
-                      status={a.arc_status}
-                    />
-                  ))}
-              </div>
-            )}
+            <AdminArcList
+              mangaId={id}
+              arcs={arcs}
+              editingArcId={editingArcId}
+              onToggleEdit={handleToggleArcEdit}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] uppercase tracking-widest text-[#6b655e]">Chapters</p>
-            <AdminChapterCreateForm mangaId={id} arcs={arcs} />
+            <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Chapters</h3>
+            <AdminChapterCreateForm
+              mangaId={id}
+              arcs={arcs}
+              isOpen={chapterCreateOpen}
+              onOpenChange={handleChapterCreateOpenChange}
+            />
 
-            {chapters.length === 0 ? (
-              <p className="text-xs text-[#6b655e] text-center py-4">
-                No chapters yet — create one above.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {chapters.map((c) => (
-                  <AdminChapterRow
-                    key={c.id}
-                    id={c.id}
-                    arcName={c.arcName}
-                    chapterNumber={c.chapterNumber}
-                    chapterName={c.chapterName}
-                    publishedDate={c.publishedDate}
-                  />
-                ))}
-              </div>
-            )}
+            <AdminChapterList
+              chapters={chapters}
+              arcs={arcs}
+              editingChapterId={editingChapterId}
+              onToggleEdit={handleToggleChapterEdit}
+            />
           </div>
         </div>
       )}

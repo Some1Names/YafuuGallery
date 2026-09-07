@@ -15,17 +15,15 @@ export default async function AdminPage() {
     userCount,
     mangaCount,
     chapterCount,
-    commentCount,
     users,
     mangaList,
     chapters,
     arcs,
-    recentComments,
+    comments,
   ] = await Promise.all([
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
-      prisma.comment.count(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
         select: { id: true, name: true, email: true, role: true, created_at: true },
@@ -34,7 +32,7 @@ export default async function AdminPage() {
         orderBy: { created_at: "desc" },
         include: {
           author: { select: { name: true, email: true } },
-          _count: { select: { chapters: true } },
+          _count: { select: { chapters: true, bookmarks: true } },
         },
       }),
       prisma.chapter.findMany({
@@ -45,13 +43,20 @@ export default async function AdminPage() {
       }),
       prisma.arc.findMany({
         orderBy: { arc_order: "asc" },
-        select: { id: true, arc_name: true, arc_order: true, arc_status: true, manga_id: true },
+        select: {
+          id: true,
+          arc_name: true,
+          arc_order: true,
+          arc_is_ex: true,
+          arc_status: true,
+          arc_image_url: true,
+          manga_id: true,
+        },
       }),
       prisma.comment.findMany({
         orderBy: { created_at: "desc" },
-        take: 30,
         include: {
-          user: { select: { name: true } },
+          user: { select: { id: true, name: true } },
           chapter: {
             select: {
               chapter_number: true,
@@ -66,7 +71,6 @@ export default async function AdminPage() {
     { label: "Users", value: userCount },
     { label: "Manga", value: mangaCount },
     { label: "Chapters", value: chapterCount },
-    { label: "Comments", value: commentCount },
   ];
 
   const mangaItems = mangaList.map((m) => ({
@@ -75,6 +79,10 @@ export default async function AdminPage() {
     synopsis: m.manga_synopsis,
     authorName: m.author.name ?? m.author.email,
     chapterCount: m._count.chapters,
+    viewCount: chapters
+      .filter((c) => c.manga_id === m.id)
+      .reduce((sum, c) => sum + c.view_count, 0),
+    favoriteCount: m._count.bookmarks,
     coverImageUrl: m.cover_image_url,
     bannerImageUrl: m.banner_image_url,
   }));
@@ -82,14 +90,17 @@ export default async function AdminPage() {
   const chapterItems = chapters.map((c) => ({
     id: c.id,
     mangaId: c.manga_id,
+    arcId: c.arc_id,
     arcName: c.arc?.arc_name ?? null,
     chapterNumber: c.chapter_number,
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
+    coverImageUrl: c.cover_image_url,
   }));
 
-  const commentItems = recentComments.map((c) => ({
+  const commentItems = comments.map((c) => ({
     id: c.id,
+    userId: c.user.id,
     body: c.body,
     userName: c.user.name ?? "Unknown",
     chapterLabel: `${c.chapter.manga.manga_title} #${String(c.chapter.chapter_number).padStart(3, "0")}`,
@@ -113,7 +124,7 @@ export default async function AdminPage() {
 
         {/* Stats — always visible above the tabs, regardless of which
             section is open */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-3 gap-4 mb-10">
           {stats.map((s) => (
             <div key={s.label} className="border border-[#050505] rounded-md p-4 bg-[#1b1a1c]/60">
               <div className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">{s.value}</div>
@@ -127,7 +138,7 @@ export default async function AdminPage() {
           chapters={chapterItems}
           arcs={arcs}
           users={users}
-          recentComments={commentItems}
+          comments={commentItems}
           currentUserId={session.user.id}
         />
       </div>

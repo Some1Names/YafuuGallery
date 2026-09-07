@@ -25,7 +25,7 @@ export async function PATCH(
   }
 
   const body = await request.json().catch(() => null);
-  const { chapter_number, chapter_name, published_date } = body ?? {};
+  const { arc_id, chapter_number, chapter_name, published_date, cover_image_url } = body ?? {};
 
   if (chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
     return NextResponse.json(
@@ -46,9 +46,11 @@ export async function PATCH(
     const chapter = await prisma.chapter.update({
       where: { id },
       data: {
+        arc_id: arc_id || null,
         chapter_number: number,
         chapter_name,
         published_date: new Date(published_date),
+        cover_image_url: cover_image_url || null,
       },
     });
 

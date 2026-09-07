@@ -12,20 +12,18 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => null);
   const { manga_title, manga_synopsis, cover_image_url, banner_image_url } = body ?? {};
-  // Admins pick the author from a dropdown; authors can only ever publish
-  // under their own name, so the client-submitted author_id is ignored for
-  // that role instead of trusted.
-  const author_id = session!.user!.role === "admin" ? body?.author_id : session!.user!.id;
 
-  if (!manga_title || !manga_synopsis || !author_id) {
-    return NextResponse.json({ error: "manga_title, manga_synopsis, and author_id are required" }, { status: 400 });
+  if (!manga_title || !manga_synopsis) {
+    return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
   }
 
   const manga = await prisma.manga.create({
     data: {
       manga_title,
       manga_synopsis,
-      author_id,
+      // A manga's author is whoever creates it, not a separately assignable
+      // field — no admin override, so this can't be spoofed via the body.
+      author_id: session!.user!.id,
       cover_image_url: cover_image_url || null,
       banner_image_url: banner_image_url || null,
     },

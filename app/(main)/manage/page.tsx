@@ -17,7 +17,7 @@ export default async function ManageMangaPage() {
     prisma.manga.findMany({
       where: { author_id: authorId },
       orderBy: { created_at: "desc" },
-      include: { _count: { select: { chapters: true } } },
+      include: { _count: { select: { chapters: true, bookmarks: true } } },
     }),
     prisma.chapter.findMany({
       where: { manga: { author_id: authorId } },
@@ -27,7 +27,15 @@ export default async function ManageMangaPage() {
     prisma.arc.findMany({
       where: { manga: { author_id: authorId } },
       orderBy: { arc_order: "asc" },
-      select: { id: true, arc_name: true, arc_order: true, arc_status: true, manga_id: true },
+      select: {
+        id: true,
+        arc_name: true,
+        arc_order: true,
+        arc_is_ex: true,
+        arc_status: true,
+        arc_image_url: true,
+        manga_id: true,
+      },
     }),
   ]);
 
@@ -36,6 +44,10 @@ export default async function ManageMangaPage() {
     title: m.manga_title,
     synopsis: m.manga_synopsis,
     chapterCount: m._count.chapters,
+    viewCount: chapters
+      .filter((c) => c.manga_id === m.id)
+      .reduce((sum, c) => sum + c.view_count, 0),
+    favoriteCount: m._count.bookmarks,
     coverImageUrl: m.cover_image_url,
     bannerImageUrl: m.banner_image_url,
   }));
@@ -43,10 +55,12 @@ export default async function ManageMangaPage() {
   const chapterItems = chapters.map((c) => ({
     id: c.id,
     mangaId: c.manga_id,
+    arcId: c.arc_id,
     arcName: c.arc?.arc_name ?? null,
     chapterNumber: c.chapter_number,
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
+    coverImageUrl: c.cover_image_url,
   }));
 
   return (

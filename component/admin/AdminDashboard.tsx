@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import AdminMangaCreateForm from "./AdminMangaCreateForm";
+import { Fragment, useState } from "react";
+import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "./AdminMangaRow";
 import AdminUserRoleSelect from "./AdminUserRoleSelect";
 import AdminUserDeleteButton from "./AdminUserDeleteButton";
@@ -13,6 +13,8 @@ interface MangaItem {
   synopsis: string;
   authorName: string;
   chapterCount: number;
+  viewCount: number;
+  favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
 }
@@ -20,17 +22,21 @@ interface MangaItem {
 interface ChapterItem {
   id: string;
   mangaId: string;
+  arcId: string | null;
   arcName: string | null;
   chapterNumber: number;
   chapterName: string;
   publishedDate: Date;
+  coverImageUrl: string | null;
 }
 
 interface ArcOption {
   id: string;
   arc_name: string;
   arc_order: number;
+  arc_is_ex: boolean;
   arc_status: "ongoing" | "completed";
+  arc_image_url: string | null;
   manga_id: string;
 }
 
@@ -44,6 +50,7 @@ interface UserItem {
 
 interface CommentItem {
   id: string;
+  userId: string;
   body: string;
   userName: string;
   chapterLabel: string;
@@ -56,25 +63,35 @@ interface AdminDashboardProps {
   chapters: ChapterItem[];
   arcs: ArcOption[];
   users: UserItem[];
-  recentComments: CommentItem[];
+  comments: CommentItem[];
   currentUserId: string;
 }
 
-type Tab = "manga" | "users" | "comments";
+type Tab = "manga" | "users";
 
 export default function AdminDashboard({
   mangaList,
   chapters,
   arcs,
   users,
-  recentComments,
+  comments,
   currentUserId,
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("manga");
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
+  const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   function toggleExpand(mangaId: string) {
     setExpandedMangaId((current) => (current === mangaId ? null : mangaId));
+  }
+
+  function toggleEdit(mangaId: string) {
+    setEditingMangaId((current) => (current === mangaId ? null : mangaId));
+  }
+
+  function toggleUserComments(userId: string) {
+    setExpandedUserId((current) => (current === userId ? null : userId));
   }
 
   const tabClass = (isActive: boolean) =>
@@ -95,26 +112,18 @@ export default function AdminDashboard({
           Users
           <span className="ml-1.5 text-xs text-[#6b655e]">{users.length}</span>
         </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("comments")}
-          className={tabClass(activeTab === "comments")}
-        >
-          Comments
-          <span className="ml-1.5 text-xs text-[#6b655e]">{recentComments.length}</span>
-        </button>
       </div>
 
       {activeTab === "manga" && (
         <section>
-          <AdminMangaCreateForm authors={users} />
+          <MangaCreateForm />
 
           {mangaList.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
               <p className="text-[#b6b0a2] text-sm">No manga yet — create one above.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {mangaList.map((m) => (
                 <AdminMangaRow
                   key={m.id}
@@ -123,16 +132,20 @@ export default function AdminDashboard({
                   synopsis={m.synopsis}
                   authorName={m.authorName}
                   chapterCount={m.chapterCount}
+                  viewCount={m.viewCount}
+                  favoriteCount={m.favoriteCount}
                   coverImageUrl={m.coverImageUrl}
                   bannerImageUrl={m.bannerImageUrl}
                   chapters={chapters
                     .filter((c) => c.mangaId === m.id)
                     .map((c) => ({
                       id: c.id,
+                      arcId: c.arcId,
                       arcName: c.arcName,
                       chapterNumber: c.chapterNumber,
                       chapterName: c.chapterName,
                       publishedDate: c.publishedDate,
+                      coverImageUrl: c.coverImageUrl,
                     }))}
                   arcs={arcs
                     .filter((a) => a.manga_id === m.id)
@@ -140,10 +153,14 @@ export default function AdminDashboard({
                       id: a.id,
                       arc_name: a.arc_name,
                       arc_order: a.arc_order,
+                      arc_is_ex: a.arc_is_ex,
                       arc_status: a.arc_status,
+                      arc_image_url: a.arc_image_url,
                     }))}
                   isExpanded={expandedMangaId === m.id}
                   onToggleExpand={() => toggleExpand(m.id)}
+                  isEditing={editingMangaId === m.id}
+                  onToggleEdit={() => toggleEdit(m.id)}
                 />
               ))}
             </div>
@@ -162,59 +179,73 @@ export default function AdminDashboard({
                     <th className="text-left px-4 py-2">Email</th>
                     <th className="text-left px-4 py-2">Joined</th>
                     <th className="text-left px-4 py-2">Role</th>
+                    <th className="text-left px-4 py-2">Comments</th>
                     <th className="text-left px-4 py-2"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id} className="border-t border-[#050505] hover:bg-[#1b1a1c]/40 transition-colors duration-200">
-                      <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">{u.name ?? "—"}</td>
-                      <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">{u.email}</td>
-                      <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">
-                        {u.created_at.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="px-4 py-2">
-                        <AdminUserRoleSelect userId={u.id} currentRole={u.role} />
-                      </td>
-                      <td className="px-4 py-2">
-                        {u.id !== currentUserId && (
-                          <AdminUserDeleteButton userId={u.id} userLabel={u.name ?? u.email} />
+                  {users.map((u) => {
+                    const userComments = comments.filter((c) => c.userId === u.id);
+                    const isExpanded = expandedUserId === u.id;
+
+                    return (
+                      <Fragment key={u.id}>
+                        <tr className="border-t border-[#050505] hover:bg-[#1b1a1c]/40 transition-colors duration-200">
+                          <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">{u.name ?? "—"}</td>
+                          <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">{u.email}</td>
+                          <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">
+                            {u.created_at.toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="px-4 py-2">
+                            <AdminUserRoleSelect userId={u.id} currentRole={u.role} />
+                          </td>
+                          <td className="px-4 py-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleUserComments(u.id)}
+                              disabled={userComments.length === 0}
+                              className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] disabled:opacity-40 disabled:hover:text-[#b6b0a2] disabled:hover:border-[#050505] transition-colors duration-200"
+                            >
+                              {userComments.length} {isExpanded ? "− Close" : "· View"}
+                            </button>
+                          </td>
+                          <td className="px-4 py-2">
+                            {u.id !== currentUserId && (
+                              <AdminUserDeleteButton userId={u.id} userLabel={u.name ?? u.email} />
+                            )}
+                          </td>
+                        </tr>
+
+                        {isExpanded && (
+                          <tr className="border-t border-[#050505] bg-[#0a0a0a]/40">
+                            <td colSpan={6} className="p-3">
+                              <div className="flex flex-col gap-2">
+                                {userComments.map((c) => (
+                                  <AdminCommentRow
+                                    key={c.id}
+                                    commentId={c.id}
+                                    body={c.body}
+                                    userName={c.userName}
+                                    chapterLabel={c.chapterLabel}
+                                    createdAt={c.createdAt}
+                                    initialHidden={c.hidden}
+                                  />
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                      </td>
-                    </tr>
-                  ))}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </div>
-        </section>
-      )}
-
-      {activeTab === "comments" && (
-        <section>
-          {recentComments.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
-              <p className="text-[#b6b0a2] text-sm">No comments yet.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {recentComments.map((c) => (
-                <AdminCommentRow
-                  key={c.id}
-                  commentId={c.id}
-                  body={c.body}
-                  userName={c.userName}
-                  chapterLabel={c.chapterLabel}
-                  createdAt={c.createdAt}
-                  initialHidden={c.hidden}
-                />
-              ))}
-            </div>
-          )}
         </section>
       )}
     </div>

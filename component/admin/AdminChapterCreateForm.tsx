@@ -2,22 +2,50 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AdminImageUploadButton from "./AdminImageUploadButton";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
   arcs: { id: string; arc_name: string }[];
+  // Controlled from AdminMangaRow so opening this form and editing an
+  // existing chapter row mutually close each other — only one
+  // chapter-related form is ever open at a time.
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-// Always scoped to one manga now (nested inside its AdminMangaRow), so
-// there's no manga picker here — just arc, number, title, date.
-export default function AdminChapterCreateForm({ mangaId, arcs }: AdminChapterCreateFormProps) {
+// Always scoped to one manga (nested inside its AdminMangaRow), so there's
+// no manga picker here — just cover, arc, number, title, and date.
+// Collapsed to a single button by default, same open/close pattern as
+// AdminArcCreateForm/MangaCreateForm.
+//
+// Unlike arcs, chapter numbers aren't a contiguous 1..N sequence — real
+// manga chapter numbering has gaps (specials, seasons, renumbers), so this
+// stays a plain editable number rather than a "#001" insert-position
+// dropdown; there's no drag-to-reorder for the same reason.
+export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenChange }: AdminChapterCreateFormProps) {
   const router = useRouter();
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [arcId, setArcId] = useState("");
   const [chapterNumber, setChapterNumber] = useState("");
   const [chapterName, setChapterName] = useState("");
   const [publishedDate, setPublishedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function resetForm() {
+    setCoverImageUrl(null);
+    setArcId("");
+    setChapterNumber("");
+    setChapterName("");
+    setPublishedDate(new Date().toISOString().slice(0, 10));
+    setError(null);
+  }
+
+  function handleCancel() {
+    resetForm();
+    onOpenChange(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,6 +62,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs }: AdminChapterCr
           chapter_number: Number(chapterNumber),
           chapter_name: chapterName,
           published_date: publishedDate,
+          cover_image_url: coverImageUrl,
         }),
       });
 
@@ -43,8 +72,8 @@ export default function AdminChapterCreateForm({ mangaId, arcs }: AdminChapterCr
         return;
       }
 
-      setChapterNumber("");
-      setChapterName("");
+      resetForm();
+      onOpenChange(false);
       router.refresh();
     } catch {
       setError("Network error — please try again.");
@@ -53,62 +82,110 @@ export default function AdminChapterCreateForm({ mangaId, arcs }: AdminChapterCr
     }
   }
 
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenChange(true)}
+        className="self-start px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 transition-colors duration-200"
+      >
+        + Create Chapter
+      </button>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-[#050505] rounded-md p-3 bg-[#0a0a0a] flex flex-col gap-2"
+      className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4"
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <select
-          value={arcId}
-          onChange={(e) => setArcId(e.target.value)}
-          className="bg-[#1b1a1c] border border-[#050505] rounded px-2 py-1.5 text-sm text-[#ece6d8]"
-        >
-          <option value="">No arc</option>
-          {arcs.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.arc_name}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="number"
-          min="0"
-          step="1"
-          value={chapterNumber}
-          onChange={(e) => setChapterNumber(e.target.value)}
-          placeholder="# (0+)"
-          required
-          className="bg-[#1b1a1c] border border-[#050505] rounded px-2 py-1.5 text-sm text-[#ece6d8] placeholder:text-[#6b655e]"
+      <div className="flex flex-col sm:flex-row gap-4">
+        <AdminImageUploadButton
+          label="Cover"
+          value={coverImageUrl}
+          onChange={setCoverImageUrl}
+          boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
         />
 
-        <input
-          value={chapterName}
-          onChange={(e) => setChapterName(e.target.value)}
-          placeholder="Chapter title"
-          required
-          className="bg-[#1b1a1c] border border-[#050505] rounded px-2 py-1.5 text-sm text-[#ece6d8] placeholder:text-[#6b655e]"
-        />
+        <div className="flex-1 flex flex-col gap-4">
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+              Chapter Title
+            </label>
+            <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={chapterNumber}
+                onChange={(e) => setChapterNumber(e.target.value)}
+                placeholder="#"
+                required
+                className="w-16 shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1 text-sm text-[#b6b0a2] placeholder:text-[#6b655e] focus:outline-none"
+              />
+              <input
+                value={chapterName}
+                onChange={(e) => setChapterName(e.target.value)}
+                placeholder="Chapter title"
+                required
+                className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none"
+              />
+            </div>
+          </div>
 
-        <input
-          type="date"
-          value={publishedDate}
-          onChange={(e) => setPublishedDate(e.target.value)}
-          required
-          className="bg-[#1b1a1c] border border-[#050505] rounded px-2 py-1.5 text-sm text-[#ece6d8]"
-        />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                Arc
+              </label>
+              <select
+                value={arcId}
+                onChange={(e) => setArcId(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+              >
+                <option value="">No arc</option>
+                {arcs.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.arc_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="sm:w-40">
+              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                Published Date
+              </label>
+              <input
+                type="date"
+                value={publishedDate}
+                onChange={(e) => setPublishedDate(e.target.value)}
+                required
+                className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {error && <p className="text-xs text-[#9c1d25]">{error}</p>}
+      {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="self-start px-3 py-1.5 bg-[#ece6d8] text-[#0a0a0a] text-xs font-semibold rounded disabled:opacity-50 transition-colors duration-200"
-      >
-        {isSubmitting ? "Creating…" : "+ Create chapter"}
-      </button>
+      <div className="flex gap-2 self-end">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+        >
+          {isSubmitting ? "Creating…" : "+ Create Chapter"}
+        </button>
+      </div>
     </form>
   );
 }
