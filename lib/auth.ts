@@ -39,6 +39,14 @@ export const betterAuthInstance = betterAuth({
       // the email on its end, that's an acceptable trade for now; revisit
       // if/when real email verification is added.
       requireLocalEmailVerified: false,
+      // Copy Google's name/profile picture onto the local account the
+      // first time it links (brand-new Google sign-ups already get this
+      // for free — this covers linking Google onto an existing
+      // email/password account, e.g. someone who signed up with a
+      // password and later hits "Continue with Google"). Only runs once,
+      // at link time, so it won't clobber a custom avatar on every
+      // subsequent login.
+      updateUserInfoOnLink: true,
     },
   },
   user: {
