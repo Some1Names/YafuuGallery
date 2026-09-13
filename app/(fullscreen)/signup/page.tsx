@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { signupSchema, type SignupFormValues } from "@/lib/signup-schema";
 import { authClient } from "@/lib/auth-client";
+import GoogleIcon from "@/component/icons/GoogleIcon";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,8 +71,9 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
-            className="w-full flex items-center justify-center gap-2 border border-[#050505] rounded-md py-2.5 text-sm text-[#ece6d8] hover:bg-[#1b1a1c] transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-2 border border-[#2a2a2a] bg-[#1b1a1c] rounded-md py-2.5 text-sm text-[#ece6d8] font-medium hover:bg-[#232224] hover:border-[#b6b0a2] transition-colors duration-200"
           >
+            <GoogleIcon />
             Continue with Google
           </button>
 

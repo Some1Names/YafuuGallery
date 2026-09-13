@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, X, Pencil } from "lucide-react";
+import { Check, X, Pencil, ArrowUpRight } from "lucide-react";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -257,8 +257,9 @@ export default function ProfileEditForm({
                 <p className="text-2xl text-[#ece6d8] group-hover:text-white font-(family-name:--font-display) transition-colors duration-200">
                   {s.value}
                 </p>
-                <p className="text-[10px] uppercase tracking-widest text-[#6b655e] group-hover:text-[#b6b0a2] mt-1 transition-colors duration-200">
+                <p className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-[#6b655e] group-hover:text-[#b6b0a2] mt-1 transition-colors duration-200">
                   {s.label}
+                  {s.href && <ArrowUpRight className="w-3 h-3" />}
                 </p>
               </>
             );

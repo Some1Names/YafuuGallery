@@ -112,108 +112,13 @@ export default function AdminArcRow({
     onToggleEdit();
   }
 
-  if (isEditing) {
-    return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          save();
-        }}
-        className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4"
-      >
-        <div className="flex flex-col sm:flex-row gap-4">
-          <AdminImageUploadButton
-            label="Cover"
-            value={editImageUrl}
-            onChange={setEditImageUrl}
-            boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
-          />
-
-          <div className="flex-1 flex flex-col gap-4">
-            <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
-                Arc Title
-              </label>
-              <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
-                <select
-                  value={editPosition}
-                  onChange={(e) => setEditPosition(Number(e.target.value))}
-                  className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
-                >
-                  {Array.from({ length: totalCount }, (_, i) => (
-                    <option key={i} value={i}>
-                      #{String(i + 1).padStart(3, "0")}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  required
-                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="sm:w-40">
-                <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
-                  Status
-                </label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value as "ongoing" | "completed")}
-                  className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
-                >
-                  <option value="ongoing">Ongoing</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-
-              <label
-                className={`flex items-center gap-2 text-sm pt-5 ${
-                  hasOtherEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={editIsEx}
-                  disabled={hasOtherEx}
-                  onChange={(e) => setEditIsEx(e.target.checked)}
-                  className="accent-[#ece6d8]"
-                />
-                Special (ex) arc
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
-
-        <div className="flex gap-2 self-end">
-          <button
-            type="button"
-            onClick={cancelEdit}
-            className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
-          >
-            {isSaving ? "Saving…" : "Save"}
-          </button>
-        </div>
-      </form>
-    );
-  }
-
   return (
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
       {/* Same layout as AdminMangaRow's collapsed row — cover flush left,
-          stretched to the row's full height, content column beside it. */}
+          stretched to the row's full height, content column beside it.
+          Stays visible while editing — the edit form drops down below it
+          instead of replacing it, like a dropdown/accordion panel, so the
+          row never disappears from the list mid-edit. */}
       <div className="flex">
         <div className="w-24 sm:w-32 shrink-0 bg-[#0a0a0a]">
           {imageUrl && (
@@ -240,7 +145,7 @@ export default function AdminArcRow({
               onClick={onToggleEdit}
               className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
             >
-              Edit
+              {isEditing ? "Close" : "Edit"}
             </button>
             <button
               onClick={remove}
@@ -251,6 +156,102 @@ export default function AdminArcRow({
           </div>
         </div>
       </div>
+
+      {isEditing && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            save();
+          }}
+          className="border-t border-[#050505] p-12 flex flex-col gap-4"
+        >
+          <div className="flex flex-col sm:flex-row gap-4">
+            <AdminImageUploadButton
+              label="Cover"
+              value={editImageUrl}
+              onChange={setEditImageUrl}
+              boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
+            />
+
+            <div className="flex-1 flex flex-col gap-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                  Arc Title
+                </label>
+                <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
+                  <select
+                    value={editPosition}
+                    onChange={(e) => setEditPosition(Number(e.target.value))}
+                    className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
+                  >
+                    {Array.from({ length: totalCount }, (_, i) => (
+                      <option key={i} value={i}>
+                        #{String(i + 1).padStart(3, "0")}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                    className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="sm:w-40">
+                  <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as "ongoing" | "completed")}
+                    className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+                  >
+                    <option value="ongoing">Ongoing</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+
+                <label
+                  className={`flex items-center gap-2 text-sm pt-5 ${
+                    hasOtherEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={editIsEx}
+                    disabled={hasOtherEx}
+                    onChange={(e) => setEditIsEx(e.target.checked)}
+                    className="accent-[#ece6d8]"
+                  />
+                  Special (ex) arc
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+
+          <div className="flex gap-2 self-end">
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+            >
+              {isSaving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

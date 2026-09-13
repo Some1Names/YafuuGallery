@@ -15,6 +15,7 @@ interface ChapterItem {
   arcId: string | null;
   arcName: string | null;
   chapterNumber: number;
+  chapterIsEx: boolean;
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
@@ -52,7 +53,6 @@ export default function AdminMangaRow({
   title,
   synopsis,
   authorName,
-  chapterCount,
   viewCount,
   favoriteCount,
   coverImageUrl,
@@ -91,6 +91,22 @@ export default function AdminMangaRow({
   // of the Arc section's own state above.
   const [chapterCreateOpen, setChapterCreateOpen] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
+
+  // Arc and Chapters are tabs, not stacked sections — only one is on
+  // screen at a time. The tab switcher itself is the expand control: it
+  // sits where a plain expand chevron used to, so picking a tab both
+  // opens the section and selects it; clicking the tab that's already
+  // open and active collapses the row instead.
+  const [activeSection, setActiveSection] = useState<"arc" | "chapters">("arc");
+
+  function handleTabClick(section: "arc" | "chapters") {
+    if (isExpanded && activeSection === section) {
+      onToggleExpand();
+      return;
+    }
+    if (!isExpanded) onToggleExpand();
+    setActiveSection(section);
+  }
 
   function handleChapterCreateOpenChange(open: boolean) {
     setChapterCreateOpen(open);
@@ -246,22 +262,46 @@ export default function AdminMangaRow({
             </div>
           </div>
 
-          {/* Divider + footer row — the arc/chapter CRUD for this manga
-              lives below, revealed here instead of a separate top-level
-              Chapters tab */}
-          <div className="px-8 py-3 border-t border-[#050505] flex items-center justify-between gap-4">
-            <p className="text-xs text-[#b6b0a2]">
-              {chapterCount} {chapterCount === 1 ? "chapter" : "chapters"}
-            </p>
+          {/* Divider + footer row — the Arc/Chapters tab switcher IS the
+              expand control here (no separate generic chevron button):
+              picking a tab opens the row to that section, and each tab
+              carries its own chevron (rotated when it's the open, active
+              one) instead of one shared toggle. */}
+          <div className="px-8 py-3 border-t border-[#050505] flex items-center gap-1">
             <button
               type="button"
-              onClick={onToggleExpand}
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Collapse" : "Expand"}
-              className="p-1.5 text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+              onClick={() => handleTabClick("arc")}
+              aria-expanded={isExpanded && activeSection === "arc"}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
+                isExpanded && activeSection === "arc"
+                  ? "bg-[#232224] text-[#ece6d8]"
+                  : "text-[#b6b0a2] hover:text-[#ece6d8]"
+              }`}
             >
+              Arc
+              <span className="text-xs text-[#6b655e]">{arcs.length}</span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  isExpanded && activeSection === "arc" ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabClick("chapters")}
+              aria-expanded={isExpanded && activeSection === "chapters"}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
+                isExpanded && activeSection === "chapters"
+                  ? "bg-[#232224] text-[#ece6d8]"
+                  : "text-[#b6b0a2] hover:text-[#ece6d8]"
+              }`}
+            >
+              Chapters
+              <span className="text-xs text-[#6b655e]">{chapters.length}</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  isExpanded && activeSection === "chapters" ? "rotate-180" : ""
+                }`}
               />
             </button>
           </div>
@@ -269,41 +309,46 @@ export default function AdminMangaRow({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-[#050505] p-3 flex flex-col gap-4 bg-[#0a0a0a]/40">
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Arc</h3>
-            <AdminArcCreateForm
-              mangaId={id}
-              totalCount={arcs.length}
-              hasEx={arcs.some((a) => a.arc_is_ex)}
-              isOpen={arcCreateOpen}
-              onOpenChange={handleArcCreateOpenChange}
-            />
+        <div className="border-t border-[#050505] p-12 flex flex-col gap-4 bg-[#0a0a0a]/40">
+          {activeSection === "arc" && (
+            <div className="flex flex-col gap-4">
+              <AdminArcCreateForm
+                mangaId={id}
+                totalCount={arcs.length}
+                hasEx={arcs.some((a) => a.arc_is_ex)}
+                isOpen={arcCreateOpen}
+                onOpenChange={handleArcCreateOpenChange}
+              />
 
-            <AdminArcList
-              mangaId={id}
-              arcs={arcs}
-              editingArcId={editingArcId}
-              onToggleEdit={handleToggleArcEdit}
-            />
-          </div>
+              <AdminArcList
+                mangaId={id}
+                arcs={arcs}
+                editingArcId={editingArcId}
+                onToggleEdit={handleToggleArcEdit}
+              />
+            </div>
+          )}
 
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Chapters</h3>
-            <AdminChapterCreateForm
-              mangaId={id}
-              arcs={arcs}
-              isOpen={chapterCreateOpen}
-              onOpenChange={handleChapterCreateOpenChange}
-            />
+          {activeSection === "chapters" && (
+            <div className="flex flex-col gap-4">
+              <AdminChapterCreateForm
+                mangaId={id}
+                arcs={arcs}
+                totalCount={chapters.length}
+                hasEx={chapters.some((c) => c.chapterIsEx)}
+                isOpen={chapterCreateOpen}
+                onOpenChange={handleChapterCreateOpenChange}
+              />
 
-            <AdminChapterList
-              chapters={chapters}
-              arcs={arcs}
-              editingChapterId={editingChapterId}
-              onToggleEdit={handleToggleChapterEdit}
-            />
-          </div>
+              <AdminChapterList
+                mangaId={id}
+                chapters={chapters}
+                arcs={arcs}
+                editingChapterId={editingChapterId}
+                onToggleEdit={handleToggleChapterEdit}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

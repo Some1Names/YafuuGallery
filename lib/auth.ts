@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
 
 export const betterAuthInstance = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
@@ -9,11 +10,35 @@ export const betterAuthInstance = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your YafuuGallery password",
+        html: `
+          <p>Someone requested a password reset for your YafuuGallery account.</p>
+          <p><a href="${url}">Click here to reset your password</a></p>
+          <p>If you didn't request this, you can safely ignore this email.</p>
+        `,
+      });
+    },
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    },
+  },
+  account: {
+    accountLinking: {
+      // There's no email-verification flow in this app yet, so every
+      // email/password account has emailVerified: false. Better Auth's
+      // default refuses to link a social sign-in onto an unverified local
+      // account (an account-takeover guard) — without this, anyone who
+      // already made an email/password account could never also sign in
+      // with Google using the same address. Since Google itself verifies
+      // the email on its end, that's an acceptable trade for now; revisit
+      // if/when real email verification is added.
+      requireLocalEmailVerified: false,
     },
   },
   user: {

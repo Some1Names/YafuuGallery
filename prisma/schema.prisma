@@ -163,6 +163,11 @@ model Chapter {
   manga_id        String
   arc_id          String?
   chapter_number  Int
+  // A single chapter per manga can be flagged as the special "ex" (bonus/
+  // omake) entry — independent of chapter_number, so it can be dragged to
+  // sit anywhere in the list while always displaying "ex" instead of a
+  // position number. Mirrors Arc.arc_is_ex.
+  chapter_is_ex   Boolean  @default(false)
   chapter_name    String
   cover_image_url String?  // thumbnail shown in the chapter list
   published_date  DateTime

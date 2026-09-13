@@ -93,6 +93,7 @@ export default async function AdminPage() {
     arcId: c.arc_id,
     arcName: c.arc?.arc_name ?? null,
     chapterNumber: c.chapter_number,
+    chapterIsEx: c.chapter_is_ex,
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
     coverImageUrl: c.cover_image_url,

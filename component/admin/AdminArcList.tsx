@@ -144,7 +144,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
   if (totalCount === 0) {
     return (
       <div className="relative">
-        <div className="flex flex-col gap-2" aria-hidden="true">
+        <div className="flex flex-col gap-3" aria-hidden="true">
           {Array.from({ length: PAGE_SIZE }).map((_, i) => (
             <ArcRowPlaceholder key={i} />
           ))}
@@ -157,7 +157,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {pageItems.map((a, localIndex) => {
         const index = pageStart + localIndex;
         const isBeingEdited = editingArcId === a.id;

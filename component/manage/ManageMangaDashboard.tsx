@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "@/component/admin/AdminMangaRow";
+import AdminSearchInput from "@/component/admin/AdminSearchInput";
 
 interface ChapterItem {
   id: string;
@@ -10,6 +11,7 @@ interface ChapterItem {
   arcId: string | null;
   arcName: string | null;
   chapterNumber: number;
+  chapterIsEx: boolean;
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
@@ -50,13 +52,33 @@ interface ManageMangaDashboardProps {
 export default function ManageMangaDashboard({ mangaList, chapters, arcs, authorName }: ManageMangaDashboardProps) {
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
+  const [mangaSearch, setMangaSearch] = useState("");
 
+  const filteredMangaList = useMemo(() => {
+    const q = mangaSearch.trim().toLowerCase();
+    if (!q) return mangaList;
+    return mangaList.filter((m) => m.title.toLowerCase().includes(q));
+  }, [mangaList, mangaSearch]);
+
+  // A manga's title-edit form and its Arc/Chapters panel are mutually
+  // exclusive across the WHOLE list, not just within one row — opening
+  // one on any manga closes the other wherever it currently is, so
+  // clicking Edit on manga B while manga A is expanded doesn't leave both
+  // visible at once.
   function toggleExpand(mangaId: string) {
-    setExpandedMangaId((current) => (current === mangaId ? null : mangaId));
+    setExpandedMangaId((current) => {
+      const next = current === mangaId ? null : mangaId;
+      if (next !== null) setEditingMangaId(null);
+      return next;
+    });
   }
 
   function toggleEdit(mangaId: string) {
-    setEditingMangaId((current) => (current === mangaId ? null : mangaId));
+    setEditingMangaId((current) => {
+      const next = current === mangaId ? null : mangaId;
+      if (next !== null) setExpandedMangaId(null);
+      return next;
+    });
   }
 
   return (
@@ -68,47 +90,58 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
           <p className="text-[#b6b0a2] text-sm">No manga yet — create one above.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {mangaList.map((m) => (
-            <AdminMangaRow
-              key={m.id}
-              id={m.id}
-              title={m.title}
-              synopsis={m.synopsis}
-              authorName={authorName}
-              chapterCount={m.chapterCount}
-              viewCount={m.viewCount}
-              favoriteCount={m.favoriteCount}
-              coverImageUrl={m.coverImageUrl}
-              bannerImageUrl={m.bannerImageUrl}
-              chapters={chapters
-                .filter((c) => c.mangaId === m.id)
-                .map((c) => ({
-                  id: c.id,
-                  arcId: c.arcId,
-                  arcName: c.arcName,
-                  chapterNumber: c.chapterNumber,
-                  chapterName: c.chapterName,
-                  publishedDate: c.publishedDate,
-                  coverImageUrl: c.coverImageUrl,
-                }))}
-              arcs={arcs
-                .filter((a) => a.manga_id === m.id)
-                .map((a) => ({
-                  id: a.id,
-                  arc_name: a.arc_name,
-                  arc_order: a.arc_order,
-                  arc_is_ex: a.arc_is_ex,
-                  arc_status: a.arc_status,
-                  arc_image_url: a.arc_image_url,
-                }))}
-              isExpanded={expandedMangaId === m.id}
-              onToggleExpand={() => toggleExpand(m.id)}
-              isEditing={editingMangaId === m.id}
-              onToggleEdit={() => toggleEdit(m.id)}
-            />
-          ))}
-        </div>
+        <>
+          <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder="Search by title…" />
+
+          {filteredMangaList.length === 0 ? (
+            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
+              <p className="text-[#b6b0a2] text-sm">No manga match "{mangaSearch}".</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 mt-4">
+              {filteredMangaList.map((m) => (
+                <AdminMangaRow
+                  key={m.id}
+                  id={m.id}
+                  title={m.title}
+                  synopsis={m.synopsis}
+                  authorName={authorName}
+                  chapterCount={m.chapterCount}
+                  viewCount={m.viewCount}
+                  favoriteCount={m.favoriteCount}
+                  coverImageUrl={m.coverImageUrl}
+                  bannerImageUrl={m.bannerImageUrl}
+                  chapters={chapters
+                    .filter((c) => c.mangaId === m.id)
+                    .map((c) => ({
+                      id: c.id,
+                      arcId: c.arcId,
+                      arcName: c.arcName,
+                      chapterNumber: c.chapterNumber,
+                      chapterIsEx: c.chapterIsEx,
+                      chapterName: c.chapterName,
+                      publishedDate: c.publishedDate,
+                      coverImageUrl: c.coverImageUrl,
+                    }))}
+                  arcs={arcs
+                    .filter((a) => a.manga_id === m.id)
+                    .map((a) => ({
+                      id: a.id,
+                      arc_name: a.arc_name,
+                      arc_order: a.arc_order,
+                      arc_is_ex: a.arc_is_ex,
+                      arc_status: a.arc_status,
+                      arc_image_url: a.arc_image_url,
+                    }))}
+                  isExpanded={expandedMangaId === m.id}
+                  onToggleExpand={() => toggleExpand(m.id)}
+                  isEditing={editingMangaId === m.id}
+                  onToggleEdit={() => toggleEdit(m.id)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

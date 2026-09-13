@@ -7,6 +7,12 @@ import AdminImageUploadButton from "./AdminImageUploadButton";
 interface AdminChapterCreateFormProps {
   mangaId: string;
   arcs: { id: string; arc_name: string }[];
+  // Current total chapters on this manga — the position dropdown offers
+  // every slot 0..totalCount (appending at the end is the default).
+  totalCount: number;
+  // Whether some chapter already holds the special "ex" slot — when true,
+  // the ex checkbox here is disabled (only one ex per manga).
+  hasEx: boolean;
   // Controlled from AdminMangaRow so opening this form and editing an
   // existing chapter row mutually close each other — only one
   // chapter-related form is ever open at a time.
@@ -15,19 +21,22 @@ interface AdminChapterCreateFormProps {
 }
 
 // Always scoped to one manga (nested inside its AdminMangaRow), so there's
-// no manga picker here — just cover, arc, number, title, and date.
-// Collapsed to a single button by default, same open/close pattern as
-// AdminArcCreateForm/MangaCreateForm.
-//
-// Unlike arcs, chapter numbers aren't a contiguous 1..N sequence — real
-// manga chapter numbering has gaps (specials, seasons, renumbers), so this
-// stays a plain editable number rather than a "#001" insert-position
-// dropdown; there's no drag-to-reorder for the same reason.
-export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenChange }: AdminChapterCreateFormProps) {
+// no manga picker here — just cover, arc, position, title, status, and the
+// ex flag. Collapsed to a single button by default, same open/close pattern
+// as AdminArcCreateForm/MangaCreateForm.
+export default function AdminChapterCreateForm({
+  mangaId,
+  arcs,
+  totalCount,
+  hasEx,
+  isOpen,
+  onOpenChange,
+}: AdminChapterCreateFormProps) {
   const router = useRouter();
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [arcId, setArcId] = useState("");
-  const [chapterNumber, setChapterNumber] = useState("");
+  const [chapterPosition, setChapterPosition] = useState(totalCount);
+  const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
   const [publishedDate, setPublishedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,10 +45,19 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
   function resetForm() {
     setCoverImageUrl(null);
     setArcId("");
-    setChapterNumber("");
+    setChapterPosition(totalCount);
+    setChapterIsEx(false);
     setChapterName("");
     setPublishedDate(new Date().toISOString().slice(0, 10));
     setError(null);
+  }
+
+  function handleOpen() {
+    // totalCount may have moved on since this form last reset (another
+    // chapter created elsewhere, page refreshed) — pick up the current
+    // value.
+    setChapterPosition(totalCount);
+    onOpenChange(true);
   }
 
   function handleCancel() {
@@ -59,7 +77,8 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
         body: JSON.stringify({
           manga_id: mangaId,
           arc_id: arcId || null,
-          chapter_number: Number(chapterNumber),
+          chapter_number: chapterPosition,
+          chapter_is_ex: chapterIsEx,
           chapter_name: chapterName,
           published_date: publishedDate,
           cover_image_url: coverImageUrl,
@@ -86,7 +105,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
     return (
       <button
         type="button"
-        onClick={() => onOpenChange(true)}
+        onClick={handleOpen}
         className="self-start px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 transition-colors duration-200"
       >
         + Create Chapter
@@ -108,33 +127,34 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
         />
 
         <div className="flex-1 flex flex-col gap-4">
-          <div>
-            <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
-              Chapter Title
-            </label>
-            <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={chapterNumber}
-                onChange={(e) => setChapterNumber(e.target.value)}
-                placeholder="#"
-                required
-                className="w-16 shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1 text-sm text-[#b6b0a2] placeholder:text-[#6b655e] focus:outline-none"
-              />
-              <input
-                value={chapterName}
-                onChange={(e) => setChapterName(e.target.value)}
-                placeholder="Chapter title"
-                required
-                className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none"
-              />
-            </div>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
+              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                Chapter Title
+              </label>
+              <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
+                <select
+                  value={chapterPosition}
+                  onChange={(e) => setChapterPosition(Number(e.target.value))}
+                  className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
+                >
+                  {Array.from({ length: totalCount + 1 }, (_, i) => (
+                    <option key={i} value={i}>
+                      #{String(i + 1).padStart(3, "0")}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={chapterName}
+                  onChange={(e) => setChapterName(e.target.value)}
+                  placeholder="Chapter title"
+                  required
+                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="sm:w-48">
               <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
                 Arc
               </label>
@@ -151,7 +171,9 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
                 ))}
               </select>
             </div>
+          </div>
 
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:w-40">
               <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
                 Published Date
@@ -164,6 +186,21 @@ export default function AdminChapterCreateForm({ mangaId, arcs, isOpen, onOpenCh
                 className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
               />
             </div>
+
+            <label
+              className={`flex items-center gap-2 text-sm pt-5 ${
+                hasEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={chapterIsEx}
+                disabled={hasEx}
+                onChange={(e) => setChapterIsEx(e.target.checked)}
+                className="accent-[#ece6d8]"
+              />
+              Special (ex) chapter
+            </label>
           </div>
         </div>
       </div>

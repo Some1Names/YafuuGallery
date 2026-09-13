@@ -18,7 +18,8 @@ export async function POST(request: NextRequest) {
   const session = await auth();
 
   const body = await request.json().catch(() => null);
-  const { manga_id, arc_id, chapter_number, chapter_name, published_date, cover_image_url } = body ?? {};
+  const { manga_id, arc_id, chapter_number, chapter_name, published_date, cover_image_url, chapter_is_ex } =
+    body ?? {};
 
   if (!manga_id || chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
     return NextResponse.json(
@@ -39,12 +40,28 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const isEx = chapter_is_ex === true;
+
+  if (isEx) {
+    const existingEx = await prisma.chapter.findFirst({
+      where: { manga_id, chapter_is_ex: true },
+      select: { id: true },
+    });
+    if (existingEx) {
+      return NextResponse.json(
+        { error: "This manga already has a special (ex) chapter." },
+        { status: 409 }
+      );
+    }
+  }
+
   try {
     const chapter = await prisma.chapter.create({
       data: {
         manga_id,
         arc_id: arc_id || null,
         chapter_number: number,
+        chapter_is_ex: isEx,
         chapter_name,
         published_date: new Date(published_date),
         cover_image_url: cover_image_url || null,

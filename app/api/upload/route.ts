@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { uploadFile } from "@/lib/storage";
 import { auth } from "@/auth";
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
-// POST /api/upload — used by ProfileEditForm to upload an avatar image.
-// Requires a signed-in user; the resulting blob URL is what gets saved via
-// PATCH /api/profile.
+// POST /api/upload — used by ProfileEditForm (avatars) and
+// AdminImageUploadButton (manga/arc/chapter covers) to upload an image to
+// Cloudflare R2. Requires a signed-in user; the resulting public URL is
+// what gets saved on the owning record.
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -31,11 +32,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const extension = file.type.split("/")[1];
-    const blob = await put(`avatars/${session.user.id}-${Date.now()}.${extension}`, file, {
-      access: "public",
-    });
+    const url = await uploadFile(`uploads/${session.user.id}-${Date.now()}.${extension}`, file);
 
-    return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url });
   } catch (err) {
     console.error("[POST /api/upload]", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
