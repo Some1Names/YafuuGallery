@@ -32,6 +32,12 @@ const DRAG_INTENT_PX = 10;
 export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffsetX, setDragOffsetX] = useState(0);
+  // Which way the text content should slide in from — recomputed on every
+  // index change so dots/arrows/swipe/auto-advance all animate in the
+  // direction that actually matches the motion (shortest path for a dot
+  // jump, so e.g. going from the last slide to the first via "next" slides
+  // forward, not backward across the whole set).
+  const [direction, setDirection] = useState<1 | -1>(1);
 
   const dragStartXRef = useRef(0);
   const isPotentialDragRef = useRef(false);
@@ -42,6 +48,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   useEffect(() => {
     if (count <= 1) return;
     const id = setInterval(() => {
+      setDirection(1);
       setActiveIndex((i) => (i + 1) % count);
     }, AUTO_ADVANCE_MS);
     return () => clearInterval(id);
@@ -49,12 +56,58 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
     // doesn't get immediately overridden by an already-in-flight timer.
   }, [count, activeIndex]);
 
-  if (count === 0) return null;
-
+  // manga[activeIndex] is undefined when count === 0 — fine here since
+  // every hook below only seeds/tracks it, and the component bails out
+  // (below, after all hooks have run) before anything renders it. Every
+  // hook has to be declared before that early return regardless, or
+  // they'd be skipped on some renders and not others, which breaks React's
+  // rules of hooks.
   const current = manga[activeIndex];
 
+  // The background banner crossfades by keeping the previous slide's image
+  // sitting statically underneath while the new one fades in on top. The
+  // top layer is a single persistent DOM node (never remounted) whose
+  // opacity is driven by state instead of a key-triggered CSS animation.
+  // (A key-remounted version of this layer was originally blamed for an
+  // intermittent dev-only "useInsertionEffect must not schedule updates"
+  // warning; that turned out to actually come from RouteProgressBar's
+  // patched history.pushState, unrelated to this component. Kept this
+  // approach anyway — not remounting a full-bleed background node on every
+  // slide change is the better default regardless.) topOpacity drops to 0
+  // the instant the slide changes, then
+  // a setTimeout flips it back to 1 so the browser actually paints the 0
+  // state before transitioning — setting it back on the same tick can get
+  // coalesced into one frame and skip the fade. Deliberately setTimeout,
+  // not requestAnimationFrame: rAF simply never fires while a tab is
+  // backgrounded (confirmed — not just throttled), which would leave the
+  // image stuck invisible if a slide changed while the tab wasn't in the
+  // foreground; a timer still fires (possibly delayed) once the tab is
+  // visible again. bottomLayer is state (not a ref) because it's read
+  // during render; it can briefly lag behind `current` by design (it's
+  // meant to still show the outgoing slide while the top layer fades in)
+  // but always falls back to `current` below in case it's never been set
+  // (count was 0 on an earlier render).
+  const [bottomLayer, setBottomLayer] = useState(current);
+  const [topOpacity, setTopOpacity] = useState(1);
+  useEffect(() => {
+    if (!current) return;
+    setTopOpacity(0);
+    const fadeInTimer = setTimeout(() => setTopOpacity(1), 20);
+    const swapTimer = setTimeout(() => setBottomLayer(current), 700);
+    return () => {
+      clearTimeout(fadeInTimer);
+      clearTimeout(swapTimer);
+    };
+  }, [current]);
+
+  if (count === 0) return null;
+
   function goTo(index: number) {
-    setActiveIndex(((index % count) + count) % count);
+    const next = ((index % count) + count) % count;
+    const forwardDistance = (next - activeIndex + count) % count;
+    const backwardDistance = (activeIndex - next + count) % count;
+    setDirection(forwardDistance <= backwardDistance ? 1 : -1);
+    setActiveIndex(next);
   }
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
@@ -86,8 +139,10 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
       if (dragOffsetX > SWIPE_THRESHOLD_PX) {
+        setDirection(-1);
         setActiveIndex((i) => (i - 1 + count) % count);
       } else if (dragOffsetX < -SWIPE_THRESHOLD_PX) {
+        setDirection(1);
         setActiveIndex((i) => (i + 1) % count);
       }
       setDragOffsetX(0);
@@ -106,13 +161,32 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      {current.bannerImageUrl ? (
+      {/* Bottom layer: the previous slide, sitting still — the top layer
+          fading in over it is what creates the crossfade, so this never
+          needs its own opacity transition. */}
+      {(bottomLayer ?? current).bannerImageUrl ? (
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${current.bannerImageUrl}')` }}
+          style={{ backgroundImage: `url('${(bottomLayer ?? current).bannerImageUrl}')` }}
         />
       ) : (
         <div className="absolute inset-0">
+          <NoImagePlaceholder />
+        </div>
+      )}
+      {/* Top layer: the current slide. Same DOM node the whole time —
+          topOpacity (not a key remount) drives the fade so it replays on
+          every change without unmounting anything. */}
+      {current.bannerImageUrl ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out motion-reduce:transition-none"
+          style={{ backgroundImage: `url('${current.bannerImageUrl}')`, opacity: topOpacity }}
+        />
+      ) : (
+        <div
+          className="absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none"
+          style={{ opacity: topOpacity }}
+        >
           <NoImagePlaceholder />
         </div>
       )}
@@ -149,35 +223,47 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       )}
 
       <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10 select-none">
-        <div className="flex flex-col gap-2 items-start">
-          <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl line-clamp-2">{current.title}</h1>
-        </div>
+        {/* Keyed on id + direction so a slide change remounts this whole
+            block and replays the matching slide-in animation; the
+            direction-specific class picks which side it enters from.
+            Mirrors the parent's own flex/gap so wrapping these three
+            pieces in one more div doesn't change their spacing. */}
+        <div
+          key={current.id}
+          className={`flex flex-col gap-2 items-start ${
+            direction === 1 ? "animate-carousel-slide-right" : "animate-carousel-slide-left"
+          }`}
+        >
+          <div className="flex flex-col gap-2 items-start">
+            <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl line-clamp-2">{current.title}</h1>
+          </div>
 
-        <p className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3">
-          {current.synopsis}
-        </p>
+          <p className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3">
+            {current.synopsis}
+          </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto mt-2">
-          {current.firstChapterId ? (
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto mt-2">
+            {current.firstChapterId ? (
+              <Link
+                href={`/viewer/${current.firstChapterId}`}
+                className="bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+              >
+                Start Reading
+              </Link>
+            ) : (
+              <span className="bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+                No chapters yet
+              </span>
+            )}
+
             <Link
-              href={`/viewer/${current.firstChapterId}`}
-              className="bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+              href={`/manga/titles/${current.id}`}
+              className="bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
-              Start Reading
+              View Manga
             </Link>
-          ) : (
-            <span className="bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
-              No chapters yet
-            </span>
-          )}
-
-          <Link
-            href={`/manga/titles/${current.id}`}
-            className="bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
-          >
-            View Manga
-          </Link>
+          </div>
         </div>
 
         {count > 1 && (

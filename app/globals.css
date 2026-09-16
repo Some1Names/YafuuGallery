@@ -43,3 +43,42 @@ input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* Featured carousel slide transitions (see FeaturedCarousel). The
+   background crossfade is a plain opacity transition driven by state, not
+   a keyframe here — a key-remounted background layer was tripping a
+   React "useInsertionEffect must not schedule updates" warning on every
+   slide change. The text content's direction-aware slide-in still uses a
+   replayed keyframe, keyed on the active slide's id. */
+@keyframes carousel-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes carousel-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-carousel-slide-right {
+  animation: carousel-slide-in-right 500ms ease-out;
+}
+.animate-carousel-slide-left {
+  animation: carousel-slide-in-left 500ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-carousel-slide-right,
+  .animate-carousel-slide-left {
+    animation: none;
+  }
+}

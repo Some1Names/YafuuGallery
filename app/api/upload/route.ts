@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { uploadFile } from "@/lib/storage";
 import { auth } from "@/auth";
+import { getImageDimensions, MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -28,6 +29,22 @@ export async function POST(request: NextRequest) {
 
   if (file.size > MAX_SIZE_BYTES) {
     return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 400 });
+  }
+
+  // A small file size doesn't guarantee reasonable pixel dimensions (a
+  // lightly-compressed 4000x3000 PNG can be well under 5MB) — read the
+  // dimensions straight out of the file's own header bytes, no decode
+  // needed, and cap the resolution too.
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const dimensions = getImageDimensions(bytes);
+  if (!dimensions) {
+    return NextResponse.json({ error: "Couldn't read image dimensions — the file may be corrupt" }, { status: 400 });
+  }
+  if (dimensions.width > MAX_IMAGE_DIMENSION || dimensions.height > MAX_IMAGE_DIMENSION) {
+    return NextResponse.json(
+      { error: `Image too large (max ${MAX_IMAGE_DIMENSION}px on either side)` },
+      { status: 400 }
+    );
   }
 
   try {

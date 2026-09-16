@@ -4,6 +4,27 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, X, Pencil, ArrowUpRight } from "lucide-react";
+import { MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
+
+// Reads a picked file's pixel dimensions in-browser before uploading, so an
+// oversized image is rejected instantly instead of after a round trip to
+// the server (which enforces the same limit either way, since this check
+// is easy to bypass).
+function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Couldn't read image"));
+    };
+    img.src = url;
+  });
+}
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -65,8 +86,22 @@ export default function ProfileEditForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
     setError(null);
+
+    try {
+      const { width, height } = await readImageDimensions(file);
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        setError(`Image too large (max ${MAX_IMAGE_DIMENSION}px on either side)`);
+        e.target.value = "";
+        return;
+      }
+    } catch {
+      setError("Couldn't read that image — please try a different file.");
+      e.target.value = "";
+      return;
+    }
+
+    setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -139,8 +174,17 @@ export default function ProfileEditForm({
           className="group relative block w-28 h-28 mx-auto rounded-full sm:mx-0 sm:w-auto sm:h-full sm:aspect-square sm:rounded-none overflow-hidden bg-[#1b1a1c]"
         >
           {image ? (
+            // absolute + inset-0 (not just w-full/h-full) — the button's
+            // width is `auto`, sized by CSS grid off its own content so it
+            // can match the sibling column's height via aspect-square.
+            // Percentage sizing on the img can't help that: grid's
+            // track-sizing pass resolves percentages against nothing yet
+            // defined, so it falls back to the image's raw intrinsic pixel
+            // dimensions as the content size — a large upload was blowing
+            // the column out to its native resolution. Absolute
+            // positioning removes the img from that sizing pass entirely.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt="Avatar" className="w-full h-full object-cover" />
+            <img src={image} alt="Avatar" className="absolute inset-0 w-full h-full object-cover" />
           ) : (
             <span className="w-full h-full flex items-center justify-center text-4xl text-[#b6b0a2] font-(family-name:--font-display)">
               {name.charAt(0).toUpperCase() || "?"}

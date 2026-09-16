@@ -2,6 +2,27 @@
 
 import { useRef, useState } from "react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
+import { MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
+
+// Reads a picked file's pixel dimensions in-browser before uploading, so an
+// oversized image is rejected instantly instead of after a round trip to
+// the server (which enforces the same limit either way, since this check
+// is easy to bypass).
+function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Couldn't read image"));
+    };
+    img.src = url;
+  });
+}
 
 interface AdminImageUploadButtonProps {
   label: string;
@@ -32,8 +53,22 @@ export default function AdminImageUploadButton({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
     setError(null);
+
+    try {
+      const { width, height } = await readImageDimensions(file);
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        setError(`Image too large (max ${MAX_IMAGE_DIMENSION}px on either side)`);
+        e.target.value = "";
+        return;
+      }
+    } catch {
+      setError("Couldn't read that image — please try a different file.");
+      e.target.value = "";
+      return;
+    }
+
+    setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
 

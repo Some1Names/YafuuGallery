@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black } from "next/font/google";
+import RouteProgressBar from "@/component/RouteProgressBar";
 import "./globals.css";
 
 // Loaded once here instead of per-page — every page and component gets
@@ -22,7 +23,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${archivoBlack.variable} bg-[#0a0a0a]`}>{children}</body>
+      <body className={`${inter.variable} ${archivoBlack.variable} bg-[#0a0a0a]`}>
+        <RouteProgressBar />
+        {children}
+      </body>
     </html>
   );
 }
