@@ -171,6 +171,11 @@ export default function ProfileEditForm({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
+          // Password-manager/form-filler extensions tag interactive elements
+          // with a `fdprocessedid` attribute before React hydrates, which
+          // React would otherwise flag as a hydration mismatch even though
+          // nothing about our own render output changed.
+          suppressHydrationWarning
           className="group relative block w-28 h-28 mx-auto rounded-full sm:mx-0 sm:w-auto sm:h-full sm:aspect-square sm:rounded-none overflow-hidden bg-[#1b1a1c]"
         >
           {image ? (
@@ -227,6 +232,7 @@ export default function ProfileEditForm({
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={handleNameKeyDown}
                 readOnly={!isEditingName}
+                suppressHydrationWarning
                 className={
                   "w-full bg-transparent border-b px-0 py-2 text-base text-[#ece6d8] outline-none transition-colors " +
                   (isEditingName ? "border-[#ece6d8] pr-16" : "border-[#050505] cursor-default pr-8")
@@ -259,6 +265,7 @@ export default function ProfileEditForm({
                   type="button"
                   onClick={startEditingName}
                   aria-label="Edit display name"
+                  suppressHydrationWarning
                   className="absolute right-0 bottom-2 text-[#6b655e] hover:text-[#ece6d8] transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
