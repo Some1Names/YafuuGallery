@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { createLocalAccountIssuer } from "@better-auth/core/db";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
@@ -62,6 +63,28 @@ export const betterAuthInstance = betterAuth({
         type: "string",
         defaultValue: "reader",
         input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    account: {
+      create: {
+        // Better Auth is supposed to always populate `issuer` itself
+        // (createLocalAccountIssuer for email/password, an OAuth issuer URL
+        // for social sign-ins) — the Account model's `issuer` column is
+        // required specifically so two different auth methods can never be
+        // confused for the same account. In production this has been
+        // observed arriving empty for brand-new credential (email/password)
+        // sign-ups, which throws mid-signup and leaves an orphaned User row
+        // with no working password — the account "exists" but can never log
+        // in. This guarantees the value regardless of why the built-in path
+        // drops it, without touching accounts that already have one (e.g.
+        // Google, which sets its own issuer).
+        before: async (account) => {
+          if (!account.issuer && account.providerId === "credential") {
+            return { data: { issuer: createLocalAccountIssuer("credential") } };
+          }
+        },
       },
     },
   },
