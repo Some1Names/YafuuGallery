@@ -15,6 +15,8 @@ interface ChapterItem {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
+  pdfUrl: string | null;
+  pdfFileName: string | null;
 }
 
 interface ArcOption {
@@ -122,6 +124,8 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
                       chapterName: c.chapterName,
                       publishedDate: c.publishedDate,
                       coverImageUrl: c.coverImageUrl,
+                      pdfUrl: c.pdfUrl,
+                      pdfFileName: c.pdfFileName,
                     }))}
                   arcs={arcs
                     .filter((a) => a.manga_id === m.id)

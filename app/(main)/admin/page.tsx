@@ -39,6 +39,7 @@ export default async function AdminPage() {
         orderBy: [{ manga: { manga_title: "asc" } }, { chapter_number: "asc" }],
         include: {
           arc: { select: { arc_name: true } },
+          translations: { select: { file_url: true, file_name: true } },
         },
       }),
       prisma.arc.findMany({
@@ -97,6 +98,8 @@ export default async function AdminPage() {
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
     coverImageUrl: c.cover_image_url,
+    pdfUrl: c.translations[0]?.file_url ?? null,
+    pdfFileName: c.translations[0]?.file_name ?? null,
   }));
 
   const commentItems = comments.map((c) => ({

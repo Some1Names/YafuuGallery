@@ -2,42 +2,38 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Eye } from "lucide-react";
 import AdminImageUploadButton from "./AdminImageUploadButton";
+import AdminPdfUploadButton from "./AdminPdfUploadButton";
 
 interface AdminChapterRowProps {
   id: string;
+  mangaId: string;
   arcId: string | null;
   arcName: string | null;
   isEx: boolean;
   // "How many non-ex chapters come before this one" — only meaningful when
-  // !isEx. Independent of `position`, so dragging the ex chapter around
-  // never changes any regular chapter's displayed number.
+  // !isEx. Independent of `chapterOrder`, so dragging the ex chapter
+  // around never changes any regular chapter's displayed number.
   displayNumber: number;
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
+  pdfUrl: string | null;
+  pdfFileName: string | null;
   arcs: { id: string; arc_name: string }[];
-  // This chapter's current 0-indexed slot within the manga's full chapter
-  // list — drives the position dropdown below (valid slots are
-  // 0..totalCount-1).
-  position: number;
-  totalCount: number;
-  // Whether some OTHER chapter already holds the special "ex" slot — when
-  // true, the ex checkbox here is disabled (only one ex per manga).
-  hasOtherEx: boolean;
+  // This chapter's current raw chapter_number value — sent back unchanged
+  // on save (reordering only ever happens by dragging in the list now,
+  // not from this form).
+  chapterOrder: number;
   isEditing: boolean;
   onToggleEdit: () => void;
-  // Moves this chapter to `newIndex` (0-indexed) within the manga's chapter
-  // list, shifting every other chapter out of the way via the reorder
-  // API's transaction. Called before the regular PATCH below whenever the
-  // position changed, since a plain PATCH straight to that chapter_number
-  // would otherwise almost always collide with whichever sibling already
-  // sits there.
-  onReorder: (newIndex: number) => Promise<boolean>;
 }
 
 export default function AdminChapterRow({
   id,
+  mangaId,
   arcId,
   arcName,
   isEx,
@@ -45,18 +41,18 @@ export default function AdminChapterRow({
   chapterName,
   publishedDate,
   coverImageUrl,
+  pdfUrl,
+  pdfFileName,
   arcs,
-  position,
-  totalCount,
-  hasOtherEx,
+  chapterOrder,
   isEditing,
   onToggleEdit,
-  onReorder,
 }: AdminChapterRowProps) {
   const router = useRouter();
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
+  const [editPdfUrl, setEditPdfUrl] = useState(pdfUrl);
+  const [editPdfFileName, setEditPdfFileName] = useState(pdfFileName);
   const [editArcId, setEditArcId] = useState(arcId ?? "");
-  const [editPosition, setEditPosition] = useState(position);
   const [editIsEx, setEditIsEx] = useState(isEx);
   const [editName, setEditName] = useState(chapterName);
   const [editDate, setEditDate] = useState(publishedDate.toISOString().slice(0, 10));
@@ -67,25 +63,18 @@ export default function AdminChapterRow({
     setIsSaving(true);
     setError(null);
 
-    if (editPosition !== position) {
-      const reordered = await onReorder(editPosition);
-      if (!reordered) {
-        setIsSaving(false);
-        setError("Failed to reorder — please try again.");
-        return;
-      }
-    }
-
     const res = await fetch(`/api/admin/chapters/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         arc_id: editArcId || null,
-        chapter_number: editPosition,
+        chapter_number: chapterOrder,
         chapter_is_ex: editIsEx,
         chapter_name: editName,
         published_date: editDate,
         cover_image_url: editCoverImageUrl,
+        pdf_url: editPdfUrl,
+        pdf_file_name: editPdfFileName,
       }),
     });
 
@@ -108,8 +97,9 @@ export default function AdminChapterRow({
 
   function cancelEdit() {
     setEditCoverImageUrl(coverImageUrl);
+    setEditPdfUrl(pdfUrl);
+    setEditPdfFileName(pdfFileName);
     setEditArcId(arcId ?? "");
-    setEditPosition(position);
     setEditIsEx(isEx);
     setEditName(chapterName);
     setEditDate(publishedDate.toISOString().slice(0, 10));
@@ -146,6 +136,16 @@ export default function AdminChapterRow({
           </div>
 
           <div className="flex gap-2 shrink-0">
+            {pdfUrl && (
+              <Link
+                href={`/viewer/${id}`}
+                target="_blank"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                View
+              </Link>
+            )}
             <button
               onClick={onToggleEdit}
               className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
@@ -186,15 +186,12 @@ export default function AdminChapterRow({
                   </label>
                   <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
                     <select
-                      value={editPosition}
-                      onChange={(e) => setEditPosition(Number(e.target.value))}
+                      value={editIsEx ? "ex" : "number"}
+                      onChange={(e) => setEditIsEx(e.target.value === "ex")}
                       className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
                     >
-                      {Array.from({ length: totalCount }, (_, i) => (
-                        <option key={i} value={i}>
-                          #{String(i + 1).padStart(3, "0")}
-                        </option>
-                      ))}
+                      <option value="number">#{String(displayNumber).padStart(3, "0")}</option>
+                      <option value="ex">ex</option>
                     </select>
                     <input
                       value={editName}
@@ -238,20 +235,17 @@ export default function AdminChapterRow({
                   />
                 </div>
 
-                <label
-                  className={`flex items-center gap-2 text-sm pt-5 ${
-                    hasOtherEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={editIsEx}
-                    disabled={hasOtherEx}
-                    onChange={(e) => setEditIsEx(e.target.checked)}
-                    className="accent-[#ece6d8]"
+                <div className="flex-1">
+                  <AdminPdfUploadButton
+                    mangaId={mangaId}
+                    value={editPdfUrl}
+                    fileName={editPdfFileName}
+                    onChange={(url, name) => {
+                      setEditPdfUrl(url);
+                      setEditPdfFileName(name);
+                    }}
                   />
-                  Special (ex) chapter
-                </label>
+                </div>
               </div>
             </div>
           </div>

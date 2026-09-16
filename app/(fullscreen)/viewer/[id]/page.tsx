@@ -15,13 +15,14 @@ export default async function ViewerPage({
     select: {
       chapter_number: true,
       chapter_name: true,
+      translations: { select: { file_url: true } },
       manga: {
         select: {
           id: true,
           manga_title: true,
           chapters: {
             orderBy: { chapter_number: "asc" },
-            select: { id: true, chapter_number: true, chapter_name: true },
+            select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
           },
         },
       },
@@ -46,10 +47,9 @@ export default async function ViewerPage({
 
   return (
     <ChapterReaderClient
-      // hardcoded on purpose — no Translation/file-storage wiring yet
-      pdfUrl="/chapters/mangatest.pdf"
-      chapterLabel={`Chapter ${chapter.chapter_number}: ${chapter.chapter_name}`}
-      chapterNumber={chapter.chapter_number}
+      pdfUrl={chapter.translations[0]?.file_url ?? null}
+      currentChapterId={id}
+      chapterName={chapter.chapter_name}
       mangaTitle={chapter.manga.manga_title}
       mangaId={chapter.manga.id}
       chapters={chapter.manga.chapters}

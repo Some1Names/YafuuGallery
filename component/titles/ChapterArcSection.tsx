@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import ChapterList from "./ChapterList";
 import ArcList from "./ArcList";
+import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import type { ArcItem, ChapterItem } from "./types";
 
 interface ChapterArcSectionProps {
@@ -21,6 +22,14 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
   const [filteredArcId, setFilteredArcId] = useState<string | null>(null);
 
   const filteredArc = filteredArcId ? (arcs.find((a) => a.id === filteredArcId) ?? null) : null;
+
+  // Display numbers are computed from every chapter on the manga, not just
+  // the currently filtered arc's — otherwise filtering to one arc would
+  // renumber its chapters relative to the manga as a whole.
+  const displayNumbers = useMemo(
+    () => getChapterDisplayNumbers([...arcs.flatMap((arc) => arc.chapters), ...looseChapters]),
+    [arcs, looseChapters]
+  );
 
   const chapters = useMemo(() => {
     const base = filteredArc
@@ -98,7 +107,7 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
       )}
 
       {activeView === "chapters" ? (
-        <ChapterList chapters={chapters} favoritedChapterIds={favoritedChapterIds} />
+        <ChapterList chapters={chapters} favoritedChapterIds={favoritedChapterIds} displayNumbers={displayNumbers} />
       ) : (
         <ArcList arcs={arcs} onSelectArc={selectArc} />
       )}

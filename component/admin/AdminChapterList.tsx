@@ -14,6 +14,8 @@ interface ChapterItem {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
+  pdfUrl: string | null;
+  pdfFileName: string | null;
 }
 
 interface AdminChapterListProps {
@@ -83,7 +85,6 @@ export default function AdminChapterList({
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
   }, [chapters]);
 
-  const hasEx = ordered.some((c) => c.chapterIsEx);
   const totalCount = ordered.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
@@ -116,20 +117,6 @@ export default function AdminChapterList({
     // Snap back to the last known-good server order on failure.
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
     return false;
-  }
-
-  // Used by AdminChapterRow's edit form when the position dropdown
-  // changes — moves this chapter to `newIndex` (0-indexed) within the full
-  // list.
-  async function reorderChapter(chapterId: string, newIndex: number): Promise<boolean> {
-    const currentIndex = ordered.findIndex((c) => c.id === chapterId);
-    if (currentIndex === -1 || currentIndex === newIndex) return true;
-
-    const next = ordered.slice();
-    const [moved] = next.splice(currentIndex, 1);
-    const insertAt = Math.min(Math.max(newIndex, 0), next.length);
-    next.splice(insertAt, 0, moved);
-    return commitOrder(next);
   }
 
   function handleDragOver(e: React.DragEvent, index: number) {
@@ -212,13 +199,13 @@ export default function AdminChapterList({
                 chapterName={c.chapterName}
                 publishedDate={c.publishedDate}
                 coverImageUrl={c.coverImageUrl}
+                pdfUrl={c.pdfUrl}
+                pdfFileName={c.pdfFileName}
+                mangaId={mangaId}
                 arcs={arcs}
-                position={index}
-                totalCount={totalCount}
-                hasOtherEx={hasEx && !c.chapterIsEx}
+                chapterOrder={c.chapterNumber}
                 isEditing={isBeingEdited}
                 onToggleEdit={() => onToggleEdit(c.id)}
-                onReorder={(newIndex) => reorderChapter(c.id, newIndex)}
               />
             </div>
           </div>

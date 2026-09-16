@@ -6,6 +6,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Columns2, Rows2, ChevronDown, Languages } from "lucide-react";
 import Link from "next/link";
+import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -14,13 +15,14 @@ type ReadingMode = "vertical" | "horizontal";
 interface ChapterSummary {
   id: string;
   chapter_number: number;
+  chapter_is_ex: boolean;
   chapter_name: string;
 }
 
 interface ChapterReaderProps {
-  pdfUrl: string;
-  chapterLabel: string;
-  chapterNumber: number;
+  pdfUrl: string | null;
+  currentChapterId: string;
+  chapterName: string;
   mangaTitle: string;
   mangaId: string;
   chapters: ChapterSummary[];
@@ -28,12 +30,17 @@ interface ChapterReaderProps {
 
 export default function ChapterReaderClient({
   pdfUrl,
-  chapterLabel,
-  chapterNumber,
+  currentChapterId,
+  chapterName,
   mangaTitle,
   mangaId,
   chapters,
 }: ChapterReaderProps) {
+  const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
+  const currentChapter = chapters.find((c) => c.id === currentChapterId);
+  const currentIsEx = currentChapter?.chapter_is_ex ?? false;
+  const currentDisplayNumber = displayNumbers.get(currentChapterId);
+  const chapterLabel = `Chapter ${currentIsEx ? "ex" : (currentDisplayNumber ?? 0)}: ${chapterName}`;
   const [mode, setMode] = useState<ReadingMode>("vertical");
   const [numPages, setNumPages] = useState<number>(0);
   const [pageWidth, setPageWidth] = useState(760);
@@ -213,7 +220,7 @@ export default function ChapterReaderClient({
                 className="flex gap-1.5 px-2.5 py-1.5 border border-[#050505] rounded text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
               >
                 <span className="text-sm font-bold">
-                  #{String(chapterNumber).padStart(3, "0")}
+                  {formatChapterBadge(currentIsEx, currentDisplayNumber)}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 text-[#b6b0a2] transition-transform duration-200 ${
@@ -233,11 +240,11 @@ export default function ChapterReaderClient({
                       href={`/viewer/${c.id}`}
                       onClick={() => setIsChapterMenuOpen(false)}
                       className={`flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#232224] transition-colors duration-200 ${
-                        c.chapter_number === chapterNumber ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
+                        c.id === currentChapterId ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
                       }`}
                     >
                       <span className="shrink-0">
-                        #{String(c.chapter_number).padStart(3, "0")}
+                        {formatChapterBadge(c.chapter_is_ex, displayNumbers.get(c.id))}
                       </span>
                       <span className="truncate">{c.chapter_name}</span>
                     </Link>
@@ -310,6 +317,11 @@ export default function ChapterReaderClient({
             : "max-w-225 mx-auto px-4 py-8"
         }
       >
+        {!pdfUrl ? (
+          <div className="text-center text-[#b6b0a2] py-20">
+            This chapter&apos;s file hasn&apos;t been uploaded yet.
+          </div>
+        ) : (
         <Document
           key={pdfUrl}
           file={pdfUrl}
@@ -379,6 +391,7 @@ export default function ChapterReaderClient({
             </div>
           )}
         </Document>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 export interface ChapterItem {
   id: string;
   chapter_number: number;
+  chapter_is_ex: boolean;
   chapter_name: string;
   published_date: Date;
 }

@@ -136,9 +136,10 @@ model Arc {
   manga_id       String
   arc_name       String
   arc_order      Int
-  // A single arc per manga can be flagged as the special "ex" (bonus/omake)
-  // entry — independent of arc_order, so it can be dragged to sit anywhere
-  // in the list while always displaying "ex" instead of a position number.
+  // Any number of arcs on a manga can be flagged as special "ex"
+  // (bonus/omake) entries — independent of arc_order, so each can be
+  // dragged to sit anywhere in the list while always displaying "ex"
+  // instead of a position number.
   arc_is_ex      Boolean   @default(false)
   arc_status     ArcStatus @default(ongoing)
   arc_image_url  String?   // cover image shown when browsing by arc
@@ -163,10 +164,10 @@ model Chapter {
   manga_id        String
   arc_id          String?
   chapter_number  Int
-  // A single chapter per manga can be flagged as the special "ex" (bonus/
-  // omake) entry — independent of chapter_number, so it can be dragged to
-  // sit anywhere in the list while always displaying "ex" instead of a
-  // position number. Mirrors Arc.arc_is_ex.
+  // Any number of chapters on a manga can be flagged as special "ex"
+  // (bonus/omake) entries — independent of chapter_number, so each can be
+  // dragged to sit anywhere in the list while always displaying "ex"
+  // instead of a position number. Mirrors Arc.arc_is_ex.
   chapter_is_ex   Boolean  @default(false)
   chapter_name    String
   cover_image_url String?  // thumbnail shown in the chapter list
@@ -194,6 +195,11 @@ model Translation {
   chapter_id     String
   language       Language
   file_url       String
+  // Original filename as uploaded (e.g. "chapter-12-final.pdf") — the R2
+  // object key itself is a random UUID, so this is purely for display in
+  // the admin panel. Nullable since translations created before this field
+  // existed have none.
+  file_name      String?
   translator_id  String?
   created_at     DateTime @default(now())
 

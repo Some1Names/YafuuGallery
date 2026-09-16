@@ -9,27 +9,17 @@ interface AdminArcRowProps {
   name: string;
   isEx: boolean;
   // "How many non-ex arcs come before this one" — only meaningful when
-  // !isEx. Independent of `position`, so dragging the ex arc around never
+  // !isEx. Independent of `arcOrder`, so dragging the ex arc around never
   // changes any regular arc's displayed number.
   displayNumber: number;
   status: "ongoing" | "completed";
   imageUrl: string | null;
-  // This arc's current 0-indexed slot within the manga's full arc list —
-  // drives the position dropdown below (valid slots are 0..totalCount-1).
-  position: number;
-  totalCount: number;
-  // Whether some OTHER arc already holds the special "ex" slot — when
-  // true, the ex checkbox here is disabled (only one ex per manga).
-  hasOtherEx: boolean;
+  // This arc's current raw arc_order value — sent back unchanged on save
+  // (reordering only ever happens by dragging in the list now, not from
+  // this form).
+  arcOrder: number;
   isEditing: boolean;
   onToggleEdit: () => void;
-  // Moves this arc to `newIndex` (0-indexed) within the manga's arc list,
-  // shifting every other arc out of the way via the reorder API's
-  // transaction. Called before the regular PATCH below whenever the
-  // position changed, since a plain PATCH straight to that arc_order
-  // would otherwise almost always collide with whichever sibling already
-  // sits there.
-  onReorder: (newIndex: number) => Promise<boolean>;
 }
 
 export default function AdminArcRow({
@@ -39,17 +29,13 @@ export default function AdminArcRow({
   displayNumber,
   status,
   imageUrl,
-  position,
-  totalCount,
-  hasOtherEx,
+  arcOrder,
   isEditing,
   onToggleEdit,
-  onReorder,
 }: AdminArcRowProps) {
   const router = useRouter();
   const [editImageUrl, setEditImageUrl] = useState(imageUrl);
   const [editName, setEditName] = useState(name);
-  const [editPosition, setEditPosition] = useState(position);
   const [editIsEx, setEditIsEx] = useState(isEx);
   const [editStatus, setEditStatus] = useState<"ongoing" | "completed">(status);
   const [isSaving, setIsSaving] = useState(false);
@@ -59,21 +45,12 @@ export default function AdminArcRow({
     setIsSaving(true);
     setError(null);
 
-    if (editPosition !== position) {
-      const reordered = await onReorder(editPosition);
-      if (!reordered) {
-        setIsSaving(false);
-        setError("Failed to reorder — please try again.");
-        return;
-      }
-    }
-
     const res = await fetch(`/api/admin/arcs/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         arc_name: editName,
-        arc_order: editPosition,
+        arc_order: arcOrder,
         arc_is_ex: editIsEx,
         arc_status: editStatus,
         arc_image_url: editImageUrl,
@@ -105,7 +82,6 @@ export default function AdminArcRow({
   function cancelEdit() {
     setEditImageUrl(imageUrl);
     setEditName(name);
-    setEditPosition(position);
     setEditIsEx(isEx);
     setEditStatus(status);
     setError(null);
@@ -180,15 +156,12 @@ export default function AdminArcRow({
                 </label>
                 <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
                   <select
-                    value={editPosition}
-                    onChange={(e) => setEditPosition(Number(e.target.value))}
+                    value={editIsEx ? "ex" : "number"}
+                    onChange={(e) => setEditIsEx(e.target.value === "ex")}
                     className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
                   >
-                    {Array.from({ length: totalCount }, (_, i) => (
-                      <option key={i} value={i}>
-                        #{String(i + 1).padStart(3, "0")}
-                      </option>
-                    ))}
+                    <option value="number">#{String(displayNumber).padStart(3, "0")}</option>
+                    <option value="ex">ex</option>
                   </select>
                   <input
                     value={editName}
@@ -199,35 +172,18 @@ export default function AdminArcRow({
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="sm:w-40">
-                  <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
-                    Status
-                  </label>
-                  <select
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value as "ongoing" | "completed")}
-                    className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
-                  >
-                    <option value="ongoing">Ongoing</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-
-                <label
-                  className={`flex items-center gap-2 text-sm pt-5 ${
-                    hasOtherEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={editIsEx}
-                    disabled={hasOtherEx}
-                    onChange={(e) => setEditIsEx(e.target.checked)}
-                    className="accent-[#ece6d8]"
-                  />
-                  Special (ex) arc
+              <div className="sm:w-40">
+                <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+                  Status
                 </label>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value as "ongoing" | "completed")}
+                  className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+                >
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                </select>
               </div>
             </div>
           </div>

@@ -30,6 +30,8 @@ interface ChapterItem {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
+  pdfUrl: string | null;
+  pdfFileName: string | null;
 }
 
 interface ArcOption {
@@ -205,6 +207,8 @@ export default function AdminDashboard({
                           chapterName: c.chapterName,
                           publishedDate: c.publishedDate,
                           coverImageUrl: c.coverImageUrl,
+                          pdfUrl: c.pdfUrl,
+                          pdfFileName: c.pdfFileName,
                         }))}
                       arcs={arcs
                         .filter((a) => a.manga_id === m.id)

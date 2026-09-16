@@ -19,6 +19,8 @@ interface ChapterItem {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
+  pdfUrl: string | null;
+  pdfFileName: string | null;
 }
 
 interface ArcOption {
@@ -315,7 +317,6 @@ export default function AdminMangaRow({
               <AdminArcCreateForm
                 mangaId={id}
                 totalCount={arcs.length}
-                hasEx={arcs.some((a) => a.arc_is_ex)}
                 isOpen={arcCreateOpen}
                 onOpenChange={handleArcCreateOpenChange}
               />
@@ -335,7 +336,6 @@ export default function AdminMangaRow({
                 mangaId={id}
                 arcs={arcs}
                 totalCount={chapters.length}
-                hasEx={chapters.some((c) => c.chapterIsEx)}
                 isOpen={chapterCreateOpen}
                 onOpenChange={handleChapterCreateOpenChange}
               />

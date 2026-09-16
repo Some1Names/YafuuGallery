@@ -18,8 +18,17 @@ export async function POST(request: NextRequest) {
   const session = await auth();
 
   const body = await request.json().catch(() => null);
-  const { manga_id, arc_id, chapter_number, chapter_name, published_date, cover_image_url, chapter_is_ex } =
-    body ?? {};
+  const {
+    manga_id,
+    arc_id,
+    chapter_number,
+    chapter_name,
+    published_date,
+    cover_image_url,
+    chapter_is_ex,
+    pdf_url,
+    pdf_file_name,
+  } = body ?? {};
 
   if (!manga_id || chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
     return NextResponse.json(
@@ -42,19 +51,6 @@ export async function POST(request: NextRequest) {
 
   const isEx = chapter_is_ex === true;
 
-  if (isEx) {
-    const existingEx = await prisma.chapter.findFirst({
-      where: { manga_id, chapter_is_ex: true },
-      select: { id: true },
-    });
-    if (existingEx) {
-      return NextResponse.json(
-        { error: "This manga already has a special (ex) chapter." },
-        { status: 409 }
-      );
-    }
-  }
-
   try {
     const chapter = await prisma.chapter.create({
       data: {
@@ -67,6 +63,22 @@ export async function POST(request: NextRequest) {
         cover_image_url: cover_image_url || null,
       },
     });
+
+    // No multi-language UI yet — every uploaded PDF is filed as the "en"
+    // translation for now, one per chapter. The schema already supports
+    // more languages per chapter (Translation is keyed on chapter+language)
+    // for whenever that's actually needed.
+    if (pdf_url) {
+      await prisma.translation.create({
+        data: {
+          chapter_id: chapter.id,
+          language: "en",
+          file_url: pdf_url,
+          file_name: pdf_file_name ?? null,
+          translator_id: session?.user?.id ?? null,
+        },
+      });
+    }
 
     return NextResponse.json(chapter, { status: 201 });
   } catch (err) {

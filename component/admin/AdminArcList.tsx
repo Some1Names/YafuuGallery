@@ -74,7 +74,6 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
     setOrdered(arcs.slice().sort((a, b) => a.arc_order - b.arc_order));
   }, [arcs]);
 
-  const hasEx = ordered.some((a) => a.arc_is_ex);
   const totalCount = ordered.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
@@ -107,19 +106,6 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
     // Snap back to the last known-good server order on failure.
     setOrdered(arcs.slice().sort((a, b) => a.arc_order - b.arc_order));
     return false;
-  }
-
-  // Used by AdminArcRow's edit form when the position dropdown changes —
-  // moves this arc to `newIndex` (0-indexed) within the full list.
-  async function reorderArc(arcId: string, newIndex: number): Promise<boolean> {
-    const currentIndex = ordered.findIndex((a) => a.id === arcId);
-    if (currentIndex === -1 || currentIndex === newIndex) return true;
-
-    const next = ordered.slice();
-    const [moved] = next.splice(currentIndex, 1);
-    const insertAt = Math.min(Math.max(newIndex, 0), next.length);
-    next.splice(insertAt, 0, moved);
-    return commitOrder(next);
   }
 
   function handleDragOver(e: React.DragEvent, index: number) {
@@ -200,12 +186,9 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
                 displayNumber={displayNumbers.get(a.id) ?? 0}
                 status={a.arc_status}
                 imageUrl={a.arc_image_url}
-                position={index}
-                totalCount={totalCount}
-                hasOtherEx={hasEx && !a.arc_is_ex}
+                arcOrder={a.arc_order}
                 isEditing={isBeingEdited}
                 onToggleEdit={() => onToggleEdit(a.id)}
-                onReorder={(newIndex) => reorderArc(a.id, newIndex)}
               />
             </div>
           </div>

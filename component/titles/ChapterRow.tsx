@@ -1,13 +1,15 @@
 import Link from "next/link";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
+import { formatChapterBadge } from "@/lib/chapter-number";
 import type { ChapterItem } from "./types";
 
 interface ChapterRowProps {
   chapter: ChapterItem;
+  displayNumber: number;
   isFavorited?: boolean;
 }
 
-export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowProps) {
+export default function ChapterRow({ chapter, displayNumber, isFavorited = false }: ChapterRowProps) {
   return (
     <Link
       href={`/viewer/${chapter.id}`}
@@ -25,7 +27,7 @@ export default function ChapterRow({ chapter, isFavorited = false }: ChapterRowP
         <div className="flex items-center justify-between gap-4 w-full">
           <div className="flex items-baseline gap-2">
             <span className="text-md sm:text-lg text-[#ece6d8] group-hover:text-[#f2f0f0] transition-colors duration-200">
-              #{String(chapter.chapter_number).padStart(3, "0")}
+              {formatChapterBadge(chapter.chapter_is_ex, displayNumber)}
             </span>
             <span className="text-xs sm:text-sm text-[#b6b0a2]">
               {chapter.published_date.toLocaleDateString("en-US", {

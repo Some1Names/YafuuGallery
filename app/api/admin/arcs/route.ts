@@ -42,19 +42,6 @@ export async function POST(request: NextRequest) {
   const status = arc_status === "completed" ? "completed" : "ongoing";
   const isEx = arc_is_ex === true;
 
-  if (isEx) {
-    const existingEx = await prisma.arc.findFirst({
-      where: { manga_id, arc_is_ex: true },
-      select: { id: true },
-    });
-    if (existingEx) {
-      return NextResponse.json(
-        { error: "This manga already has a special (ex) arc." },
-        { status: 409 }
-      );
-    }
-  }
-
   try {
     const arc = await prisma.arc.create({
       data: {

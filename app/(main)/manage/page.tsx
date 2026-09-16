@@ -22,7 +22,10 @@ export default async function ManageMangaPage() {
     prisma.chapter.findMany({
       where: { manga: { author_id: authorId } },
       orderBy: [{ manga: { manga_title: "asc" } }, { chapter_number: "asc" }],
-      include: { arc: { select: { arc_name: true } } },
+      include: {
+        arc: { select: { arc_name: true } },
+        translations: { select: { file_url: true, file_name: true } },
+      },
     }),
     prisma.arc.findMany({
       where: { manga: { author_id: authorId } },
@@ -62,6 +65,8 @@ export default async function ManageMangaPage() {
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
     coverImageUrl: c.cover_image_url,
+    pdfUrl: c.translations[0]?.file_url ?? null,
+    pdfFileName: c.translations[0]?.file_name ?? null,
   }));
 
   return (

@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // R2 is Cloudflare's S3-compatible object storage — same PutObjectCommand
 // API as AWS S3, just pointed at the account's R2 endpoint instead.
@@ -29,5 +30,18 @@ export async function uploadFile(key: string, file: File): Promise<string> {
     })
   );
 
+  return publicUrlFor(key);
+}
+
+// For large files (chapter PDFs, up to 200MB) a Vercel serverless function
+// can't proxy the upload — request bodies there are capped around 4.5MB.
+// Instead the browser uploads the bytes straight to R2 using a short-lived
+// presigned PUT URL, and the Next.js server never sees the file at all.
+export async function getPresignedUploadUrl(key: string, contentType: string): Promise<string> {
+  const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType });
+  return getSignedUrl(r2, command, { expiresIn: 3600 });
+}
+
+export function publicUrlFor(key: string): string {
   return `${PUBLIC_URL_BASE}/${key}`;
 }

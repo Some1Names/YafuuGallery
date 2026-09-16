@@ -3,16 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
+import AdminPdfUploadButton from "./AdminPdfUploadButton";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
   arcs: { id: string; arc_name: string }[];
-  // Current total chapters on this manga — the position dropdown offers
-  // every slot 0..totalCount (appending at the end is the default).
+  // Current total chapters on this manga — new chapters always append at
+  // the end (chapter_number: totalCount); reordering only ever happens by
+  // dragging in the list, not by picking a position here.
   totalCount: number;
-  // Whether some chapter already holds the special "ex" slot — when true,
-  // the ex checkbox here is disabled (only one ex per manga).
-  hasEx: boolean;
   // Controlled from AdminMangaRow so opening this form and editing an
   // existing chapter row mutually close each other — only one
   // chapter-related form is ever open at a time.
@@ -21,43 +20,39 @@ interface AdminChapterCreateFormProps {
 }
 
 // Always scoped to one manga (nested inside its AdminMangaRow), so there's
-// no manga picker here — just cover, arc, position, title, status, and the
-// ex flag. Collapsed to a single button by default, same open/close pattern
+// no manga picker here — just cover, arc, title, status, date, and the ex
+// flag. Collapsed to a single button by default, same open/close pattern
 // as AdminArcCreateForm/MangaCreateForm.
-export default function AdminChapterCreateForm({
-  mangaId,
-  arcs,
-  totalCount,
-  hasEx,
-  isOpen,
-  onOpenChange,
-}: AdminChapterCreateFormProps) {
+export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOpen, onOpenChange }: AdminChapterCreateFormProps) {
   const router = useRouter();
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfFileName, setPdfFileName] = useState<string | null>(null);
   const [arcId, setArcId] = useState("");
-  const [chapterPosition, setChapterPosition] = useState(totalCount);
   const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
   const [publishedDate, setPublishedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Every field is mandatory for a new chapter — cover and PDF included,
+  // even though neither is enforced with a native `required` attribute
+  // (they're upload buttons, not plain inputs). Gating the submit button
+  // on this is simpler than duplicating the same check server-side, since
+  // the fields that DO have `required` already stop a bare Enter-key
+  // submit from doing anything either.
+  const canSubmit =
+    coverImageUrl !== null && pdfUrl !== null && chapterName.trim() !== "" && publishedDate !== "";
+
   function resetForm() {
     setCoverImageUrl(null);
+    setPdfUrl(null);
+    setPdfFileName(null);
     setArcId("");
-    setChapterPosition(totalCount);
     setChapterIsEx(false);
     setChapterName("");
     setPublishedDate(new Date().toISOString().slice(0, 10));
     setError(null);
-  }
-
-  function handleOpen() {
-    // totalCount may have moved on since this form last reset (another
-    // chapter created elsewhere, page refreshed) — pick up the current
-    // value.
-    setChapterPosition(totalCount);
-    onOpenChange(true);
   }
 
   function handleCancel() {
@@ -77,11 +72,13 @@ export default function AdminChapterCreateForm({
         body: JSON.stringify({
           manga_id: mangaId,
           arc_id: arcId || null,
-          chapter_number: chapterPosition,
+          chapter_number: totalCount,
           chapter_is_ex: chapterIsEx,
           chapter_name: chapterName,
           published_date: publishedDate,
           cover_image_url: coverImageUrl,
+          pdf_url: pdfUrl,
+          pdf_file_name: pdfFileName,
         }),
       });
 
@@ -105,7 +102,7 @@ export default function AdminChapterCreateForm({
     return (
       <button
         type="button"
-        onClick={handleOpen}
+        onClick={() => onOpenChange(true)}
         className="self-start px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 transition-colors duration-200"
       >
         + Create Chapter
@@ -134,15 +131,12 @@ export default function AdminChapterCreateForm({
               </label>
               <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
                 <select
-                  value={chapterPosition}
-                  onChange={(e) => setChapterPosition(Number(e.target.value))}
+                  value={chapterIsEx ? "ex" : "number"}
+                  onChange={(e) => setChapterIsEx(e.target.value === "ex")}
                   className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
                 >
-                  {Array.from({ length: totalCount + 1 }, (_, i) => (
-                    <option key={i} value={i}>
-                      #{String(i + 1).padStart(3, "0")}
-                    </option>
-                  ))}
+                  <option value="number">#{String(totalCount + 1).padStart(3, "0")}</option>
+                  <option value="ex">ex</option>
                 </select>
                 <input
                   value={chapterName}
@@ -187,20 +181,17 @@ export default function AdminChapterCreateForm({
               />
             </div>
 
-            <label
-              className={`flex items-center gap-2 text-sm pt-5 ${
-                hasEx ? "text-[#6b655e] cursor-not-allowed" : "text-[#ece6d8] cursor-pointer"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={chapterIsEx}
-                disabled={hasEx}
-                onChange={(e) => setChapterIsEx(e.target.checked)}
-                className="accent-[#ece6d8]"
+            <div className="flex-1">
+              <AdminPdfUploadButton
+                mangaId={mangaId}
+                value={pdfUrl}
+                fileName={pdfFileName}
+                onChange={(url, name) => {
+                  setPdfUrl(url);
+                  setPdfFileName(name);
+                }}
               />
-              Special (ex) chapter
-            </label>
+            </div>
           </div>
         </div>
       </div>
@@ -217,7 +208,8 @@ export default function AdminChapterCreateForm({
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canSubmit}
+          title={!canSubmit ? "Cover, title, date, and PDF are all required" : undefined}
           className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Chapter"}
