@@ -17,6 +17,9 @@ export async function PATCH(request: NextRequest) {
   if (name !== undefined && (typeof name !== "string" || name.trim().length === 0)) {
     return NextResponse.json({ error: "Name can't be empty" }, { status: 400 });
   }
+  if (name !== undefined && /\s/.test(name.trim())) {
+    return NextResponse.json({ error: "Display name can't contain spaces" }, { status: 400 });
+  }
 
   const user = await prisma.user.update({
     where: { id: session.user.id },

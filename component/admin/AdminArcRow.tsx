@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 
 interface AdminArcRowProps {
@@ -20,6 +21,11 @@ interface AdminArcRowProps {
   arcOrder: number;
   isEditing: boolean;
   onToggleEdit: () => void;
+  // The drag-reorder grip AdminArcList renders for this row. On sm+ it
+  // stays outside the card (rendered by the list, to the left), but there's
+  // no cover thumbnail to anchor it against below sm, so the list hands it
+  // in here to render inline, inside the card's own border.
+  dragHandle?: React.ReactNode;
 }
 
 export default function AdminArcRow({
@@ -32,6 +38,7 @@ export default function AdminArcRow({
   arcOrder,
   isEditing,
   onToggleEdit,
+  dragHandle,
 }: AdminArcRowProps) {
   const router = useRouter();
   const [editImageUrl, setEditImageUrl] = useState(imageUrl);
@@ -90,14 +97,23 @@ export default function AdminArcRow({
 
   return (
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
-      {/* Same layout as AdminMangaRow's collapsed row — cover flush left,
-          stretched to the row's full height, content column beside it.
-          Stays visible while editing — the edit form drops down below it
-          instead of replacing it, like a dropdown/accordion panel, so the
-          row never disappears from the list mid-edit. */}
+      {/* Cover — hidden on mobile so the row stays a compact text row on
+          narrow screens (where a thumbnail this small isn't worth the
+          space), shown from sm up. Kept at the edit form's own cover
+          ratio (w-54 h-30, i.e. 1.8:1) but scaled down for a collapsed-row
+          thumbnail instead of stretching to the row's full height — arc
+          covers are wide/short, not the tall manga-poster shape, so
+          stretching them crops away most of the art. Stays visible while
+          editing — the edit form drops down below it instead of replacing
+          it, like a dropdown/accordion panel, so the row never disappears
+          from the list mid-edit. */}
       <div className="flex">
-        <div className="w-24 sm:w-32 shrink-0 bg-[#0a0a0a]">
-          {imageUrl && (
+        {dragHandle && (
+          <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
+        )}
+
+        <div className="hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
+          {imageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default, and
             // a mousedown starting on it would otherwise trigger the
@@ -105,10 +121,12 @@ export default function AdminArcRow({
             // AdminArcList's reorder drag.
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageUrl} alt="" draggable={false} className="w-full h-full object-cover" />
+          ) : (
+            <NoImagePlaceholder />
           )}
         </div>
 
-        <div className="min-w-0 flex-1 flex items-start gap-4 p-4">
+        <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-4">
           <div className="min-w-0 flex-1">
             <p className="text-base text-[#ece6d8] font-medium truncate">
               {isEx ? "ex" : `#${String(displayNumber).padStart(3, "0")}`} — {name}
@@ -116,7 +134,7 @@ export default function AdminArcRow({
             <p className="text-sm text-[#b6b0a2] mt-0.5 capitalize truncate">{status}</p>
           </div>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
             <button
               onClick={onToggleEdit}
               className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"

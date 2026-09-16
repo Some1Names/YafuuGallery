@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye } from "lucide-react";
+import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminPdfUploadButton from "./AdminPdfUploadButton";
 
@@ -29,6 +30,11 @@ interface AdminChapterRowProps {
   chapterOrder: number;
   isEditing: boolean;
   onToggleEdit: () => void;
+  // The drag-reorder grip AdminChapterList renders for this row. On sm+ it
+  // stays outside the card (rendered by the list, to the left), but there's
+  // no cover thumbnail to anchor it against below sm, so the list hands it
+  // in here to render inline, inside the card's own border.
+  dragHandle?: React.ReactNode;
 }
 
 export default function AdminChapterRow({
@@ -47,6 +53,7 @@ export default function AdminChapterRow({
   chapterOrder,
   isEditing,
   onToggleEdit,
+  dragHandle,
 }: AdminChapterRowProps) {
   const router = useRouter();
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
@@ -109,22 +116,33 @@ export default function AdminChapterRow({
 
   return (
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
-      {/* Same layout as AdminArcRow/AdminMangaRow's collapsed row — cover
-          flush left, stretched to the row's full height, content column
-          beside it. Stays visible while editing — the edit form drops down
-          below it instead of replacing it, like a dropdown/accordion
-          panel, so the row never disappears from the list mid-edit. */}
+      {/* Cover — hidden on mobile so the row stays a compact text row on
+          narrow screens (where a thumbnail this small isn't worth the
+          space), shown from sm up. Kept at the edit form's own cover
+          ratio (w-54 h-30, i.e. 1.8:1) but scaled down for a collapsed-row
+          thumbnail instead of stretching to the row's full height — chapter
+          covers are wide/short, not the tall manga-poster shape, so
+          stretching them crops away most of the art. Stays visible while
+          editing — the edit form drops down below it instead of replacing
+          it, like a dropdown/accordion panel, so the row never disappears
+          from the list mid-edit. */}
       <div className="flex">
-        <div className="w-24 sm:w-32 shrink-0 bg-[#0a0a0a]">
-          {coverImageUrl && (
+        {dragHandle && (
+          <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
+        )}
+
+        <div className="hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
+          {coverImageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default.
             // eslint-disable-next-line @next/next/no-img-element
             <img src={coverImageUrl} alt="" draggable={false} className="w-full h-full object-cover" />
+          ) : (
+            <NoImagePlaceholder />
           )}
         </div>
 
-        <div className="min-w-0 flex-1 flex items-start gap-4 p-4">
+        <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-4">
           <div className="min-w-0 flex-1">
             <p className="text-base text-[#ece6d8] font-medium truncate">
               {isEx ? "ex" : `#${String(displayNumber).padStart(3, "0")}`} — {chapterName}
@@ -135,7 +153,7 @@ export default function AdminChapterRow({
             </p>
           </div>
 
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
             {pdfUrl && (
               <Link
                 href={`/viewer/${id}`}

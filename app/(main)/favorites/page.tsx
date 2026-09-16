@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import FavoriteChapterCard from "@/component/titles/FavoriteChapterCard";
+import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function FavoritesPage({
   searchParams,
@@ -28,10 +29,12 @@ export default async function FavoritesPage({
         manga: {
           include: {
             author: { select: { name: true } },
+            // chapter_number is a 0-indexed sort key, not the number shown
+            // to readers, and doesn't skip "ex" entries — computing the
+            // real display number needs every chapter (see
+            // lib/chapter-number.ts)
             chapters: {
-              orderBy: { chapter_number: "desc" },
-              take: 1,
-              select: { chapter_number: true, chapter_name: true },
+              select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
             },
           },
         },
@@ -45,6 +48,7 @@ export default async function FavoritesPage({
           select: {
             id: true,
             chapter_number: true,
+            chapter_is_ex: true,
             chapter_name: true,
             cover_image_url: true,
             manga: { select: { id: true, manga_title: true } },
@@ -67,6 +71,24 @@ export default async function FavoritesPage({
     }
     group.chapters.push(fav);
   }
+
+  // chapter_number is a 0-indexed sort key, not the number shown to
+  // readers — the display number depends on this chapter's position among
+  // its OWN manga's non-ex chapters, so fetch each group's manga's full
+  // chapter list to compute it correctly (see lib/chapter-number.ts).
+  const favMangaIds = chapterGroups.map((g) => g.mangaId);
+  const favSiblingChapters = favMangaIds.length
+    ? await prisma.chapter.findMany({
+        where: { manga_id: { in: favMangaIds } },
+        select: { id: true, manga_id: true, chapter_number: true, chapter_is_ex: true },
+      })
+    : [];
+  const favDisplayNumbers = new Map(
+    favMangaIds.map((mangaId) => [
+      mangaId,
+      getChapterDisplayNumbers(favSiblingChapters.filter((c) => c.manga_id === mangaId)),
+    ])
+  );
 
   const tabClass = (isActive: boolean) =>
     "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
@@ -110,7 +132,8 @@ export default async function FavoritesPage({
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
               {bookmarkedManga.map(({ manga }) => {
-                const latest = manga.chapters[0];
+                const latest = manga.chapters.slice().sort((a, b) => b.chapter_number - a.chapter_number)[0];
+                const displayNumbers = getChapterDisplayNumbers(manga.chapters);
                 return (
                   <MangaCard
                     key={manga.id}
@@ -118,7 +141,8 @@ export default async function FavoritesPage({
                     title={manga.manga_title}
                     author={manga.author.name ?? "Unknown"}
                     coverImageUrl={manga.cover_image_url}
-                    latestChapterNumber={latest?.chapter_number ?? null}
+                    latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
+                    latestChapterIsEx={latest?.chapter_is_ex ?? false}
                     latestChapterName={latest?.chapter_name ?? null}
                     updatedAt={manga.updated_at}
                     isFavorited
@@ -148,7 +172,8 @@ export default async function FavoritesPage({
                     <FavoriteChapterCard
                       key={chapter.id}
                       chapterId={chapter.id}
-                      chapterNumber={chapter.chapter_number}
+                      displayNumber={favDisplayNumbers.get(group.mangaId)?.get(chapter.id) ?? 0}
+                      chapterIsEx={chapter.chapter_is_ex}
                       chapterName={chapter.chapter_name}
                       coverImageUrl={chapter.cover_image_url}
                     />

@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
+import NoImagePlaceholder from "./NoImagePlaceholder";
+import { formatChapterBadge } from "@/lib/chapter-number";
 
 interface MangaCardProps {
   id: string;
   title: string;
   author: string;
   coverImageUrl: string | null;
-  latestChapterNumber: number | null;
+  // null exactly when the manga has no chapters at all — otherwise this is
+  // the manga's highest chapter_number entry, which formatChapterBadge
+  // turns into "#001" (or "ex", if that entry happens to be one)
+  latestChapterDisplayNumber: number | null;
+  latestChapterIsEx: boolean;
   latestChapterName: string | null;
   updatedAt: Date;
   // omit entirely to hide the heart badge — only pages that already know
@@ -49,7 +55,8 @@ export default function MangaCard({
   title,
   author,
   coverImageUrl,
-  latestChapterNumber,
+  latestChapterDisplayNumber,
+  latestChapterIsEx,
   latestChapterName,
   updatedAt,
   isFavorited,
@@ -61,11 +68,15 @@ export default function MangaCard({
       {/* Cover */}
       <div className="relative w-full aspect-2/3 rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-[1.03]">
         {/* Cover Image */}
-        <img
-          src={coverImageUrl ?? "/coverimage.png"}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {coverImageUrl ? (
+          <img
+            src={coverImageUrl}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <NoImagePlaceholder />
+        )}
 
         {/* Last Updated */}
         <div
@@ -79,18 +90,18 @@ export default function MangaCard({
         </div>
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 flex flex-col gap-5 px-6 py-15 bg-white/85 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 flex flex-col gap-5 px-6 py-15 bg-[#0a0a0a]/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="flex flex-col">
-            <div className="text-black font-bold text-xl line-clamp-1">{title}</div>
-            <div className="text-gray-500 text-base">{author}</div>
+            <div className="text-[#ece6d8] font-bold text-xl line-clamp-1">{title}</div>
+            <div className="text-[#b6b0a2] text-base">{author}</div>
           </div>
 
-          {latestChapterNumber !== null && (
+          {latestChapterName !== null && (
             <div className="flex flex-col">
-              <div className="self-start px-2 py-1 bg-black text-white text-sm font-bold rounded-sm">
-                #{String(latestChapterNumber).padStart(3, "0")}
+              <div className="self-start px-2 py-1 bg-[#ece6d8] text-[#0a0a0a] text-sm font-bold rounded-sm">
+                {formatChapterBadge(latestChapterIsEx, latestChapterDisplayNumber ?? undefined)}
               </div>
-              <div className="text-gray-500 text-lg">{latestChapterName}</div>
+              <div className="text-[#b6b0a2] text-lg">{latestChapterName}</div>
             </div>
           )}
         </div>
@@ -108,7 +119,9 @@ export default function MangaCard({
       <div className="flex flex-col">
         <div className="font-bold text-xl line-clamp-2">{title}</div>
         <div className="text-gray-500 text-base">
-          {latestChapterNumber !== null ? `#${String(latestChapterNumber).padStart(3, "0")}` : "No chapters yet"}
+          {latestChapterName !== null
+            ? formatChapterBadge(latestChapterIsEx, latestChapterDisplayNumber ?? undefined)
+            : "No chapters yet"}
         </div>
       </div>
     </Link>

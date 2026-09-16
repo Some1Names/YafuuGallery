@@ -86,6 +86,7 @@ export default async function AdminPage() {
     favoriteCount: m._count.bookmarks,
     coverImageUrl: m.cover_image_url,
     bannerImageUrl: m.banner_image_url,
+    isFeatured: m.is_featured,
   }));
 
   const chapterItems = chapters.map((c) => ({

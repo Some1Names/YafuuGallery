@@ -205,7 +205,7 @@ export default function ChapterReaderClient({
             >
               <span>‹</span>
             </Link>
-            <div className="text-lg uppercase text-[#ece6d8] tracking-wide shrink-0">
+            <div className="hidden sm:block text-lg uppercase text-[#ece6d8] tracking-wide shrink-0">
               {mangaTitle}
             </div>
 
@@ -253,7 +253,7 @@ export default function ChapterReaderClient({
               )}
             </div>
 
-            <div className="text-sm text-[#b6b0a2] truncate min-w-0">{chapterLabel}</div>
+            <div className="hidden sm:block text-sm text-[#b6b0a2] truncate min-w-0">{chapterLabel}</div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
@@ -269,7 +269,7 @@ export default function ChapterReaderClient({
               type="button"
               aria-label="Change language"
               title="Language"
-              className="p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
+              className="hidden sm:inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
             >
               <Languages className="w-4 h-4" />
             </button>

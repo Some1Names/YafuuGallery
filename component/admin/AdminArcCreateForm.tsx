@@ -35,6 +35,11 @@ export default function AdminArcCreateForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Cover isn't enforced with a native `required` attribute (it's an
+  // upload button, not a plain input), so gate the submit button on it
+  // directly — same pattern as AdminChapterCreateForm.
+  const canSubmit = arcImageUrl !== null && arcName.trim() !== "";
+
   function resetForm() {
     setArcImageUrl(null);
     setArcName("");
@@ -160,7 +165,8 @@ export default function AdminArcCreateForm({
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canSubmit}
+          title={!canSubmit ? "Cover and arc name are required" : undefined}
           className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Arc"}

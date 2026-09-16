@@ -1,3 +1,5 @@
+import NoImagePlaceholder from "@/component/NoImagePlaceholder";
+
 interface MangaHeroProps {
   imageUrl: string | null;
 }
@@ -7,9 +9,15 @@ interface MangaHeroProps {
 // bg-contain still keeps anything off-spec fully visible, just letterboxed.
 export default function MangaHero({ imageUrl }: MangaHeroProps) {
   return (
-    <div
-      className="relative w-full aspect-32/9 bg-[#ece6d8] bg-contain bg-no-repeat bg-center rounded-none sm:rounded-md mb-6 sm:mb-14 overflow-hidden"
-      style={{ backgroundImage: `url('${imageUrl ?? "/wide.png"}')` }}
-    />
+    <div className="relative w-full aspect-32/9 rounded-none sm:rounded-md mb-6 sm:mb-14 overflow-hidden">
+      {imageUrl ? (
+        <div
+          className="absolute inset-0 bg-[#ece6d8] bg-contain bg-no-repeat bg-center"
+          style={{ backgroundImage: `url('${imageUrl}')` }}
+        />
+      ) : (
+        <NoImagePlaceholder />
+      )}
+    </div>
   );
 }

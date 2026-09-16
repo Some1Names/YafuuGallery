@@ -1,8 +1,11 @@
 import Link from "next/link";
+import NoImagePlaceholder from "@/component/NoImagePlaceholder";
+import { formatChapterBadge } from "@/lib/chapter-number";
 
 interface ContinueReadingCardProps {
   chapterId: string;
-  chapterNumber: number;
+  displayNumber: number;
+  chapterIsEx: boolean;
   chapterName: string;
   coverImageUrl: string | null;
   mangaTitle: string;
@@ -13,7 +16,8 @@ interface ContinueReadingCardProps {
 // cards can come from any series, not one grouped-by-title section.
 export default function ContinueReadingCard({
   chapterId,
-  chapterNumber,
+  displayNumber,
+  chapterIsEx,
   chapterName,
   coverImageUrl,
   mangaTitle,
@@ -23,17 +27,21 @@ export default function ContinueReadingCard({
       href={`/viewer/${chapterId}`}
       className="group relative block w-full aspect-square rounded-lg overflow-hidden bg-[#ece6d8]"
     >
-      <img
-        src={coverImageUrl ?? "/placeholder.png"}
-        alt={chapterName}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
+      {coverImageUrl ? (
+        <img
+          src={coverImageUrl}
+          alt={chapterName}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      ) : (
+        <NoImagePlaceholder />
+      )}
       <div className="absolute inset-0 bg-linear-to-t from-[#1b1a1c] via-[#1b1a1c]/10 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-3">
         <div className="text-[#ece6d8]/70 text-xs truncate">{mangaTitle}</div>
         <div className="text-[#ece6d8] text-lg font-(family-name:--font-display)">
-          #{String(chapterNumber).padStart(3, "0")}
+          {formatChapterBadge(chapterIsEx, displayNumber)}
         </div>
         <div className="text-[#ece6d8]/80 text-xs truncate">{chapterName}</div>
       </div>

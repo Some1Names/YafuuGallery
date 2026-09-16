@@ -22,3 +22,24 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
+
+/* Fill animation for the featured carousel's active dot — shows how much
+   longer until it auto-advances to the next slide. Restarted by giving the
+   fill element a `key` tied to the active slide, in FeaturedCarousel. */
+@keyframes carousel-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* The browser's own round "x" clear button on <input type="search">
+   doesn't match the site's icon language (Lucide, not native chrome) —
+   suppressed everywhere in favor of an explicit Lucide X button next to
+   each search input. */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}

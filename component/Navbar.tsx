@@ -214,7 +214,7 @@ export default function Navbar({ user }: NavbarProps) {
           <Link
             href="/search"
             aria-label="Search"
-            className="w-8 h-8 rounded-full border border-[#050505] flex items-center justify-center text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
           >
             <Search className="w-4 h-4" />
           </Link>
@@ -247,7 +247,7 @@ export default function Navbar({ user }: NavbarProps) {
             {isMenuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-2 flex items-center gap-1 p-1.5 bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg"
+              className="absolute right-0 top-full mt-2 w-44 flex flex-col bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg overflow-hidden"
             >
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -257,54 +257,50 @@ export default function Navbar({ user }: NavbarProps) {
                     key={item.href}
                     href={item.href}
                     role="menuitem"
-                    aria-label={item.label}
-                    title={item.label}
                     className={
-                      "w-10 h-10 flex items-center justify-center rounded transition-colors duration-200 " +
+                      "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
                       (isActive ? "text-[#ece6d8] bg-[#232224]" : "text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]")
                     }
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4" />
+                    {item.label}
                   </Link>
                 );
               })}
 
-              <div className="w-px h-6 bg-[#050505] mx-0.5" />
+              <div className="border-t border-[#050505]" />
 
               {user ? (
                 <>
                   <Link
                     href="/profile"
                     role="menuitem"
-                    aria-label={user.name ?? "Profile"}
-                    title={user.name ?? "Profile"}
                     className={
-                      "w-10 h-10 flex items-center justify-center rounded transition-colors duration-200 " +
+                      "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
                       (pathname === "/profile" ? "text-[#ece6d8] bg-[#232224]" : "text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]")
                     }
                   >
-                    <User className="w-5 h-5" />
+                    <User className="w-4 h-4" />
+                    {user.name ?? "Profile"}
                   </Link>
                   <button
                     type="button"
                     onClick={handleSignOut}
                     role="menuitem"
-                    aria-label="Sign out"
-                    title="Sign out"
-                    className="w-10 h-10 flex items-center justify-center rounded text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8] transition-colors duration-200"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8] transition-colors duration-200"
                   >
-                    <LogOut className="w-5 h-5" />
+                    <LogOut className="w-4 h-4" />
+                    Sign out
                   </button>
                 </>
               ) : (
                 <Link
                   href="/signup"
                   role="menuitem"
-                  aria-label="Sign up"
-                  title="Sign up"
-                  className="w-10 h-10 flex items-center justify-center rounded text-[#ece6d8] hover:bg-[#232224] transition-colors duration-200"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#ece6d8] hover:bg-[#232224] transition-colors duration-200"
                 >
-                  <UserPlus className="w-5 h-5" />
+                  <UserPlus className="w-4 h-4" />
+                  Sign up
                 </Link>
               )}
             </div>

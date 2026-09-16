@@ -100,6 +100,10 @@ export default function ProfileEditForm({
       setError("Name can't be empty");
       return;
     }
+    if (/\s/.test(trimmed)) {
+      setError("Display name can't contain spaces");
+      return;
+    }
 
     setIsEditingName(false);
     setName(trimmed);

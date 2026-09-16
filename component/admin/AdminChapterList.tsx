@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminChapterRow from "./AdminChapterRow";
@@ -27,14 +27,20 @@ interface AdminChapterListProps {
 }
 
 const PAGE_SIZE = 5;
+// Must match the `gap-3` on the list's own flex container below.
+const ROW_GAP_PX = 12;
 
 // A blank row matching a real AdminChapterRow's collapsed-view box model
 // (same cover width, same p-4 + text-base/text-sm stack) so that padding
 // the page out to PAGE_SIZE rows reserves the exact same height a full
 // page would take, rather than a guessed pixel value.
-function ChapterRowPlaceholder() {
+// Hidden below sm past the first one — reserving a full page's worth of
+// blank height makes sense on desktop (keeps the panel from jumping
+// between pages), but on a phone that's a lot of wasted scroll for pure
+// spacing, so mobile only reserves room for 1 row.
+function ChapterRowPlaceholder({ index }: { index: number }) {
   return (
-    <div className="rounded-md overflow-hidden" aria-hidden="true">
+    <div className={`rounded-md overflow-hidden ${index === 0 ? "" : "hidden sm:block"}`} aria-hidden="true">
       <div className="flex">
         <div className="w-24 sm:w-32 shrink-0" />
         <div className="flex-1 p-4">
@@ -59,13 +65,20 @@ function ChapterRowPlaceholder() {
 // position but never the relative order of the regular chapters to each
 // other.
 //
-// Drag-and-drop reorders on drop, not incrementally on every dragover.
-// Mutating the list (and therefore the DOM) mid-drag used to reshuffle
-// rows out from under the cursor while the browser was still tracking one
-// as the drop target, which made the native drop event stop firing
-// partway through a drag. Tracking dragOverIndex separately keeps every
-// row's position — and its drop-target tracking — stable for the whole
-// gesture; only the hover highlight updates until the actual drop.
+// Reordering is done with the Pointer Events API rather than native HTML5
+// drag-and-drop — the native `draggable` attribute never fires drag events
+// for touch input at all (it's mouse-only in every mobile browser), so it
+// silently did nothing on a phone. Pointer events unify mouse and touch
+// through one API. A drag can only start from the grip handle (not
+// anywhere on the row) so the rest of the row stays normally
+// touch-scrollable.
+//
+// Reorders commit on release, not incrementally on every pointer move —
+// mutating the list (and therefore the DOM) mid-drag would reshuffle rows
+// out from under the pointer while it's still mid-gesture. Tracking
+// dragOverIndex separately keeps every row's position stable for the whole
+// gesture; only the drop-target outline and the dragged row's own offset
+// update until the actual release.
 export default function AdminChapterList({
   mangaId,
   chapters,
@@ -79,7 +92,24 @@ export default function AdminChapterList({
   );
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
   const [page, setPage] = useState(0);
+
+  const dragStartYRef = useRef(0);
+  // Height of the row being dragged, captured once at pointer-down — used
+  // to know how far its neighbors need to shift to visually "make room"
+  // for it as it moves (see dragTargetOriginalIndex below). ROW_GAP_PX
+  // matches the list container's own `gap-3`; there's no DOM way to read a
+  // flex gap back out, so it's a plain constant kept in sync with the
+  // className below by hand.
+  const dragRowHeightRef = useRef(0);
+  // Mirrors dragOverIndex for synchronous reads from the window listener
+  // below — that listener only resubscribes when dragIndex changes (not on
+  // every pointermove), so its pointerup/pointercancel closures would
+  // otherwise see whatever dragOverIndex was at drag-start, not the latest
+  // value.
+  const dragOverIndexRef = useRef<number | null>(null);
+  const rowRefs = useRef(new Map<number, HTMLDivElement>());
 
   useEffect(() => {
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
@@ -119,31 +149,96 @@ export default function AdminChapterList({
     return false;
   }
 
-  function handleDragOver(e: React.DragEvent, index: number) {
+  // Returns where the dragged item would land among the OTHER rows, as a
+  // position in that (N-1)-length list — i.e. "insert at this index after
+  // removing the dragged one". Counting how many other rows have their
+  // midpoint above the pointer gives that position directly. The dragged
+  // row itself is excluded from the count (its own rect gets excluded, not
+  // skipped-past) so that a pointer that hasn't actually crossed a
+  // neighbor's midpoint yet — including one that hasn't moved at all —
+  // resolves back to the row's own starting slot instead of drifting onto
+  // a neighbor. (Previously this excluded the dragged row from the
+  // candidate list without excluding it from the count, which meant even a
+  // stationary pointer could resolve one slot off from where the drag
+  // started — the "accidental drag reorders things without moving"
+  // report.)
+  function findOverIndex(clientY: number, currentDragIndex: number): number {
+    const entries = [...rowRefs.current.entries()].sort((a, b) => a[0] - b[0]);
+    let position = 0;
+    for (const [idx, el] of entries) {
+      if (idx === currentDragIndex) continue;
+      const rect = el.getBoundingClientRect();
+      if (clientY > rect.top + rect.height / 2) position++;
+    }
+    return position;
+  }
+
+  function handleGripPointerDown(e: React.PointerEvent<HTMLElement>, index: number) {
     e.preventDefault();
-    if (dragIndex === null || dragIndex === index) return;
-    if (dragOverIndex !== index) setDragOverIndex(index);
+    dragStartYRef.current = e.clientY;
+    dragRowHeightRef.current = rowRefs.current.get(index)?.getBoundingClientRect().height ?? 0;
+    dragOverIndexRef.current = index;
+    setDragIndex(index);
+    setDragOverIndex(index);
+    setDragOffsetY(0);
+    try {
+      // Nice-to-have (keeps a mouse's "grabbing" cursor and hover states
+      // pinned to the grip while dragging) but no longer load-bearing —
+      // the window listeners below track the gesture regardless of
+      // whether this succeeds.
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
   }
 
-  async function handleDrop() {
-    const from = dragIndex;
-    const to = dragOverIndex;
-    setDragIndex(null);
-    setDragOverIndex(null);
-    if (from === null || to === null || from === to) return;
+  // Tracks the drag via window-level listeners instead of handlers on the
+  // grip itself. A handler on the grip only keeps receiving events once
+  // the pointer leaves it if setPointerCapture succeeded — on a real
+  // touchscreen a fast finger movement off the small grip icon can outrun
+  // or fail that capture, silently dropping the rest of the gesture
+  // (the drag would start but never actually track or commit). Listening
+  // on window sidesteps that: every pointermove/pointerup bubbles up to
+  // window regardless of capture.
+  useEffect(() => {
+    if (dragIndex === null) return;
 
-    const next = ordered.slice();
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    await commitOrder(next);
-  }
+    function onMove(e: PointerEvent) {
+      setDragOffsetY(e.clientY - dragStartYRef.current);
+      const over = findOverIndex(e.clientY, dragIndex as number);
+      dragOverIndexRef.current = over;
+      setDragOverIndex(over);
+    }
+
+    function finishDrag() {
+      const from = dragIndex as number;
+      const to = dragOverIndexRef.current ?? from;
+      setDragIndex(null);
+      setDragOverIndex(null);
+      setDragOffsetY(0);
+      if (from === to) return;
+
+      const next = ordered.slice();
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      commitOrder(next);
+    }
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", finishDrag);
+    window.addEventListener("pointercancel", finishDrag);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", finishDrag);
+      window.removeEventListener("pointercancel", finishDrag);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragIndex]);
 
   if (totalCount === 0) {
     return (
       <div className="relative">
         <div className="flex flex-col gap-3" aria-hidden="true">
           {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-            <ChapterRowPlaceholder key={i} />
+            <ChapterRowPlaceholder key={i} index={i} />
           ))}
         </div>
         <p className="absolute inset-0 flex items-center justify-center text-xs text-[#6b655e]">
@@ -153,40 +248,78 @@ export default function AdminChapterList({
     );
   }
 
+  // The original-index equivalent of dragOverIndex — "insert before this
+  // original row" — used to work out which rows between the drag's start
+  // and current position need to visually shift out of the way. See
+  // findOverIndex for why dragOverIndex itself is in post-removal terms.
+  const dragTargetOriginalIndex =
+    dragIndex !== null && dragOverIndex !== null
+      ? dragOverIndex < dragIndex
+        ? dragOverIndex
+        : dragOverIndex + 1
+      : null;
+
   return (
     <div className="flex flex-col gap-3">
       {pageItems.map((c, localIndex) => {
         const index = pageStart + localIndex;
         const isBeingEdited = editingChapterId === c.id;
+        const isDragging = dragIndex === index;
+
+        // Real-time "auto sort" preview: rows between the drag's start and
+        // current target slide out of the way by exactly one row's worth
+        // of space, so the list visibly reflows around where the dragged
+        // row will land — instead of just outlining a static target row.
+        let dragShiftY = 0;
+        if (!isDragging && dragIndex !== null && dragTargetOriginalIndex !== null) {
+          const slot = dragRowHeightRef.current + ROW_GAP_PX;
+          if (dragTargetOriginalIndex > dragIndex && index > dragIndex && index < dragTargetOriginalIndex) {
+            dragShiftY = -slot;
+          } else if (dragTargetOriginalIndex < dragIndex && index >= dragTargetOriginalIndex && index < dragIndex) {
+            dragShiftY = slot;
+          }
+        }
+
+        // The grip is rendered twice — once here for sm+ (beside the
+        // cover), once passed into AdminChapterRow to render inline inside
+        // the card below sm (there's no cover there to sit beside). Both
+        // copies share the same pointer-down handler for this row; move/up
+        // tracking happens on window (see the effect above).
+        const gripHandle = !isBeingEdited && (
+          <span
+            className="flex items-center cursor-grab active:cursor-grabbing touch-none select-none"
+            onPointerDown={(e) => handleGripPointerDown(e, index)}
+          >
+            <GripVertical className="w-4 h-4" />
+          </span>
+        );
+
         return (
           <div
             key={c.id}
-            draggable={!isBeingEdited}
-            onDragStart={(e) => {
-              // Firefox refuses to continue a drag that never calls
-              // setData in dragstart — the payload itself is unused
-              // since state (dragIndex) already tracks what's moving.
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", c.id);
-              setDragIndex(index);
+            ref={(el) => {
+              if (el) rowRefs.current.set(index, el);
+              else rowRefs.current.delete(index);
             }}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDrop={handleDrop}
-            onDragEnd={() => {
-              setDragIndex(null);
-              setDragOverIndex(null);
-            }}
-            className={`flex items-stretch gap-1.5 transition-opacity duration-150 ${
-              dragIndex === index ? "opacity-50" : ""
-            } ${
-              dragIndex !== null && dragIndex !== index && dragOverIndex === index
-                ? "outline outline-2 outline-[#ece6d8] rounded-md"
-                : ""
+            style={
+              isDragging
+                ? { transform: `translateY(${dragOffsetY}px)`, zIndex: 50 }
+                : dragShiftY !== 0
+                  ? { transform: `translateY(${dragShiftY}px)` }
+                  : undefined
+            }
+            className={`relative flex items-stretch gap-1.5 ${
+              isDragging
+                ? "shadow-lg scale-[1.02] bg-[#0a0a0a] rounded-md"
+                : "transition-transform duration-150 ease-out"
             }`}
           >
             {!isBeingEdited && (
-              <div className="flex items-center px-1 text-[#6b655e] hover:text-[#b6b0a2] cursor-grab active:cursor-grabbing transition-colors duration-200">
-                <GripVertical className="w-4 h-4" />
+              // Hidden below sm — there's no cover thumbnail there for it to
+              // sit beside, so AdminChapterRow renders its own copy inline,
+              // inside the card, instead.
+              <div className="hidden sm:flex items-center px-1 text-[#6b655e] hover:text-[#b6b0a2] transition-colors duration-200">
+                {gripHandle}
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -206,6 +339,7 @@ export default function AdminChapterList({
                 chapterOrder={c.chapterNumber}
                 isEditing={isBeingEdited}
                 onToggleEdit={() => onToggleEdit(c.id)}
+                dragHandle={gripHandle}
               />
             </div>
           </div>
@@ -213,7 +347,7 @@ export default function AdminChapterList({
       })}
 
       {Array.from({ length: placeholderCount }).map((_, i) => (
-        <ChapterRowPlaceholder key={`placeholder-${i}`} />
+        <ChapterRowPlaceholder key={`placeholder-${i}`} index={i} />
       ))}
 
       {totalCount > PAGE_SIZE && (

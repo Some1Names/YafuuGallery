@@ -1,7 +1,10 @@
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { Search, X } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
+import RecentSearches from "@/component/search/RecentSearches";
+import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function SearchPage({
   searchParams,
@@ -13,14 +16,21 @@ export default async function SearchPage({
 
   const mangaList = query
     ? await prisma.manga.findMany({
-        where: { manga_title: { contains: query, mode: "insensitive" } },
+        where: {
+          OR: [
+            { manga_title: { contains: query, mode: "insensitive" } },
+            { author: { name: { contains: query, mode: "insensitive" } } },
+            { chapters: { some: { chapter_name: { contains: query, mode: "insensitive" } } } },
+          ],
+        },
         orderBy: { updated_at: "desc" },
         include: {
           author: { select: { name: true } },
+          // chapter_number is a 0-indexed sort key, not the number shown to
+          // readers, and doesn't skip "ex" entries — computing the real
+          // display number needs every chapter (see lib/chapter-number.ts)
           chapters: {
-            orderBy: { chapter_number: "desc" },
-            take: 1,
-            select: { chapter_number: true, chapter_name: true },
+            select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
           },
         },
       })
@@ -39,7 +49,7 @@ export default async function SearchPage({
           <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">
             Search
           </h1>
-          <p className="text-sm text-[#b6b0a2]">Find manga by title.</p>
+          <p className="text-sm text-[#b6b0a2]">Find manga by title, author, or chapter name.</p>
         </div>
 
         <form action="/search" method="GET" className="mb-10">
@@ -49,12 +59,27 @@ export default async function SearchPage({
               type="search"
               name="q"
               defaultValue={query}
-              placeholder="Search manga titles…"
+              placeholder="Search by title, author, or chapter…"
               autoFocus
-              className="w-full bg-[#1b1a1c] border border-[#050505] rounded-md pl-10 pr-4 py-2.5 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
+              className="w-full bg-[#1b1a1c] border border-[#050505] rounded-md pl-10 pr-10 py-2.5 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
             />
+            {/* Replaces the browser's own native "x" clear button (suppressed
+                in globals.css) with one that matches the site's Lucide icon
+                language. No client JS needed — the query is already known
+                server-side, so this is just a link back to a bare /search. */}
+            {query && (
+              <Link
+                href="/search"
+                aria-label="Clear search"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b655e] hover:text-[#ece6d8] transition-colors duration-200"
+              >
+                <X className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </form>
+
+        <RecentSearches query={query} />
 
         {query === "" ? (
           <p className="text-[#b6b0a2] text-center mt-12 text-sm">
@@ -67,7 +92,8 @@ export default async function SearchPage({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {mangaList.map((manga) => {
-              const latest = manga.chapters[0];
+              const latest = manga.chapters.slice().sort((a, b) => b.chapter_number - a.chapter_number)[0];
+              const displayNumbers = getChapterDisplayNumbers(manga.chapters);
               return (
                 <MangaCard
                   key={manga.id}
@@ -75,7 +101,8 @@ export default async function SearchPage({
                   title={manga.manga_title}
                   author={manga.author.name ?? "Unknown"}
                   coverImageUrl={manga.cover_image_url}
-                  latestChapterNumber={latest?.chapter_number ?? null}
+                  latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
+                  latestChapterIsEx={latest?.chapter_is_ex ?? false}
                   latestChapterName={latest?.chapter_name ?? null}
                   updatedAt={manga.updated_at}
                 />

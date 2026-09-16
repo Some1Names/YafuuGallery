@@ -118,6 +118,12 @@ model Manga {
   manga_synopsis    String
   cover_image_url   String?  // poster-style cover, used in browse grids / cards
   banner_image_url  String?  // wide hero image, used on the detail page
+  // Admin-curated home page carousel — is_featured is a plain toggle, and
+  // featured_order is set to (current max + 1) whenever it's turned on, so
+  // the carousel order is simply "the order manga were featured in" with
+  // no separate manual-reorder UI. Meaningless while is_featured is false.
+  is_featured       Boolean  @default(false)
+  featured_order    Int      @default(0)
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 

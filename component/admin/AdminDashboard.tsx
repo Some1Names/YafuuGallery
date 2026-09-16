@@ -18,6 +18,7 @@ interface MangaItem {
   favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
+  isFeatured: boolean;
 }
 
 interface ChapterItem {
@@ -196,6 +197,8 @@ export default function AdminDashboard({
                       favoriteCount={m.favoriteCount}
                       coverImageUrl={m.coverImageUrl}
                       bannerImageUrl={m.bannerImageUrl}
+                      isAdmin
+                      isFeatured={m.isFeatured}
                       chapters={chapters
                         .filter((c) => c.mangaId === m.id)
                         .map((c) => ({

@@ -70,7 +70,7 @@ export default async function MangaDetailPage({
                     <Breadcrumb mangaTitle={manga.manga_title} />
                 </div>
 
-                <MangaHero imageUrl={manga.cover_image_url} />
+                <MangaHero imageUrl={manga.banner_image_url} />
 
                 {/* Mobile: title/synopsis/favorite stack above the
                     Chapters/Arcs tabs, same order as always. From sm up,

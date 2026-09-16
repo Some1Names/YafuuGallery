@@ -18,6 +18,12 @@ export default function MangaCreateForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Cover/banner aren't enforced with a native `required` attribute
+  // (they're upload buttons, not plain inputs), so gate the submit button
+  // on them directly — same pattern as AdminChapterCreateForm.
+  const canSubmit =
+    coverImageUrl !== null && bannerImageUrl !== null && title.trim() !== "" && synopsis.trim() !== "";
+
   function resetForm() {
     setTitle("");
     setSynopsis("");
@@ -142,7 +148,8 @@ export default function MangaCreateForm() {
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canSubmit}
+          title={!canSubmit ? "Cover, banner, title, and synopsis are all required" : undefined}
           className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Manga"}

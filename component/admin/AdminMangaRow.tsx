@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, Heart, ChevronDown } from "lucide-react";
+import { Eye, Heart, ChevronDown, Star } from "lucide-react";
+import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterCreateForm from "./AdminChapterCreateForm";
 import AdminChapterList from "./AdminChapterList";
@@ -48,6 +49,13 @@ interface AdminMangaRowProps {
   onToggleExpand: () => void;
   isEditing: boolean;
   onToggleEdit: () => void;
+  // Featured toggle is admin-only — this row is also reused by
+  // ManageMangaDashboard for authors managing their own manga, who
+  // shouldn't be able to grant themselves a home page carousel slot.
+  // Both default to false/undefined so existing (author-facing) callers
+  // don't need to change.
+  isAdmin?: boolean;
+  isFeatured?: boolean;
 }
 
 export default function AdminMangaRow({
@@ -65,6 +73,8 @@ export default function AdminMangaRow({
   onToggleExpand,
   isEditing,
   onToggleEdit,
+  isAdmin = false,
+  isFeatured = false,
 }: AdminMangaRowProps) {
   const router = useRouter();
   const [editTitle, setEditTitle] = useState(title);
@@ -72,6 +82,18 @@ export default function AdminMangaRow({
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
   const [editBannerImageUrl, setEditBannerImageUrl] = useState(bannerImageUrl);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTogglingFeatured, setIsTogglingFeatured] = useState(false);
+
+  async function toggleFeatured() {
+    setIsTogglingFeatured(true);
+    const res = await fetch(`/api/admin/manga/${id}/featured`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_featured: !isFeatured }),
+    });
+    setIsTogglingFeatured(false);
+    if (res.ok) router.refresh();
+  }
 
   // The arc create form and an arc row's edit form are mutually
   // exclusive — opening one closes the other, so at most one arc-related
@@ -216,26 +238,37 @@ export default function AdminMangaRow({
 
   return (
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
-      {/* Cover — flush against the row's left/top/bottom edges. Stretches
-          (flex default) to match whatever height the content column needs,
-          so there's never a gap below it; object-cover on the img crops it
-          to fill that box without distorting the art. */}
+      {/* Cover — fixed at the site's standard manga-poster ratio (2:3, same
+          as MangaCard and the cover uploaders) instead of stretching to
+          match the content column's height. A stretched box meant a short
+          title and a 2-line title gave every row a different cover shape;
+          self-start keeps it a consistent size regardless of how much text
+          is in the row next to it. object-contain still shows the image at
+          its own proportions (letterboxed on the container's bg) rather
+          than cropping/zooming it like object-cover would. */}
       <div className="flex">
-        <div className="w-24 sm:w-32 shrink-0 bg-[#0a0a0a]">
-          {coverImageUrl && (
+        <div className="w-24 sm:w-32 aspect-2/3 shrink-0 self-start bg-[#0a0a0a]">
+          {coverImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverImageUrl} alt="" className="w-full h-full object-cover" />
+            <img src={coverImageUrl} alt="" className="w-full h-full object-contain" />
+          ) : (
+            <NoImagePlaceholder />
           )}
         </div>
 
         <div className="min-w-0 flex-1 flex flex-col">
-          {/* Header row */}
-          <div className="p-8 flex-1 flex items-start gap-4">
+          {/* Header row — stacks the action buttons below the title on
+              mobile instead of squeezing them onto the same line as the
+              text column. Below sm, the cover (w-24) plus p-8 padding plus
+              the Featured/Edit/Delete button group left the title's
+              min-w-0 flex-1 column with negative available width, which
+              collapsed it to nothing rather than actually shrinking it. */}
+          <div className="p-4 sm:p-8 flex-1 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
-              <Link href={`/manga/titles/${id}`} className="text-lg text-[#ece6d8] hover:underline font-medium">
+              <Link href={`/manga/titles/${id}`} className="block text-lg text-[#ece6d8] hover:underline font-medium truncate">
                 {title}
               </Link>
-              <p className="text-sm text-[#b6b0a2] mt-0.5">{authorName}</p>
+              <p className="text-sm text-[#b6b0a2] mt-0.5 truncate">{authorName}</p>
               <div className="flex items-center gap-4 mt-2 text-xs text-[#6b655e]">
                 <span className="flex items-center gap-1">
                   <Eye className="w-3.5 h-3.5" />
@@ -248,7 +281,22 @@ export default function AdminMangaRow({
               </div>
             </div>
 
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 flex-wrap shrink-0">
+              {isAdmin && (
+                <button
+                  onClick={toggleFeatured}
+                  disabled={isTogglingFeatured}
+                  title={isFeatured ? "Remove from home page carousel" : "Add to home page carousel"}
+                  className={`flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded transition-colors duration-200 disabled:opacity-50 ${
+                    isFeatured
+                      ? "border-[#ece6d8]/50 text-[#ece6d8] bg-[#ece6d8]/10 hover:bg-[#ece6d8]/15"
+                      : "border-[#050505] text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2]"
+                  }`}
+                >
+                  <Star className={`w-3.5 h-3.5 ${isFeatured ? "fill-current" : ""}`} />
+                  Featured
+                </button>
+              )}
               <button
                 onClick={onToggleEdit}
                 className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"

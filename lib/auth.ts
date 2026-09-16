@@ -27,6 +27,14 @@ export const betterAuthInstance = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      // Google's id token already carries the first name separately
+      // (given_name) — using that instead of splitting `name` on a space
+      // also gets this right for people with multi-word first names.
+      // Falls back to a plain space-split only if given_name is ever
+      // missing. Image is left alone; only the name gets shortened.
+      mapProfileToUser: (profile) => ({
+        name: profile.given_name || profile.name.split(" ")[0],
+      }),
     },
   },
   account: {
