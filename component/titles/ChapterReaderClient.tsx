@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Columns2, Rows2, ChevronDown, Languages } from "lucide-react";
@@ -70,7 +71,7 @@ export default function ChapterReaderClient({
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [isChapterMenuOpen]);
 
-  const onDocumentLoadSuccess = useCallback(async (pdf: any) => {
+  const onDocumentLoadSuccess = useCallback(async (pdf: PDFDocumentProxy) => {
     setNumPages(pdf.numPages);
 
     const entries = await Promise.all(
@@ -327,7 +328,7 @@ export default function ChapterReaderClient({
           file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<div className="text-center text-[#b6b0a2] py-20">Loading chapter…</div>}
-          error={<div className="text-center text-[#b6b0a2] py-20">Couldn't load this chapter.</div>}
+          error={<div className="text-center text-[#b6b0a2] py-20">Couldn&apos;t load this chapter.</div>}
         >
           {mode === "vertical" ? (
             <div className="flex flex-col items-center">

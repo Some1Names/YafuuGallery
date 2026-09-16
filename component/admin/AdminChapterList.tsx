@@ -94,15 +94,16 @@ export default function AdminChapterList({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [page, setPage] = useState(0);
-
-  const dragStartYRef = useRef(0);
   // Height of the row being dragged, captured once at pointer-down — used
   // to know how far its neighbors need to shift to visually "make room"
-  // for it as it moves (see dragTargetOriginalIndex below). ROW_GAP_PX
-  // matches the list container's own `gap-3`; there's no DOM way to read a
-  // flex gap back out, so it's a plain constant kept in sync with the
-  // className below by hand.
-  const dragRowHeightRef = useRef(0);
+  // for it as it moves (see dragTargetOriginalIndex below). State (not a
+  // ref) because it's read during render to compute each row's shift.
+  // ROW_GAP_PX matches the list container's own `gap-3`; there's no DOM
+  // way to read a flex gap back out, so it's a plain constant kept in sync
+  // with the className below by hand.
+  const [dragRowHeight, setDragRowHeight] = useState(0);
+
+  const dragStartYRef = useRef(0);
   // Mirrors dragOverIndex for synchronous reads from the window listener
   // below — that listener only resubscribes when dragIndex changes (not on
   // every pointermove), so its pointerup/pointercancel closures would
@@ -176,7 +177,7 @@ export default function AdminChapterList({
   function handleGripPointerDown(e: React.PointerEvent<HTMLElement>, index: number) {
     e.preventDefault();
     dragStartYRef.current = e.clientY;
-    dragRowHeightRef.current = rowRefs.current.get(index)?.getBoundingClientRect().height ?? 0;
+    setDragRowHeight(rowRefs.current.get(index)?.getBoundingClientRect().height ?? 0);
     dragOverIndexRef.current = index;
     setDragIndex(index);
     setDragOverIndex(index);
@@ -272,7 +273,7 @@ export default function AdminChapterList({
         // row will land — instead of just outlining a static target row.
         let dragShiftY = 0;
         if (!isDragging && dragIndex !== null && dragTargetOriginalIndex !== null) {
-          const slot = dragRowHeightRef.current + ROW_GAP_PX;
+          const slot = dragRowHeight + ROW_GAP_PX;
           if (dragTargetOriginalIndex > dragIndex && index > dragIndex && index < dragTargetOriginalIndex) {
             dragShiftY = -slot;
           } else if (dragTargetOriginalIndex < dragIndex && index >= dragTargetOriginalIndex && index < dragIndex) {

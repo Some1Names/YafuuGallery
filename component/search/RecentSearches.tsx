@@ -46,15 +46,12 @@ export default function RecentSearches({ query }: RecentSearchesProps) {
   }, []);
 
   useEffect(() => {
-    console.log("[RS-DEBUG] recording effect, query=", JSON.stringify(query));
     if (!query) return;
     setHistory((current) => {
       const existing = current ?? readHistory();
       const deduped = existing.filter((h) => h.toLowerCase() !== query.toLowerCase());
       const next = [query, ...deduped].slice(0, MAX_ENTRIES);
-      console.log("[RS-DEBUG] writing history:", JSON.stringify(next));
       writeHistory(next);
-      console.log("[RS-DEBUG] after write, localStorage now:", localStorage.getItem(STORAGE_KEY));
       return next;
     });
   }, [query]);

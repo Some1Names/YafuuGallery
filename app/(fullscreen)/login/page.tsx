@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import GoogleIcon from "@/component/icons/GoogleIcon";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +27,8 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/";
+      router.push("/");
+      router.refresh();
     } catch {
       setError("Network error — please try again.");
     } finally {

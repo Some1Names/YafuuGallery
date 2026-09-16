@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -9,20 +10,18 @@ import { authClient } from "@/lib/auth-client";
 import GoogleIcon from "@/component/icons/GoogleIcon";
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     mode: "onBlur",
   });
-
-  const password = watch("password", "");
 
   async function onSubmit(values: SignupFormValues) {
     setServerError(null);
@@ -39,7 +38,7 @@ export default function SignUpPage() {
         return;
       }
 
-      window.location.href = "/login";
+      router.push("/login");
     } catch {
       setServerError("Network error — please try again.");
     }

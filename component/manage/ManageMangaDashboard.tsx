@@ -97,7 +97,7 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
 
           {filteredMangaList.length === 0 ? (
             <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
-              <p className="text-[#b6b0a2] text-sm">No manga match "{mangaSearch}".</p>
+              <p className="text-[#b6b0a2] text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2 mt-4">
