@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getStorageUsage } from "@/lib/storage";
+import { getObjectSizes, keyFromPublicUrl } from "@/lib/storage";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
@@ -17,7 +17,7 @@ export default async function AdminPage() {
     userCount,
     mangaCount,
     chapterCount,
-    storageUsage,
+    objectSizes,
     users,
     mangaList,
     chapters,
@@ -27,7 +27,7 @@ export default async function AdminPage() {
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
-      getStorageUsage(),
+      getObjectSizes(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
         select: { id: true, name: true, email: true, role: true, created_at: true },
@@ -98,6 +98,22 @@ export default async function AdminPage() {
     { label: "Chapters", value: chapterCount },
   ];
 
+  // R2 objects aren't tagged with the manga/chapter they belong to — the
+  // only record of that is whichever *_url column stored the object's own
+  // public URL, so attribution works backwards from those columns rather
+  // than from anything in R2 itself.
+  function sizeOfUrl(url: string | null): number {
+    const key = keyFromPublicUrl(url);
+    return key ? objectSizes.get(key) ?? 0 : 0;
+  }
+
+  const chapterBytes = new Map<string, number>();
+  for (const c of chapters) {
+    const bytes =
+      sizeOfUrl(c.cover_image_url) + c.translations.reduce((sum, t) => sum + sizeOfUrl(t.file_url), 0);
+    chapterBytes.set(c.id, bytes);
+  }
+
   const mangaItems = mangaList.map((m) => ({
     id: m.id,
     title: m.manga_title,
@@ -111,6 +127,16 @@ export default async function AdminPage() {
     coverImageUrl: m.cover_image_url,
     bannerImageUrl: m.banner_image_url,
     isFeatured: m.is_featured,
+    // Own cover/banner + every arc image + every chapter's cover and PDFs.
+    storageBytes:
+      sizeOfUrl(m.cover_image_url) +
+      sizeOfUrl(m.banner_image_url) +
+      arcs
+        .filter((a) => a.manga_id === m.id)
+        .reduce((sum, a) => sum + sizeOfUrl(a.arc_image_url), 0) +
+      chapters
+        .filter((c) => c.manga_id === m.id)
+        .reduce((sum, c) => sum + (chapterBytes.get(c.id) ?? 0), 0),
   }));
 
   const chapterItems = chapters.map((c) => ({
@@ -130,6 +156,7 @@ export default async function AdminPage() {
     })),
     favoriteCount: c._count.chapter_bookmarks,
     commentCount: c._count.comments,
+    storageBytes: chapterBytes.get(c.id) ?? 0,
   }));
 
   const commentItems = comments.map((c) => ({
@@ -167,7 +194,10 @@ export default async function AdminPage() {
           ))}
         </div>
 
-        <StorageUsageBar bytesUsed={storageUsage.bytesUsed} objectCount={storageUsage.objectCount} />
+        <StorageUsageBar
+          bytesUsed={[...objectSizes.values()].reduce((sum, size) => sum + size, 0)}
+          objectCount={objectSizes.size}
+        />
 
         <AdminDashboard
           mangaList={mangaItems}

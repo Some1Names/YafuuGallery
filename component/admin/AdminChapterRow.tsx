@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, Heart, MessageCircle } from "lucide-react";
+import { Eye, Heart, MessageCircle, HardDrive } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
+import { formatBytes } from "@/lib/format-bytes";
 
 interface AdminChapterRowProps {
   id: string;
@@ -25,6 +26,7 @@ interface AdminChapterRowProps {
   translations: ChapterTranslationDraft[];
   favoriteCount: number;
   commentCount: number;
+  storageBytes?: number;
   arcs: { id: string; arc_name: string }[];
   // This chapter's current raw chapter_number value — sent back unchanged
   // on save (reordering only ever happens by dragging in the list now,
@@ -52,6 +54,7 @@ export default function AdminChapterRow({
   translations,
   favoriteCount,
   commentCount,
+  storageBytes,
   arcs,
   chapterOrder,
   isEditing,
@@ -171,6 +174,12 @@ export default function AdminChapterRow({
                 <MessageCircle className="w-3.5 h-3.5" />
                 {commentCount.toLocaleString()}
               </span>
+              {typeof storageBytes === "number" && (
+                <span className="flex items-center gap-1">
+                  <HardDrive className="w-3.5 h-3.5" />
+                  {formatBytes(storageBytes)}
+                </span>
+              )}
             </div>
           </div>
 
@@ -229,6 +238,12 @@ export default function AdminChapterRow({
                   <MessageCircle className="w-3.5 h-3.5" />
                   {commentCount.toLocaleString()}
                 </span>
+                {typeof storageBytes === "number" && (
+                  <span className="flex items-center gap-1">
+                    <HardDrive className="w-3.5 h-3.5" />
+                    {formatBytes(storageBytes)}
+                  </span>
+                )}
               </div>
             </div>
 

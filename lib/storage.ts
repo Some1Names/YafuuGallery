@@ -46,15 +46,21 @@ export function publicUrlFor(key: string): string {
   return `${PUBLIC_URL_BASE}/${key}`;
 }
 
+// Reverses publicUrlFor — lets the admin dashboard attribute an R2 object
+// back to the manga/chapter/arc/user row whose *_url column stored it.
+export function keyFromPublicUrl(url: string | null | undefined): string | null {
+  if (!url || !url.startsWith(`${PUBLIC_URL_BASE}/`)) return null;
+  return url.slice(PUBLIC_URL_BASE.length + 1);
+}
+
 // R2's S3-compatible API has no "bucket size" endpoint — the object-scoped
 // credentials this app holds can't reach Cloudflare's account-level
 // analytics API either (see AdminImageUploadButton's CORS-check history),
 // so the only way to total storage is listing every object and summing
 // Size. Paginated via ContinuationToken since ListObjectsV2 caps a single
 // page at 1000 keys.
-export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCount: number }> {
-  let bytesUsed = 0;
-  let objectCount = 0;
+export async function getObjectSizes(): Promise<Map<string, number>> {
+  const sizes = new Map<string, number>();
   let continuationToken: string | undefined;
 
   do {
@@ -63,12 +69,18 @@ export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCoun
     );
 
     for (const obj of page.Contents ?? []) {
-      bytesUsed += obj.Size ?? 0;
-      objectCount += 1;
+      if (obj.Key) sizes.set(obj.Key, obj.Size ?? 0);
     }
 
     continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
   } while (continuationToken);
 
-  return { bytesUsed, objectCount };
+  return sizes;
+}
+
+export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCount: number }> {
+  const sizes = await getObjectSizes();
+  let bytesUsed = 0;
+  for (const size of sizes.values()) bytesUsed += size;
+  return { bytesUsed, objectCount: sizes.size };
 }

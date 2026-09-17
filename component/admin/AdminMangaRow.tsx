@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, Heart, ChevronDown, Star } from "lucide-react";
+import { Eye, Heart, ChevronDown, Star, HardDrive } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterCreateForm from "./AdminChapterCreateForm";
 import AdminChapterList from "./AdminChapterList";
 import AdminArcCreateForm from "./AdminArcCreateForm";
 import AdminArcList from "./AdminArcList";
+import { formatBytes } from "@/lib/format-bytes";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface ChapterItem {
@@ -25,6 +26,7 @@ interface ChapterItem {
   translations: ChapterTranslationDraft[];
   favoriteCount: number;
   commentCount: number;
+  storageBytes?: number;
 }
 
 interface ArcOption {
@@ -59,6 +61,11 @@ interface AdminMangaRowProps {
   // don't need to change.
   isAdmin?: boolean;
   isFeatured?: boolean;
+  // Undefined (not just 0) for ManageMangaDashboard's author-facing reuse
+  // of this row — storage usage is an infra/billing concern, not
+  // something every author's view needs, so it's left off entirely there
+  // rather than showing a possibly-misleading "0 B".
+  storageBytes?: number;
 }
 
 export default function AdminMangaRow({
@@ -78,6 +85,7 @@ export default function AdminMangaRow({
   onToggleEdit,
   isAdmin = false,
   isFeatured = false,
+  storageBytes,
 }: AdminMangaRowProps) {
   const router = useRouter();
   const [editTitle, setEditTitle] = useState(title);
@@ -282,6 +290,12 @@ export default function AdminMangaRow({
                   <Heart className="w-3.5 h-3.5" />
                   {favoriteCount.toLocaleString()}
                 </span>
+                {typeof storageBytes === "number" && (
+                  <span className="flex items-center gap-1">
+                    <HardDrive className="w-3.5 h-3.5" />
+                    {formatBytes(storageBytes)}
+                  </span>
+                )}
               </div>
             </div>
 

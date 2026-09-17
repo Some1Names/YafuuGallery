@@ -18,6 +18,7 @@ interface ChapterItem {
   translations: ChapterTranslationDraft[];
   favoriteCount: number;
   commentCount: number;
+  storageBytes?: number;
 }
 
 interface AdminChapterListProps {
@@ -338,6 +339,7 @@ export default function AdminChapterList({
                 translations={c.translations}
                 favoriteCount={c.favoriteCount}
                 commentCount={c.commentCount}
+                storageBytes={c.storageBytes}
                 mangaId={mangaId}
                 arcs={arcs}
                 chapterOrder={c.chapterNumber}

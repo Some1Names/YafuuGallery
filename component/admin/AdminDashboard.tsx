@@ -20,6 +20,7 @@ interface MangaItem {
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
   isFeatured: boolean;
+  storageBytes: number;
 }
 
 interface ChapterItem {
@@ -35,6 +36,7 @@ interface ChapterItem {
   translations: ChapterTranslationDraft[];
   favoriteCount: number;
   commentCount: number;
+  storageBytes: number;
 }
 
 interface ArcOption {
@@ -201,6 +203,7 @@ export default function AdminDashboard({
                       bannerImageUrl={m.bannerImageUrl}
                       isAdmin
                       isFeatured={m.isFeatured}
+                      storageBytes={m.storageBytes}
                       chapters={chapters
                         .filter((c) => c.mangaId === m.id)
                         .map((c) => ({
@@ -215,6 +218,7 @@ export default function AdminDashboard({
                           translations: c.translations,
                           favoriteCount: c.favoriteCount,
                           commentCount: c.commentCount,
+                          storageBytes: c.storageBytes,
                         }))}
                       arcs={arcs
                         .filter((a) => a.manga_id === m.id)
