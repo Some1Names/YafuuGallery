@@ -11,6 +11,7 @@ import AdminChapterCreateForm from "./AdminChapterCreateForm";
 import AdminChapterList from "./AdminChapterList";
 import AdminArcCreateForm from "./AdminArcCreateForm";
 import AdminArcList from "./AdminArcList";
+import type { PdfLanguage } from "./AdminPdfUploadButton";
 
 interface ChapterItem {
   id: string;
@@ -23,6 +24,7 @@ interface ChapterItem {
   coverImageUrl: string | null;
   pdfUrl: string | null;
   pdfFileName: string | null;
+  pdfLanguage: PdfLanguage;
 }
 
 interface ArcOption {

@@ -7,6 +7,7 @@ import AdminUserRoleSelect from "./AdminUserRoleSelect";
 import AdminUserDeleteButton from "./AdminUserDeleteButton";
 import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
+import type { PdfLanguage } from "./AdminPdfUploadButton";
 
 interface MangaItem {
   id: string;
@@ -33,6 +34,7 @@ interface ChapterItem {
   coverImageUrl: string | null;
   pdfUrl: string | null;
   pdfFileName: string | null;
+  pdfLanguage: PdfLanguage;
 }
 
 interface ArcOption {
@@ -212,6 +214,7 @@ export default function AdminDashboard({
                           coverImageUrl: c.coverImageUrl,
                           pdfUrl: c.pdfUrl,
                           pdfFileName: c.pdfFileName,
+                          pdfLanguage: c.pdfLanguage,
                         }))}
                       arcs={arcs
                         .filter((a) => a.manga_id === m.id)

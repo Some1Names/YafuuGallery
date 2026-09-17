@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Eye } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
-import AdminPdfUploadButton from "./AdminPdfUploadButton";
+import AdminPdfUploadButton, { type PdfLanguage } from "./AdminPdfUploadButton";
 
 interface AdminChapterRowProps {
   id: string;
@@ -24,6 +24,7 @@ interface AdminChapterRowProps {
   coverImageUrl: string | null;
   pdfUrl: string | null;
   pdfFileName: string | null;
+  pdfLanguage: PdfLanguage;
   arcs: { id: string; arc_name: string }[];
   // This chapter's current raw chapter_number value — sent back unchanged
   // on save (reordering only ever happens by dragging in the list now,
@@ -50,6 +51,7 @@ export default function AdminChapterRow({
   coverImageUrl,
   pdfUrl,
   pdfFileName,
+  pdfLanguage,
   arcs,
   chapterOrder,
   isEditing,
@@ -60,6 +62,7 @@ export default function AdminChapterRow({
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
   const [editPdfUrl, setEditPdfUrl] = useState(pdfUrl);
   const [editPdfFileName, setEditPdfFileName] = useState(pdfFileName);
+  const [editPdfLanguage, setEditPdfLanguage] = useState(pdfLanguage);
   const [editArcId, setEditArcId] = useState(arcId ?? "");
   const [editIsEx, setEditIsEx] = useState(isEx);
   const [editName, setEditName] = useState(chapterName);
@@ -83,6 +86,7 @@ export default function AdminChapterRow({
         cover_image_url: editCoverImageUrl,
         pdf_url: editPdfUrl,
         pdf_file_name: editPdfFileName,
+        pdf_language: editPdfLanguage,
       }),
     });
 
@@ -107,6 +111,7 @@ export default function AdminChapterRow({
     setEditCoverImageUrl(coverImageUrl);
     setEditPdfUrl(pdfUrl);
     setEditPdfFileName(pdfFileName);
+    setEditPdfLanguage(pdfLanguage);
     setEditArcId(arcId ?? "");
     setEditIsEx(isEx);
     setEditName(chapterName);
@@ -263,6 +268,8 @@ export default function AdminChapterRow({
                       setEditPdfUrl(url);
                       setEditPdfFileName(name);
                     }}
+                    language={editPdfLanguage}
+                    onLanguageChange={setEditPdfLanguage}
                   />
                 </div>
               </div>

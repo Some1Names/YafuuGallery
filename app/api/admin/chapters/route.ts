@@ -13,6 +13,13 @@ function isUniqueConstraintError(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && err.code === "P2002";
 }
 
+const VALID_LANGUAGES = ["th", "en", "ja"] as const;
+type TranslationLanguage = (typeof VALID_LANGUAGES)[number];
+
+function parseLanguage(value: unknown): TranslationLanguage {
+  return VALID_LANGUAGES.includes(value as TranslationLanguage) ? (value as TranslationLanguage) : "en";
+}
+
 // POST /api/admin/chapters — create
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -28,6 +35,7 @@ export async function POST(request: NextRequest) {
     chapter_is_ex,
     pdf_url,
     pdf_file_name,
+    pdf_language,
   } = body ?? {};
 
   if (!manga_id || chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
@@ -64,15 +72,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // No multi-language UI yet — every uploaded PDF is filed as the "en"
-    // translation for now, one per chapter. The schema already supports
-    // more languages per chapter (Translation is keyed on chapter+language)
-    // for whenever that's actually needed.
+    // Translation is keyed on chapter+language, so each language tag gets
+    // its own row — the admin picks which language a given PDF is when
+    // uploading it (AdminPdfUploadButton), defaulting to "en" if omitted.
     if (pdf_url) {
       await prisma.translation.create({
         data: {
           chapter_id: chapter.id,
-          language: "en",
+          language: parseLanguage(pdf_language),
           file_url: pdf_url,
           file_name: pdf_file_name ?? null,
           translator_id: session?.user?.id ?? null,

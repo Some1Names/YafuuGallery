@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
-import AdminPdfUploadButton from "./AdminPdfUploadButton";
+import AdminPdfUploadButton, { type PdfLanguage } from "./AdminPdfUploadButton";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -28,6 +28,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfFileName, setPdfFileName] = useState<string | null>(null);
+  const [pdfLanguage, setPdfLanguage] = useState<PdfLanguage>("en");
   const [arcId, setArcId] = useState("");
   const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
@@ -48,6 +49,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
     setCoverImageUrl(null);
     setPdfUrl(null);
     setPdfFileName(null);
+    setPdfLanguage("en");
     setArcId("");
     setChapterIsEx(false);
     setChapterName("");
@@ -79,6 +81,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           cover_image_url: coverImageUrl,
           pdf_url: pdfUrl,
           pdf_file_name: pdfFileName,
+          pdf_language: pdfLanguage,
         }),
       });
 
@@ -191,6 +194,8 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                   setPdfUrl(url);
                   setPdfFileName(name);
                 }}
+                language={pdfLanguage}
+                onLanguageChange={setPdfLanguage}
               />
             </div>
           </div>

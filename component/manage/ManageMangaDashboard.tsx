@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "@/component/admin/AdminMangaRow";
 import AdminSearchInput from "@/component/admin/AdminSearchInput";
+import type { PdfLanguage } from "@/component/admin/AdminPdfUploadButton";
 
 interface ChapterItem {
   id: string;
@@ -17,6 +18,7 @@ interface ChapterItem {
   coverImageUrl: string | null;
   pdfUrl: string | null;
   pdfFileName: string | null;
+  pdfLanguage: PdfLanguage;
 }
 
 interface ArcOption {
@@ -126,6 +128,7 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
                       coverImageUrl: c.coverImageUrl,
                       pdfUrl: c.pdfUrl,
                       pdfFileName: c.pdfFileName,
+                      pdfLanguage: c.pdfLanguage,
                     }))}
                   arcs={arcs
                     .filter((a) => a.manga_id === m.id)

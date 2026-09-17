@@ -54,7 +54,7 @@ export default async function AdminPage() {
           cover_image_url: true,
           view_count: true,
           arc: { select: { arc_name: true } },
-          translations: { select: { file_url: true, file_name: true } },
+          translations: { select: { file_url: true, file_name: true, language: true } },
         },
       }),
       prisma.arc.findMany({
@@ -120,6 +120,7 @@ export default async function AdminPage() {
     coverImageUrl: c.cover_image_url,
     pdfUrl: c.translations[0]?.file_url ?? null,
     pdfFileName: c.translations[0]?.file_name ?? null,
+    pdfLanguage: c.translations[0]?.language ?? "en",
   }));
 
   const commentItems = comments.map((c) => ({

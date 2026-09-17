@@ -13,6 +13,13 @@ function isUniqueConstraintError(err: unknown): boolean {
   return typeof err === "object" && err !== null && "code" in err && err.code === "P2002";
 }
 
+const VALID_LANGUAGES = ["th", "en", "ja"] as const;
+type TranslationLanguage = (typeof VALID_LANGUAGES)[number];
+
+function parseLanguage(value: unknown): TranslationLanguage {
+  return VALID_LANGUAGES.includes(value as TranslationLanguage) ? (value as TranslationLanguage) : "en";
+}
+
 // PATCH /api/admin/chapters/[id] — update
 export async function PATCH(
   request: NextRequest,
@@ -34,6 +41,7 @@ export async function PATCH(
     chapter_is_ex,
     pdf_url,
     pdf_file_name,
+    pdf_language,
   } = body ?? {};
 
   if (chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
@@ -66,16 +74,17 @@ export async function PATCH(
       },
     });
 
-    // No multi-language UI yet — every uploaded PDF is filed as the "en"
-    // translation for now, one per chapter. The schema already supports
-    // more languages per chapter (Translation is keyed on chapter+language)
-    // for whenever that's actually needed.
+    // Translation is keyed on chapter+language, so switching the language
+    // tag before saving targets a different translation row rather than
+    // overwriting the one that was loaded — e.g. adding a Thai PDF to a
+    // chapter that already has an English one, instead of replacing it.
     if (pdf_url) {
+      const language = parseLanguage(pdf_language);
       await prisma.translation.upsert({
-        where: { chapter_id_language: { chapter_id: id, language: "en" } },
+        where: { chapter_id_language: { chapter_id: id, language } },
         create: {
           chapter_id: id,
-          language: "en",
+          language,
           file_url: pdf_url,
           file_name: pdf_file_name ?? null,
           translator_id: session?.user?.id ?? null,
