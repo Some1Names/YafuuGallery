@@ -31,7 +31,7 @@ export default async function AdminPage() {
       getObjectSizes(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
-        select: { id: true, name: true, email: true, role: true, created_at: true, image: true },
+        select: { id: true, name: true, tag: true, email: true, role: true, created_at: true, image: true },
       }),
       prisma.manga.findMany({
         orderBy: { created_at: "desc" },
@@ -82,7 +82,7 @@ export default async function AdminPage() {
           body: true,
           hidden_at: true,
           created_at: true,
-          user: { select: { id: true, name: true } },
+          user: { select: { id: true, name: true, tag: true } },
           chapter: {
             select: {
               chapter_number: true,
@@ -198,6 +198,7 @@ export default async function AdminPage() {
     userId: c.user.id,
     body: c.body,
     userName: c.user.name ?? "Unknown",
+    userTag: c.user.tag,
     chapterLabel: `${c.chapter.manga.manga_title} #${String(c.chapter.chapter_number).padStart(3, "0")}`,
     createdAt: c.created_at,
     hidden: c.hidden_at !== null,

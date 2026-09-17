@@ -6,10 +6,12 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Home, Heart, User, LogOut, UserPlus, Search } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { formatUsername } from "@/lib/format-username";
 
 interface NavbarProps {
   user?: {
     name: string | null;
+    tag: string | null;
     image: string | null;
   } | null;
 }
@@ -157,7 +159,7 @@ export default function Navbar({ user }: NavbarProps) {
                     <span className="text-xs">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
                 </span>
-                {user.name ?? "Profile"}
+                {user.name ? formatUsername(user.name, user.tag) : "Profile"}
                 <svg
                   width="12"
                   height="12"
@@ -280,7 +282,7 @@ export default function Navbar({ user }: NavbarProps) {
                     }
                   >
                     <User className="w-4 h-4" />
-                    {user.name ?? "Profile"}
+                    {user.name ? formatUsername(user.name, user.tag) : "Profile"}
                   </Link>
                   <button
                     type="button"

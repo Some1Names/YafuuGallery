@@ -18,7 +18,7 @@ export default async function ProfilePage() {
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
-        select: { name: true, email: true, image: true, role: true, created_at: true },
+        select: { name: true, tag: true, email: true, image: true, role: true, created_at: true },
       }),
       prisma.bookmark.count({ where: { user_id: userId } }),
       prisma.chapterBookmark.count({ where: { user_id: userId } }),
@@ -57,6 +57,7 @@ export default async function ProfilePage() {
           <ProfileEditForm
             initialName={user.name ?? ""}
             initialImage={user.image}
+            tag={user.tag}
             email={user.email}
             role={user.role}
             createdAt={user.created_at}

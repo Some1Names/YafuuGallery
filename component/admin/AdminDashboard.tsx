@@ -7,6 +7,7 @@ import AdminUserRoleSelect from "./AdminUserRoleSelect";
 import AdminUserDeleteButton from "./AdminUserDeleteButton";
 import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
+import { formatUsername } from "@/lib/format-username";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface MangaItem {
@@ -52,6 +53,7 @@ interface ArcOption {
 interface UserItem {
   id: string;
   name: string | null;
+  tag: string | null;
   email: string;
   role: "reader" | "author" | "admin";
   created_at: Date;
@@ -62,6 +64,7 @@ interface CommentItem {
   userId: string;
   body: string;
   userName: string;
+  userTag: string | null;
   chapterLabel: string;
   createdAt: Date;
   hidden: boolean;
@@ -275,7 +278,9 @@ export default function AdminDashboard({
                     return (
                       <Fragment key={u.id}>
                         <tr className="border-t border-[#050505] hover:bg-[#1b1a1c]/40 transition-colors duration-200">
-                          <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">{u.name ?? "—"}</td>
+                          <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">
+                            {u.name ? formatUsername(u.name, u.tag) : "—"}
+                          </td>
                           <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">{u.email}</td>
                           <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">
                             {u.created_at.toLocaleDateString("en-US", {
@@ -299,7 +304,10 @@ export default function AdminDashboard({
                           </td>
                           <td className="px-4 py-2">
                             {u.id !== currentUserId && (
-                              <AdminUserDeleteButton userId={u.id} userLabel={u.name ?? u.email} />
+                              <AdminUserDeleteButton
+                                userId={u.id}
+                                userLabel={u.name ? formatUsername(u.name, u.tag) : u.email}
+                              />
                             )}
                           </td>
                         </tr>
@@ -314,6 +322,7 @@ export default function AdminDashboard({
                                     commentId={c.id}
                                     body={c.body}
                                     userName={c.userName}
+                                    userTag={c.userTag}
                                     chapterLabel={c.chapterLabel}
                                     createdAt={c.createdAt}
                                     initialHidden={c.hidden}
@@ -357,6 +366,7 @@ export default function AdminDashboard({
                   commentId={c.id}
                   body={c.body}
                   userName={c.userName}
+                  userTag={c.userTag}
                   chapterLabel={c.chapterLabel}
                   createdAt={c.createdAt}
                   initialHidden={c.hidden}

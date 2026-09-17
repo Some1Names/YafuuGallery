@@ -2,11 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { formatUsername } from "@/lib/format-username";
 
 interface AdminCommentRowProps {
   commentId: string;
   body: string;
   userName: string;
+  userTag: string | null;
   chapterLabel: string;
   createdAt: Date;
   initialHidden: boolean;
@@ -16,6 +18,7 @@ export default function AdminCommentRow({
   commentId,
   body,
   userName,
+  userTag,
   chapterLabel,
   createdAt,
   initialHidden,
@@ -53,7 +56,7 @@ export default function AdminCommentRow({
     >
       <div className="min-w-0">
         <div className="text-xs text-[#b6b0a2] mb-1">
-          {userName} · {chapterLabel} ·{" "}
+          {formatUsername(userName, userTag)} · {chapterLabel} ·{" "}
           {createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           {hidden && <span className="text-[#9c1d25]"> · hidden</span>}
         </div>

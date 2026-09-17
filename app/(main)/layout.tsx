@@ -19,7 +19,7 @@ async function NavbarWithSession() {
   // but Navbar expects `string | null` — normalize here so Navbar's prop
   // type can stay strict instead of loosening it to match NextAuth's shape
   const user = session?.user
-    ? { name: session.user.name ?? null, image: session.user.image ?? null }
+    ? { name: session.user.name ?? null, tag: session.user.tag ?? null, image: session.user.image ?? null }
     : null;
 
   return <Navbar user={user} />;

@@ -19,6 +19,7 @@ export const auth = cache(async () => {
     user: {
       id: session.user.id,
       name: session.user.name as string | null,
+      tag: session.user.tag as string | null,
       email: session.user.email,
       image: session.user.image as string | null,
       role: session.user.role as "reader" | "author" | "admin",

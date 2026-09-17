@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { createLocalAccountIssuer } from "@better-auth/core/db";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { generateUniqueTag } from "@/lib/user-tag";
 
 export const betterAuthInstance = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
@@ -72,9 +73,30 @@ export const betterAuthInstance = betterAuth({
         defaultValue: "reader",
         input: false,
       },
+      // Assigned once at signup by the user.create hook below — never
+      // user-editable, so this is read-only from every client the same
+      // way `role` is.
+      tag: {
+        type: "string",
+        input: false,
+      },
     },
   },
   databaseHooks: {
+    user: {
+      create: {
+        // "name" alone isn't unique — this assigns the "#0472"-style
+        // discriminator that, combined with name, is (User's
+        // @@unique([name, tag])). Runs for both credential and Google
+        // sign-ups, since both create the User row through this same
+        // hook; for Google, mapProfileToUser above has already set
+        // `user.name` by the time this fires.
+        before: async (user) => {
+          const tag = await generateUniqueTag(user.name);
+          return { data: { tag } };
+        },
+      },
+    },
     account: {
       create: {
         // Better Auth is supposed to always populate `issuer` itself

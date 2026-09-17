@@ -22,7 +22,7 @@ export async function GET(
       id: true,
       body: true,
       created_at: true,
-      user: { select: { id: true, name: true, image: true } },
+      user: { select: { id: true, name: true, tag: true, image: true } },
       _count: { select: { likes: true } },
       // Only ever matches the viewer's own like row (if any) — this is
       // just "did I like this," not the like list itself, so there's
@@ -81,7 +81,7 @@ export async function POST(
           id: true,
           body: true,
           created_at: true,
-          user: { select: { id: true, name: true, image: true } },
+          user: { select: { id: true, name: true, tag: true, image: true } },
         },
       }),
       prisma.chapter.update({ where: { id }, data: { comment_count: { increment: 1 } } }),

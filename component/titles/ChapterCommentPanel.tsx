@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X, Send, Heart } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
+import { formatUsername } from "@/lib/format-username";
 
 interface CommentUser {
   id: string;
   name: string | null;
+  tag: string | null;
   image: string | null;
 }
 
@@ -185,7 +187,9 @@ export default function ChapterCommentPanel({
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm text-[#ece6d8] font-medium truncate">{c.user.name ?? "Unknown"}</span>
+                    <span className="text-sm text-[#ece6d8] font-medium truncate">
+                      {formatUsername(c.user.name, c.user.tag)}
+                    </span>
                     <span className="text-xs text-[#6b655e] shrink-0">{timeAgo(new Date(c.created_at))}</span>
                   </div>
                   <p className="text-sm text-[#b6b0a2] whitespace-pre-wrap break-words mt-0.5">{c.body}</p>

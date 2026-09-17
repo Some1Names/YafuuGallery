@@ -10,6 +10,7 @@ import { processImageForUpload } from "@/lib/image-processing";
 interface ProfileEditFormProps {
   initialName: string;
   initialImage: string | null;
+  tag: string | null;
   email: string;
   role: "reader" | "author" | "admin";
   createdAt: Date;
@@ -19,6 +20,7 @@ interface ProfileEditFormProps {
 export default function ProfileEditForm({
   initialName,
   initialImage,
+  tag,
   email,
   role,
   createdAt,
@@ -257,6 +259,12 @@ export default function ProfileEditForm({
             {error && <p className="text-sm text-[#9c1d25] pt-2">{error}</p>}
             {isSaving && <p className="text-xs text-[#6b655e] pt-2">Saving…</p>}
           </div>
+
+          {/* Fixed for the life of the account (see User.tag in the
+              schema) — shown here, not editable, so people understand
+              their full identity elsewhere (comments, admin) is
+              name#tag, not just the name they can freely change above. */}
+          {tag && <p className="text-xs text-[#6b655e] mt-2">Your tag is #{tag} — shown as {name}#{tag}, and never changes.</p>}
         </div>
 
         {/* Role / email / member-since, with the manage-manga action
