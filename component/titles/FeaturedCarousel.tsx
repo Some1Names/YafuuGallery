@@ -199,17 +199,20 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       {/* Edge click zones to step through slides — desktop only, since
           swipe already covers this on touch. Sit above the scrim but
           below the text/dots block. Wider than the visible icon so the
-          actual click target is bigger than it looks; invisible until the
-          carousel's hovered (group-hover) since a zone this wide showing a
-          hard-edged icon all the time would look heavy — the fade makes a
-          bigger hitbox feel like an affordance instead of clutter. */}
+          actual click target is bigger than it looks, with the icon
+          pinned to the outer edge (justify-start/end, not center) so a
+          wider hitbox doesn't push it inward toward the title/synopsis —
+          centering it within a w-32 zone was landing it almost on top of
+          the text. Both the icon and its hover backdrop fade in from the
+          edge inward (bg-linear-to-*, not a flat color) so hovering shows
+          a soft glow rather than a visible hard-edged box. */}
       {count > 1 && (
         <>
           <button
             type="button"
             onClick={() => goTo(activeIndex - 1)}
             aria-label="Previous featured manga"
-            className="hidden sm:flex absolute inset-y-0 left-0 z-10 w-24 md:w-32 items-center justify-center text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/20 transition-all duration-300 motion-reduce:transition-none"
+            className="hidden sm:flex absolute inset-y-0 left-0 z-10 w-24 md:w-32 items-center justify-start pl-4 md:pl-6 text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-linear-to-r hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
@@ -217,7 +220,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             type="button"
             onClick={() => goTo(activeIndex + 1)}
             aria-label="Next featured manga"
-            className="hidden sm:flex absolute inset-y-0 right-0 z-10 w-24 md:w-32 items-center justify-center text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/20 transition-all duration-300 motion-reduce:transition-none"
+            className="hidden sm:flex absolute inset-y-0 right-0 z-10 w-24 md:w-32 items-center justify-end pr-4 md:pr-6 text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-linear-to-l hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none"
           >
             <ChevronRight className="w-8 h-8" />
           </button>
