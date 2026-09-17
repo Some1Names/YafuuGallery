@@ -109,11 +109,14 @@ export default function AdminArcRow({
           stretched out of ratio. Stays visible while editing — the edit
           form drops down below it instead of replacing it, like a
           dropdown/accordion panel, so the row never disappears from the
-          list mid-edit. min-h-25 matches AdminChapterRow's own natural
+          list mid-edit. min-h matches AdminChapterRow's own natural
           height (title + subtitle + favorite/comment line) so arc and
           chapter rows read as the same size in the admin panel even
-          though an arc row only has two lines of text. */}
-      <div className="flex sm:grid sm:grid-cols-[auto_1fr] sm:min-h-25">
+          though an arc row only has two lines of text. Two values, not
+          one — below sm the text/button columns stack (flex-col) instead
+          of sitting side by side, which is taller than sm+'s layout, so
+          the two breakpoints need their own floor to actually match. */}
+      <div className="flex sm:grid sm:grid-cols-[auto_1fr] min-h-34 sm:min-h-25">
         {dragHandle && (
           <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
         )}
