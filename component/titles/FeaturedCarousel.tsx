@@ -236,10 +236,25 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         >
           <div className="flex flex-col gap-2 items-start">
             <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
-            <h1 className="text-4xl md:text-5xl font-bold text-white max-w-xl line-clamp-2">{current.title}</h1>
+            <h1
+              className="text-4xl md:text-5xl font-bold text-white max-w-xl line-clamp-2 break-words"
+              // line-clamp only caps the line count, it doesn't reserve
+              // space for lines that aren't there — without this, a
+              // one-line title sits shorter than a two-line one, which
+              // shoves the synopsis/buttons/dots below it up or down as
+              // the carousel changes slides. `lh` reserves exactly 2 line
+              // heights regardless of this element's own font-size, so it
+              // stays correct across the md breakpoint's size jump too.
+              style={{ minHeight: "2lh" }}
+            >
+              {current.title}
+            </h1>
           </div>
 
-          <p className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3">
+          <p
+            className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3"
+            style={{ minHeight: "3lh" }}
+          >
             {current.synopsis}
           </p>
 
