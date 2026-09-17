@@ -222,7 +222,14 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         </>
       )}
 
-      <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10 select-none">
+      {/* pointer-events-none here (re-enabled on each actual link/button
+          below) — this wrapper's own box spans its full shrink-to-fit
+          width, well past where the title/synopsis text actually renders
+          on most slides, and that dead space was sitting on top of (and
+          swallowing clicks meant for) the edge-arrow buttons on desktop,
+          which render earlier in the DOM at the same z-index. Only the
+          real interactive children need to opt back in. */}
+      <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10 select-none pointer-events-none">
         {/* Keyed on id + direction so a slide change remounts this whole
             block and replays the matching slide-in animation; the
             direction-specific class picks which side it enters from.
@@ -274,19 +281,19 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             {current.firstChapterId ? (
               <Link
                 href={`/viewer/${current.firstChapterId}`}
-                className="w-full sm:w-auto bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+                className="pointer-events-auto w-full sm:w-auto bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
               >
                 Start Reading
               </Link>
             ) : (
-              <span className="w-full sm:w-auto bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+              <span className="pointer-events-auto w-full sm:w-auto bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
                 No chapters yet
               </span>
             )}
 
             <Link
               href={`/manga/titles/${current.id}`}
-              className="w-full sm:w-auto bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
+              className="pointer-events-auto w-full sm:w-auto bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
               View Manga
             </Link>
@@ -302,7 +309,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 onClick={() => goTo(i)}
                 aria-label={`Show ${m.title}`}
                 aria-current={i === activeIndex}
-                className={`relative h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
+                className={`pointer-events-auto relative h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
                   i === activeIndex ? "w-6 bg-white/30" : "w-1.5 bg-white/40 hover:bg-white/60"
                 }`}
               >
