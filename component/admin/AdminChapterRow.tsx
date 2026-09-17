@@ -125,22 +125,26 @@ export default function AdminChapterRow({
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
       {/* Cover — hidden on mobile so the row stays a compact text row on
           narrow screens (where a thumbnail this small isn't worth the
-          space), shown from sm up. Stretches to fill the row's full height
-          (self-stretch, no fixed h-) so it always covers the row regardless
-          of how many lines of text sit next to it. Stays visible while
-          editing — the edit form drops down below it instead of replacing
-          it, like a dropdown/accordion panel, so the row never disappears
-          from the list mid-edit. */}
-      <div className="flex">
+          space), shown from sm up. sm:grid (not flex) — same reasoning as
+          ProfileEditForm's avatar column: CSS grid resolves aspect-ratio
+          correctly against a sibling-driven stretched height, so the cover
+          keeps its 16:9 shape (matching the edit form's own crop ratio)
+          while its height — and, from that, its width — tracks however
+          tall the row ends up, instead of either leaving a gap or getting
+          stretched out of ratio. Stays visible while editing — the edit
+          form drops down below it instead of replacing it, like a
+          dropdown/accordion panel, so the row never disappears from the
+          list mid-edit. */}
+      <div className="flex sm:grid sm:grid-cols-[auto_1fr]">
         {dragHandle && (
           <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
         )}
 
-        <div className="relative hidden sm:block sm:w-36 shrink-0 self-stretch bg-[#0a0a0a]">
+        <div className="relative hidden sm:block sm:h-full sm:w-auto sm:aspect-video bg-[#0a0a0a]">
           {coverImageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default.
-            <Image src={coverImageUrl} alt="" fill draggable={false} sizes="144px" className="object-cover" />
+            <Image src={coverImageUrl} alt="" fill draggable={false} sizes="180px" className="object-cover" />
           ) : (
             <NoImagePlaceholder />
           )}
