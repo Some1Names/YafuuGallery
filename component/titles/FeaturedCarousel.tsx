@@ -90,19 +90,28 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   // during render; it can briefly lag behind `current` by design (it's
   // meant to still show the outgoing slide while the top layer fades in)
   // but always falls back to `current` below in case it's never been set
-  // (count was 0 on an earlier render).
+  // (count was 0 on an earlier render). topOffsetX rides along with
+  // topOpacity on the same schedule — offset to the direction-appropriate
+  // starting point, then flipped back to 0 in the same setTimeout that
+  // triggers the opacity fade-in — so the image slides in from the same
+  // side the text does, instead of just crossfading in place.
   const [bottomLayer, setBottomLayer] = useState(current);
   const [topOpacity, setTopOpacity] = useState(1);
+  const [topOffsetX, setTopOffsetX] = useState(0);
   useEffect(() => {
     if (!current) return;
     setTopOpacity(0);
-    const fadeInTimer = setTimeout(() => setTopOpacity(1), 20);
+    setTopOffsetX(direction === 1 ? 28 : -28);
+    const fadeInTimer = setTimeout(() => {
+      setTopOpacity(1);
+      setTopOffsetX(0);
+    }, 20);
     const swapTimer = setTimeout(() => setBottomLayer(current), 700);
     return () => {
       clearTimeout(fadeInTimer);
       clearTimeout(swapTimer);
     };
-  }, [current]);
+  }, [current, direction]);
 
   if (count === 0) return null;
 
@@ -191,17 +200,24 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         </div>
       )}
       {/* Top layer: the current slide. Same DOM node the whole time —
-          topOpacity (not a key remount) drives the fade so it replays on
-          every change without unmounting anything. */}
+          topOpacity/topOffsetX (not a key remount) drive the fade+slide so
+          it replays on every change without unmounting anything. Slides in
+          the same direction as the text block, just a plain translateX
+          rather than the text's keyframe, since this node is never
+          remounted (no `key` to replay a CSS animation against). */}
       {current.bannerImageUrl ? (
         <div
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out motion-reduce:transition-none"
-          style={{ backgroundImage: `url('${current.bannerImageUrl}')`, opacity: topOpacity }}
+          className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none"
+          style={{
+            backgroundImage: `url('${current.bannerImageUrl}')`,
+            opacity: topOpacity,
+            transform: `translateX(${topOffsetX}px)`,
+          }}
         />
       ) : (
         <div
-          className="absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none"
-          style={{ opacity: topOpacity }}
+          className="absolute inset-0 transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none"
+          style={{ opacity: topOpacity, transform: `translateX(${topOffsetX}px)` }}
         >
           <NoImagePlaceholder />
         </div>
