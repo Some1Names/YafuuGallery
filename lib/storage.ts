@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // R2 is Cloudflare's S3-compatible object storage — same PutObjectCommand
@@ -44,4 +44,31 @@ export async function getPresignedUploadUrl(key: string, contentType: string): P
 
 export function publicUrlFor(key: string): string {
   return `${PUBLIC_URL_BASE}/${key}`;
+}
+
+// R2's S3-compatible API has no "bucket size" endpoint — the object-scoped
+// credentials this app holds can't reach Cloudflare's account-level
+// analytics API either (see AdminImageUploadButton's CORS-check history),
+// so the only way to total storage is listing every object and summing
+// Size. Paginated via ContinuationToken since ListObjectsV2 caps a single
+// page at 1000 keys.
+export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCount: number }> {
+  let bytesUsed = 0;
+  let objectCount = 0;
+  let continuationToken: string | undefined;
+
+  do {
+    const page = await r2.send(
+      new ListObjectsV2Command({ Bucket: BUCKET, ContinuationToken: continuationToken })
+    );
+
+    for (const obj of page.Contents ?? []) {
+      bytesUsed += obj.Size ?? 0;
+      objectCount += 1;
+    }
+
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  return { bytesUsed, objectCount };
 }

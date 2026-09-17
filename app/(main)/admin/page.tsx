@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getStorageUsage } from "@/lib/storage";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
+import StorageUsageBar from "@/component/admin/StorageUsageBar";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -15,6 +17,7 @@ export default async function AdminPage() {
     userCount,
     mangaCount,
     chapterCount,
+    storageUsage,
     users,
     mangaList,
     chapters,
@@ -24,6 +27,7 @@ export default async function AdminPage() {
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
+      getStorageUsage(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
         select: { id: true, name: true, email: true, role: true, created_at: true },
@@ -162,6 +166,8 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+
+        <StorageUsageBar bytesUsed={storageUsage.bytesUsed} objectCount={storageUsage.objectCount} />
 
         <AdminDashboard
           mangaList={mangaItems}
