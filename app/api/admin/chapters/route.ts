@@ -20,6 +20,31 @@ function parseLanguage(value: unknown): TranslationLanguage {
   return VALID_LANGUAGES.includes(value as TranslationLanguage) ? (value as TranslationLanguage) : "en";
 }
 
+interface TranslationInput {
+  language: TranslationLanguage;
+  file_url: string;
+  file_name: string | null;
+}
+
+// Normalizes the client's `translations` array into one entry per language
+// (last one wins on an accidental duplicate — the UI already prevents
+// picking the same language twice, this is just a server-side backstop)
+// and drops anything without a file, so an empty/unfinished slot the admin
+// added but never uploaded to is silently ignored rather than erroring.
+function parseTranslations(value: unknown): TranslationInput[] {
+  if (!Array.isArray(value)) return [];
+  const byLanguage = new Map<TranslationLanguage, TranslationInput>();
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object") continue;
+    const url = "url" in entry ? entry.url : undefined;
+    if (typeof url !== "string" || !url) continue;
+    const language = parseLanguage("language" in entry ? entry.language : undefined);
+    const file_name = "file_name" in entry && typeof entry.file_name === "string" ? entry.file_name : null;
+    byLanguage.set(language, { language, file_url: url, file_name });
+  }
+  return [...byLanguage.values()];
+}
+
 // POST /api/admin/chapters — create
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -33,9 +58,7 @@ export async function POST(request: NextRequest) {
     published_date,
     cover_image_url,
     chapter_is_ex,
-    pdf_url,
-    pdf_file_name,
-    pdf_language,
+    translations: translationsInput,
   } = body ?? {};
 
   if (!manga_id || chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
@@ -58,6 +81,7 @@ export async function POST(request: NextRequest) {
   }
 
   const isEx = chapter_is_ex === true;
+  const translations = parseTranslations(translationsInput);
 
   try {
     const chapter = await prisma.chapter.create({
@@ -72,18 +96,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Translation is keyed on chapter+language, so each language tag gets
-    // its own row — the admin picks which language a given PDF is when
-    // uploading it (AdminPdfUploadButton), defaulting to "en" if omitted.
-    if (pdf_url) {
-      await prisma.translation.create({
-        data: {
+    // Translation is keyed on chapter+language, so a chapter can carry a
+    // PDF per language — one row created per language the admin uploaded.
+    if (translations.length > 0) {
+      await prisma.translation.createMany({
+        data: translations.map((t) => ({
           chapter_id: chapter.id,
-          language: parseLanguage(pdf_language),
-          file_url: pdf_url,
-          file_name: pdf_file_name ?? null,
+          language: t.language,
+          file_url: t.file_url,
+          file_name: t.file_name,
           translator_id: session?.user?.id ?? null,
-        },
+        })),
       });
     }
 

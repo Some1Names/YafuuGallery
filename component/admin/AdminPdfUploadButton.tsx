@@ -3,25 +3,15 @@
 import { useRef, useState } from "react";
 import { FileText, CheckCircle2 } from "lucide-react";
 
-export type PdfLanguage = "th" | "en" | "ja";
-
 interface AdminPdfUploadButtonProps {
   mangaId: string;
   value: string | null;
   fileName: string | null;
   onChange: (url: string, fileName: string) => void;
-  language: PdfLanguage;
-  onLanguageChange: (language: PdfLanguage) => void;
 }
 
 const HARD_LIMIT_BYTES = 200 * 1024 * 1024;
 const RECOMMENDED_BYTES = 50 * 1024 * 1024;
-
-const LANGUAGE_OPTIONS: { value: PdfLanguage; label: string }[] = [
-  { value: "th", label: "Thai" },
-  { value: "en", label: "English" },
-  { value: "ja", label: "Japanese" },
-];
 
 function formatMB(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
@@ -34,17 +24,13 @@ function formatMB(bytes: number): string {
 // actual PUT purely because it's the only one of the two that reports
 // upload progress.
 //
-// A chapter can hold one Translation per language (chapter_id + language is
-// unique), so the language picked here decides which translation this PDF
-// fills in — replacing that language's existing file if there is one,
-// or adding it as a new one alongside other languages if not.
+// One of possibly several per chapter — AdminChapterPdfUploads renders one
+// of these per language and owns the language picker + add/remove list.
 export default function AdminPdfUploadButton({
   mangaId,
   value,
   fileName,
   onChange,
-  language,
-  onLanguageChange,
 }: AdminPdfUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -114,25 +100,6 @@ export default function AdminPdfUploadButton({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-2 mb-1.5">
-        <label className="text-[10px] uppercase tracking-widest text-[#6b655e]">
-          Chapter PDF
-        </label>
-
-        <select
-          value={language}
-          onChange={(e) => onLanguageChange(e.target.value as PdfLanguage)}
-          aria-label="PDF language"
-          className="shrink-0 bg-[#0a0a0a] border border-[#050505] rounded px-2 py-0.5 text-[10px] uppercase tracking-widest text-[#b6b0a2] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
-        >
-          {LANGUAGE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <button
         type="button"
         onClick={() => inputRef.current?.click()}

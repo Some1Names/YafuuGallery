@@ -81,9 +81,11 @@ export default async function ManageMangaPage() {
     chapterName: c.chapter_name,
     publishedDate: c.published_date,
     coverImageUrl: c.cover_image_url,
-    pdfUrl: c.translations[0]?.file_url ?? null,
-    pdfFileName: c.translations[0]?.file_name ?? null,
-    pdfLanguage: c.translations[0]?.language ?? "en",
+    translations: c.translations.map((t) => ({
+      language: t.language,
+      url: t.file_url,
+      fileName: t.file_name,
+    })),
   }));
 
   return (

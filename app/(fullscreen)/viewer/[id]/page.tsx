@@ -18,7 +18,7 @@ export default async function ViewerPage({
       select: {
         chapter_number: true,
         chapter_name: true,
-        translations: { select: { file_url: true } },
+        translations: { select: { file_url: true, language: true } },
         manga: {
           select: {
             id: true,
@@ -58,7 +58,7 @@ export default async function ViewerPage({
 
   return (
     <ChapterReaderClient
-      pdfUrl={chapter.translations[0]?.file_url ?? null}
+      translations={chapter.translations.map((t) => ({ language: t.language, url: t.file_url }))}
       currentChapterId={id}
       chapterName={chapter.chapter_name}
       mangaTitle={chapter.manga.manga_title}

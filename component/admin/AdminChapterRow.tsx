@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Eye } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
-import AdminPdfUploadButton, { type PdfLanguage } from "./AdminPdfUploadButton";
+import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface AdminChapterRowProps {
   id: string;
@@ -22,9 +22,7 @@ interface AdminChapterRowProps {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
-  pdfUrl: string | null;
-  pdfFileName: string | null;
-  pdfLanguage: PdfLanguage;
+  translations: ChapterTranslationDraft[];
   arcs: { id: string; arc_name: string }[];
   // This chapter's current raw chapter_number value — sent back unchanged
   // on save (reordering only ever happens by dragging in the list now,
@@ -49,9 +47,7 @@ export default function AdminChapterRow({
   chapterName,
   publishedDate,
   coverImageUrl,
-  pdfUrl,
-  pdfFileName,
-  pdfLanguage,
+  translations,
   arcs,
   chapterOrder,
   isEditing,
@@ -60,9 +56,12 @@ export default function AdminChapterRow({
 }: AdminChapterRowProps) {
   const router = useRouter();
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
-  const [editPdfUrl, setEditPdfUrl] = useState(pdfUrl);
-  const [editPdfFileName, setEditPdfFileName] = useState(pdfFileName);
-  const [editPdfLanguage, setEditPdfLanguage] = useState(pdfLanguage);
+  // A chapter with no PDFs yet still starts with one blank upload slot
+  // (matching the create form) instead of an empty list the admin has to
+  // click "Add another language" on just to get started.
+  const [editTranslations, setEditTranslations] = useState(
+    translations.length > 0 ? translations : [{ language: "en" as const, url: null, fileName: null }]
+  );
   const [editArcId, setEditArcId] = useState(arcId ?? "");
   const [editIsEx, setEditIsEx] = useState(isEx);
   const [editName, setEditName] = useState(chapterName);
@@ -84,9 +83,9 @@ export default function AdminChapterRow({
         chapter_name: editName,
         published_date: editDate,
         cover_image_url: editCoverImageUrl,
-        pdf_url: editPdfUrl,
-        pdf_file_name: editPdfFileName,
-        pdf_language: editPdfLanguage,
+        translations: editTranslations
+          .filter((t) => t.url !== null)
+          .map((t) => ({ language: t.language, url: t.url, file_name: t.fileName })),
       }),
     });
 
@@ -109,9 +108,7 @@ export default function AdminChapterRow({
 
   function cancelEdit() {
     setEditCoverImageUrl(coverImageUrl);
-    setEditPdfUrl(pdfUrl);
-    setEditPdfFileName(pdfFileName);
-    setEditPdfLanguage(pdfLanguage);
+    setEditTranslations(translations.length > 0 ? translations : [{ language: "en", url: null, fileName: null }]);
     setEditArcId(arcId ?? "");
     setEditIsEx(isEx);
     setEditName(chapterName);
@@ -159,7 +156,7 @@ export default function AdminChapterRow({
           </div>
 
           <div className="flex flex-wrap gap-2 shrink-0">
-            {pdfUrl && (
+            {translations.some((t) => t.url !== null) && (
               <Link
                 href={`/viewer/${id}`}
                 target="_blank"
@@ -260,17 +257,7 @@ export default function AdminChapterRow({
                 </div>
 
                 <div className="flex-1">
-                  <AdminPdfUploadButton
-                    mangaId={mangaId}
-                    value={editPdfUrl}
-                    fileName={editPdfFileName}
-                    onChange={(url, name) => {
-                      setEditPdfUrl(url);
-                      setEditPdfFileName(name);
-                    }}
-                    language={editPdfLanguage}
-                    onLanguageChange={setEditPdfLanguage}
-                  />
+                  <AdminChapterPdfUploads mangaId={mangaId} value={editTranslations} onChange={setEditTranslations} />
                 </div>
               </div>
             </div>

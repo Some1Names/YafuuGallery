@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminChapterRow from "./AdminChapterRow";
-import type { PdfLanguage } from "./AdminPdfUploadButton";
+import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface ChapterItem {
   id: string;
@@ -15,9 +15,7 @@ interface ChapterItem {
   chapterName: string;
   publishedDate: Date;
   coverImageUrl: string | null;
-  pdfUrl: string | null;
-  pdfFileName: string | null;
-  pdfLanguage: PdfLanguage;
+  translations: ChapterTranslationDraft[];
 }
 
 interface AdminChapterListProps {
@@ -335,9 +333,7 @@ export default function AdminChapterList({
                 chapterName={c.chapterName}
                 publishedDate={c.publishedDate}
                 coverImageUrl={c.coverImageUrl}
-                pdfUrl={c.pdfUrl}
-                pdfFileName={c.pdfFileName}
-                pdfLanguage={c.pdfLanguage}
+                translations={c.translations}
                 mangaId={mangaId}
                 arcs={arcs}
                 chapterOrder={c.chapterNumber}

@@ -20,6 +20,31 @@ function parseLanguage(value: unknown): TranslationLanguage {
   return VALID_LANGUAGES.includes(value as TranslationLanguage) ? (value as TranslationLanguage) : "en";
 }
 
+interface TranslationInput {
+  language: TranslationLanguage;
+  file_url: string;
+  file_name: string | null;
+}
+
+// Normalizes the client's `translations` array into one entry per language
+// (last one wins on an accidental duplicate — the UI already prevents
+// picking the same language twice, this is just a server-side backstop)
+// and drops anything without a file, so an empty/unfinished slot the admin
+// added but never uploaded to is silently ignored rather than erroring.
+function parseTranslations(value: unknown): TranslationInput[] {
+  if (!Array.isArray(value)) return [];
+  const byLanguage = new Map<TranslationLanguage, TranslationInput>();
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object") continue;
+    const url = "url" in entry ? entry.url : undefined;
+    if (typeof url !== "string" || !url) continue;
+    const language = parseLanguage("language" in entry ? entry.language : undefined);
+    const file_name = "file_name" in entry && typeof entry.file_name === "string" ? entry.file_name : null;
+    byLanguage.set(language, { language, file_url: url, file_name });
+  }
+  return [...byLanguage.values()];
+}
+
 // PATCH /api/admin/chapters/[id] — update
 export async function PATCH(
   request: NextRequest,
@@ -39,9 +64,7 @@ export async function PATCH(
     published_date,
     cover_image_url,
     chapter_is_ex,
-    pdf_url,
-    pdf_file_name,
-    pdf_language,
+    translations: translationsInput,
   } = body ?? {};
 
   if (chapter_number === undefined || chapter_number === null || !chapter_name || !published_date) {
@@ -60,6 +83,8 @@ export async function PATCH(
   }
 
   const isEx = chapter_is_ex === true;
+  const translations = parseTranslations(translationsInput);
+  const submittedLanguages = translations.map((t) => t.language);
 
   try {
     const chapter = await prisma.chapter.update({
@@ -74,28 +99,32 @@ export async function PATCH(
       },
     });
 
-    // Translation is keyed on chapter+language, so switching the language
-    // tag before saving targets a different translation row rather than
-    // overwriting the one that was loaded — e.g. adding a Thai PDF to a
-    // chapter that already has an English one, instead of replacing it.
-    if (pdf_url) {
-      const language = parseLanguage(pdf_language);
-      await prisma.translation.upsert({
-        where: { chapter_id_language: { chapter_id: id, language } },
-        create: {
-          chapter_id: id,
-          language,
-          file_url: pdf_url,
-          file_name: pdf_file_name ?? null,
-          translator_id: session?.user?.id ?? null,
-        },
-        update: {
-          file_url: pdf_url,
-          file_name: pdf_file_name ?? null,
-          translator_id: session?.user?.id ?? null,
-        },
-      });
-    }
+    // The submitted array is the chapter's full desired translation list —
+    // any language the chapter currently has that isn't in it anymore was
+    // removed in the edit form and gets deleted, while every submitted
+    // language is upserted (new file, or a replacement for an existing one).
+    await prisma.$transaction([
+      prisma.translation.deleteMany({
+        where: { chapter_id: id, language: { notIn: submittedLanguages } },
+      }),
+      ...translations.map((t) =>
+        prisma.translation.upsert({
+          where: { chapter_id_language: { chapter_id: id, language: t.language } },
+          create: {
+            chapter_id: id,
+            language: t.language,
+            file_url: t.file_url,
+            file_name: t.file_name,
+            translator_id: session?.user?.id ?? null,
+          },
+          update: {
+            file_url: t.file_url,
+            file_name: t.file_name,
+            translator_id: session?.user?.id ?? null,
+          },
+        })
+      ),
+    ]);
 
     return NextResponse.json(chapter);
   } catch (err) {

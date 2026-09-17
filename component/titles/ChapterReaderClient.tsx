@@ -8,6 +8,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 import { Columns2, Rows2, ChevronDown, Languages } from "lucide-react";
 import Link from "next/link";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
+import { LANGUAGE_LABELS, type Language } from "@/lib/language";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -20,8 +21,13 @@ interface ChapterSummary {
   chapter_name: string;
 }
 
+interface ChapterTranslation {
+  language: Language;
+  url: string;
+}
+
 interface ChapterReaderProps {
-  pdfUrl: string | null;
+  translations: ChapterTranslation[];
   currentChapterId: string;
   chapterName: string;
   mangaTitle: string;
@@ -30,7 +36,7 @@ interface ChapterReaderProps {
 }
 
 export default function ChapterReaderClient({
-  pdfUrl,
+  translations,
   currentChapterId,
   chapterName,
   mangaTitle,
@@ -43,6 +49,33 @@ export default function ChapterReaderClient({
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
   const chapterLabel = `Chapter ${currentIsEx ? "ex" : (currentDisplayNumber ?? 0)}: ${chapterName}`;
   const [mode, setMode] = useState<ReadingMode>("vertical");
+
+  // Which language is currently showing. Falls back to the chapter's first
+  // available translation whenever the picked one isn't actually in this
+  // chapter's list — e.g. right after navigating to a different chapter
+  // (via the chapter selector below) that doesn't have the language that
+  // was selected on the previous one, since this component's state
+  // persists across that navigation rather than remounting.
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(translations[0]?.language ?? null);
+  const activeLanguage = translations.some((t) => t.language === selectedLanguage)
+    ? selectedLanguage
+    : (translations[0]?.language ?? null);
+  const pdfUrl = translations.find((t) => t.language === activeLanguage)?.url ?? null;
+
+  // language-selector dropdown
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLanguageMenuOpen) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(e.target as Node)) {
+        setIsLanguageMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [isLanguageMenuOpen]);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageWidth, setPageWidth] = useState(760);
 
@@ -264,16 +297,49 @@ export default function ChapterReaderClient({
               </span>
             )}
 
-            {/* Language selector — same status as the chapter selector:
-                icon only, not wired to a language list yet */}
-            <button
-              type="button"
-              aria-label="Change language"
-              title="Language"
-              className="hidden sm:inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
-            >
-              <Languages className="w-4 h-4" />
-            </button>
+            {/* Language selector — only shown once a chapter actually has
+                more than one translation to switch between; with 0 or 1
+                there's nothing to pick, so the icon isn't rendered at all
+                rather than sitting there doing nothing. */}
+            {translations.length > 1 && (
+              <div className="relative hidden sm:block" ref={languageMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsLanguageMenuOpen((v) => !v)}
+                  aria-expanded={isLanguageMenuOpen}
+                  aria-haspopup="listbox"
+                  aria-label="Change language"
+                  title="Language"
+                  className="inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
+                >
+                  <Languages className="w-4 h-4" />
+                </button>
+
+                {isLanguageMenuOpen && (
+                  <div
+                    role="listbox"
+                    className="absolute top-full right-0 mt-2 w-36 bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg z-30"
+                  >
+                    {translations.map((t) => (
+                      <button
+                        key={t.language}
+                        type="button"
+                        onClick={() => {
+                          setSelectedLanguage(t.language);
+                          setIsLanguageMenuOpen(false);
+                        }}
+                        aria-current={t.language === activeLanguage}
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-[#232224] transition-colors duration-200 ${
+                          t.language === activeLanguage ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
+                        }`}
+                      >
+                        {LANGUAGE_LABELS[t.language]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Mode toggle */}
             <div className="flex border border-[#050505] rounded-md overflow-hidden">

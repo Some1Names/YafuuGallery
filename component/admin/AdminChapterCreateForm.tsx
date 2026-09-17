@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
-import AdminPdfUploadButton, { type PdfLanguage } from "./AdminPdfUploadButton";
+import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -26,9 +26,9 @@ interface AdminChapterCreateFormProps {
 export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOpen, onOpenChange }: AdminChapterCreateFormProps) {
   const router = useRouter();
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfFileName, setPdfFileName] = useState<string | null>(null);
-  const [pdfLanguage, setPdfLanguage] = useState<PdfLanguage>("en");
+  const [translations, setTranslations] = useState<ChapterTranslationDraft[]>([
+    { language: "en", url: null, fileName: null },
+  ]);
   const [arcId, setArcId] = useState("");
   const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
@@ -43,13 +43,14 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   // the fields that DO have `required` already stop a bare Enter-key
   // submit from doing anything either.
   const canSubmit =
-    coverImageUrl !== null && pdfUrl !== null && chapterName.trim() !== "" && publishedDate !== "";
+    coverImageUrl !== null &&
+    translations.some((t) => t.url !== null) &&
+    chapterName.trim() !== "" &&
+    publishedDate !== "";
 
   function resetForm() {
     setCoverImageUrl(null);
-    setPdfUrl(null);
-    setPdfFileName(null);
-    setPdfLanguage("en");
+    setTranslations([{ language: "en", url: null, fileName: null }]);
     setArcId("");
     setChapterIsEx(false);
     setChapterName("");
@@ -79,9 +80,9 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           chapter_name: chapterName,
           published_date: publishedDate,
           cover_image_url: coverImageUrl,
-          pdf_url: pdfUrl,
-          pdf_file_name: pdfFileName,
-          pdf_language: pdfLanguage,
+          translations: translations
+            .filter((t) => t.url !== null)
+            .map((t) => ({ language: t.language, url: t.url, file_name: t.fileName })),
         }),
       });
 
@@ -186,17 +187,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
             </div>
 
             <div className="flex-1">
-              <AdminPdfUploadButton
-                mangaId={mangaId}
-                value={pdfUrl}
-                fileName={pdfFileName}
-                onChange={(url, name) => {
-                  setPdfUrl(url);
-                  setPdfFileName(name);
-                }}
-                language={pdfLanguage}
-                onLanguageChange={setPdfLanguage}
-              />
+              <AdminChapterPdfUploads mangaId={mangaId} value={translations} onChange={setTranslations} />
             </div>
           </div>
         </div>
