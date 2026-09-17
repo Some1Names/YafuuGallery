@@ -121,6 +121,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           value={coverImageUrl}
           onChange={setCoverImageUrl}
           boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
+          aspectRatio={16 / 9}
         />
 
         <div className="flex-1 flex flex-col gap-4">

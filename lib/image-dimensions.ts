@@ -1,9 +1,16 @@
 // Reads width/height straight from a PNG/JPEG/WEBP file's own header
 // bytes — no decode, no image-processing dependency. Used server-side in
-// /api/upload to reject oversized-resolution uploads (a small file size
-// doesn't guarantee reasonable pixel dimensions — a 4000x3000 PNG can be
-// under 100KB). Returns null if the format isn't recognized or the header
-// is truncated/malformed, which the caller treats as "reject the upload".
+// /api/upload as a defensive backstop that rejects oversized-resolution
+// uploads (a small file size doesn't guarantee reasonable pixel dimensions
+// — a 4000x3000 PNG can be under 100KB) in case a request bypasses the
+// client entirely. Returns null if the format isn't recognized or the
+// header is truncated/malformed, which the caller treats as "reject the
+// upload".
+//
+// MAX_IMAGE_DIMENSION itself is also the client-side target in
+// lib/image-processing.ts, which resizes/crops every upload to fit this
+// before it ever reaches the server — so in normal use this check should
+// never actually trigger.
 
 export const MAX_IMAGE_DIMENSION = 2000;
 

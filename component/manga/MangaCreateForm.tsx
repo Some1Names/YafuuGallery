@@ -104,12 +104,14 @@ export default function MangaCreateForm() {
           value={coverImageUrl}
           onChange={setCoverImageUrl}
           boxClassName="w-full aspect-2/3"
+          aspectRatio={2 / 3}
         />
         <AdminImageUploadButton
           label="Banner"
           value={bannerImageUrl}
           onChange={setBannerImageUrl}
           boxClassName="w-full aspect-32/9"
+          aspectRatio={32 / 9}
         />
 
         <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">

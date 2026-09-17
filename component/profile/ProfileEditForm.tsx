@@ -5,27 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NextImage from "next/image";
 import { Check, X, Pencil, ArrowUpRight } from "lucide-react";
-import { MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
-
-// Reads a picked file's pixel dimensions in-browser before uploading, so an
-// oversized image is rejected instantly instead of after a round trip to
-// the server (which enforces the same limit either way, since this check
-// is easy to bypass).
-function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Couldn't read image"));
-    };
-    img.src = url;
-  });
-}
+import { processImageForUpload } from "@/lib/image-processing";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -88,23 +68,23 @@ export default function ProfileEditForm({
     if (!file) return;
 
     setError(null);
+    setIsUploading(true);
 
+    // Center-crops to a square and downscales/re-encodes to fit comfortably
+    // under the server's size limit — replaces the old "reject anything
+    // over 2000px" behavior, since most phone photos are already past that.
+    let processed: File;
     try {
-      const { width, height } = await readImageDimensions(file);
-      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-        setError(`Image too large (max ${MAX_IMAGE_DIMENSION}px on either side)`);
-        e.target.value = "";
-        return;
-      }
+      processed = await processImageForUpload(file, { aspectRatio: 1 });
     } catch {
       setError("Couldn't read that image — please try a different file.");
+      setIsUploading(false);
       e.target.value = "";
       return;
     }
 
-    setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", processed);
 
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
@@ -119,6 +99,7 @@ export default function ProfileEditForm({
       setError("Upload failed — please try again.");
     } finally {
       setIsUploading(false);
+      e.target.value = "";
     }
   }
 
