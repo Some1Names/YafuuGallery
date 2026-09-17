@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageChapter } from "@/lib/manga-access";
+import { deleteReplacedUrls } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -87,6 +88,18 @@ export async function PATCH(
   const submittedLanguages = translations.map((t) => t.language);
 
   try {
+    // Grabbed before the update/transaction so replaced or removed
+    // covers/PDFs' old R2 objects can be deleted afterward instead of
+    // lingering as orphans — upsert's `update` branch below overwrites
+    // file_url in place, so the old value has to be captured now.
+    const previous = await prisma.chapter.findUnique({
+      where: { id },
+      select: {
+        cover_image_url: true,
+        translations: { select: { language: true, file_url: true } },
+      },
+    });
+
     const chapter = await prisma.chapter.update({
       where: { id },
       data: {
@@ -125,6 +138,20 @@ export async function PATCH(
         })
       ),
     ]);
+
+    if (previous) {
+      // Removed entirely (no longer submitted) or replaced with a
+      // different file — either way the old PDF's key is now unreachable.
+      const droppedPdfUrls = previous.translations.filter((t) => {
+        const submitted = translations.find((s) => s.language === t.language);
+        return !submitted || submitted.file_url !== t.file_url;
+      });
+
+      await deleteReplacedUrls([
+        { oldUrl: previous.cover_image_url, newUrl: cover_image_url || null },
+        ...droppedPdfUrls.map((t) => ({ oldUrl: t.file_url, newUrl: null })),
+      ]);
+    }
 
     return NextResponse.json(chapter);
   } catch (err) {

@@ -99,3 +99,22 @@ export async function deleteObjects(keys: string[]): Promise<void> {
     );
   }
 }
+
+// Called after a PATCH route successfully swaps a *_url column to a new
+// value — deletes whatever the column pointed at before, so a re-upload
+// stops leaving its predecessor as an orphan for UnattributedStorage to
+// catch later. `newUrl: undefined` means the field wasn't part of this
+// update at all (the route's own conditional-spread convention) and is
+// left alone; `null`/a same-URL replacement/no previous value are all
+// no-ops too.
+export async function deleteReplacedUrls(
+  pairs: { oldUrl: string | null; newUrl: string | null | undefined }[]
+): Promise<void> {
+  const keys: string[] = [];
+  for (const { oldUrl, newUrl } of pairs) {
+    if (newUrl === undefined || !oldUrl || oldUrl === newUrl) continue;
+    const key = keyFromPublicUrl(oldUrl);
+    if (key) keys.push(key);
+  }
+  if (keys.length > 0) await deleteObjects(keys);
+}

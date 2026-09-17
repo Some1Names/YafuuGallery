@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteReplacedUrls } from "@/lib/storage";
 
 // PATCH /api/profile — a user updating their own name/avatar.
 // Deliberately doesn't accept role or email here — those aren't
@@ -21,6 +22,13 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Display name can't contain spaces" }, { status: 400 });
   }
 
+  // Grabbed before the update so a replaced avatar's old R2 object can be
+  // deleted afterward instead of lingering as an orphan.
+  const previous =
+    image !== undefined
+      ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { image: true } })
+      : null;
+
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: {
@@ -28,6 +36,10 @@ export async function PATCH(request: NextRequest) {
       ...(image !== undefined ? { image } : {}),
     },
   });
+
+  if (previous) {
+    await deleteReplacedUrls([{ oldUrl: previous.image, newUrl: image }]);
+  }
 
   return NextResponse.json({ name: user.name, image: user.image });
 }

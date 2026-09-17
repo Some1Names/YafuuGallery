@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
+import { deleteReplacedUrls } from "@/lib/storage";
 
 // PATCH /api/admin/manga/[id] — update
 export async function PATCH(
@@ -21,6 +22,13 @@ export async function PATCH(
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
   }
 
+  // Grabbed before the update so a replaced cover/banner's old R2 object
+  // can be deleted afterward instead of lingering as an orphan.
+  const previous = await prisma.manga.findUnique({
+    where: { id },
+    select: { cover_image_url: true, banner_image_url: true },
+  });
+
   const manga = await prisma.manga.update({
     where: { id },
     data: {
@@ -30,6 +38,13 @@ export async function PATCH(
       ...(banner_image_url !== undefined ? { banner_image_url: banner_image_url || null } : {}),
     },
   });
+
+  if (previous) {
+    await deleteReplacedUrls([
+      { oldUrl: previous.cover_image_url, newUrl: cover_image_url !== undefined ? cover_image_url || null : undefined },
+      { oldUrl: previous.banner_image_url, newUrl: banner_image_url !== undefined ? banner_image_url || null : undefined },
+    ]);
+  }
 
   return NextResponse.json(manga);
 }

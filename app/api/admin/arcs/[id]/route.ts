@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageArc } from "@/lib/manga-access";
+import { deleteReplacedUrls } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -46,6 +47,10 @@ export async function PATCH(
   const isEx = arc_is_ex === true;
 
   try {
+    // Grabbed before the update so a replaced image's old R2 object can be
+    // deleted afterward instead of lingering as an orphan.
+    const previous = await prisma.arc.findUnique({ where: { id }, select: { arc_image_url: true } });
+
     const arc = await prisma.arc.update({
       where: { id },
       data: {
@@ -56,6 +61,10 @@ export async function PATCH(
         arc_image_url: arc_image_url || null,
       },
     });
+
+    if (previous) {
+      await deleteReplacedUrls([{ oldUrl: previous.arc_image_url, newUrl: arc_image_url || null }]);
+    }
 
     return NextResponse.json(arc);
   } catch (err) {
