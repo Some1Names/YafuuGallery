@@ -5,10 +5,12 @@ import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Columns2, Rows2, ChevronDown, Languages } from "lucide-react";
+import { Columns2, Rows2, ChevronDown, Languages, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
 import { LANGUAGE_LABELS, type Language } from "@/lib/language";
+import ChapterCommentPanel from "./ChapterCommentPanel";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -35,6 +37,10 @@ interface ChapterReaderProps {
   mangaTitle: string;
   mangaId: string;
   chapters: ChapterSummary[];
+  // null for a signed-out visitor — the comment bubble sends them to
+  // /signup instead of opening the panel when this is null.
+  currentUserId: string | null;
+  initialCommentCount: number;
 }
 
 export default function ChapterReaderClient({
@@ -44,7 +50,10 @@ export default function ChapterReaderClient({
   mangaTitle,
   mangaId,
   chapters,
+  currentUserId,
+  initialCommentCount,
 }: ChapterReaderProps) {
+  const router = useRouter();
   const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
   const currentChapter = chapters.find((c) => c.id === currentChapterId);
   const currentIsEx = currentChapter?.chapter_is_ex ?? false;
@@ -95,6 +104,25 @@ export default function ChapterReaderClient({
   // top bar auto-hides in fullscreen mode unless the mouse is near the
   // top edge of the screen — vertical mode always shows it
   const [topBarVisible, setTopBarVisible] = useState(true);
+
+  // Comment panel — signed-out visitors never see it open at all (the
+  // bubble button sends them to /signup instead), so no signed-out UI
+  // exists inside ChapterCommentPanel itself.
+  const [isCommentPanelOpen, setIsCommentPanelOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(initialCommentCount);
+
+  function handleCommentButtonClick() {
+    if (!currentUserId) {
+      router.push("/signup");
+      return;
+    }
+    setIsCommentPanelOpen((v) => !v);
+  }
+
+  useEffect(() => {
+    setIsCommentPanelOpen(false);
+    setCommentCount(initialCommentCount);
+  }, [currentChapterId, initialCommentCount]);
 
   // chapter-selector dropdown
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
@@ -347,6 +375,23 @@ export default function ChapterReaderClient({
               </span>
             )}
 
+            {/* Comments — signed-out visitors get sent to /signup instead
+                of the panel opening (handleCommentButtonClick). */}
+            <button
+              type="button"
+              onClick={handleCommentButtonClick}
+              aria-label="Comments"
+              title="Comments"
+              className="relative inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
+            >
+              <MessageCircle className="w-4 h-4" />
+              {commentCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-[10px] font-semibold leading-4 text-center">
+                  {commentCount > 99 ? "99+" : commentCount}
+                </span>
+              )}
+            </button>
+
             {/* Language selector — only shown once a chapter actually has
                 more than one translation to switch between; with 0 or 1
                 there's nothing to pick, so the icon isn't rendered at all
@@ -521,6 +566,13 @@ export default function ChapterReaderClient({
         </Document>
         )}
       </div>
+
+      <ChapterCommentPanel
+        chapterId={currentChapterId}
+        isOpen={isCommentPanelOpen}
+        onClose={() => setIsCommentPanelOpen(false)}
+        onCommentPosted={() => setCommentCount((c) => c + 1)}
+      />
     </div>
   );
 }

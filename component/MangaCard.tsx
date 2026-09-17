@@ -4,6 +4,7 @@ import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 import NoImagePlaceholder from "./NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
+import { timeAgo } from "@/lib/time-ago";
 
 interface MangaCardProps {
   id: string;
@@ -20,33 +21,6 @@ interface MangaCardProps {
   // omit entirely to hide the heart badge — only pages that already know
   // the viewer's favorite state (e.g. the favorites page) should pass this
   isFavorited?: boolean;
-}
-
-function timeAgo(date: Date): string {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  const units: [number, Intl.RelativeTimeFormatUnit][] = [
-    [60, "second"],
-    [60, "minute"],
-    [24, "hour"],
-    [7, "day"],
-    [4.34524, "week"],
-    [12, "month"],
-    [Number.POSITIVE_INFINITY, "year"],
-  ];
-
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-  let value = seconds;
-  let unit: Intl.RelativeTimeFormatUnit = "second";
-
-  for (const [amount, u] of units) {
-    if (Math.abs(value) < amount) {
-      unit = u;
-      break;
-    }
-    value /= amount;
-  }
-
-  return rtf.format(-Math.round(value), unit);
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;

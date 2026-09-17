@@ -18,6 +18,7 @@ export default async function ViewerPage({
       select: {
         chapter_number: true,
         chapter_name: true,
+        comment_count: true,
         translations: { select: { file_url: true, language: true } },
         manga: {
           select: {
@@ -64,6 +65,8 @@ export default async function ViewerPage({
       mangaTitle={chapter.manga.manga_title}
       mangaId={chapter.manga.id}
       chapters={chapter.manga.chapters}
+      currentUserId={session?.user?.id ?? null}
+      initialCommentCount={chapter.comment_count}
     />
   );
 }
