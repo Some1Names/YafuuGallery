@@ -12,6 +12,8 @@ import { LANGUAGE_LABELS, type Language } from "@/lib/language";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+const SWIPE_THRESHOLD_PX = 50;
+
 type ReadingMode = "vertical" | "horizontal";
 
 interface ChapterSummary {
@@ -158,6 +160,30 @@ export default function ChapterReaderClient({
   const goPrev = useCallback(() => {
     setSpreadIdx((i) => Math.max(i - 1, 0));
   }, []);
+
+  // Mobile horizontal mode turns pages by swipe instead of the left/right
+  // tap zones desktop uses (those stay click-based, mouse-only). RTL: a
+  // left swipe (negative delta) advances forward — same direction as
+  // desktop's left zone — a right swipe goes back.
+  const swipeStartXRef = useRef(0);
+  const isSwipingRef = useRef(false);
+
+  function handleSwipeStart(e: React.PointerEvent<HTMLDivElement>) {
+    swipeStartXRef.current = e.clientX;
+    isSwipingRef.current = true;
+  }
+
+  function handleSwipeEnd(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isSwipingRef.current) return;
+    isSwipingRef.current = false;
+    const delta = e.clientX - swipeStartXRef.current;
+    if (delta < -SWIPE_THRESHOLD_PX) goNext();
+    else if (delta > SWIPE_THRESHOLD_PX) goPrev();
+  }
+
+  function handleSwipeCancel() {
+    isSwipingRef.current = false;
+  }
 
   useEffect(() => {
     setSpreadIdx(0);
@@ -434,7 +460,12 @@ export default function ChapterReaderClient({
               ))}
             </div>
           ) : (
-            <div className="relative flex justify-center items-center w-full h-full">
+            <div
+              className={`relative flex justify-center items-center w-full h-full ${isMobile ? "touch-pan-y" : ""}`}
+              onPointerDown={isMobile ? handleSwipeStart : undefined}
+              onPointerUp={isMobile ? handleSwipeEnd : undefined}
+              onPointerCancel={isMobile ? handleSwipeCancel : undefined}
+            >
               {/* RTL: currentSpread[0] is read first → renders on the right.
                   currentSpread[1] (if present) is read second → renders on the left. */}
               {currentSpread.length === 2 && (
@@ -456,29 +487,35 @@ export default function ChapterReaderClient({
                 />
               )}
 
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={spreadIdx >= spreads.length - 1}
-                aria-label="Next page"
-                className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
-              >
-                <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
-                  ‹
-                </span>
-              </button>
+              {/* Tap zones — desktop (mouse) only. Mobile turns pages by
+                  swipe instead, handled by the pointer events above. */}
+              {!isMobile && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    disabled={spreadIdx >= spreads.length - 1}
+                    aria-label="Next page"
+                    className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
+                  >
+                    <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
+                      ‹
+                    </span>
+                  </button>
 
-              <button
-                type="button"
-                onClick={goPrev}
-                disabled={spreadIdx === 0}
-                aria-label="Previous page"
-                className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
-              >
-                <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
-                  ›
-                </span>
-              </button>
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    disabled={spreadIdx === 0}
+                    aria-label="Previous page"
+                    className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
+                  >
+                    <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
+                      ›
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           )}
         </Document>
