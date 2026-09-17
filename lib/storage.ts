@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // R2 is Cloudflare's S3-compatible object storage — same PutObjectCommand
@@ -83,4 +83,19 @@ export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCoun
   let bytesUsed = 0;
   for (const size of sizes.values()) bytesUsed += size;
   return { bytesUsed, objectCount: sizes.size };
+}
+
+// DeleteObjectsCommand caps a single call at 1000 keys — chunked the same
+// way ListObjectsV2's pagination is, so this stays correct even once the
+// bucket has more orphaned objects than that.
+export async function deleteObjects(keys: string[]): Promise<void> {
+  for (let i = 0; i < keys.length; i += 1000) {
+    const chunk = keys.slice(i, i + 1000);
+    await r2.send(
+      new DeleteObjectsCommand({
+        Bucket: BUCKET,
+        Delete: { Objects: chunk.map((Key) => ({ Key })) },
+      })
+    );
+  }
 }

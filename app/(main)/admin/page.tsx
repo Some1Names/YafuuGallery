@@ -5,6 +5,7 @@ import { getObjectSizes, keyFromPublicUrl } from "@/lib/storage";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
+import UnattributedStorage from "@/component/admin/UnattributedStorage";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -30,7 +31,7 @@ export default async function AdminPage() {
       getObjectSizes(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
-        select: { id: true, name: true, email: true, role: true, created_at: true },
+        select: { id: true, name: true, email: true, role: true, created_at: true, image: true },
       }),
       prisma.manga.findMany({
         orderBy: { created_at: "desc" },
@@ -113,6 +114,39 @@ export default async function AdminPage() {
       sizeOfUrl(c.cover_image_url) + c.translations.reduce((sum, t) => sum + sizeOfUrl(t.file_url), 0);
     chapterBytes.set(c.id, bytes);
   }
+
+  // Every *_url column in the schema that can point at an R2 object —
+  // whatever key isn't referenced by any of these is a leftover no manga,
+  // chapter, arc, or user is still holding onto (an old avatar after a
+  // re-upload, or a cover picked mid-edit and then abandoned by Cancel).
+  const referencedKeys = new Set<string>();
+  for (const m of mangaList) {
+    for (const url of [m.cover_image_url, m.banner_image_url]) {
+      const key = keyFromPublicUrl(url);
+      if (key) referencedKeys.add(key);
+    }
+  }
+  for (const a of arcs) {
+    const key = keyFromPublicUrl(a.arc_image_url);
+    if (key) referencedKeys.add(key);
+  }
+  for (const c of chapters) {
+    const key = keyFromPublicUrl(c.cover_image_url);
+    if (key) referencedKeys.add(key);
+    for (const t of c.translations) {
+      const tKey = keyFromPublicUrl(t.file_url);
+      if (tKey) referencedKeys.add(tKey);
+    }
+  }
+  for (const u of users) {
+    const key = keyFromPublicUrl(u.image);
+    if (key) referencedKeys.add(key);
+  }
+
+  const orphanedObjects = [...objectSizes.entries()]
+    .filter(([key]) => !referencedKeys.has(key))
+    .map(([key, size]) => ({ key, size }))
+    .sort((a, b) => b.size - a.size);
 
   const mangaItems = mangaList.map((m) => ({
     id: m.id,
@@ -198,6 +232,8 @@ export default async function AdminPage() {
           bytesUsed={[...objectSizes.values()].reduce((sum, size) => sum + size, 0)}
           objectCount={objectSizes.size}
         />
+
+        <UnattributedStorage objects={orphanedObjects} />
 
         <AdminDashboard
           mangaList={mangaItems}
