@@ -237,7 +237,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           <div className="flex flex-col gap-2 items-start">
             <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
             <h1
-              className="text-4xl md:text-5xl font-bold text-white max-w-xl line-clamp-2 break-words"
+              className="text-4xl md:text-5xl font-bold text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere"
               // line-clamp only caps the line count, it doesn't reserve
               // space for lines that aren't there — without this, a
               // one-line title sits shorter than a two-line one, which
@@ -245,6 +245,18 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
               // the carousel changes slides. `lh` reserves exactly 2 line
               // heights regardless of this element's own font-size, so it
               // stays correct across the md breakpoint's size jump too.
+              //
+              // min-w-0 is load-bearing for break-words to actually do
+              // anything on a narrow (mobile) screen: as a flex column
+              // item this h1's default min-width is "auto", which floors
+              // it at its own min-content size — and overflow-wrap (what
+              // break-words maps to) doesn't reduce that intrinsic size
+              // per spec, only how a line already given a width wraps. An
+              // unbroken string was rendering at the full max-w-xl (576px)
+              // on every viewport, spilling off-screen on mobile and only
+              // staying invisible there because the carousel clips
+              // overflow. min-w-0 removes that floor so it actually
+              // shrinks to the real available width first.
               style={{ minHeight: "2lh" }}
             >
               {current.title}
