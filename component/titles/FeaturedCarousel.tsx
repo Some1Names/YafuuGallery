@@ -225,9 +225,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       <div className="relative z-10 flex flex-col gap-2 items-start px-6 md:px-10 select-none">
         {/* Keyed on id + direction so a slide change remounts this whole
             block and replays the matching slide-in animation; the
-            direction-specific class picks which side it enters from.
-            Mirrors the parent's own flex/gap so wrapping these three
-            pieces in one more div doesn't change their spacing. */}
+            direction-specific class picks which side it enters from. */}
         <div
           key={current.id}
           className={`flex flex-col gap-2 items-start ${
@@ -237,36 +235,30 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           <div className="flex flex-col gap-2 items-start">
             <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
             <h1
-              className="text-4xl md:text-5xl font-bold text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere"
-              // line-clamp only caps the line count, it doesn't reserve
-              // space for lines that aren't there — without this, a
-              // one-line title sits shorter than a two-line one, which
-              // shoves the synopsis/buttons/dots below it up or down as
-              // the carousel changes slides. `lh` reserves exactly 2 line
-              // heights regardless of this element's own font-size, so it
-              // stays correct across the md breakpoint's size jump too.
-              //
-              // min-w-0 is load-bearing for break-words to actually do
-              // anything on a narrow (mobile) screen: as a flex column
-              // item this h1's default min-width is "auto", which floors
-              // it at its own min-content size — and overflow-wrap (what
-              // break-words maps to) doesn't reduce that intrinsic size
-              // per spec, only how a line already given a width wraps. An
+              // min-w-0 is load-bearing for wrap-anywhere to actually do
+              // anything on a narrow (mobile) screen: as a flex item this
+              // h1's default min-width is "auto", which floors it at its
+              // own min-content size regardless of overflow-wrap. An
               // unbroken string was rendering at the full max-w-xl (576px)
               // on every viewport, spilling off-screen on mobile and only
               // staying invisible there because the carousel clips
-              // overflow. min-w-0 removes that floor so it actually
-              // shrinks to the real available width first.
-              style={{ minHeight: "2lh" }}
+              // overflow.
+              //
+              // No fixed/reserved height here on purpose: a short title or
+              // synopsis does make the whole centered block (and the dots
+              // below it) sit a little higher or lower between slides, but
+              // that's a small, sub-second effect during the crossfade —
+              // reserving worst-case space to eliminate it was tried and
+              // reverted, since it left obviously dead, empty space below
+              // short text for as long as that slide was on screen, which
+              // read as more broken than the brief shift ever did.
+              className="text-4xl md:text-5xl font-bold text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere"
             >
               {current.title}
             </h1>
           </div>
 
-          <p
-            className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3"
-            style={{ minHeight: "3lh" }}
-          >
+          <p className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3">
             {current.synopsis}
           </p>
 
