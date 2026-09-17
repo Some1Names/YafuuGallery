@@ -32,6 +32,10 @@ const DRAG_INTENT_PX = 10;
 export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffsetX, setDragOffsetX] = useState(0);
+  // Which edge arrow is showing — whichever one the mouse is nearer to,
+  // not both at once. Null (mouse outside the carousel, or on mobile where
+  // this never gets set) hides both.
+  const [hoverSide, setHoverSide] = useState<"left" | "right" | null>(null);
   // Which way the text content should slide in from — recomputed on every
   // index change so dots/arrows/swipe/auto-advance all animate in the
   // direction that actually matches the motion (shortest path for a dot
@@ -110,6 +114,16 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
     setActiveIndex(next);
   }
 
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (count <= 1) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoverSide(e.clientX - rect.left < rect.width / 2 ? "left" : "right");
+  }
+
+  function handleMouseLeave() {
+    setHoverSide(null);
+  }
+
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (count <= 1) return;
     dragStartXRef.current = e.clientX;
@@ -155,11 +169,13 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       // vertical padding around variable content — a longer title or
       // synopsis on one slide no longer resizes the whole hero as the
       // carousel advances. Content is centered inside it instead.
-      className="group relative h-100 sm:h-125 md:h-150 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
+      className="relative h-100 sm:h-125 md:h-150 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Bottom layer: the previous slide, sitting still — the top layer
           fading in over it is what creates the crossfade, so this never
@@ -205,14 +221,19 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           centering it within a w-32 zone was landing it almost on top of
           the text. Both the icon and its hover backdrop fade in from the
           edge inward (bg-linear-to-*, not a flat color) so hovering shows
-          a soft glow rather than a visible hard-edged box. */}
+          a soft glow rather than a visible hard-edged box. Visibility is
+          driven by hoverSide (which half of the carousel the mouse is
+          over), not a plain group-hover, so only the nearer arrow shows
+          at a time instead of both appearing together. */}
       {count > 1 && (
         <>
           <button
             type="button"
             onClick={() => goTo(activeIndex - 1)}
             aria-label="Previous featured manga"
-            className="hidden sm:flex absolute inset-y-0 left-0 z-10 w-24 md:w-32 items-center justify-start pl-4 md:pl-6 text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-linear-to-r hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none"
+            className={`hidden sm:flex absolute inset-y-0 left-0 z-10 w-24 md:w-32 items-center justify-start pl-4 md:pl-6 text-white/70 hover:text-white hover:bg-linear-to-r hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none ${
+              hoverSide === "left" ? "opacity-100" : "opacity-0"
+            }`}
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
@@ -220,7 +241,9 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             type="button"
             onClick={() => goTo(activeIndex + 1)}
             aria-label="Next featured manga"
-            className="hidden sm:flex absolute inset-y-0 right-0 z-10 w-24 md:w-32 items-center justify-end pr-4 md:pr-6 text-white/70 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-linear-to-l hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none"
+            className={`hidden sm:flex absolute inset-y-0 right-0 z-10 w-24 md:w-32 items-center justify-end pr-4 md:pr-6 text-white/70 hover:text-white hover:bg-linear-to-l hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none ${
+              hoverSide === "right" ? "opacity-100" : "opacity-0"
+            }`}
           >
             <ChevronRight className="w-8 h-8" />
           </button>
