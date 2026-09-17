@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminArcRow from "./AdminArcRow";
+import AdminSearchInput from "./AdminSearchInput";
 
 interface ArcItem {
   id: string;
@@ -84,6 +85,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
   // Height of the row being dragged, captured once at pointer-down — used
   // to know how far its neighbors need to shift to visually "make room"
   // for it as it moves (see dragTargetOriginalIndex below). State (not a
@@ -106,13 +108,6 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
     setOrdered(arcs.slice().sort((a, b) => a.arc_order - b.arc_order));
   }, [arcs]);
 
-  const totalCount = ordered.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages - 1);
-  const pageStart = currentPage * PAGE_SIZE;
-  const pageItems = ordered.slice(pageStart, pageStart + PAGE_SIZE);
-  const placeholderCount = PAGE_SIZE - pageItems.length;
-
   const displayNumbers = new Map<string, number>();
   let regularCounter = 0;
   for (const a of ordered) {
@@ -121,6 +116,27 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
       displayNumbers.set(a.id, regularCounter);
     }
   }
+
+  // Search is a pure display filter over `ordered`, not a different data
+  // source — reordering only ever operates on the full list (see
+  // commitOrder), so drag-and-drop is turned off while filtered instead of
+  // trying to make "drag position 2 of 3 filtered results" mean something
+  // in the full arc order.
+  const query = search.trim().toLowerCase();
+  const isSearching = query.length > 0;
+  const filtered = isSearching
+    ? ordered.filter((a) => {
+        const number = a.arc_is_ex ? "ex" : `#${String(displayNumbers.get(a.id) ?? 0).padStart(3, "0")}`;
+        return a.arc_name.toLowerCase().includes(query) || number.toLowerCase().includes(query);
+      })
+    : ordered;
+
+  const totalCount = ordered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageStart = currentPage * PAGE_SIZE;
+  const pageItems = isSearching ? filtered : ordered.slice(pageStart, pageStart + PAGE_SIZE);
+  const placeholderCount = isSearching ? 0 : PAGE_SIZE - pageItems.length;
 
   async function commitOrder(nextOrdered: ArcItem[]): Promise<boolean> {
     const res = await fetch("/api/admin/arcs/reorder", {
@@ -252,10 +268,22 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
 
   return (
     <div className="flex flex-col gap-3">
+      {totalCount > PAGE_SIZE || isSearching ? (
+        <AdminSearchInput value={search} onChange={setSearch} placeholder="Search arcs by number or title…" />
+      ) : null}
+
+      {isSearching && filtered.length === 0 && (
+        <p className="text-xs text-[#6b655e] text-center py-6">No arcs match &quot;{search}&quot;.</p>
+      )}
+
       {pageItems.map((a, localIndex) => {
-        const index = pageStart + localIndex;
+        // Indexing into `ordered` (not `pageItems`/`filtered`) keeps drag
+        // math correct — see the comment above `filtered`. Dragging is
+        // disabled while searching (no gripHandle rendered below), so
+        // `index` only needs to be meaningful in the non-searching path.
+        const index = isSearching ? ordered.indexOf(a) : pageStart + localIndex;
         const isBeingEdited = editingArcId === a.id;
-        const isDragging = dragIndex === index;
+        const isDragging = !isSearching && dragIndex === index;
 
         // Real-time "auto sort" preview: rows between the drag's start and
         // current target slide out of the way by exactly one row's worth
@@ -276,7 +304,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
         // the card below sm (there's no cover there to sit beside). Both
         // copies share the same pointer-down handler for this row; move/up
         // tracking happens on window (see the effect above).
-        const gripHandle = !isBeingEdited && (
+        const gripHandle = !isBeingEdited && !isSearching && (
           <span
             className="flex items-center cursor-grab active:cursor-grabbing touch-none select-none"
             onPointerDown={(e) => handleGripPointerDown(e, index)}
@@ -335,7 +363,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
         <ArcRowPlaceholder key={`placeholder-${i}`} index={i} />
       ))}
 
-      {totalCount > PAGE_SIZE && (
+      {!isSearching && totalCount > PAGE_SIZE && (
         <div className="flex items-center justify-between pt-1">
           <button
             type="button"

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminChapterRow from "./AdminChapterRow";
+import AdminSearchInput from "./AdminSearchInput";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface ChapterItem {
@@ -97,6 +98,7 @@ export default function AdminChapterList({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
   // Height of the row being dragged, captured once at pointer-down — used
   // to know how far its neighbors need to shift to visually "make room"
   // for it as it moves (see dragTargetOriginalIndex below). State (not a
@@ -119,13 +121,6 @@ export default function AdminChapterList({
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
   }, [chapters]);
 
-  const totalCount = ordered.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages - 1);
-  const pageStart = currentPage * PAGE_SIZE;
-  const pageItems = ordered.slice(pageStart, pageStart + PAGE_SIZE);
-  const placeholderCount = PAGE_SIZE - pageItems.length;
-
   const displayNumbers = new Map<string, number>();
   let regularCounter = 0;
   for (const c of ordered) {
@@ -134,6 +129,31 @@ export default function AdminChapterList({
       displayNumbers.set(c.id, regularCounter);
     }
   }
+
+  // Search is a pure display filter over `ordered`, not a different data
+  // source — reordering only ever operates on the full list (see
+  // commitOrder), so drag-and-drop is turned off while filtered instead of
+  // trying to make "drag position 2 of 3 filtered results" mean something
+  // in the full chapter order.
+  const query = search.trim().toLowerCase();
+  const isSearching = query.length > 0;
+  const filtered = isSearching
+    ? ordered.filter((c) => {
+        const number = c.chapterIsEx ? "ex" : `#${String(displayNumbers.get(c.id) ?? 0).padStart(3, "0")}`;
+        return (
+          c.chapterName.toLowerCase().includes(query) ||
+          (c.arcName ?? "").toLowerCase().includes(query) ||
+          number.toLowerCase().includes(query)
+        );
+      })
+    : ordered;
+
+  const totalCount = ordered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageStart = currentPage * PAGE_SIZE;
+  const pageItems = isSearching ? filtered : ordered.slice(pageStart, pageStart + PAGE_SIZE);
+  const placeholderCount = isSearching ? 0 : PAGE_SIZE - pageItems.length;
 
   async function commitOrder(nextOrdered: ChapterItem[]): Promise<boolean> {
     const res = await fetch("/api/admin/chapters/reorder", {
@@ -265,10 +285,22 @@ export default function AdminChapterList({
 
   return (
     <div className="flex flex-col gap-3">
+      {totalCount > PAGE_SIZE || isSearching ? (
+        <AdminSearchInput value={search} onChange={setSearch} placeholder="Search chapters by number, title, or arc…" />
+      ) : null}
+
+      {isSearching && filtered.length === 0 && (
+        <p className="text-xs text-[#6b655e] text-center py-6">No chapters match &quot;{search}&quot;.</p>
+      )}
+
       {pageItems.map((c, localIndex) => {
-        const index = pageStart + localIndex;
+        // Indexing into `ordered` (not `pageItems`/`filtered`) keeps drag
+        // math correct — see the comment above `filtered`. Dragging is
+        // disabled while searching (no gripHandle rendered below), so
+        // `index` only needs to be meaningful in the non-searching path.
+        const index = isSearching ? ordered.indexOf(c) : pageStart + localIndex;
         const isBeingEdited = editingChapterId === c.id;
-        const isDragging = dragIndex === index;
+        const isDragging = !isSearching && dragIndex === index;
 
         // Real-time "auto sort" preview: rows between the drag's start and
         // current target slide out of the way by exactly one row's worth
@@ -289,7 +321,7 @@ export default function AdminChapterList({
         // the card below sm (there's no cover there to sit beside). Both
         // copies share the same pointer-down handler for this row; move/up
         // tracking happens on window (see the effect above).
-        const gripHandle = !isBeingEdited && (
+        const gripHandle = !isBeingEdited && !isSearching && (
           <span
             className="flex items-center cursor-grab active:cursor-grabbing touch-none select-none"
             onPointerDown={(e) => handleGripPointerDown(e, index)}
@@ -356,7 +388,7 @@ export default function AdminChapterList({
         <ChapterRowPlaceholder key={`placeholder-${i}`} index={i} />
       ))}
 
-      {totalCount > PAGE_SIZE && (
+      {!isSearching && totalCount > PAGE_SIZE && (
         <div className="flex items-center justify-between pt-1">
           <button
             type="button"
