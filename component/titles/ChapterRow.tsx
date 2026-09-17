@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Heart, MessageCircle } from "lucide-react";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
@@ -51,6 +52,16 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
           <ChapterFavoriteButton chapterId={chapter.id} initialFavorited={isFavorited} />
         </div>
         <div className="text-sm mt-1 text-[#ece6d8]/90 truncate">{chapter.chapter_name}</div>
+        <div className="flex items-center gap-3 mt-1 text-xs text-[#6b655e]">
+          <span className="flex items-center gap-1">
+            <Heart className="w-3.5 h-3.5" />
+            {chapter.favoriteCount.toLocaleString()}
+          </span>
+          <span className="flex items-center gap-1">
+            <MessageCircle className="w-3.5 h-3.5" />
+            {chapter.commentCount.toLocaleString()}
+          </span>
+        </div>
       </div>
     </Link>
   );

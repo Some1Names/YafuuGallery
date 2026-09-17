@@ -5,6 +5,8 @@ export interface ChapterItem {
   chapter_name: string;
   cover_image_url: string | null;
   published_date: Date;
+  favoriteCount: number;
+  commentCount: number;
 }
 
 export interface ArcItem {

@@ -7,6 +7,7 @@ import MangaHero from "@/component/titles/MangaHero";
 import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import Breadcrumb from "@/component/titles/Breadcrumb";
+import type { ChapterItem } from "@/component/titles/types";
 
 export default async function MangaDetailPage({
     params,
@@ -51,6 +52,7 @@ export default async function MangaDetailPage({
                                 chapter_name: true,
                                 cover_image_url: true,
                                 published_date: true,
+                                _count: { select: { chapter_bookmarks: true, comments: true } },
                             },
                         },
                     },
@@ -65,6 +67,7 @@ export default async function MangaDetailPage({
                         chapter_name: true,
                         cover_image_url: true,
                         published_date: true,
+                        _count: { select: { chapter_bookmarks: true, comments: true } },
                     },
                 },
             },
@@ -89,6 +92,25 @@ export default async function MangaDetailPage({
     }
 
     const favoritedChapterIds = favoritedChapters.map((f) => f.chapter_id);
+
+    // total_chapters/total_view-style: favorite/comment counts aren't
+    // stored on Chapter, so map Prisma's _count into the flat shape
+    // ChapterItem expects (same convention as the admin dashboard).
+    function toChapterItem(c: {
+        id: string;
+        chapter_number: number;
+        chapter_is_ex: boolean;
+        chapter_name: string;
+        cover_image_url: string | null;
+        published_date: Date;
+        _count: { chapter_bookmarks: number; comments: number };
+    }): ChapterItem {
+        const { _count, ...rest } = c;
+        return { ...rest, favoriteCount: _count.chapter_bookmarks, commentCount: _count.comments };
+    }
+
+    const arcs = manga.arcs.map((arc) => ({ ...arc, chapters: arc.chapters.map(toChapterItem) }));
+    const looseChapters = manga.chapters.map(toChapterItem);
 
     return (
         <div
@@ -123,8 +145,8 @@ export default async function MangaDetailPage({
 
                     <div className="px-6 sm:px-0 pb-8 sm:pb-0 sm:order-1 sm:flex-1 min-w-0">
                         <ChapterArcSection
-                            arcs={manga.arcs}
-                            looseChapters={manga.chapters}
+                            arcs={arcs}
+                            looseChapters={looseChapters}
                             favoritedChapterIds={favoritedChapterIds}
                         />
                     </div>
