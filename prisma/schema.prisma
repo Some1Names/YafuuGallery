@@ -34,23 +34,24 @@ enum ArcStatus {
 // rest of the app can keep reading/ordering by created_at unchanged.
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  id            String   @id @default(cuid())
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   name          String?
   image         String?
-  role          Role      @default(reader)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @default(now()) @updatedAt
+  role          Role     @default(reader)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
 
   // Better Auth adapter relations
   accounts Account[]
   sessions Session[]
 
   // app relations
-  manga            Manga[]        @relation("AuthoredManga")
-  translations      Translation[] @relation("TranslatedBy")
+  manga             Manga[]           @relation("AuthoredManga")
+  translations      Translation[]     @relation("TranslatedBy")
   comments          Comment[]
+  comment_likes     CommentLike[]
   bookmarks         Bookmark[]
   chapter_bookmarks ChapterBookmark[]
   reading_progress  ReadingProgress[]
@@ -112,25 +113,25 @@ model Verification {
 // ---------- Manga ----------
 
 model Manga {
-  id                String   @id @default(cuid())
-  author_id         String
-  manga_title       String
-  manga_synopsis    String
-  cover_image_url   String?  // poster-style cover, used in browse grids / cards
-  banner_image_url  String?  // wide hero image, used on the detail page
+  id               String   @id @default(cuid())
+  author_id        String
+  manga_title      String
+  manga_synopsis   String
+  cover_image_url  String? // poster-style cover, used in browse grids / cards
+  banner_image_url String? // wide hero image, used on the detail page
   // Admin-curated home page carousel — is_featured is a plain toggle, and
   // featured_order is set to (current max + 1) whenever it's turned on, so
   // the carousel order is simply "the order manga were featured in" with
   // no separate manual-reorder UI. Meaningless while is_featured is false.
-  is_featured       Boolean  @default(false)
-  featured_order    Int      @default(0)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  is_featured      Boolean  @default(false)
+  featured_order   Int      @default(0)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
-  author     User       @relation("AuthoredManga", fields: [author_id], references: [id])
-  arcs       Arc[]
-  chapters   Chapter[]
-  bookmarks  Bookmark[]
+  author    User       @relation("AuthoredManga", fields: [author_id], references: [id])
+  arcs      Arc[]
+  chapters  Chapter[]
+  bookmarks Bookmark[]
 
   @@index([author_id])
   // Home page hero query filters on is_featured then sorts by
@@ -144,18 +145,18 @@ model Manga {
 // ---------- Arc ----------
 
 model Arc {
-  id             String    @id @default(cuid())
-  manga_id       String
-  arc_name       String
-  arc_order      Int
+  id            String    @id @default(cuid())
+  manga_id      String
+  arc_name      String
+  arc_order     Int
   // Any number of arcs on a manga can be flagged as special "ex"
   // (bonus/omake) entries — independent of arc_order, so each can be
   // dragged to sit anywhere in the list while always displaying "ex"
   // instead of a position number.
-  arc_is_ex      Boolean   @default(false)
-  arc_status     ArcStatus @default(ongoing)
-  arc_image_url  String?   // cover image shown when browsing by arc
-  created_at     DateTime  @default(now())
+  arc_is_ex     Boolean   @default(false)
+  arc_status    ArcStatus @default(ongoing)
+  arc_image_url String? // cover image shown when browsing by arc
+  created_at    DateTime  @default(now())
 
   manga    Manga     @relation(fields: [manga_id], references: [id], onDelete: Cascade)
   chapters Chapter[]
@@ -165,8 +166,8 @@ model Arc {
   //   total_chapters = chapters.length
   //   total_view     = sum(chapters[].view_count)
 
-  @@index([manga_id])
   @@unique([manga_id, arc_order])
+  @@index([manga_id])
 }
 
 // ---------- Chapter ----------
@@ -182,38 +183,38 @@ model Chapter {
   // instead of a position number. Mirrors Arc.arc_is_ex.
   chapter_is_ex   Boolean  @default(false)
   chapter_name    String
-  cover_image_url String?  // thumbnail shown in the chapter list
+  cover_image_url String? // thumbnail shown in the chapter list
   published_date  DateTime
   view_count      Int      @default(0)
   comment_count   Int      @default(0)
   created_at      DateTime @default(now())
 
-  manga    Manga            @relation(fields: [manga_id], references: [id], onDelete: Cascade)
-  arc      Arc?             @relation(fields: [arc_id], references: [id], onDelete: SetNull)
+  manga             Manga             @relation(fields: [manga_id], references: [id], onDelete: Cascade)
+  arc               Arc?              @relation(fields: [arc_id], references: [id], onDelete: SetNull)
   translations      Translation[]
   comments          Comment[]
   reading_progress  ReadingProgress[]
   chapter_bookmarks ChapterBookmark[]
 
+  @@unique([manga_id, chapter_number])
   @@index([manga_id])
   @@index([arc_id])
-  @@unique([manga_id, chapter_number])
 }
 
 // ---------- Translation ----------
 
 model Translation {
-  id             String   @id @default(cuid())
-  chapter_id     String
-  language       Language
-  file_url       String
+  id            String   @id @default(cuid())
+  chapter_id    String
+  language      Language
+  file_url      String
   // Original filename as uploaded (e.g. "chapter-12-final.pdf") — the R2
   // object key itself is a random UUID, so this is purely for display in
   // the admin panel. Nullable since translations created before this field
   // existed have none.
-  file_name      String?
-  translator_id  String?
-  created_at     DateTime @default(now())
+  file_name     String?
+  translator_id String?
+  created_at    DateTime @default(now())
 
   chapter    Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
   translator User?   @relation("TranslatedBy", fields: [translator_id], references: [id])
@@ -232,11 +233,30 @@ model Comment {
   hidden_at  DateTime?
   created_at DateTime  @default(now())
 
-  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  chapter Chapter @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter       @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  likes   CommentLike[]
 
   @@index([chapter_id])
   @@index([user_id])
+}
+
+// ---------- Comment Like ----------
+// like_count is intentionally NOT stored on Comment — same reasoning as
+// Arc's total_chapters/total_view: compute it at query time via _count
+// instead of keeping a counter in sync on every like/unlike.
+
+model CommentLike {
+  id         String   @id @default(cuid())
+  user_id    String
+  comment_id String
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, comment_id])
+  @@index([comment_id])
 }
 
 // ---------- Bookmark ----------

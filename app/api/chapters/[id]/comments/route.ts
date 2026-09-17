@@ -12,6 +12,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const session = await auth();
+  const viewerId = session?.user?.id;
 
   const comments = await prisma.comment.findMany({
     where: { chapter_id: id, hidden_at: null },
@@ -21,10 +23,26 @@ export async function GET(
       body: true,
       created_at: true,
       user: { select: { id: true, name: true, image: true } },
+      _count: { select: { likes: true } },
+      // Only ever matches the viewer's own like row (if any) — this is
+      // just "did I like this," not the like list itself, so there's
+      // never more than one row here. "" never matches a real user_id, so
+      // a signed-out viewer cleanly gets an empty array without needing a
+      // differently-shaped select (which Prisma can't type-check as well).
+      likes: { where: { user_id: viewerId ?? "" }, select: { id: true } },
     },
   });
 
-  return NextResponse.json(comments);
+  return NextResponse.json(
+    comments.map((c) => ({
+      id: c.id,
+      body: c.body,
+      created_at: c.created_at,
+      user: c.user,
+      likeCount: c._count.likes,
+      likedByMe: c.likes.length > 0,
+    }))
+  );
 }
 
 // POST /api/chapters/[id]/comments — create, requires an account. The
@@ -69,7 +87,8 @@ export async function POST(
       prisma.chapter.update({ where: { id }, data: { comment_count: { increment: 1 } } }),
     ]);
 
-    return NextResponse.json(comment, { status: 201 });
+    // A brand-new comment has no likes yet — no need to query for it.
+    return NextResponse.json({ ...comment, likeCount: 0, likedByMe: false }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/chapters/[id]/comments]", err);
     return NextResponse.json({ error: "Failed to post comment." }, { status: 500 });

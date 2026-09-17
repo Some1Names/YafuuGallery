@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { X, Send } from "lucide-react";
+import { X, Send, Heart } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
 
 interface CommentUser {
@@ -16,6 +16,8 @@ interface CommentItem {
   body: string;
   created_at: string;
   user: CommentUser;
+  likeCount: number;
+  likedByMe: boolean;
 }
 
 interface ChapterCommentPanelProps {
@@ -99,6 +101,35 @@ export default function ChapterCommentPanel({
     }
   }
 
+  // Optimistic toggle, same pattern as MangaFavoriteButton/ChapterFavoriteButton
+  // — flip immediately, revert on failure, reconcile with the server's
+  // actual count either way (a double-click race resolves to whatever the
+  // server ends up with, not just the client's own guess).
+  async function toggleLike(comment: CommentItem) {
+    const optimisticLiked = !comment.likedByMe;
+    const optimisticCount = comment.likeCount + (optimisticLiked ? 1 : -1);
+
+    setComments((prev) =>
+      prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: optimisticLiked, likeCount: optimisticCount } : c)) ??
+      prev
+    );
+
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const data: { liked: boolean; likeCount: number } = await res.json();
+      setComments((prev) =>
+        prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: data.liked, likeCount: data.likeCount } : c)) ??
+        prev
+      );
+    } catch {
+      setComments((prev) =>
+        prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount } : c)) ??
+        prev
+      );
+    }
+  }
+
   return (
     <>
       {/* Backdrop — mobile only, closes on tap. Desktop has room to leave
@@ -145,6 +176,18 @@ export default function ChapterCommentPanel({
                     <span className="text-xs text-[#6b655e] shrink-0">{timeAgo(new Date(c.created_at))}</span>
                   </div>
                   <p className="text-sm text-[#b6b0a2] whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
+                  <button
+                    type="button"
+                    onClick={() => toggleLike(c)}
+                    aria-pressed={c.likedByMe}
+                    aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
+                    className={`flex items-center gap-1 mt-1 text-xs transition-colors duration-200 ${
+                      c.likedByMe ? "text-[#9c1d25]" : "text-[#6b655e] hover:text-[#b6b0a2]"
+                    }`}
+                  >
+                    <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
+                    {c.likeCount > 0 && c.likeCount}
+                  </button>
                 </div>
               </div>
             ))
