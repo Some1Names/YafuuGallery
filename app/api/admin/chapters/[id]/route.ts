@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageChapter } from "@/lib/manga-access";
-import { deleteReplacedUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -167,6 +167,8 @@ export async function PATCH(
 }
 
 // DELETE /api/admin/chapters/[id] — delete
+// Cascades to Translation per the schema's onDelete: Cascade, so the
+// chapter's cover and every one of its PDFs need cleaning up in R2 too.
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -177,7 +179,16 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const chapter = await prisma.chapter.findUnique({
+    where: { id },
+    select: { cover_image_url: true, translations: { select: { file_url: true } } },
+  });
+
   await prisma.chapter.delete({ where: { id } });
+
+  if (chapter) {
+    await deleteUrls([chapter.cover_image_url, ...chapter.translations.map((t) => t.file_url)]);
+  }
 
   return NextResponse.json({ success: true });
 }

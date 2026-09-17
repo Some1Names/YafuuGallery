@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageArc } from "@/lib/manga-access";
-import { deleteReplacedUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -81,7 +81,9 @@ export async function PATCH(
 
 // DELETE /api/admin/arcs/[id] — delete
 // Chapters assigned to this arc are NOT deleted — the schema's
-// `onDelete: SetNull` on Chapter.arc unassigns them instead.
+// `onDelete: SetNull` on Chapter.arc unassigns them instead, so only the
+// arc's own image needs cleaning up, not anything belonging to its
+// (surviving) chapters.
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -92,7 +94,11 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const arc = await prisma.arc.findUnique({ where: { id }, select: { arc_image_url: true } });
+
   await prisma.arc.delete({ where: { id } });
+
+  if (arc) await deleteUrls([arc.arc_image_url]);
 
   return NextResponse.json({ success: true });
 }

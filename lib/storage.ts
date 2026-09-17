@@ -118,3 +118,15 @@ export async function deleteReplacedUrls(
   }
   if (keys.length > 0) await deleteObjects(keys);
 }
+
+// Called after a DELETE route removes a row (and, via the schema's own
+// cascades, everything under it) — every *_url this row and its cascaded
+// children held is now unreachable, no "did it change" comparison needed.
+export async function deleteUrls(urls: (string | null | undefined)[]): Promise<void> {
+  const keys: string[] = [];
+  for (const url of urls) {
+    const key = keyFromPublicUrl(url);
+    if (key) keys.push(key);
+  }
+  if (keys.length > 0) await deleteObjects(keys);
+}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
-import { deleteReplacedUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
 
 // PATCH /api/admin/manga/[id] — update
 export async function PATCH(
@@ -50,8 +50,11 @@ export async function PATCH(
 }
 
 // DELETE /api/admin/manga/[id] — delete
-// Cascades to Arc/Chapter/Bookmark per the schema's onDelete: Cascade —
-// deleting a manga wipes its whole chapter tree, not just the manga row.
+// Cascades to Arc/Chapter/Translation/Bookmark per the schema's
+// onDelete: Cascade — deleting a manga wipes its whole chapter tree, not
+// just the manga row. Every *_url anywhere in that tree is gathered
+// before the delete so their R2 objects can be removed too, instead of
+// leaving them as orphans.
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -62,7 +65,27 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const manga = await prisma.manga.findUnique({
+    where: { id },
+    select: {
+      cover_image_url: true,
+      banner_image_url: true,
+      arcs: { select: { arc_image_url: true } },
+      chapters: { select: { cover_image_url: true, translations: { select: { file_url: true } } } },
+    },
+  });
+
   await prisma.manga.delete({ where: { id } });
+
+  if (manga) {
+    await deleteUrls([
+      manga.cover_image_url,
+      manga.banner_image_url,
+      ...manga.arcs.map((a) => a.arc_image_url),
+      ...manga.chapters.map((c) => c.cover_image_url),
+      ...manga.chapters.flatMap((c) => c.translations.map((t) => t.file_url)),
+    ]);
+  }
 
   return NextResponse.json({ success: true });
 }
