@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import Link from "next/link";
 import MangaCard from "@/component/MangaCard";
 import FeaturedCarousel from "@/component/titles/FeaturedCarousel";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
@@ -66,9 +67,11 @@ export default async function BrowsePage() {
     firstChapterId: m.chapters[0]?.id ?? null,
   }));
 
-  // Logged-out visitors and logged-in users with no history both just skip
-  // the section entirely below — unlike the profile page's own "no history
-  // yet" placeholder, an empty box has no real use on a landing page.
+  // Logged-in users with no history yet just skip the section entirely —
+  // unlike the profile page's own "no history yet" placeholder, an empty
+  // box has no real use on a landing page. Logged-out visitors get a
+  // small sign-in nudge instead (below), since for them the section isn't
+  // "empty," it's unavailable until they have an account to track against.
   const recentProgress = session?.user?.id ? await getContinueReading(session.user.id, 6) : [];
 
   return (
@@ -90,32 +93,46 @@ export default async function BrowsePage() {
         <FeaturedCarousel manga={featuredSlides} />
       </section>
 
-      {/* Continue reading — only rendered at all when there's something to
-          show (see the recentProgress comment above), so a logged-out
-          visitor or a brand-new account never sees an empty section here. */}
-      {recentProgress.length > 0 && (
-        <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
+      {/* Continue reading. Three states: signed out gets a small nudge
+          (no cards to show anyway), signed in with history gets the real
+          section, signed in with none yet gets nothing — a brand-new
+          account doesn't need to be told it has no history. */}
+      {!session?.user?.id ? (
+        <section className="px-6 md:px-8 pt-6 sm:pt-8">
           <div className="max-w-350 mx-auto">
-            <div className="mb-6 sm:mb-8">
-              <p className="text-[#b6b0a2] text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
-              <h2 className="text-2xl sm:text-3xl text-white font-bold">Continue Reading</h2>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-              {recentProgress.map((p) => (
-                <ContinueReadingCard
-                  key={p.id}
-                  chapterId={p.chapterId}
-                  displayNumber={p.displayNumber}
-                  chapterIsEx={p.chapterIsEx}
-                  chapterName={p.chapterName}
-                  coverImageUrl={p.coverImageUrl}
-                  mangaTitle={p.mangaTitle}
-                />
-              ))}
-            </div>
+            <p className="text-[#b6b0a2] text-sm">
+              <Link href="/login" className="text-[#ece6d8] underline underline-offset-2 hover:no-underline">
+                Sign in
+              </Link>{" "}
+              to keep track of what you&apos;re reading.
+            </p>
           </div>
         </section>
+      ) : (
+        recentProgress.length > 0 && (
+          <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
+            <div className="max-w-350 mx-auto">
+              <div className="mb-6 sm:mb-8">
+                <p className="text-[#b6b0a2] text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
+                <h2 className="text-2xl sm:text-3xl text-white font-bold">Continue Reading</h2>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+                {recentProgress.map((p) => (
+                  <ContinueReadingCard
+                    key={p.id}
+                    chapterId={p.chapterId}
+                    displayNumber={p.displayNumber}
+                    chapterIsEx={p.chapterIsEx}
+                    chapterName={p.chapterName}
+                    coverImageUrl={p.coverImageUrl}
+                    mangaTitle={p.mangaTitle}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )
       )}
 
       {/* Latest Updates */}
