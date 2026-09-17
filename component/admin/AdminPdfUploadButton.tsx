@@ -2,12 +2,23 @@
 
 import { useRef, useState } from "react";
 import { FileText, CheckCircle2 } from "lucide-react";
+import { renderPdfFirstPageToFile } from "@/lib/pdf-thumbnail";
+import { processImageForUpload } from "@/lib/image-processing";
 
 interface AdminPdfUploadButtonProps {
   mangaId: string;
   value: string | null;
   fileName: string | null;
   onChange: (url: string, fileName: string) => void;
+  // Whether this chapter currently has no cover — when true, a
+  // successful PDF upload also renders the PDF's first page and hands the
+  // resulting URL to onCoverGenerated, so a chapter never has to sit on
+  // the generic placeholder just because nobody picked a cover manually.
+  // Best-effort: rendering happens in the background and any failure
+  // (a corrupt/encrypted PDF) is swallowed rather than surfaced as an
+  // error, since the PDF itself already uploaded fine.
+  generateCoverIfMissing?: boolean;
+  onCoverGenerated?: (url: string) => void;
 }
 
 const HARD_LIMIT_BYTES = 200 * 1024 * 1024;
@@ -31,6 +42,8 @@ export default function AdminPdfUploadButton({
   value,
   fileName,
   onChange,
+  generateCoverIfMissing = false,
+  onCoverGenerated,
 }: AdminPdfUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -91,6 +104,23 @@ export default function AdminPdfUploadButton({
       });
 
       onChange(publicUrl, file.name);
+
+      // Fire-and-forget — runs after setIsUploading(false) below so the
+      // button itself doesn't sit in a loading state for this, and a
+      // failure here (a corrupt/encrypted PDF) shouldn't surface as an
+      // upload error since the PDF itself is already saved.
+      if (generateCoverIfMissing && onCoverGenerated) {
+        (async () => {
+          const rendered = await renderPdfFirstPageToFile(file);
+          const processed = await processImageForUpload(rendered, { aspectRatio: 16 / 9 });
+          const coverFormData = new FormData();
+          coverFormData.append("file", processed);
+          const coverRes = await fetch("/api/upload", { method: "POST", body: coverFormData });
+          if (!coverRes.ok) return;
+          const coverData = await coverRes.json();
+          onCoverGenerated(coverData.url);
+        })().catch(() => {});
+      }
     } catch {
       setError("Upload failed — please try again.");
     } finally {

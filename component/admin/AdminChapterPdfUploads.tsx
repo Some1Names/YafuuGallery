@@ -14,6 +14,12 @@ interface AdminChapterPdfUploadsProps {
   mangaId: string;
   value: ChapterTranslationDraft[];
   onChange: (value: ChapterTranslationDraft[]) => void;
+  // Passed straight through to every AdminPdfUploadButton rendered below —
+  // see its own prop docs. Which language's PDF ends up supplying the
+  // fallback cover is arbitrary (whichever finishes uploading first while
+  // the cover is still empty); that's fine, there's no "primary" language.
+  generateCoverIfMissing?: boolean;
+  onCoverGenerated?: (url: string) => void;
 }
 
 // A chapter can hold one Translation per language (chapter_id + language is
@@ -22,7 +28,13 @@ interface AdminChapterPdfUploadsProps {
 // "Add another language" control for whichever of th/en/ja isn't in use
 // yet. An entry with no file uploaded is just dropped on submit rather
 // than treated as an error, so adding a slot and not filling it is harmless.
-export default function AdminChapterPdfUploads({ mangaId, value, onChange }: AdminChapterPdfUploadsProps) {
+export default function AdminChapterPdfUploads({
+  mangaId,
+  value,
+  onChange,
+  generateCoverIfMissing,
+  onCoverGenerated,
+}: AdminChapterPdfUploadsProps) {
   const usedLanguages = new Set(value.map((t) => t.language));
   const unusedLanguages = LANGUAGE_OPTIONS.filter((opt) => !usedLanguages.has(opt.value));
 
@@ -74,6 +86,8 @@ export default function AdminChapterPdfUploads({ mangaId, value, onChange }: Adm
                   value={t.url}
                   fileName={t.fileName}
                   onChange={(url, fileName) => updateEntry(i, { url, fileName })}
+                  generateCoverIfMissing={generateCoverIfMissing}
+                  onCoverGenerated={onCoverGenerated}
                 />
               </div>
 

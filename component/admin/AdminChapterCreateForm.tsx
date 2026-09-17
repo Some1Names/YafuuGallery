@@ -187,7 +187,13 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
             </div>
 
             <div className="flex-1">
-              <AdminChapterPdfUploads mangaId={mangaId} value={translations} onChange={setTranslations} />
+              <AdminChapterPdfUploads
+                mangaId={mangaId}
+                value={translations}
+                onChange={setTranslations}
+                generateCoverIfMissing={!coverImageUrl}
+                onCoverGenerated={(url) => setCoverImageUrl((current) => current ?? url)}
+              />
             </div>
           </div>
         </div>

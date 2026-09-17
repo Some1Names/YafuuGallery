@@ -305,7 +305,13 @@ export default function AdminChapterRow({
                 </div>
 
                 <div className="flex-1">
-                  <AdminChapterPdfUploads mangaId={mangaId} value={editTranslations} onChange={setEditTranslations} />
+                  <AdminChapterPdfUploads
+                    mangaId={mangaId}
+                    value={editTranslations}
+                    onChange={setEditTranslations}
+                    generateCoverIfMissing={!editCoverImageUrl}
+                    onCoverGenerated={(url) => setEditCoverImageUrl((current) => current ?? url)}
+                  />
                 </div>
               </div>
             </div>
