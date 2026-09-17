@@ -84,6 +84,11 @@ export default function ChapterReaderClient({
   const [viewportWidth, setViewportWidth] = useState(1200);
 
   const isFullscreen = mode === "horizontal";
+  // Below Tailwind's sm breakpoint, a landscape-paired two-page spread
+  // leaves each page too narrow to read — horizontal mode shows one page
+  // at a time there instead, same threshold used everywhere else in the
+  // app for mobile vs desktop layout.
+  const isMobile = viewportWidth < 640;
 
   // top bar auto-hides in fullscreen mode unless the mouse is near the
   // top edge of the screen — vertical mode always shows it
@@ -118,6 +123,10 @@ export default function ChapterReaderClient({
   }, []);
 
   const spreads = useMemo(() => {
+    if (isMobile) {
+      return Array.from({ length: numPages }, (_, i) => [i + 1]);
+    }
+
     const isLandscape = (n: number) => (pageRatios[n] ?? 0) > 1;
     const result: number[][] = [];
     let i = 1;
@@ -137,7 +146,7 @@ export default function ChapterReaderClient({
       }
     }
     return result;
-  }, [numPages, pageRatios]);
+  }, [numPages, pageRatios, isMobile]);
 
   const [spreadIdx, setSpreadIdx] = useState(0);
   const currentSpread = spreads[spreadIdx] ?? [];
@@ -202,12 +211,27 @@ export default function ChapterReaderClient({
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const fallbackWidth = isFullscreen ? Math.min(viewportWidth * 0.42, 480) : Math.min((pageWidth - 12) / 2, 420);
+  const fallbackWidth = isMobile
+    ? viewportWidth - 32
+    : isFullscreen
+      ? Math.min(viewportWidth * 0.42, 480)
+      : Math.min((pageWidth - 12) / 2, 420);
 
   function pageSizeProps(pageNum: number) {
     const ratio = pageRatios[pageNum];
     const maxWidth = isFullscreen ? viewportWidth - 32 : pageWidth;
     if (ratio === undefined) return { width: fallbackWidth };
+
+    // Mobile horizontal mode shows one page per screen with no spare width
+    // to fall back on the way desktop's wider viewport has — fit the whole
+    // page within the screen (whichever of width/height is the tighter
+    // constraint) instead of just sizing by height and letting a portrait
+    // page's width run past the screen edge.
+    if (isMobile && isFullscreen) {
+      const widthConstrainedHeight = maxWidth / ratio;
+      return widthConstrainedHeight <= readerHeight ? { width: maxWidth } : { height: readerHeight };
+    }
+
     return ratio > 1 ? { width: maxWidth } : { height: readerHeight };
   }
 
