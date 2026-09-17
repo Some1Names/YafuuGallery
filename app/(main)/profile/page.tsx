@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import ProfileEditForm from "@/component/profile/ProfileEditForm";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import MangaBackground from "@/component/titles/MangaBackground";
-import { getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { getContinueReading } from "@/lib/continue-reading";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -14,7 +14,7 @@ export default async function ProfilePage() {
 
   const userId = session.user.id;
 
-  const [user, bookmarkCount, chapterFavoriteCount, commentCount, chaptersReadCount, recentProgressRaw] =
+  const [user, bookmarkCount, chapterFavoriteCount, commentCount, chaptersReadCount, recentProgress] =
     await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -24,51 +24,10 @@ export default async function ProfilePage() {
       prisma.chapterBookmark.count({ where: { user_id: userId } }),
       prisma.comment.count({ where: { user_id: userId } }),
       prisma.readingProgress.count({ where: { user_id: userId } }),
-      prisma.readingProgress.findMany({
-        where: { user_id: userId },
-        orderBy: { updated_at: "desc" },
-        take: 4,
-        include: {
-          chapter: {
-            select: {
-              chapter_number: true,
-              chapter_is_ex: true,
-              chapter_name: true,
-              cover_image_url: true,
-              manga: { select: { id: true, manga_title: true } },
-            },
-          },
-        },
-      }),
+      getContinueReading(userId, 4),
     ]);
 
   if (!user) redirect("/login");
-
-  // chapter_number is a 0-indexed sort key, not the number shown to
-  // readers (see lib/chapter-number.ts) — the display number depends on
-  // this chapter's position among its OWN manga's non-ex chapters, so
-  // fetch each involved manga's full chapter list to compute it correctly.
-  const progressMangaIds = [...new Set(recentProgressRaw.map((p) => p.chapter.manga.id))];
-  const progressSiblingChapters = await prisma.chapter.findMany({
-    where: { manga_id: { in: progressMangaIds } },
-    select: { id: true, manga_id: true, chapter_number: true, chapter_is_ex: true },
-  });
-  const progressDisplayNumbers = new Map(
-    progressMangaIds.map((mangaId) => [
-      mangaId,
-      getChapterDisplayNumbers(progressSiblingChapters.filter((c) => c.manga_id === mangaId)),
-    ])
-  );
-
-  const recentProgress = recentProgressRaw.map((p) => ({
-    id: p.id,
-    chapterId: p.chapter_id,
-    displayNumber: progressDisplayNumbers.get(p.chapter.manga.id)?.get(p.chapter_id) ?? 0,
-    chapterIsEx: p.chapter.chapter_is_ex,
-    chapterName: p.chapter.chapter_name,
-    coverImageUrl: p.chapter.cover_image_url,
-    mangaTitle: p.chapter.manga.manga_title,
-  }));
 
   const stats = [
     { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },

@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import MangaCard from "@/component/MangaCard";
 import FeaturedCarousel from "@/component/titles/FeaturedCarousel";
+import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { getContinueReading } from "@/lib/continue-reading";
 
 export default async function BrowsePage() {
-  // These two don't depend on each other's results, so they run as one
-  // round trip instead of two sequential ones.
-  const [mangaList, curatedFeatured] = await Promise.all([
+  // session doesn't depend on the manga queries (or vice versa), so all
+  // three run as one round trip instead of two sequential ones.
+  const [session, mangaList, curatedFeatured] = await Promise.all([
+    auth(),
     prisma.manga.findMany({
       orderBy: { updated_at: "desc" },
       include: {
@@ -62,6 +66,11 @@ export default async function BrowsePage() {
     firstChapterId: m.chapters[0]?.id ?? null,
   }));
 
+  // Logged-out visitors and logged-in users with no history both just skip
+  // the section entirely below — unlike the profile page's own "no history
+  // yet" placeholder, an empty box has no real use on a landing page.
+  const recentProgress = session?.user?.id ? await getContinueReading(session.user.id, 6) : [];
+
   return (
     <div className="bg-[#0a0a0a] min-h-screen">
 
@@ -80,6 +89,34 @@ export default async function BrowsePage() {
 
         <FeaturedCarousel manga={featuredSlides} />
       </section>
+
+      {/* Continue reading — only rendered at all when there's something to
+          show (see the recentProgress comment above), so a logged-out
+          visitor or a brand-new account never sees an empty section here. */}
+      {recentProgress.length > 0 && (
+        <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
+          <div className="max-w-350 mx-auto">
+            <div className="mb-6 sm:mb-8">
+              <p className="text-[#b6b0a2] text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
+              <h2 className="text-2xl sm:text-3xl text-white font-bold">Continue Reading</h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
+              {recentProgress.map((p) => (
+                <ContinueReadingCard
+                  key={p.id}
+                  chapterId={p.chapterId}
+                  displayNumber={p.displayNumber}
+                  chapterIsEx={p.chapterIsEx}
+                  chapterName={p.chapterName}
+                  coverImageUrl={p.coverImageUrl}
+                  mangaTitle={p.mangaTitle}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Latest Updates */}
       <section className="px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
