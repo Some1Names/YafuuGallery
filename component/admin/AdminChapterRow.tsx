@@ -125,11 +125,9 @@ export default function AdminChapterRow({
     <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
       {/* Cover — hidden on mobile so the row stays a compact text row on
           narrow screens (where a thumbnail this small isn't worth the
-          space), shown from sm up. Kept at the edit form's own cover
-          ratio (w-54 h-30, i.e. 1.8:1) but scaled down for a collapsed-row
-          thumbnail instead of stretching to the row's full height — chapter
-          covers are wide/short, not the tall manga-poster shape, so
-          stretching them crops away most of the art. Stays visible while
+          space), shown from sm up. Stretches to fill the row's full height
+          (self-stretch, no fixed h-) so it always covers the row regardless
+          of how many lines of text sit next to it. Stays visible while
           editing — the edit form drops down below it instead of replacing
           it, like a dropdown/accordion panel, so the row never disappears
           from the list mid-edit. */}
@@ -138,7 +136,7 @@ export default function AdminChapterRow({
           <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
         )}
 
-        <div className="relative hidden sm:block sm:w-36 sm:h-20 shrink-0 self-center bg-[#0a0a0a]">
+        <div className="relative hidden sm:block sm:w-36 shrink-0 self-stretch bg-[#0a0a0a]">
           {coverImageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default.
