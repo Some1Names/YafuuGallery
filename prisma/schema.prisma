@@ -133,6 +133,12 @@ model Manga {
   bookmarks  Bookmark[]
 
   @@index([author_id])
+  // Home page hero query filters on is_featured then sorts by
+  // featured_order — a composite index serves both parts of that query in
+  // one pass instead of a full-table scan.
+  @@index([is_featured, featured_order])
+  // Home page and search both list every manga ordered by updated_at.
+  @@index([updated_at])
 }
 
 // ---------- Arc ----------

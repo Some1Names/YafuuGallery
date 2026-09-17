@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 import NoImagePlaceholder from "./NoImagePlaceholder";
@@ -69,10 +70,16 @@ export default function MangaCard({
       <div className="relative w-full aspect-2/3 rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-[1.03]">
         {/* Cover Image */}
         {coverImageUrl ? (
-          <img
+          <Image
             src={coverImageUrl}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            // Matches the home/search/favorites grid this renders in:
+            // grid-cols-2 sm:grid-cols-3 md:grid-cols-5, so the browser
+            // knows roughly how wide a card actually is at each breakpoint
+            // instead of downloading a full-width image for a ~20vw card.
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <NoImagePlaceholder />

@@ -4,32 +4,35 @@ import FeaturedCarousel from "@/component/titles/FeaturedCarousel";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function BrowsePage() {
-  const mangaList = await prisma.manga.findMany({
-    orderBy: { updated_at: "desc" },
-    include: {
-      author: { select: { name: true } },
-      // chapter_number is a 0-indexed sort key, not the number shown to
-      // readers, and doesn't skip "ex" entries — computing the real display
-      // number needs every chapter, not just the highest chapter_number one
-      // (see lib/chapter-number.ts)
-      chapters: {
-        select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
+  // These two don't depend on each other's results, so they run as one
+  // round trip instead of two sequential ones.
+  const [mangaList, curatedFeatured] = await Promise.all([
+    prisma.manga.findMany({
+      orderBy: { updated_at: "desc" },
+      include: {
+        author: { select: { name: true } },
+        // chapter_number is a 0-indexed sort key, not the number shown to
+        // readers, and doesn't skip "ex" entries — computing the real
+        // display number needs every chapter, not just the highest
+        // chapter_number one (see lib/chapter-number.ts)
+        chapters: {
+          select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
+        },
       },
-    },
-  });
-
-  // Home page hero — admin-curated via the "Featured" toggle in the admin
-  // panel (is_featured + featured_order, set in the order manga were
-  // toggled on). Falls back to the single most-viewed manga so the hero
-  // is never empty on a fresh install where nothing's been curated yet.
-  const curatedFeatured = await prisma.manga.findMany({
-    where: { is_featured: true },
-    orderBy: { featured_order: "asc" },
-    take: 8,
-    include: {
-      chapters: { orderBy: { chapter_number: "asc" }, take: 1, select: { id: true } },
-    },
-  });
+    }),
+    // Home page hero — admin-curated via the "Featured" toggle in the admin
+    // panel (is_featured + featured_order, set in the order manga were
+    // toggled on). Falls back to the single most-viewed manga so the hero
+    // is never empty on a fresh install where nothing's been curated yet.
+    prisma.manga.findMany({
+      where: { is_featured: true },
+      orderBy: { featured_order: "asc" },
+      take: 8,
+      include: {
+        chapters: { orderBy: { chapter_number: "asc" }, take: 1, select: { id: true } },
+      },
+    }),
+  ]);
 
   let featuredManga = curatedFeatured;
   if (featuredManga.length === 0) {

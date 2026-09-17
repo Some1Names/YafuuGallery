@@ -15,44 +15,48 @@ export default async function MangaDetailPage({
 }) {
     const { id } = await params;
 
+    // auth() has to resolve first — the bookmark/favorite queries below need
+    // session.user.id to build their WHERE clause. But none of the three
+    // queries below depend on each other (they use the route's `id` param
+    // directly, not manga.id, which is the same value once manga resolves),
+    // so those three run as one round trip instead of two sequential ones.
     const session = await auth();
 
-    const manga = await prisma.manga.findUnique({
-        where: { id },
-        include: {
-            author: { select: { name: true } },
-            arcs: {
-                orderBy: { arc_order: "asc" },
-                include: {
-                    chapters: { orderBy: { chapter_number: "asc" } },
+    const [manga, bookmark, favoritedChapters] = await Promise.all([
+        prisma.manga.findUnique({
+            where: { id },
+            include: {
+                author: { select: { name: true } },
+                arcs: {
+                    orderBy: { arc_order: "asc" },
+                    include: {
+                        chapters: { orderBy: { chapter_number: "asc" } },
+                    },
+                },
+                chapters: {
+                    where: { arc_id: null },
+                    orderBy: { chapter_number: "asc" },
                 },
             },
-            chapters: {
-                where: { arc_id: null },
-                orderBy: { chapter_number: "asc" },
-            },
-        },
-    });
+        }),
+        session?.user?.id
+            ? prisma.bookmark.findUnique({
+                where: {
+                    user_id_manga_id: { user_id: session.user.id, manga_id: id },
+                },
+            })
+            : Promise.resolve(null),
+        session?.user?.id
+            ? prisma.chapterBookmark.findMany({
+                where: { user_id: session.user.id, chapter: { manga_id: id } },
+                select: { chapter_id: true },
+            })
+            : Promise.resolve([]),
+    ]);
 
     if (!manga) {
         notFound();
     }
-
-    const [bookmark, favoritedChapters] = await Promise.all([
-        session?.user?.id
-            ? prisma.bookmark.findUnique({
-                where: {
-                    user_id_manga_id: { user_id: session.user.id, manga_id: manga.id },
-                },
-            })
-            : null,
-        session?.user?.id
-            ? prisma.chapterBookmark.findMany({
-                where: { user_id: session.user.id, chapter: { manga_id: manga.id } },
-                select: { chapter_id: true },
-            })
-            : [],
-    ]);
 
     const favoritedChapterIds = favoritedChapters.map((f) => f.chapter_id);
 
