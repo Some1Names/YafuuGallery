@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye } from "lucide-react";
+import { Eye, Heart, MessageCircle } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
@@ -23,6 +23,8 @@ interface AdminChapterRowProps {
   publishedDate: Date;
   coverImageUrl: string | null;
   translations: ChapterTranslationDraft[];
+  favoriteCount: number;
+  commentCount: number;
   arcs: { id: string; arc_name: string }[];
   // This chapter's current raw chapter_number value — sent back unchanged
   // on save (reordering only ever happens by dragging in the list now,
@@ -48,6 +50,8 @@ export default function AdminChapterRow({
   publishedDate,
   coverImageUrl,
   translations,
+  favoriteCount,
+  commentCount,
   arcs,
   chapterOrder,
   isEditing,
@@ -153,6 +157,16 @@ export default function AdminChapterRow({
               {arcName ? `${arcName} · ` : ""}
               {publishedDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
+            <div className="flex items-center gap-3 mt-1 text-xs text-[#6b655e]">
+              <span className="flex items-center gap-1">
+                <Heart className="w-3.5 h-3.5" />
+                {favoriteCount.toLocaleString()}
+              </span>
+              <span className="flex items-center gap-1">
+                <MessageCircle className="w-3.5 h-3.5" />
+                {commentCount.toLocaleString()}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 shrink-0">
@@ -191,13 +205,27 @@ export default function AdminChapterRow({
           className="border-t border-[#050505] p-12 flex flex-col gap-4"
         >
           <div className="flex flex-col sm:flex-row gap-4">
-            <AdminImageUploadButton
-              label="Cover"
-              value={editCoverImageUrl}
-              onChange={setEditCoverImageUrl}
-              boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
-              aspectRatio={16 / 9}
-            />
+            <div className="shrink-0 flex flex-col gap-2">
+              <AdminImageUploadButton
+                label="Cover"
+                value={editCoverImageUrl}
+                onChange={setEditCoverImageUrl}
+                boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
+                aspectRatio={16 / 9}
+              />
+              {/* Read-only — favorites/comments come from readers, not
+                  something the admin sets here. */}
+              <div className="flex items-center gap-3 text-xs text-[#6b655e]">
+                <span className="flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5" />
+                  {favoriteCount.toLocaleString()}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  {commentCount.toLocaleString()}
+                </span>
+              </div>
+            </div>
 
             <div className="flex-1 flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row gap-4">

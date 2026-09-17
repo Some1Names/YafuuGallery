@@ -23,6 +23,8 @@ interface ChapterItem {
   publishedDate: Date;
   coverImageUrl: string | null;
   translations: ChapterTranslationDraft[];
+  favoriteCount: number;
+  commentCount: number;
 }
 
 interface ArcOption {

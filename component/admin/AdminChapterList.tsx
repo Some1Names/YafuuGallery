@@ -16,6 +16,8 @@ interface ChapterItem {
   publishedDate: Date;
   coverImageUrl: string | null;
   translations: ChapterTranslationDraft[];
+  favoriteCount: number;
+  commentCount: number;
 }
 
 interface AdminChapterListProps {
@@ -334,6 +336,8 @@ export default function AdminChapterList({
                 publishedDate={c.publishedDate}
                 coverImageUrl={c.coverImageUrl}
                 translations={c.translations}
+                favoriteCount={c.favoriteCount}
+                commentCount={c.commentCount}
                 mangaId={mangaId}
                 arcs={arcs}
                 chapterOrder={c.chapterNumber}

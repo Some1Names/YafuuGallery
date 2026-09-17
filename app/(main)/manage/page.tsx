@@ -41,6 +41,7 @@ export default async function ManageMangaPage() {
         view_count: true,
         arc: { select: { arc_name: true } },
         translations: { select: { file_url: true, file_name: true, language: true } },
+        _count: { select: { chapter_bookmarks: true, comments: true } },
       },
     }),
     prisma.arc.findMany({
@@ -86,6 +87,8 @@ export default async function ManageMangaPage() {
       url: t.file_url,
       fileName: t.file_name,
     })),
+    favoriteCount: c._count.chapter_bookmarks,
+    commentCount: c._count.comments,
   }));
 
   return (

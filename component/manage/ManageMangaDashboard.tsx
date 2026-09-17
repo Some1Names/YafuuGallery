@@ -17,6 +17,8 @@ interface ChapterItem {
   publishedDate: Date;
   coverImageUrl: string | null;
   translations: ChapterTranslationDraft[];
+  favoriteCount: number;
+  commentCount: number;
 }
 
 interface ArcOption {
@@ -125,6 +127,8 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
                       publishedDate: c.publishedDate,
                       coverImageUrl: c.coverImageUrl,
                       translations: c.translations,
+                      favoriteCount: c.favoriteCount,
+                      commentCount: c.commentCount,
                     }))}
                   arcs={arcs
                     .filter((a) => a.manga_id === m.id)
