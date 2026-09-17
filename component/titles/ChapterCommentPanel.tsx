@@ -69,8 +69,7 @@ export default function ChapterCommentPanel({
     if (comments) listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [comments]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submitComment() {
     const body = draft.trim();
     if (!body || isSubmitting) return;
 
@@ -98,6 +97,20 @@ export default function ChapterCommentPanel({
       setError("Network error — please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    submitComment();
+  }
+
+  // Enter posts the comment; shift+Enter still inserts a newline like a
+  // normal textarea (only plain Enter is intercepted).
+  function handleTextareaKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submitComment();
     }
   }
 
@@ -200,8 +213,9 @@ export default function ChapterCommentPanel({
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Add a comment…"
-              rows={1}
+              onKeyDown={handleTextareaKeyDown}
+              placeholder="Add a comment… (Enter to send, Shift+Enter for a new line)"
+              rows={3}
               maxLength={MAX_BODY_LENGTH}
               className="flex-1 min-w-0 resize-none bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
             />
