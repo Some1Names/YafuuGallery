@@ -274,19 +274,19 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             {current.firstChapterId ? (
               <Link
                 href={`/viewer/${current.firstChapterId}`}
-                className="bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+                className="w-full sm:w-auto bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
               >
                 Start Reading
               </Link>
             ) : (
-              <span className="bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+              <span className="w-full sm:w-auto bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
                 No chapters yet
               </span>
             )}
 
             <Link
               href={`/manga/titles/${current.id}`}
-              className="bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
+              className="w-full sm:w-auto bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
               View Manga
             </Link>
