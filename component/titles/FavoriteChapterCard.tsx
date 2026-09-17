@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
@@ -28,10 +29,12 @@ export default function FavoriteChapterCard({
         className="relative block w-full aspect-square rounded-lg overflow-hidden bg-[#ece6d8]"
       >
         {coverImageUrl ? (
-          <img
+          <Image
             src={coverImageUrl}
             alt={chapterName}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 50vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <NoImagePlaceholder />

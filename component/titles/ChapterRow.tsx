@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
@@ -19,9 +20,12 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
       <div className="relative w-24 sm:w-54 h-full overflow-hidden shrink-0 bg-[#1b1a1c]">
         {chapter.cover_image_url ? (
           <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url('${chapter.cover_image_url}')` }}
+            <Image
+              src={chapter.cover_image_url}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 96px, 216px"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#1b1a1c]/20 to-[#1b1a1c]" />
           </>

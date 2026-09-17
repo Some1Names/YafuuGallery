@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Home, Heart, User, LogOut, UserPlus, Search } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -149,10 +150,9 @@ export default function Navbar({ user }: NavbarProps) {
                     : "text-[#b6b0a2] hover:text-[#ece6d8]")
                 }
               >
-                <span className="w-7 h-7 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
+                <span className="relative w-7 h-7 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
                   {user.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.image} alt={user.name ?? "Profile"} className="w-full h-full object-cover" />
+                    <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
                   ) : (
                     <span className="text-xs">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
@@ -229,10 +229,9 @@ export default function Navbar({ user }: NavbarProps) {
               className="flex items-center gap-1"
             >
               {user ? (
-                <span className="w-8 h-8 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
+                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
                   {user.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.image} alt={user.name ?? "Profile"} className="w-full h-full object-cover" />
+                    <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
                   ) : (
                     <span className="text-xs text-[#ece6d8]">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}

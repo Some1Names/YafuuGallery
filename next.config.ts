@@ -13,14 +13,21 @@ const nextConfig: NextConfig = {
   // (e.g. from a phone on the same Wi-Fi) instead of only localhost
   allowedDevOrigins: ["192.168.1.106"],
   images: {
-    remotePatterns: r2Url
-      ? [
-          {
-            protocol: r2Url.protocol.replace(":", "") as "http" | "https",
-            hostname: r2Url.hostname,
-          },
-        ]
-      : [],
+    remotePatterns: [
+      ...(r2Url
+        ? [
+            {
+              protocol: r2Url.protocol.replace(":", "") as "http" | "https",
+              hostname: r2Url.hostname,
+            },
+          ]
+        : []),
+      // Google sign-in sets user.image to a Google-hosted avatar URL
+      // (lib/auth.ts's mapProfileToUser doesn't touch `image`) rather than
+      // one of our own uploads — this is the fixed host Google serves
+      // profile photos from, unrelated to R2.
+      { protocol: "https" as const, hostname: "lh3.googleusercontent.com" },
+    ],
   },
 };
 

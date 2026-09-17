@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Eye, Heart, ChevronDown, Star } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
@@ -247,10 +248,9 @@ export default function AdminMangaRow({
           its own proportions (letterboxed on the container's bg) rather
           than cropping/zooming it like object-cover would. */}
       <div className="flex">
-        <div className="w-24 sm:w-32 aspect-2/3 shrink-0 self-start bg-[#0a0a0a]">
+        <div className="relative w-24 sm:w-32 aspect-2/3 shrink-0 self-start bg-[#0a0a0a]">
           {coverImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverImageUrl} alt="" className="w-full h-full object-contain" />
+            <Image src={coverImageUrl} alt="" fill sizes="128px" className="object-contain" />
           ) : (
             <NoImagePlaceholder />
           )}

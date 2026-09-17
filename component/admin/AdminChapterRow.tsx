@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Eye } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
@@ -131,12 +132,11 @@ export default function AdminChapterRow({
           <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
         )}
 
-        <div className="hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
+        <div className="relative hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
           {coverImageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverImageUrl} alt="" draggable={false} className="w-full h-full object-cover" />
+            <Image src={coverImageUrl} alt="" fill draggable={false} sizes="144px" className="object-cover" />
           ) : (
             <NoImagePlaceholder />
           )}

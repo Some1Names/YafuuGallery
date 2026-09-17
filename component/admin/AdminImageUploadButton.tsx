@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import NextImage from "next/image";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
 
@@ -100,8 +101,7 @@ export default function AdminImageUploadButton({
         className={`group relative block ${boxClassName} overflow-hidden rounded border border-[#050505] bg-[#0a0a0a]`}
       >
         {value ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt={label} className="w-full h-full object-cover" />
+          <NextImage src={value} alt={label} fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
         ) : (
           <NoImagePlaceholder label="No image" />
         )}

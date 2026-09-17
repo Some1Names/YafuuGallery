@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 
@@ -112,15 +113,14 @@ export default function AdminArcRow({
           <div className="flex sm:hidden items-center pl-2 pr-3 text-[#6b655e]">{dragHandle}</div>
         )}
 
-        <div className="hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
+        <div className="relative hidden sm:block sm:w-36 sm:h-20 shrink-0 self-start bg-[#0a0a0a]">
           {imageUrl ? (
             // draggable=false so this image never hijacks the row's own
             // drag-and-drop — <img> is natively draggable by default, and
             // a mousedown starting on it would otherwise trigger the
             // browser's built-in "drag this image" behavior instead of
             // AdminArcList's reorder drag.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt="" draggable={false} className="w-full h-full object-cover" />
+            <Image src={imageUrl} alt="" fill draggable={false} sizes="144px" className="object-cover" />
           ) : (
             <NoImagePlaceholder />
           )}

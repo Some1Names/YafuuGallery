@@ -30,14 +30,29 @@ export default async function AdminPage() {
       }),
       prisma.manga.findMany({
         orderBy: { created_at: "desc" },
-        include: {
+        select: {
+          id: true,
+          manga_title: true,
+          manga_synopsis: true,
+          cover_image_url: true,
+          banner_image_url: true,
+          is_featured: true,
           author: { select: { name: true, email: true } },
           _count: { select: { chapters: true, bookmarks: true } },
         },
       }),
       prisma.chapter.findMany({
         orderBy: [{ manga: { manga_title: "asc" } }, { chapter_number: "asc" }],
-        include: {
+        select: {
+          id: true,
+          manga_id: true,
+          arc_id: true,
+          chapter_number: true,
+          chapter_is_ex: true,
+          chapter_name: true,
+          published_date: true,
+          cover_image_url: true,
+          view_count: true,
           arc: { select: { arc_name: true } },
           translations: { select: { file_url: true, file_name: true } },
         },
@@ -56,7 +71,11 @@ export default async function AdminPage() {
       }),
       prisma.comment.findMany({
         orderBy: { created_at: "desc" },
-        include: {
+        select: {
+          id: true,
+          body: true,
+          hidden_at: true,
+          created_at: true,
           user: { select: { id: true, name: true } },
           chapter: {
             select: {

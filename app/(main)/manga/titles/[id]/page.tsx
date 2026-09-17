@@ -25,17 +25,47 @@ export default async function MangaDetailPage({
     const [manga, bookmark, favoritedChapters] = await Promise.all([
         prisma.manga.findUnique({
             where: { id },
-            include: {
+            // select instead of a bare include — the page only ever reads
+            // the fields listed below (matching ChapterItem/ArcItem in
+            // component/titles/types.ts), not the full row for every arc
+            // and chapter on the manga.
+            select: {
+                id: true,
+                manga_title: true,
+                manga_synopsis: true,
+                banner_image_url: true,
                 author: { select: { name: true } },
                 arcs: {
                     orderBy: { arc_order: "asc" },
-                    include: {
-                        chapters: { orderBy: { chapter_number: "asc" } },
+                    select: {
+                        id: true,
+                        arc_name: true,
+                        arc_status: true,
+                        arc_image_url: true,
+                        chapters: {
+                            orderBy: { chapter_number: "asc" },
+                            select: {
+                                id: true,
+                                chapter_number: true,
+                                chapter_is_ex: true,
+                                chapter_name: true,
+                                cover_image_url: true,
+                                published_date: true,
+                            },
+                        },
                     },
                 },
                 chapters: {
                     where: { arc_id: null },
                     orderBy: { chapter_number: "asc" },
+                    select: {
+                        id: true,
+                        chapter_number: true,
+                        chapter_is_ex: true,
+                        chapter_name: true,
+                        cover_image_url: true,
+                        published_date: true,
+                    },
                 },
             },
         }),

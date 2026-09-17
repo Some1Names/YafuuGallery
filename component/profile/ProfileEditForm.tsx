@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import NextImage from "next/image";
 import { Check, X, Pencil, ArrowUpRight } from "lucide-react";
 import { MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
 
@@ -179,17 +180,16 @@ export default function ProfileEditForm({
           className="group relative block w-28 h-28 mx-auto rounded-full sm:mx-0 sm:w-auto sm:h-full sm:aspect-square sm:rounded-none overflow-hidden bg-[#1b1a1c]"
         >
           {image ? (
-            // absolute + inset-0 (not just w-full/h-full) — the button's
-            // width is `auto`, sized by CSS grid off its own content so it
-            // can match the sibling column's height via aspect-square.
-            // Percentage sizing on the img can't help that: grid's
-            // track-sizing pass resolves percentages against nothing yet
-            // defined, so it falls back to the image's raw intrinsic pixel
-            // dimensions as the content size — a large upload was blowing
-            // the column out to its native resolution. Absolute
-            // positioning removes the img from that sizing pass entirely.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt="Avatar" className="absolute inset-0 w-full h-full object-cover" />
+            // fill (not just w-full/h-full) — the button's width is `auto`,
+            // sized by CSS grid off its own content so it can match the
+            // sibling column's height via aspect-square. Percentage sizing
+            // on the image can't help that: grid's track-sizing pass
+            // resolves percentages against nothing yet defined, so it falls
+            // back to the image's raw intrinsic pixel dimensions as the
+            // content size — a large upload was blowing the column out to
+            // its native resolution. fill's own absolute positioning
+            // removes it from that sizing pass entirely.
+            <NextImage src={image} alt="Avatar" fill sizes="112px" className="object-cover" />
           ) : (
             <span className="w-full h-full flex items-center justify-center text-4xl text-[#b6b0a2] font-(family-name:--font-display)">
               {name.charAt(0).toUpperCase() || "?"}
