@@ -68,47 +68,70 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   // rules of hooks.
   const current = manga[activeIndex];
 
-  // The background banner crossfades by keeping the previous slide's image
-  // sitting statically underneath while the new one fades in on top. The
-  // top layer is a single persistent DOM node (never remounted) whose
-  // opacity is driven by state instead of a key-triggered CSS animation.
-  // (A key-remounted version of this layer was originally blamed for an
-  // intermittent dev-only "useInsertionEffect must not schedule updates"
-  // warning; that turned out to actually come from RouteProgressBar's
-  // patched history.pushState, unrelated to this component. Kept this
-  // approach anyway — not remounting a full-bleed background node on every
-  // slide change is the better default regardless.) topOpacity drops to 0
-  // the instant the slide changes, then
-  // a setTimeout flips it back to 1 so the browser actually paints the 0
-  // state before transitioning — setting it back on the same tick can get
-  // coalesced into one frame and skip the fade. Deliberately setTimeout,
-  // not requestAnimationFrame: rAF simply never fires while a tab is
-  // backgrounded (confirmed — not just throttled), which would leave the
-  // image stuck invisible if a slide changed while the tab wasn't in the
-  // foreground; a timer still fires (possibly delayed) once the tab is
-  // visible again. bottomLayer is state (not a ref) because it's read
-  // during render; it can briefly lag behind `current` by design (it's
-  // meant to still show the outgoing slide while the top layer fades in)
-  // but always falls back to `current` below in case it's never been set
-  // (count was 0 on an earlier render). topOffsetX rides along with
-  // topOpacity on the same schedule — offset to the direction-appropriate
-  // starting point, then flipped back to 0 in the same setTimeout that
-  // triggers the opacity fade-in — so the image slides in from the same
-  // side the text does, instead of just crossfading in place.
+  // The background banner does a full-width slide: the incoming (top)
+  // layer travels in from the direction-appropriate edge to center while
+  // the outgoing (bottom) layer — the previous slide, held in place until
+  // this point — travels the rest of the way off the opposite edge at the
+  // same time. Both are persistent DOM nodes (never remounted) with their
+  // transform driven by state, for the same reason the old crossfade version
+  // avoided a key-remount here: not tearing down a full-bleed background
+  // node on every slide change is the better default regardless of the
+  // (since-disproven, see git history) dev-warning concern that originally
+  // motivated it.
+  //
+  // Each cycle has three beats, every one already established by the old
+  // crossfade version's own opacity/offset dance:
+  //   1. Instantly (transitionsEnabled off) park the incoming layer just
+  //      outside the entry edge — both layers are exactly where the PREVIOUS
+  //      cycle's beat 3 left them, so this is a no-op past the very first
+  //      render.
+  //   2. A setTimeout (not requestAnimationFrame — rAF simply never fires in
+  //      a backgrounded tab, confirmed, which would leave a slide change
+  //      stuck mid-flight if it happened while the tab wasn't focused) lets
+  //      the browser actually paint that parked position before turning
+  //      transitions back on and animating both layers across — setting the
+  //      target position on the same tick as the parked one can get
+  //      coalesced into a single frame and skip the slide entirely.
+  //   3. Once the incoming layer has arrived, it becomes the new resting
+  //      bottom layer for next time. The outgoing layer's div still says
+  //      "off-screen" in its own inline transform from the animation that
+  //      just finished, which is fine (it's off-screen) right up until beat
+  //      1 of the NEXT cycle needs to reuse that same node as the next
+  //      incoming layer — so transitions are turned off again here too, one
+  //      beat early, purely so that reuse in the future finds the node
+  //      already quiescent rather than mid-transition.
+  //
+  // isFirstRenderRef skips all of this on mount: both layers start out
+  // showing the same (only) slide there, so animating one out from under
+  // the other would just be the hero image sliding across a duplicate of
+  // itself — the page should simply open with the hero already in place.
   const [bottomLayer, setBottomLayer] = useState(current);
-  const [topOpacity, setTopOpacity] = useState(1);
-  const [topOffsetX, setTopOffsetX] = useState(0);
+  const [topOffsetPct, setTopOffsetPct] = useState(0);
+  const [bottomOffsetPct, setBottomOffsetPct] = useState(0);
+  const [transitionsEnabled, setTransitionsEnabled] = useState(false);
+  const isFirstRenderRef = useRef(true);
   useEffect(() => {
     if (!current) return;
-    setTopOpacity(0);
-    setTopOffsetX(direction === 1 ? 28 : -28);
-    const fadeInTimer = setTimeout(() => {
-      setTopOpacity(1);
-      setTopOffsetX(0);
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+
+    setTransitionsEnabled(false);
+    setTopOffsetPct(direction === 1 ? 100 : -100);
+    setBottomOffsetPct(0);
+
+    const startTimer = setTimeout(() => {
+      setTransitionsEnabled(true);
+      setTopOffsetPct(0);
+      setBottomOffsetPct(direction === 1 ? -100 : 100);
     }, 20);
-    const swapTimer = setTimeout(() => setBottomLayer(current), 700);
+    const swapTimer = setTimeout(() => {
+      setTransitionsEnabled(false);
+      setBottomLayer(current);
+    }, 720);
     return () => {
-      clearTimeout(fadeInTimer);
+      clearTimeout(startTimer);
       clearTimeout(swapTimer);
     };
   }, [current, direction]);
@@ -186,38 +209,50 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Bottom layer: the previous slide, sitting still — the top layer
-          fading in over it is what creates the crossfade, so this never
-          needs its own opacity transition. */}
+      {/* Bottom layer: the outgoing slide, sliding the rest of the way off
+          the opposite edge as the top layer slides in over it — see the
+          bottomLayer/transitionsEnabled effect above for why this needs its
+          own transform rather than just sitting still under a fading top
+          layer. */}
       {(bottomLayer ?? current).bannerImageUrl ? (
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${(bottomLayer ?? current).bannerImageUrl}')` }}
-        />
-      ) : (
-        <div className="absolute inset-0">
-          <NoImagePlaceholder />
-        </div>
-      )}
-      {/* Top layer: the current slide. Same DOM node the whole time —
-          topOpacity/topOffsetX (not a key remount) drive the fade+slide so
-          it replays on every change without unmounting anything. Slides in
-          the same direction as the text block, just a plain translateX
-          rather than the text's keyframe, since this node is never
-          remounted (no `key` to replay a CSS animation against). */}
-      {current.bannerImageUrl ? (
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none"
+          className={`absolute inset-0 bg-cover bg-center motion-reduce:transition-none ${
+            transitionsEnabled ? "transition-transform duration-700 ease-out" : ""
+          }`}
           style={{
-            backgroundImage: `url('${current.bannerImageUrl}')`,
-            opacity: topOpacity,
-            transform: `translateX(${topOffsetX}px)`,
+            backgroundImage: `url('${(bottomLayer ?? current).bannerImageUrl}')`,
+            transform: `translateX(${bottomOffsetPct}%)`,
           }}
         />
       ) : (
         <div
-          className="absolute inset-0 transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none"
-          style={{ opacity: topOpacity, transform: `translateX(${topOffsetX}px)` }}
+          className={`absolute inset-0 motion-reduce:transition-none ${
+            transitionsEnabled ? "transition-transform duration-700 ease-out" : ""
+          }`}
+          style={{ transform: `translateX(${bottomOffsetPct}%)` }}
+        >
+          <NoImagePlaceholder />
+        </div>
+      )}
+      {/* Top layer: the incoming slide. Same DOM node the whole time —
+          topOffsetPct (not a key remount) drives the slide so it replays on
+          every change without unmounting anything. */}
+      {current.bannerImageUrl ? (
+        <div
+          className={`absolute inset-0 bg-cover bg-center motion-reduce:transition-none ${
+            transitionsEnabled ? "transition-transform duration-700 ease-out" : ""
+          }`}
+          style={{
+            backgroundImage: `url('${current.bannerImageUrl}')`,
+            transform: `translateX(${topOffsetPct}%)`,
+          }}
+        />
+      ) : (
+        <div
+          className={`absolute inset-0 motion-reduce:transition-none ${
+            transitionsEnabled ? "transition-transform duration-700 ease-out" : ""
+          }`}
+          style={{ transform: `translateX(${topOffsetPct}%)` }}
         >
           <NoImagePlaceholder />
         </div>
