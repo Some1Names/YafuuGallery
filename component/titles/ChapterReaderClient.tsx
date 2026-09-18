@@ -178,16 +178,66 @@ export default function ChapterReaderClient({
     return result;
   }, [numPages, pageRatios, isMobile]);
 
-  const [spreadIdx, setSpreadIdx] = useState(0);
+  // The single source of truth for reading position, shared by both modes,
+  // so switching modes lands on the same page instead of jumping back to
+  // the start. Horizontal mode's spreadIdx is derived from it below;
+  // vertical mode's scroll position is synced to/from it via pageRefs.
+  const [currentPage, setCurrentPage] = useState(1);
+  const currentPageRef = useRef(1);
+  // Mirrored every render (no dependency array — meant to stay
+  // unconditionally in sync) so the scroll-restore effect below can read
+  // the latest value without listing it as an effect dependency, which
+  // would re-run it on every scroll-tracked page change instead of only on
+  // an actual mode switch.
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  });
+
+  // Vertical mode's page wrapper divs, keyed by page number — used to jump
+  // the scroll position to currentPage when entering vertical mode, and to
+  // read the currently-scrolled-to page when leaving it.
+  const pageRefs = useRef(new Map<number, HTMLDivElement>());
+
+  const spreadIdx = useMemo(() => {
+    const idx = spreads.findIndex((s) => s.includes(currentPage));
+    return idx >= 0 ? idx : 0;
+  }, [spreads, currentPage]);
   const currentSpread = spreads[spreadIdx] ?? [];
 
   const goNext = useCallback(() => {
-    setSpreadIdx((i) => Math.min(i + 1, spreads.length - 1));
-  }, [spreads.length]);
+    const next = spreads[Math.min(spreadIdx + 1, spreads.length - 1)];
+    if (next?.[0] !== undefined) setCurrentPage(next[0]);
+  }, [spreads, spreadIdx]);
 
   const goPrev = useCallback(() => {
-    setSpreadIdx((i) => Math.max(i - 1, 0));
-  }, []);
+    const prev = spreads[Math.max(spreadIdx - 1, 0)];
+    if (prev?.[0] !== undefined) setCurrentPage(prev[0]);
+  }, [spreads, spreadIdx]);
+
+  // Finds whichever page is nearest the viewport's vertical center in
+  // vertical mode's scrolled list — used to capture reading position right
+  // before switching into horizontal mode.
+  function findCurrentPageInVerticalView(): number {
+    const viewportCenter = window.innerHeight / 2;
+    let closest = currentPageRef.current;
+    let closestDist = Infinity;
+    pageRefs.current.forEach((el, n) => {
+      const rect = el.getBoundingClientRect();
+      const dist = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = n;
+      }
+    });
+    return closest;
+  }
+
+  function switchMode(next: ReadingMode) {
+    if (mode === "vertical" && next === "horizontal") {
+      setCurrentPage(findCurrentPageInVerticalView());
+    }
+    setMode(next);
+  }
 
   // Mobile horizontal mode turns pages by swipe instead of the left/right
   // tap zones desktop uses (those stay click-based, mouse-only). RTL: a
@@ -214,8 +264,8 @@ export default function ChapterReaderClient({
   }
 
   useEffect(() => {
-    setSpreadIdx(0);
-  }, [mode, pdfUrl]);
+    setCurrentPage(1);
+  }, [pdfUrl]);
 
   useEffect(() => {
     if (mode !== "horizontal") return;
@@ -233,6 +283,21 @@ export default function ChapterReaderClient({
       document.body.style.overflow = "";
     };
   }, [isFullscreen]);
+
+  // Jump vertical mode's scroll position to match wherever horizontal mode
+  // (or a fresh chapter load) left off. Declared after the body-overflow
+  // effect above so it runs after that effect has cleared "overflow:
+  // hidden" back to "" for this render — scrollIntoView is a no-op while
+  // that's still set. This only works correctly because each page wrapper
+  // div below is given an explicit height from the already-loaded
+  // pageRatios, so its layout is correct the instant it mounts rather than
+  // waiting on react-pdf's own async canvas render — otherwise this would
+  // scroll against a small loading-placeholder height and land nowhere
+  // close to right.
+  useEffect(() => {
+    if (mode !== "vertical") return;
+    pageRefs.current.get(currentPageRef.current)?.scrollIntoView({ block: "start" });
+  }, [mode]);
 
   // top bar visibility follows the mouse only in fullscreen mode
   useEffect(() => {
@@ -442,7 +507,7 @@ export default function ChapterReaderClient({
             <div className="flex border border-[#050505] rounded-md overflow-hidden">
               <button
                 type="button"
-                onClick={() => setMode("vertical")}
+                onClick={() => switchMode("vertical")}
                 aria-pressed={mode === "vertical"}
                 aria-label="Vertical reading mode"
                 title="Vertical"
@@ -456,7 +521,7 @@ export default function ChapterReaderClient({
               </button>
               <button
                 type="button"
-                onClick={() => setMode("horizontal")}
+                onClick={() => switchMode("horizontal")}
                 aria-pressed={mode === "horizontal"}
                 aria-label="Horizontal reading mode"
                 title="Horizontal"
@@ -495,16 +560,33 @@ export default function ChapterReaderClient({
         >
           {mode === "vertical" ? (
             <div className="flex flex-col items-center">
-              {Array.from({ length: numPages }, (_, i) => (
-                <Page
-                  key={i}
-                  pageNumber={i + 1}
-                  width={pageWidth}
-                  renderAnnotationLayer={false}
-                  renderTextLayer={false}
-                  className="overflow-hidden"
-                />
-              ))}
+              {Array.from({ length: numPages }, (_, i) => {
+                const n = i + 1;
+                return (
+                  <div
+                    key={n}
+                    ref={(el) => {
+                      if (el) pageRefs.current.set(n, el);
+                      else pageRefs.current.delete(n);
+                    }}
+                    // Sized upfront from the already-loaded pageRatios so
+                    // this wrapper has the right layout height the instant
+                    // it mounts, instead of collapsing to a small
+                    // loading-placeholder height until react-pdf's own
+                    // async canvas render catches up — the scroll-restore
+                    // effect above depends on this being correct immediately.
+                    style={pageRatios[n] ? { height: pageWidth / pageRatios[n] } : undefined}
+                  >
+                    <Page
+                      pageNumber={n}
+                      width={pageWidth}
+                      renderAnnotationLayer={false}
+                      renderTextLayer={false}
+                      className="overflow-hidden"
+                    />
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div
