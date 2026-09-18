@@ -109,7 +109,7 @@ export default function Navbar({ user }: NavbarProps) {
             width={1529}
             height={281}
             priority
-            className="h-8 md:h-9 w-auto mt-1.5"
+            className="h-6 md:h-9 w-auto mt-1.5"
           />
         </Link>
 
