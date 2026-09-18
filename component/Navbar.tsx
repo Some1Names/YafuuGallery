@@ -102,11 +102,15 @@ export default function Navbar({ user }: NavbarProps) {
     >
       <div className="max-w-350 mx-auto px-4 md:px-8 h-16 md:h-18 flex items-center justify-between">
         {/* Wordmark */}
-        <Link
-          href="/"
-          className="text-lg tracking-wide text-[#ece6d8] font-(family-name:--font-display)"
-        >
-          YafuuGallery
+        <Link href="/" className="shrink-0">
+          <Image
+            src="/¥afuuGallery.webp"
+            alt="YafuuGallery"
+            width={1529}
+            height={281}
+            priority
+            className="h-8 md:h-9 w-auto"
+          />
         </Link>
 
         {/* Desktop: inline nav links + profile/sign up, unchanged */}
