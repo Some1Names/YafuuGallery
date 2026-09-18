@@ -276,17 +276,19 @@ export default function ChapterReaderClient({
     const maxWidth = isFullscreen ? viewportWidth - 32 : pageWidth;
     if (ratio === undefined) return { width: fallbackWidth };
 
-    // Mobile horizontal mode shows one page per screen with no spare width
-    // to fall back on the way desktop's wider viewport has — fit the whole
-    // page within the screen (whichever of width/height is the tighter
-    // constraint) instead of just sizing by height and letting a portrait
-    // page's width run past the screen edge.
-    if (isMobile && isFullscreen) {
+    // A landscape/double-page-spread page needs to fit within BOTH the
+    // available width and height, whichever is the tighter constraint —
+    // sizing by width alone (as if every landscape page were wide enough
+    // to be width-bound) can render one taller than the screen and clip it
+    // top and bottom. Mobile applies the same fit-both check to every page,
+    // portrait included, since there's no spare width there to fall back on
+    // the way desktop's wider viewport has.
+    if (isMobile || ratio > 1) {
       const widthConstrainedHeight = maxWidth / ratio;
       return widthConstrainedHeight <= readerHeight ? { width: maxWidth } : { height: readerHeight };
     }
 
-    return ratio > 1 ? { width: maxWidth } : { height: readerHeight };
+    return { height: readerHeight };
   }
 
   const pageCounterText =
