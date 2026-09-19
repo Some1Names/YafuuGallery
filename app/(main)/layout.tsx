@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Navbar from "@/component/Navbar";
 import Footer from "@/component/Footer";
+import SmoothScroll from "@/component/SmoothScroll";
 import { auth } from "@/auth";
 
 // auth() reads cookies(), which makes it "uncached/runtime" data — per
@@ -28,6 +29,7 @@ async function NavbarWithSession() {
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <SmoothScroll />
       <Suspense fallback={<Navbar user={null} />}>
         <NavbarWithSession />
       </Suspense>
