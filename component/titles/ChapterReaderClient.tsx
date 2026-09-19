@@ -211,6 +211,16 @@ export default function ChapterReaderClient({
   }, [spreads, currentPage]);
   const currentSpread = spreads[spreadIdx] ?? [];
 
+  // Wraps around at either end — spreadIdx + offset can be negative or
+  // past the last index, so it's normalized into range before indexing
+  // rather than clamped. Used by mobile's swipe (which wraps); desktop's
+  // goNext/goPrev below intentionally don't use this, since their tap
+  // zones disable at the ends instead of wrapping.
+  function spreadAtOffset(offset: number) {
+    if (spreads.length === 0) return undefined;
+    return spreads[(((spreadIdx + offset) % spreads.length) + spreads.length) % spreads.length];
+  }
+
   const goNext = useCallback(() => {
     const next = spreads[Math.min(spreadIdx + 1, spreads.length - 1)];
     if (next?.[0] !== undefined) setCurrentPage(next[0]);
@@ -302,13 +312,22 @@ export default function ChapterReaderClient({
       return;
     }
 
-    if (delta < -SWIPE_THRESHOLD_PX && spreadIdx < spreads.length - 1) {
-      settleDrag(-viewportWidth, goNext);
-    } else if (delta > SWIPE_THRESHOLD_PX && spreadIdx > 0) {
-      settleDrag(viewportWidth, goPrev);
+    if (delta < -SWIPE_THRESHOLD_PX) {
+      // Mobile wraps at the ends (last page's "next" is the first page,
+      // and vice versa) — unlike desktop's tap zones, which disable
+      // instead. goNext/goPrev stay clamped (shared with those buttons and
+      // the keyboard shortcuts), so the wrapped target is computed here
+      // directly rather than reusing them.
+      const next = spreadAtOffset(1);
+      if (next?.[0] !== undefined) settleDrag(-viewportWidth, () => setCurrentPage(next[0]));
+      else settleDrag(0);
+    } else if (delta > SWIPE_THRESHOLD_PX) {
+      const prev = spreadAtOffset(-1);
+      if (prev?.[0] !== undefined) settleDrag(viewportWidth, () => setCurrentPage(prev[0]));
+      else settleDrag(0);
     } else {
-      // Below the threshold, or already at the first/last page with
-      // nowhere to go — spring back to center instead of turning the page.
+      // Below the threshold — spring back to center instead of turning
+      // the page.
       settleDrag(0);
     }
   }
@@ -414,17 +433,12 @@ export default function ChapterReaderClient({
   // Mobile drag feedback: while actively dragging, the adjacent spread in
   // the drag's direction slides into view alongside the current one — both
   // driven by the same dragOffsetPx so they move together as one gesture.
-  // Reference equality against currentSpread (not a value check) is enough
-  // to detect "clamped at the first/last page, nothing to peek at" — spreads
-  // is memoized, so spreads[i] for the same i is the same array every render.
+  // Wraps at the ends via spreadAtOffset, same as the actual commit in
+  // handleSwipeEnd — dragging past the last page previews the first page,
+  // not a no-op repeat of the last one.
   const peekDirection = dragOffsetPx < 0 ? 1 : dragOffsetPx > 0 ? -1 : 0;
-  const peekSpread =
-    peekDirection === 1
-      ? spreads[Math.min(spreadIdx + 1, spreads.length - 1)]
-      : peekDirection === -1
-        ? spreads[Math.max(spreadIdx - 1, 0)]
-        : undefined;
-  const showPeek = peekDirection !== 0 && peekSpread !== undefined && peekSpread !== currentSpread;
+  const peekSpread = peekDirection !== 0 ? spreadAtOffset(peekDirection) : undefined;
+  const showPeek = peekDirection !== 0 && peekSpread !== undefined && spreads.length > 1;
   const peekOffsetPx = peekDirection * viewportWidth + dragOffsetPx;
 
   const pageCounterText =
