@@ -14,14 +14,18 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
       onClick={() => onSelect(arc.id)}
       className="h-24 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer text-left bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
     >
-      <div className="relative w-24 sm:w-54 h-full overflow-hidden shrink-0 bg-[#1b1a1c]">
+      {/* Mobile: width is driven by aspect-video off the row's own height
+          instead of a fixed w-24 — that used to crop the 16:9 arc image
+          into a near-square box. Desktop keeps its existing fixed-width
+          column (sm:aspect-auto cancels the ratio there). */}
+      <div className="relative aspect-video sm:aspect-auto w-auto sm:w-54 h-full overflow-hidden shrink-0 bg-[#1b1a1c]">
         {arc.arc_image_url ? (
           <>
             <Image
               src={arc.arc_image_url}
               alt=""
               fill
-              sizes="(max-width: 640px) 96px, 216px"
+              sizes="(max-width: 640px) 171px, 216px"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#1b1a1c]/20 to-[#1b1a1c]" />
