@@ -197,11 +197,21 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
 
   return (
     <div
-      // Fixed height (matching the hero section's own sizing) instead of
-      // vertical padding around variable content — a longer title or
-      // synopsis on one slide no longer resizes the whole hero as the
-      // carousel advances. Content is centered inside it instead.
-      className="relative h-100 sm:h-125 md:h-150 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
+      // Fixed height on mobile — 32:9 (the site's standard banner shape,
+      // also used by MangaHero) would be unusably short at phone widths
+      // once title/synopsis/buttons/dots are overlaid on top, so mobile
+      // keeps a content-friendly fixed height and only picks up the real
+      // banner ratio from sm: upward. min-h-95 is a floor for that same
+      // reason at the narrower end of sm: and up — at ~700px wide, 32:9
+      // alone works out to under 200px, well short of the ~316px the
+      // text/button block actually needs there, so aspect-ratio would
+      // otherwise clip it. The floor only matters up to where 32:9's own
+      // height overtakes it (a bit past the md: breakpoint within this
+      // section's max-w-350 cap) — from there the box is genuinely 32:9.
+      // Either way, a longer title or synopsis on one slide no longer
+      // resizes the whole hero as the carousel advances — content is
+      // centered inside it instead.
+      className="relative h-100 sm:h-auto sm:aspect-32/9 sm:min-h-95 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
