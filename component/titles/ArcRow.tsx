@@ -12,7 +12,7 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
     <button
       type="button"
       onClick={() => onSelect(arc.id)}
-      className="h-20 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer text-left bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
+      className="h-16 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer text-left bg-[#1b1a1c]/95 hover:bg-[#232224] border border-[#050505] hover:border-[#f6f1f2] transition-colors duration-200"
     >
       {/* Mobile: width is driven by aspect-video off the row's own height
           instead of a fixed w-24 — that used to crop the 16:9 arc image
@@ -25,7 +25,7 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
               src={arc.arc_image_url}
               alt=""
               fill
-              sizes="(max-width: 640px) 142px, 216px"
+              sizes="(max-width: 640px) 114px, 216px"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#1b1a1c]/20 to-[#1b1a1c]" />
