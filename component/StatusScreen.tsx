@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import MangaBackground from "@/component/titles/MangaBackground";
 
 interface StatusScreenProps {
   // Short glyph/code shown inside the screentone badge — "404", "500", "!" —
@@ -32,9 +33,12 @@ export default function StatusScreen({
 }: StatusScreenProps) {
   return (
     <div
-      className={`bg-[#0a0a0a] flex items-center justify-center px-6 py-20 ${fullHeight ? "min-h-screen" : ""}`}
+      className={`relative overflow-hidden bg-[#0a0a0a] flex items-center justify-center px-6 py-20 ${fullHeight ? "min-h-screen" : ""}`}
     >
-      <div className="flex flex-col items-center text-center max-w-md">
+      <div className="hidden sm:block">
+        <MangaBackground fill />
+      </div>
+      <div className="relative z-10 flex flex-col items-center text-center max-w-md">
         <div
           className="w-28 h-28 rounded-full flex items-center justify-center mb-8"
           style={{

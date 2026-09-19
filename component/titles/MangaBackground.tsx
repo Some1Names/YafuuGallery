@@ -1,5 +1,11 @@
 interface MangaBackgroundProps {
   imageUrl?: string;
+  // Fixed h-125/md:h-150 by default, sized as a page-header banner. Pass
+  // true to instead fill whatever height the (already `relative`) parent
+  // has — for shorter or variable-height contexts (e.g. StatusScreen),
+  // where the fixed height would either overflow or clip the fade before
+  // it reaches the bottom.
+  fill?: boolean;
 }
 
 // Full-bleed header backdrop: source image, dark tint, then a fade to the
@@ -12,9 +18,9 @@ interface MangaBackgroundProps {
 // shifting as a page got taller. Anchoring to a fixed height instead makes
 // it behave like a real page-header banner: constant regardless of content
 // length below it.
-export default function MangaBackground({ imageUrl = "/mangabg.png" }: MangaBackgroundProps) {
+export default function MangaBackground({ imageUrl = "/mangabg.png", fill = false }: MangaBackgroundProps) {
   return (
-    <div className="absolute inset-x-0 top-0 h-125 md:h-150">
+    <div className={fill ? "absolute inset-0" : "absolute inset-x-0 top-0 h-125 md:h-150"}>
       <div
         className="absolute inset-0 bg-cover bg-top bg-no-repeat"
         style={{ backgroundImage: `url('${imageUrl}')` }}
