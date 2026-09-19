@@ -64,6 +64,13 @@ export default function ChapterReaderClient({
   const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
   const currentChapter = chapters.find((c) => c.id === currentChapterId);
   const currentIsEx = currentChapter?.chapter_is_ex ?? false;
+  // Mobile swipe past the first/last page continues into the neighboring
+  // chapter (matching MangaPlus) instead of wrapping back within this one —
+  // chapters is already in the same reading order the selector dropdown
+  // below displays it in.
+  const currentChapterIdx = chapters.findIndex((c) => c.id === currentChapterId);
+  const nextChapter = chapters[currentChapterIdx + 1];
+  const prevChapter = chapters[currentChapterIdx - 1];
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
   const chapterLabel = `Chapter ${currentIsEx ? "ex" : (currentDisplayNumber ?? 0)}: ${chapterName}`;
   const [mode, setMode] = useState<ReadingMode>("vertical");
@@ -211,16 +218,6 @@ export default function ChapterReaderClient({
   }, [spreads, currentPage]);
   const currentSpread = spreads[spreadIdx] ?? [];
 
-  // Wraps around at either end — spreadIdx + offset can be negative or
-  // past the last index, so it's normalized into range before indexing
-  // rather than clamped. Used by mobile's swipe (which wraps); desktop's
-  // goNext/goPrev below intentionally don't use this, since their tap
-  // zones disable at the ends instead of wrapping.
-  function spreadAtOffset(offset: number) {
-    if (spreads.length === 0) return undefined;
-    return spreads[(((spreadIdx + offset) % spreads.length) + spreads.length) % spreads.length];
-  }
-
   const goNext = useCallback(() => {
     const next = spreads[Math.min(spreadIdx + 1, spreads.length - 1)];
     if (next?.[0] !== undefined) setCurrentPage(next[0]);
@@ -313,18 +310,28 @@ export default function ChapterReaderClient({
     }
 
     if (delta < -SWIPE_THRESHOLD_PX) {
-      // Mobile wraps at the ends (last page's "next" is the first page,
-      // and vice versa) — unlike desktop's tap zones, which disable
-      // instead. goNext/goPrev stay clamped (shared with those buttons and
-      // the keyboard shortcuts), so the wrapped target is computed here
-      // directly rather than reusing them.
-      const next = spreadAtOffset(1);
-      if (next?.[0] !== undefined) settleDrag(-viewportWidth, () => setCurrentPage(next[0]));
-      else settleDrag(0);
+      const next = spreads[spreadIdx + 1];
+      if (next?.[0] !== undefined) {
+        settleDrag(-viewportWidth, () => setCurrentPage(next[0]));
+      } else if (nextChapter) {
+        // Last page of this chapter — continue into the next chapter's
+        // first page (matching MangaPlus) instead of looping back to this
+        // chapter's own first page. Its pages aren't loaded here, so there's
+        // no peek to slide in — just this page sliding away before the
+        // navigation lands.
+        settleDrag(-viewportWidth, () => router.push(`/viewer/${nextChapter.id}`));
+      } else {
+        settleDrag(0);
+      }
     } else if (delta > SWIPE_THRESHOLD_PX) {
-      const prev = spreadAtOffset(-1);
-      if (prev?.[0] !== undefined) settleDrag(viewportWidth, () => setCurrentPage(prev[0]));
-      else settleDrag(0);
+      const prev = spreads[spreadIdx - 1];
+      if (prev?.[0] !== undefined) {
+        settleDrag(viewportWidth, () => setCurrentPage(prev[0]));
+      } else if (prevChapter) {
+        settleDrag(viewportWidth, () => router.push(`/viewer/${prevChapter.id}`));
+      } else {
+        settleDrag(0);
+      }
     } else {
       // Below the threshold — spring back to center instead of turning
       // the page.
@@ -433,12 +440,12 @@ export default function ChapterReaderClient({
   // Mobile drag feedback: while actively dragging, the adjacent spread in
   // the drag's direction slides into view alongside the current one — both
   // driven by the same dragOffsetPx so they move together as one gesture.
-  // Wraps at the ends via spreadAtOffset, same as the actual commit in
-  // handleSwipeEnd — dragging past the last page previews the first page,
-  // not a no-op repeat of the last one.
+  // Undefined past either end (no peek to show) rather than wrapping or
+  // clamping — dragging past the last/first page continues into the next/
+  // previous chapter, whose pages aren't loaded here to preview.
   const peekDirection = dragOffsetPx < 0 ? 1 : dragOffsetPx > 0 ? -1 : 0;
-  const peekSpread = peekDirection !== 0 ? spreadAtOffset(peekDirection) : undefined;
-  const showPeek = peekDirection !== 0 && peekSpread !== undefined && spreads.length > 1;
+  const peekSpread = peekDirection !== 0 ? spreads[spreadIdx + peekDirection] : undefined;
+  const showPeek = peekDirection !== 0 && peekSpread !== undefined;
   const peekOffsetPx = peekDirection * viewportWidth + dragOffsetPx;
 
   const pageCounterText =
