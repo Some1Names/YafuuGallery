@@ -257,6 +257,11 @@ export default function ChapterReaderClient({
     const delta = e.clientX - swipeStartXRef.current;
     if (delta < -SWIPE_THRESHOLD_PX) goNext();
     else if (delta > SWIPE_THRESHOLD_PX) goPrev();
+    // Anything under the swipe threshold is a tap, not a page turn — the
+    // top bar's own reveal mechanism (mouse-near-top-edge) has no touch
+    // equivalent, so a tap toggles it instead. Only reachable on mobile,
+    // since this handler is only wired up there in the first place.
+    else setTopBarVisible((v) => !v);
   }
 
   function handleSwipeCancel() {
