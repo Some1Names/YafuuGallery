@@ -15,6 +15,13 @@ import ChapterCommentPanel from "./ChapterCommentPanel";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const SWIPE_THRESHOLD_PX = 50;
+// Below this, a completed gesture is a tap (toggle the top bar) rather
+// than an intentional-but-too-short drag (which just snaps back to center).
+const TAP_MAX_PX = 10;
+// Matches the CSS transition duration below (duration-200) — keeps the
+// state update that swaps in the new page in sync with when it's actually
+// finished sliding fully off/on screen, instead of jumping early.
+const DRAG_SETTLE_MS = 200;
 
 type ReadingMode = "vertical" | "horizontal";
 
@@ -242,30 +249,73 @@ export default function ChapterReaderClient({
   // Mobile horizontal mode turns pages by swipe instead of the left/right
   // tap zones desktop uses (those stay click-based, mouse-only). RTL: a
   // left swipe (negative delta) advances forward — same direction as
-  // desktop's left zone — a right swipe goes back.
+  // desktop's left zone — a right swipe goes back. dragOffsetPx tracks the
+  // finger 1:1 in real time (via handleSwipeMove, read in the render below
+  // to slide the current — and, while dragging, the adjacent — page) so a
+  // swipe visually behaves like turning a physical page instead of just
+  // teleporting once the finger lifts. dragTransitionEnabled is off during
+  // the live drag itself (no lag behind the finger) and on only for the
+  // snap-to-settled-position animation once it does.
   const swipeStartXRef = useRef(0);
   const isSwipingRef = useRef(false);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [dragTransitionEnabled, setDragTransitionEnabled] = useState(false);
 
   function handleSwipeStart(e: React.PointerEvent<HTMLDivElement>) {
     swipeStartXRef.current = e.clientX;
     isSwipingRef.current = true;
+    setDragTransitionEnabled(false);
+    setDragOffsetPx(0);
+  }
+
+  function handleSwipeMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!isSwipingRef.current) return;
+    setDragOffsetPx(e.clientX - swipeStartXRef.current);
+  }
+
+  // Slides the current page the rest of the way off-screen (or, if the
+  // drag didn't clear the threshold, back to center) before actually
+  // advancing — deferring the page-swap state update until that animation
+  // finishes is what keeps it from visibly "jumping" mid-slide.
+  function settleDrag(targetPx: number, advance?: () => void) {
+    setDragTransitionEnabled(true);
+    setDragOffsetPx(targetPx);
+    if (!advance) return;
+    window.setTimeout(() => {
+      setDragTransitionEnabled(false);
+      advance();
+      setDragOffsetPx(0);
+    }, DRAG_SETTLE_MS);
   }
 
   function handleSwipeEnd(e: React.PointerEvent<HTMLDivElement>) {
     if (!isSwipingRef.current) return;
     isSwipingRef.current = false;
     const delta = e.clientX - swipeStartXRef.current;
-    if (delta < -SWIPE_THRESHOLD_PX) goNext();
-    else if (delta > SWIPE_THRESHOLD_PX) goPrev();
-    // Anything under the swipe threshold is a tap, not a page turn — the
-    // top bar's own reveal mechanism (mouse-near-top-edge) has no touch
-    // equivalent, so a tap toggles it instead. Only reachable on mobile,
-    // since this handler is only wired up there in the first place.
-    else setTopBarVisible((v) => !v);
+
+    // Anything under TAP_MAX_PX is a tap, not a page turn — the top bar's
+    // own reveal mechanism (mouse-near-top-edge) has no touch equivalent,
+    // so a tap toggles it instead.
+    if (Math.abs(delta) <= TAP_MAX_PX) {
+      settleDrag(0);
+      setTopBarVisible((v) => !v);
+      return;
+    }
+
+    if (delta < -SWIPE_THRESHOLD_PX && spreadIdx < spreads.length - 1) {
+      settleDrag(-viewportWidth, goNext);
+    } else if (delta > SWIPE_THRESHOLD_PX && spreadIdx > 0) {
+      settleDrag(viewportWidth, goPrev);
+    } else {
+      // Below the threshold, or already at the first/last page with
+      // nowhere to go — spring back to center instead of turning the page.
+      settleDrag(0);
+    }
   }
 
   function handleSwipeCancel() {
     isSwipingRef.current = false;
+    settleDrag(0);
   }
 
   useEffect(() => {
@@ -360,6 +410,22 @@ export default function ChapterReaderClient({
 
     return { height: readerHeight };
   }
+
+  // Mobile drag feedback: while actively dragging, the adjacent spread in
+  // the drag's direction slides into view alongside the current one — both
+  // driven by the same dragOffsetPx so they move together as one gesture.
+  // Reference equality against currentSpread (not a value check) is enough
+  // to detect "clamped at the first/last page, nothing to peek at" — spreads
+  // is memoized, so spreads[i] for the same i is the same array every render.
+  const peekDirection = dragOffsetPx < 0 ? 1 : dragOffsetPx > 0 ? -1 : 0;
+  const peekSpread =
+    peekDirection === 1
+      ? spreads[Math.min(spreadIdx + 1, spreads.length - 1)]
+      : peekDirection === -1
+        ? spreads[Math.max(spreadIdx - 1, 0)]
+        : undefined;
+  const showPeek = peekDirection !== 0 && peekSpread !== undefined && peekSpread !== currentSpread;
+  const peekOffsetPx = peekDirection * viewportWidth + dragOffsetPx;
 
   const pageCounterText =
     numPages > 0 && currentSpread.length > 0
@@ -594,63 +660,106 @@ export default function ChapterReaderClient({
               })}
             </div>
           ) : (
-            <div
-              className={`relative flex justify-center items-center w-full h-full ${isMobile ? "touch-pan-y" : ""}`}
-              onPointerDown={isMobile ? handleSwipeStart : undefined}
-              onPointerUp={isMobile ? handleSwipeEnd : undefined}
-              onPointerCancel={isMobile ? handleSwipeCancel : undefined}
-            >
-              {/* RTL: currentSpread[0] is read first → renders on the right.
-                  currentSpread[1] (if present) is read second → renders on the left. */}
-              {currentSpread.length === 2 && (
-                <Page
-                  pageNumber={currentSpread[1]}
-                  {...pageSizeProps(currentSpread[1])}
-                  renderAnnotationLayer={false}
-                  renderTextLayer={false}
-                  className="overflow-hidden"
-                />
-              )}
-              {currentSpread[0] !== undefined && (
-                <Page
-                  pageNumber={currentSpread[0]}
-                  {...pageSizeProps(currentSpread[0])}
-                  renderAnnotationLayer={false}
-                  renderTextLayer={false}
-                  className="overflow-hidden"
-                />
-              )}
-
-              {/* Tap zones — desktop (mouse) only. Mobile turns pages by
-                  swipe instead, handled by the pointer events above. */}
-              {!isMobile && (
-                <>
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={spreadIdx >= spreads.length - 1}
-                    aria-label="Next page"
-                    className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
+            isMobile ? (
+              <div
+                // w-screen, not w-full: every visible child here is
+                // position:absolute (needed for the drag transform), which
+                // takes them out of normal flow entirely — with nothing
+                // left in-flow to size around, a flex item sized by content
+                // (the default, main-axis behavior) collapses to zero width.
+                // h-full still works because the ancestor row-flex uses
+                // items-stretch, which fills the cross axis unconditionally
+                // regardless of content.
+                className="relative flex justify-center items-center w-screen h-full touch-pan-y overflow-hidden"
+                onPointerDown={handleSwipeStart}
+                onPointerMove={handleSwipeMove}
+                onPointerUp={handleSwipeEnd}
+                onPointerCancel={handleSwipeCancel}
+              >
+                {/* The adjacent page, only mounted while a drag has moved far
+                    enough to reveal it — positioned one viewport-width off in
+                    the drag's direction, sliding in as dragOffsetPx grows. */}
+                {showPeek && peekSpread?.[0] !== undefined && (
+                  <div
+                    className={`absolute inset-0 flex justify-center items-center ${
+                      dragTransitionEnabled ? "transition-transform duration-200 ease-out" : ""
+                    }`}
+                    style={{ transform: `translateX(${peekOffsetPx}px)` }}
                   >
-                    <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
-                      ‹
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={goPrev}
-                    disabled={spreadIdx === 0}
-                    aria-label="Previous page"
-                    className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
+                    <Page
+                      pageNumber={peekSpread[0]}
+                      {...pageSizeProps(peekSpread[0])}
+                      renderAnnotationLayer={false}
+                      renderTextLayer={false}
+                      className="overflow-hidden"
+                    />
+                  </div>
+                )}
+                {currentSpread[0] !== undefined && (
+                  <div
+                    className={`absolute inset-0 flex justify-center items-center ${
+                      dragTransitionEnabled ? "transition-transform duration-200 ease-out" : ""
+                    }`}
+                    style={{ transform: `translateX(${dragOffsetPx}px)` }}
                   >
-                    <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
-                      ›
-                    </span>
-                  </button>
-                </>
-              )}
-            </div>
+                    <Page
+                      pageNumber={currentSpread[0]}
+                      {...pageSizeProps(currentSpread[0])}
+                      renderAnnotationLayer={false}
+                      renderTextLayer={false}
+                      className="overflow-hidden"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative flex justify-center items-center w-full h-full">
+                {/* RTL: currentSpread[0] is read first → renders on the right.
+                    currentSpread[1] (if present) is read second → renders on the left. */}
+                {currentSpread.length === 2 && (
+                  <Page
+                    pageNumber={currentSpread[1]}
+                    {...pageSizeProps(currentSpread[1])}
+                    renderAnnotationLayer={false}
+                    renderTextLayer={false}
+                    className="overflow-hidden"
+                  />
+                )}
+                {currentSpread[0] !== undefined && (
+                  <Page
+                    pageNumber={currentSpread[0]}
+                    {...pageSizeProps(currentSpread[0])}
+                    renderAnnotationLayer={false}
+                    renderTextLayer={false}
+                    className="overflow-hidden"
+                  />
+                )}
+
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={spreadIdx >= spreads.length - 1}
+                  aria-label="Next page"
+                  className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
+                >
+                  <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
+                    ‹
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  disabled={spreadIdx === 0}
+                  aria-label="Previous page"
+                  className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
+                >
+                  <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
+                    ›
+                  </span>
+                </button>
+              </div>
+            )
           )}
         </Document>
         )}
