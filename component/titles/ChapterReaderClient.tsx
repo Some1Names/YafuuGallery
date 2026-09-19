@@ -254,15 +254,20 @@ export default function ChapterReaderClient({
   }
 
   // Mobile horizontal mode turns pages by swipe instead of the left/right
-  // tap zones desktop uses (those stay click-based, mouse-only). RTL: a
-  // left swipe (negative delta) advances forward — same direction as
-  // desktop's left zone — a right swipe goes back. dragOffsetPx tracks the
-  // finger 1:1 in real time (via handleSwipeMove, read in the render below
-  // to slide the current — and, while dragging, the adjacent — page) so a
-  // swipe visually behaves like turning a physical page instead of just
-  // teleporting once the finger lifts. dragTransitionEnabled is off during
-  // the live drag itself (no lag behind the finger) and on only for the
-  // snap-to-settled-position animation once it does.
+  // tap zones desktop uses (those stay click-based, mouse-only, and are
+  // deliberately NOT flipped to match — this mirrors the physical book
+  // metaphor below, tap zones are a separate, arbitrary UI convention).
+  // RTL: a left-to-right swipe (positive delta) advances forward, a
+  // right-to-left swipe goes back — the opposite of an LTR/Western comic,
+  // matching how a physical RTL book mirrors an LTR one (the page being
+  // read sits on the left, not the right, so advancing flips it
+  // left-to-right). dragOffsetPx tracks the finger 1:1 in real time (via
+  // handleSwipeMove, read in the render below to slide the current — and,
+  // while dragging, the adjacent — page) so a swipe visually behaves like
+  // turning a physical page instead of just teleporting once the finger
+  // lifts. dragTransitionEnabled is off during the live drag itself (no lag
+  // behind the finger) and on only for the snap-to-settled-position
+  // animation once it does.
   const swipeStartXRef = useRef(0);
   const isSwipingRef = useRef(false);
   const [dragOffsetPx, setDragOffsetPx] = useState(0);
@@ -309,26 +314,30 @@ export default function ChapterReaderClient({
       return;
     }
 
-    if (delta < -SWIPE_THRESHOLD_PX) {
+    if (delta > SWIPE_THRESHOLD_PX) {
+      // Physical RTL books mirror LTR ones: the page being read sits on the
+      // left (not the right), so advancing flips it left-to-right — a
+      // left-to-right (positive-delta) drag is "next" here, the opposite of
+      // an LTR/Western comic's right-to-left "next" swipe.
       const next = spreads[spreadIdx + 1];
       if (next?.[0] !== undefined) {
-        settleDrag(-viewportWidth, () => setCurrentPage(next[0]));
+        settleDrag(viewportWidth, () => setCurrentPage(next[0]));
       } else if (nextChapter) {
         // Last page of this chapter — continue into the next chapter's
         // first page (matching MangaPlus) instead of looping back to this
         // chapter's own first page. Its pages aren't loaded here, so there's
         // no peek to slide in — just this page sliding away before the
         // navigation lands.
-        settleDrag(-viewportWidth, () => router.push(`/viewer/${nextChapter.id}`));
+        settleDrag(viewportWidth, () => router.push(`/viewer/${nextChapter.id}`));
       } else {
         settleDrag(0);
       }
-    } else if (delta > SWIPE_THRESHOLD_PX) {
+    } else if (delta < -SWIPE_THRESHOLD_PX) {
       const prev = spreads[spreadIdx - 1];
       if (prev?.[0] !== undefined) {
-        settleDrag(viewportWidth, () => setCurrentPage(prev[0]));
+        settleDrag(-viewportWidth, () => setCurrentPage(prev[0]));
       } else if (prevChapter) {
-        settleDrag(viewportWidth, () => router.push(`/viewer/${prevChapter.id}`));
+        settleDrag(-viewportWidth, () => router.push(`/viewer/${prevChapter.id}`));
       } else {
         settleDrag(0);
       }
@@ -443,10 +452,14 @@ export default function ChapterReaderClient({
   // Undefined past either end (no peek to show) rather than wrapping or
   // clamping — dragging past the last/first page continues into the next/
   // previous chapter, whose pages aren't loaded here to preview.
-  const peekDirection = dragOffsetPx < 0 ? 1 : dragOffsetPx > 0 ? -1 : 0;
+  const peekDirection = dragOffsetPx > 0 ? 1 : dragOffsetPx < 0 ? -1 : 0;
   const peekSpread = peekDirection !== 0 ? spreads[spreadIdx + peekDirection] : undefined;
   const showPeek = peekDirection !== 0 && peekSpread !== undefined;
-  const peekOffsetPx = peekDirection * viewportWidth + dragOffsetPx;
+  // Negated peekDirection: the "next" peek (direction 1) starts parked at
+  // -viewportWidth (off-screen left) and slides toward 0 as dragOffsetPx
+  // grows positive — the mirror image of an LTR carousel, where advancing
+  // content enters from the right instead.
+  const peekOffsetPx = -peekDirection * viewportWidth + dragOffsetPx;
 
   const pageCounterText =
     numPages > 0 && currentSpread.length > 0
