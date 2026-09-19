@@ -1,8 +1,57 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import ChapterReaderClient from "@/component/titles/ChapterReaderClient";
+import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const chapter = await prisma.chapter.findUnique({
+    where: { id },
+    select: {
+      chapter_is_ex: true,
+      chapter_name: true,
+      cover_image_url: true,
+      manga: {
+        select: {
+          manga_title: true,
+          chapters: { select: { id: true, chapter_number: true, chapter_is_ex: true } },
+        },
+      },
+    },
+  });
+
+  if (!chapter) return {};
+
+  const displayNumber = getChapterDisplayNumbers(chapter.manga.chapters).get(id);
+  const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
+  const title = `${badge} ${chapter.chapter_name}`;
+  const description = `Read ${badge} — ${chapter.chapter_name} of ${chapter.manga.manga_title} on YafuuGallery.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: "YafuuGallery",
+      type: "article",
+      ...(chapter.cover_image_url && { images: [chapter.cover_image_url] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(chapter.cover_image_url && { images: [chapter.cover_image_url] }),
+    },
+  };
+}
 
 export default async function ViewerPage({
   params,

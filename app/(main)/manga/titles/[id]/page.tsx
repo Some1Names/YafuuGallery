@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -8,6 +9,47 @@ import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import Breadcrumb from "@/component/titles/Breadcrumb";
 import type { ChapterItem } from "@/component/titles/types";
+
+// Meta descriptions get cut off by search engines/link previews well before
+// a full synopsis ends — trim to a plain, unbroken sentence length instead.
+function truncate(text: string, max: number): string {
+    if (text.length <= max) return text;
+    return text.slice(0, max - 1).trimEnd() + "…";
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+    const { id } = await params;
+    const manga = await prisma.manga.findUnique({
+        where: { id },
+        select: { manga_title: true, manga_synopsis: true, banner_image_url: true },
+    });
+
+    if (!manga) return {};
+
+    const description = truncate(manga.manga_synopsis, 160);
+
+    return {
+        title: manga.manga_title,
+        description,
+        openGraph: {
+            title: manga.manga_title,
+            description,
+            siteName: "YafuuGallery",
+            type: "website",
+            ...(manga.banner_image_url && { images: [manga.banner_image_url] }),
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: manga.manga_title,
+            description,
+            ...(manga.banner_image_url && { images: [manga.banner_image_url] }),
+        },
+    };
+}
 
 export default async function MangaDetailPage({
     params,
