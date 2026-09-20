@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import MangaBackground from "@/component/titles/MangaBackground";
 
 interface StatusScreenProps {
-  // Short glyph/code shown inside the screentone badge — "404", "500", "!" —
-  // not a caption, just enough to read as intentional rather than broken.
+  // Short glyph/code rendered as large display text — "404", "!" — the
+  // page's main visual anchor, not a caption.
   badge: string;
   title: string;
   message: string;
@@ -21,8 +21,7 @@ interface StatusScreenProps {
 // Shared by every not-found.tsx/error.tsx in the app (root, (main), and
 // (fullscreen) each need their own file so Next renders the right layout
 // chrome around it — see those files), so the 404/500 states read as part
-// of the site rather than a generic framework fallback. The dot texture is
-// the same screentone recipe as NoImagePlaceholder, just scaled up.
+// of the site rather than a generic framework fallback.
 export default function StatusScreen({
   badge,
   title,
@@ -39,19 +38,10 @@ export default function StatusScreen({
         <MangaBackground fill />
       </div>
       <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-        <div
-          className="w-28 h-28 rounded-full flex items-center justify-center mb-8"
-          style={{
-            backgroundColor: "#1b1a1c",
-            backgroundImage: "radial-gradient(circle, #302e2a 1.5px, transparent 2px)",
-            backgroundSize: "10px 10px",
-          }}
-        >
-          <span className="text-2xl tracking-wide text-[#6b655e] font-(family-name:--font-display)">
-            {badge}
-          </span>
-        </div>
-        <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">{title}</h1>
+        <span className="text-8xl md:text-9xl leading-none tracking-wide text-[#6b655e] font-(family-name:--font-display)">
+          {badge}
+        </span>
+        <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display) mt-4">{title}</h1>
         <p className="text-sm text-[#b6b0a2] mt-3">{message}</p>
         {children && <div className="flex items-center gap-4 mt-8">{children}</div>}
         {footnote && <p className="text-xs text-[#6b655e] mt-4">{footnote}</p>}
