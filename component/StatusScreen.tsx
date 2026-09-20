@@ -38,7 +38,7 @@ export default function StatusScreen({
         <MangaBackground fill />
       </div>
       <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-        <span className="text-8xl md:text-9xl leading-none tracking-wide text-[#6b655e] font-(family-name:--font-display)">
+        <span className="text-8xl md:text-9xl leading-none tracking-wide text-white font-(family-name:--font-display)">
           {badge}
         </span>
         <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display) mt-4">{title}</h1>
