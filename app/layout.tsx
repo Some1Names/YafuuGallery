@@ -24,6 +24,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${archivoBlack.variable} bg-bg`}>
+        <script
+          // Runs before hydration so a returning visitor who chose light mode
+          // never sees a flash of dark on load. Vanilla JS only (no imports) —
+          // this executes before any bundled code, and localStorage can throw
+          // in some contexts (privacy mode, disabled storage), hence the guard.
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){try{if(window.localStorage.getItem("theme")==="light"){document.documentElement.classList.add("light")}}catch(e){}})();',
+          }}
+        />
         <RouteProgressBar />
         {children}
       </body>
