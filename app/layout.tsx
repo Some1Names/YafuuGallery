@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 // deliberately doesn't.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${archivoBlack.variable} bg-bg`}>
         <script
           // Runs before hydration so a returning visitor who chose light mode
