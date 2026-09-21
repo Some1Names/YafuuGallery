@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${archivoBlack.variable} bg-[#0a0a0a]`}>
+      <body className={`${inter.variable} ${archivoBlack.variable} bg-bg`}>
         <RouteProgressBar />
         {children}
       </body>
