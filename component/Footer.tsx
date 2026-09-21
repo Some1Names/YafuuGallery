@@ -11,15 +11,15 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-20 bg-[#212125]">
+    <footer className="mt-20 bg-nav">
       {/* Panel gutter: the screentone dot texture from NoImagePlaceholder,
           reused here as the seam between page and footer — manga panels
           are separated by screentone-filled gutters, not blank rules. */}
       <div
         className="h-2"
         style={{
-          backgroundColor: "#1b1a1c",
-          backgroundImage: "radial-gradient(circle, #302e2a 1px, transparent 1.5px)",
+          backgroundColor: "var(--color-surface)",
+          backgroundImage: "radial-gradient(circle, var(--color-texture) 1px, transparent 1.5px)",
           backgroundSize: "8px 8px",
         }}
       />
@@ -27,23 +27,23 @@ export default function Footer() {
       <div className="max-w-350 mx-auto px-6 md:px-8 py-12 flex flex-col gap-10 sm:grid sm:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xl tracking-wide text-[#ece6d8] font-(family-name:--font-display)">
+            <span className="text-xl tracking-wide text-fg font-(family-name:--font-display)">
               YafuuGallery
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#9c1d25]" aria-hidden="true" />
+            <span className="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true" />
           </div>
-          <p className="text-sm text-[#b6b0a2] mt-3 max-w-60">Scanlations, read your way.</p>
+          <p className="text-sm text-fg-secondary mt-3 max-w-60">Scanlations, read your way.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-8 sm:contents">
           <div>
-            <span className="text-xs text-[#6b655e]">Browse</span>
+            <span className="text-xs text-fg-muted">Browse</span>
             <ul className="mt-3 flex flex-col gap-2.5">
               {browseLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+                    className="text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -53,14 +53,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <span className="text-xs text-[#6b655e]">Follow</span>
+            <span className="text-xs text-fg-muted">Follow</span>
             <ul className="mt-3 flex flex-col gap-2.5">
               <li>
                 <a
                   href="https://www.instagram.com/yafuuyufaa/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+                  className="inline-flex items-center gap-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                 >
                   Instagram
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -71,9 +71,9 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[#050505]">
+      <div className="border-t border-border">
         <div className="max-w-350 mx-auto px-6 md:px-8 py-5">
-          <p className="text-xs text-[#6b655e]">© {year} — By The &quot;ONE&quot; and Only YafuuYufaa.</p>
+          <p className="text-xs text-fg-muted">© {year} — By The &quot;ONE&quot; and Only YafuuYufaa.</p>
         </div>
       </div>
     </footer>

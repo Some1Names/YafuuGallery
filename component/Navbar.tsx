@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Home, Heart, User, LogOut, UserPlus, Search } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
+import ThemeToggle from "@/component/ThemeToggle";
 
 interface NavbarProps {
   user?: {
@@ -96,7 +97,7 @@ export default function Navbar({ user }: NavbarProps) {
   return (
     <nav
       className={
-        "sticky top-0 z-30 bg-[#212125]/75 backdrop-blur border-b-2 border-[#050505] transition-transform duration-300 md:translate-y-0 " +
+        "sticky top-0 z-30 bg-nav/75 backdrop-blur border-b-2 border-border transition-transform duration-300 md:translate-y-0 " +
         (isHidden ? "-translate-y-full" : "translate-y-0")
       }
     >
@@ -115,12 +116,13 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* Desktop: inline nav links + profile/sign up, unchanged */}
         <div className="hidden md:flex items-center gap-8">
+          <ThemeToggle />
           <Link
             href="/search"
             aria-label="Search"
             className={
               "transition-colors duration-200 " +
-              (pathname === "/search" ? "text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]")
+              (pathname === "/search" ? "text-fg" : "text-fg-secondary hover:text-fg")
             }
           >
             <Search className="w-4 h-4" />
@@ -134,7 +136,7 @@ export default function Navbar({ user }: NavbarProps) {
                 href={item.href}
                 className={
                   "text-sm transition-colors duration-200 " +
-                  (isActive ? "text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]")
+                  (isActive ? "text-fg" : "text-fg-secondary hover:text-fg")
                 }
               >
                 {item.label}
@@ -152,11 +154,11 @@ export default function Navbar({ user }: NavbarProps) {
                 className={
                   "flex items-center gap-2 text-sm transition-colors duration-200 " +
                   (pathname === "/profile" || isAccountMenuOpen
-                    ? "text-[#ece6d8]"
-                    : "text-[#b6b0a2] hover:text-[#ece6d8]")
+                    ? "text-fg"
+                    : "text-fg-secondary hover:text-fg")
                 }
               >
-                <span className="relative w-7 h-7 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
+                <span className="relative w-7 h-7 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
                   {user.image ? (
                     <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
                   ) : (
@@ -180,24 +182,24 @@ export default function Navbar({ user }: NavbarProps) {
               {isAccountMenuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full mt-2 w-44 bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-44 bg-surface border border-border rounded-md shadow-lg overflow-hidden"
                 >
                   <Link
                     href="/profile"
                     role="menuitem"
                     className={
                       "block px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (pathname === "/profile" ? "text-[#ece6d8] bg-[#232224]" : "text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]")
+                      (pathname === "/profile" ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
                     }
                   >
                     Profile
                   </Link>
-                  <div className="border-t border-[#050505]" />
+                  <div className="border-t border-border" />
                   <button
                     type="button"
                     role="menuitem"
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-2.5 text-sm text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8] transition-colors duration-200"
+                    className="block w-full text-left px-4 py-2.5 text-sm text-fg-secondary hover:bg-surface-hover hover:text-fg transition-colors duration-200"
                   >
                     Sign out
                   </button>
@@ -207,7 +209,7 @@ export default function Navbar({ user }: NavbarProps) {
           ) : (
             <Link
               href="/signup"
-              className="text-sm px-3 py-1.5 bg-white hover:bg-white/80 border border-[#050505] rounded text-black transition-colors duration-200"
+              className="text-sm px-3 py-1.5 bg-white hover:bg-white/80 border border-border rounded text-black transition-colors duration-200"
             >
               Sign up
             </Link>
@@ -220,7 +222,7 @@ export default function Navbar({ user }: NavbarProps) {
           <Link
             href="/search"
             aria-label="Search"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-fg-secondary hover:text-fg transition-colors duration-200"
           >
             <Search className="w-4 h-4" />
           </Link>
@@ -235,15 +237,15 @@ export default function Navbar({ user }: NavbarProps) {
               className="flex items-center gap-1"
             >
               {user ? (
-                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-[#1b1a1c] border border-[#050505] flex items-center justify-center shrink-0">
+                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
                   {user.image ? (
                     <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
                   ) : (
-                    <span className="text-xs text-[#ece6d8]">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
+                    <span className="text-xs text-fg">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
                 </span>
               ) : (
-                <span className="w-8 h-8 rounded-full border border-[#050505] flex items-center justify-center text-[#b6b0a2]">
+                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-fg-secondary">
                   {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 </span>
               )}
@@ -252,8 +254,11 @@ export default function Navbar({ user }: NavbarProps) {
             {isMenuOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-full mt-2 w-44 flex flex-col bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg overflow-hidden"
+              className="absolute right-0 top-full mt-2 w-44 flex flex-col bg-surface border border-border rounded-md shadow-lg overflow-hidden"
             >
+              <div className="flex items-center justify-center px-4 py-2.5 border-b border-border">
+                <ThemeToggle />
+              </div>
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -264,7 +269,7 @@ export default function Navbar({ user }: NavbarProps) {
                     role="menuitem"
                     className={
                       "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (isActive ? "text-[#ece6d8] bg-[#232224]" : "text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]")
+                      (isActive ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
                     }
                   >
                     <Icon className="w-4 h-4" />
@@ -273,7 +278,7 @@ export default function Navbar({ user }: NavbarProps) {
                 );
               })}
 
-              <div className="border-t border-[#050505]" />
+              <div className="border-t border-border" />
 
               {user ? (
                 <>
@@ -282,7 +287,7 @@ export default function Navbar({ user }: NavbarProps) {
                     role="menuitem"
                     className={
                       "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (pathname === "/profile" ? "text-[#ece6d8] bg-[#232224]" : "text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8]")
+                      (pathname === "/profile" ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
                     }
                   >
                     <User className="w-4 h-4" />
@@ -292,7 +297,7 @@ export default function Navbar({ user }: NavbarProps) {
                     type="button"
                     onClick={handleSignOut}
                     role="menuitem"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#b6b0a2] hover:bg-[#232224] hover:text-[#ece6d8] transition-colors duration-200"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-fg-secondary hover:bg-surface-hover hover:text-fg transition-colors duration-200"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign out
@@ -302,7 +307,7 @@ export default function Navbar({ user }: NavbarProps) {
                 <Link
                   href="/signup"
                   role="menuitem"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#ece6d8] hover:bg-[#232224] transition-colors duration-200"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-fg hover:bg-surface-hover transition-colors duration-200"
                 >
                   <UserPlus className="w-4 h-4" />
                   Sign up
