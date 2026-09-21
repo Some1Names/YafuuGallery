@@ -21,7 +21,7 @@ export default function NoImagePlaceholder({ label, className = "" }: NoImagePla
       {...(!label && { role: "img", "aria-label": "No image" })}
       className={`w-full h-full flex items-center justify-center bg-surface ${className}`}
       style={{
-        backgroundImage: "radial-gradient(circle, #302e2a 1px, transparent 1.5px)",
+        backgroundImage: "radial-gradient(circle, var(--color-texture) 1px, transparent 1.5px)",
         backgroundSize: "8px 8px",
       }}
     >

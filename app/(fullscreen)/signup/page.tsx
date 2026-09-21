@@ -49,7 +49,7 @@ export default function SignUpPage() {
       className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg"
     >
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-bg border-r-2 border-border relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-auth-panel-from via-auth-panel-via to-bg border-r-2 border-border relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: 'url("/wide.png")' }}
@@ -70,7 +70,7 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
-            className="w-full flex items-center justify-center gap-2 border border-[#2a2a2a] bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-2 border border-border bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
           >
             <GoogleIcon />
             Continue with Google

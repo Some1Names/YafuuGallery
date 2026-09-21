@@ -137,7 +137,7 @@ export default function AdminPdfUploadButton({
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-border bg-bg text-left hover:border-fg-secondary transition-colors duration-200 disabled:opacity-60"
       >
         {value ? (
-          <CheckCircle2 className="w-4 h-4 text-[#4c8f5f] shrink-0" />
+          <CheckCircle2 className="w-4 h-4 text-success/70 shrink-0" />
         ) : (
           <FileText className="w-4 h-4 text-fg-muted shrink-0" />
         )}

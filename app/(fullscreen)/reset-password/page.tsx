@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-bg border-r-2 border-border relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-auth-panel-from via-auth-panel-via to-bg border-r-2 border-border relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: 'url("/wide.png")' }}
