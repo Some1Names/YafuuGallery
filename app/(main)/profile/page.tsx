@@ -38,7 +38,7 @@ export default async function ProfilePage() {
 
   return (
     <div
-      className="relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12"
+      className="relative min-h-screen bg-bg px-4 sm:px-6 py-12"
     >
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
@@ -46,14 +46,14 @@ export default async function ProfilePage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">Profile</h1>
-          <p className="text-sm text-[#b6b0a2]">Manage your account and see your activity.</p>
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Profile</h1>
+          <p className="text-sm text-fg-secondary">Manage your account and see your activity.</p>
         </div>
 
         {/* Identity + edit form — no padding here so the avatar can bleed
             flush against the card's edges; ProfileEditForm pads its own
             text column instead */}
-        <div className="border border-[#050505] rounded-md overflow-hidden bg-[#1b1a1c]/60 mb-10">
+        <div className="border border-border rounded-md overflow-hidden bg-surface/60 mb-10">
           <ProfileEditForm
             initialName={user.name ?? ""}
             initialImage={user.image}
@@ -70,12 +70,12 @@ export default async function ProfilePage() {
         {/* Recently read — up to 4 chapters, any title. 2x2 on phone,
             one row of 4 from sm up, so the last item never wraps alone. */}
         <section>
-          <h2 className="text-xl text-[#ece6d8] font-(family-name:--font-display) mb-4">
+          <h2 className="text-xl text-fg font-(family-name:--font-display) mb-4">
             Continue reading
           </h2>
           {recentProgress.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-              <p className="text-[#b6b0a2] text-sm">
+            <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
+              <p className="text-fg-secondary text-sm">
                 No reading history yet — open a chapter to start tracking progress.
               </p>
             </div>

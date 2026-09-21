@@ -248,7 +248,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
             <ArcRowPlaceholder key={i} index={i} />
           ))}
         </div>
-        <p className="absolute inset-0 flex items-center justify-center text-xs text-[#6b655e]">
+        <p className="absolute inset-0 flex items-center justify-center text-xs text-fg-muted">
           No arcs yet — create one above.
         </p>
       </div>
@@ -273,7 +273,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
       ) : null}
 
       {isSearching && filtered.length === 0 && (
-        <p className="text-xs text-[#6b655e] text-center py-6">No arcs match &quot;{search}&quot;.</p>
+        <p className="text-xs text-fg-muted text-center py-6">No arcs match &quot;{search}&quot;.</p>
       )}
 
       {pageItems.map((a, localIndex) => {
@@ -329,7 +329,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
             }
             className={`relative flex items-stretch gap-1.5 ${
               isDragging
-                ? "shadow-lg scale-[1.02] bg-[#0a0a0a] rounded-md"
+                ? "shadow-lg scale-[1.02] bg-bg rounded-md"
                 : "transition-transform duration-150 ease-out"
             }`}
           >
@@ -337,7 +337,7 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
               // Hidden below sm — there's no cover thumbnail there for it to
               // sit beside, so AdminArcRow renders its own copy inline,
               // inside the card, instead.
-              <div className="hidden sm:flex items-center px-1 text-[#6b655e] hover:text-[#b6b0a2] transition-colors duration-200">
+              <div className="hidden sm:flex items-center px-1 text-fg-muted hover:text-fg-secondary transition-colors duration-200">
                 {gripHandle}
               </div>
             )}
@@ -369,18 +369,18 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] disabled:opacity-40 disabled:hover:text-[#b6b0a2] disabled:hover:border-[#050505] transition-colors duration-200"
+            className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
           >
             Prev
           </button>
-          <span className="text-xs text-[#6b655e]">
+          <span className="text-xs text-fg-muted">
             Page {currentPage + 1} of {totalPages}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={currentPage === totalPages - 1}
-            className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] disabled:opacity-40 disabled:hover:text-[#b6b0a2] disabled:hover:border-[#050505] transition-colors duration-200"
+            className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
           >
             Next
           </button>

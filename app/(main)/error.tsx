@@ -20,7 +20,7 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
       <button
         type="button"
         onClick={() => retry()}
-        className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+        className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
       >
         Try again
       </button>

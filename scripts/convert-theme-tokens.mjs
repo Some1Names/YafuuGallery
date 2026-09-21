@@ -37,7 +37,7 @@ const HEX_TO_TOKEN = {
 // then a Tailwind color-utility prefix, then the arbitrary hex value in
 // brackets — e.g. "hover:bg-[#232224]" or "sm:text-[#ece6d8]".
 const CLASS_RE =
-  /((?:[\w-]+:)*(?:bg|text|border|from|via|to|ring|divide|outline|decoration|fill|stroke|caret|accent|shadow))-\[#([0-9a-fA-F]{6})\]/g;
+  /((?:[\w-]+:)*(?:bg|text|border(?:-[trblxy])?|from|via|to|ring|divide(?:-[xy])?|outline|decoration|fill|stroke|caret|accent|shadow))-\[#([0-9a-fA-F]{6})\]/g;
 
 function convertFile(filePath) {
   const original = fs.readFileSync(filePath, "utf8");

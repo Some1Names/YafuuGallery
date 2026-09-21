@@ -90,16 +90,16 @@ export default function ManageMangaDashboard({ mangaList, chapters, arcs, author
       <MangaCreateForm />
 
       {mangaList.length === 0 ? (
-        <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
-          <p className="text-[#b6b0a2] text-sm">No manga yet — create one above.</p>
+        <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center">
+          <p className="text-fg-secondary text-sm">No manga yet — create one above.</p>
         </div>
       ) : (
         <>
           <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder="Search by title…" />
 
           {filteredMangaList.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
-              <p className="text-[#b6b0a2] text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
+            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
+              <p className="text-fg-secondary text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2 mt-4">

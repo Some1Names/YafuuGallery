@@ -160,7 +160,7 @@ export default function ProfileEditForm({
           // React would otherwise flag as a hydration mismatch even though
           // nothing about our own render output changed.
           suppressHydrationWarning
-          className="group relative block w-28 h-28 mx-auto rounded-full sm:mx-0 sm:w-auto sm:h-full sm:aspect-square sm:rounded-none overflow-hidden bg-[#1b1a1c]"
+          className="group relative block w-28 h-28 mx-auto rounded-full sm:mx-0 sm:w-auto sm:h-full sm:aspect-square sm:rounded-none overflow-hidden bg-surface"
         >
           {image ? (
             // fill (not just w-full/h-full) — the button's width is `auto`,
@@ -174,13 +174,13 @@ export default function ProfileEditForm({
             // removes it from that sizing pass entirely.
             <NextImage src={image} alt="Avatar" fill sizes="112px" className="object-cover" />
           ) : (
-            <span className="w-full h-full flex items-center justify-center text-4xl text-[#b6b0a2] font-(family-name:--font-display)">
+            <span className="w-full h-full flex items-center justify-center text-4xl text-fg-secondary font-(family-name:--font-display)">
               {name.charAt(0).toUpperCase() || "?"}
             </span>
           )}
 
           {/* Hover overlay */}
-          <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-[#ece6d8] transition-opacity duration-200">
+          <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-fg transition-opacity duration-200">
             {isUploading ? "Uploading…" : "Change"}
           </span>
         </button>
@@ -201,7 +201,7 @@ export default function ProfileEditForm({
         <div>
           <label
             htmlFor="name"
-            className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-2"
+            className="block text-[10px] uppercase tracking-widest text-fg-muted mb-2"
           >
             Display name
           </label>
@@ -217,8 +217,8 @@ export default function ProfileEditForm({
                 readOnly={!isEditingName}
                 suppressHydrationWarning
                 className={
-                  "w-full bg-transparent border-b px-0 py-2 text-base text-[#ece6d8] outline-none transition-colors " +
-                  (isEditingName ? "border-[#ece6d8] pr-16" : "border-[#050505] cursor-default pr-8")
+                  "w-full bg-transparent border-b px-0 py-2 text-base text-fg outline-none transition-colors " +
+                  (isEditingName ? "border-fg pr-16" : "border-border cursor-default pr-8")
                 }
               />
 
@@ -229,7 +229,7 @@ export default function ProfileEditForm({
                     onClick={confirmNameEdit}
                     disabled={isSaving}
                     aria-label="Confirm name change"
-                    className="p-1 text-[#6b655e] hover:text-[#4ade80] disabled:opacity-50 transition-colors"
+                    className="p-1 text-fg-muted hover:text-success disabled:opacity-50 transition-colors"
                   >
                     <Check className="w-4 h-4" />
                   </button>
@@ -238,7 +238,7 @@ export default function ProfileEditForm({
                     onClick={cancelNameEdit}
                     disabled={isSaving}
                     aria-label="Cancel name change"
-                    className="p-1 text-[#6b655e] hover:text-[#9c1d25] disabled:opacity-50 transition-colors"
+                    className="p-1 text-fg-muted hover:text-danger disabled:opacity-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -249,31 +249,31 @@ export default function ProfileEditForm({
                   onClick={startEditingName}
                   aria-label="Edit display name"
                   suppressHydrationWarning
-                  className="absolute right-0 bottom-2 text-[#6b655e] hover:text-[#ece6d8] transition-colors"
+                  className="absolute right-0 bottom-2 text-fg-muted hover:text-fg transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {error && <p className="text-sm text-[#9c1d25] pt-2">{error}</p>}
-            {isSaving && <p className="text-xs text-[#6b655e] pt-2">Saving…</p>}
+            {error && <p className="text-sm text-danger pt-2">{error}</p>}
+            {isSaving && <p className="text-xs text-fg-muted pt-2">Saving…</p>}
           </div>
 
           {/* Fixed for the life of the account (see User.tag in the
               schema) — shown here, not editable, so people understand
               their full identity elsewhere (comments, admin) is
               name#tag, not just the name they can freely change above. */}
-          {tag && <p className="text-xs text-[#6b655e] mt-2">Your tag is #{tag} — shown as {name}#{tag}, and never changes.</p>}
+          {tag && <p className="text-xs text-fg-muted mt-2">Your tag is #{tag} — shown as {name}#{tag}, and never changes.</p>}
         </div>
 
         {/* Role / email / member-since, with the manage-manga action
             alongside it for authors and admins */}
         <div className="mt-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-[#ece6d8] font-bold uppercase tracking-wide">{role}</p>
-            <p className="text-sm text-[#b6b0a2] mt-1">{email}</p>
-            <p className="text-xs text-[#6b655e] mt-1">
+            <p className="text-sm text-fg font-bold uppercase tracking-wide">{role}</p>
+            <p className="text-sm text-fg-secondary mt-1">{email}</p>
+            <p className="text-xs text-fg-muted mt-1">
               member since{" "}
               {createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </p>
@@ -282,7 +282,7 @@ export default function ProfileEditForm({
           {(role === "author" || role === "admin") && (
             <Link
               href={role === "admin" ? "/admin" : "/manage"}
-              className="self-start shrink-0 text-xs uppercase tracking-wide px-3 py-1.5 rounded bg-[#232224] border border-[#050505] text-[#ece6d8] hover:bg-[#2a292c] hover:border-[#b6b0a2] transition-colors duration-200"
+              className="self-start shrink-0 text-xs uppercase tracking-wide px-3 py-1.5 rounded bg-surface-hover border border-border text-fg hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
             >
               {role === "admin" ? "Admin panel" : "Manage manga"}
             </Link>
@@ -293,15 +293,15 @@ export default function ProfileEditForm({
             tab instead of just sitting there as inert numbers. 2-column
             grid on mobile (a single unwrapped row of 4 was overflowing off
             the right edge of the card), one row from sm up. */}
-        <div className="mt-6 pt-6 border-t border-[#050505] grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:gap-0">
+        <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:gap-0">
           {stats.map((s, i) => {
-            const className = `sm:flex-1 sm:px-4 sm:first:pl-0 ${i > 0 ? "sm:border-l sm:border-[#050505]" : ""}`;
+            const className = `sm:flex-1 sm:px-4 sm:first:pl-0 ${i > 0 ? "sm:border-l sm:border-border" : ""}`;
             const inner = (
               <>
-                <p className="text-2xl text-[#ece6d8] group-hover:text-white font-(family-name:--font-display) transition-colors duration-200">
+                <p className="text-2xl text-fg group-hover:text-white font-(family-name:--font-display) transition-colors duration-200">
                   {s.value}
                 </p>
-                <p className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-[#6b655e] group-hover:text-[#b6b0a2] mt-1 transition-colors duration-200">
+                <p className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-fg-muted group-hover:text-fg-secondary mt-1 transition-colors duration-200">
                   {s.label}
                   {s.href && <ArrowUpRight className="w-3 h-3" />}
                 </p>

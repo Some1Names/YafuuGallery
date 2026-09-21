@@ -38,7 +38,7 @@ export default async function SearchPage({
 
   return (
     <div
-      className="relative min-h-screen bg-[#0a0a0a] px-6 sm:px-8 py-12"
+      className="relative min-h-screen bg-bg px-6 sm:px-8 py-12"
     >
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
@@ -46,22 +46,22 @@ export default async function SearchPage({
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">
             Search
           </h1>
-          <p className="text-sm text-[#b6b0a2]">Find manga by title, author, or chapter name.</p>
+          <p className="text-sm text-fg-secondary">Find manga by title, author, or chapter name.</p>
         </div>
 
         <form action="/search" method="GET" className="mb-10">
           <div className="relative max-w-xl">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b655e]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-muted" />
             <input
               type="search"
               name="q"
               defaultValue={query}
               placeholder="Search by title, author, or chapter…"
               autoFocus
-              className="w-full bg-[#1b1a1c] border border-[#050505] rounded-md pl-10 pr-10 py-2.5 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
+              className="w-full bg-surface border border-border rounded-md pl-10 pr-10 py-2.5 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-fg-secondary transition-colors duration-200"
             />
             {/* Replaces the browser's own native "x" clear button (suppressed
                 in globals.css) with one that matches the site's Lucide icon
@@ -71,7 +71,7 @@ export default async function SearchPage({
               <Link
                 href="/search"
                 aria-label="Clear search"
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6b655e] hover:text-[#ece6d8] transition-colors duration-200"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
               </Link>
@@ -82,11 +82,11 @@ export default async function SearchPage({
         <RecentSearches query={query} />
 
         {query === "" ? (
-          <p className="text-[#b6b0a2] text-center mt-12 text-sm">
+          <p className="text-fg-secondary text-center mt-12 text-sm">
             Start typing to search for manga.
           </p>
         ) : mangaList.length === 0 ? (
-          <p className="text-[#b6b0a2] text-center mt-12 text-sm">
+          <p className="text-fg-secondary text-center mt-12 text-sm">
             No manga found for &quot;{query}&quot;.
           </p>
         ) : (

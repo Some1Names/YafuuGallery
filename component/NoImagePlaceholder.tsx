@@ -19,13 +19,13 @@ export default function NoImagePlaceholder({ label, className = "" }: NoImagePla
       // aria-label/role is only needed for the purely-visual, textless
       // instances, where a screen reader would otherwise get nothing.
       {...(!label && { role: "img", "aria-label": "No image" })}
-      className={`w-full h-full flex items-center justify-center bg-[#1b1a1c] ${className}`}
+      className={`w-full h-full flex items-center justify-center bg-surface ${className}`}
       style={{
         backgroundImage: "radial-gradient(circle, #302e2a 1px, transparent 1.5px)",
         backgroundSize: "8px 8px",
       }}
     >
-      {label && <span className="text-xs text-[#6b655e]">{label}</span>}
+      {label && <span className="text-xs text-fg-muted">{label}</span>}
     </div>
   );
 }

@@ -12,7 +12,7 @@ export default function MangaHero({ imageUrl }: MangaHeroProps) {
     <div className="relative w-full aspect-32/9 rounded-none sm:rounded-md mb-6 sm:mb-14 overflow-hidden">
       {imageUrl ? (
         <div
-          className="absolute inset-0 bg-[#ece6d8] bg-contain bg-no-repeat bg-center"
+          className="absolute inset-0 bg-fg bg-contain bg-no-repeat bg-center"
           style={{ backgroundImage: `url('${imageUrl}')` }}
         />
       ) : (

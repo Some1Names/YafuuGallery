@@ -77,14 +77,14 @@ export default function AdminImageUploadButton({
 
   return (
     <div>
-      <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+      <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
         {label}
       </label>
 
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className={`group relative block ${boxClassName} overflow-hidden rounded border border-[#050505] bg-[#0a0a0a]`}
+        className={`group relative block ${boxClassName} overflow-hidden rounded border border-border bg-bg`}
       >
         {value ? (
           <NextImage src={value} alt={label} fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
@@ -92,7 +92,7 @@ export default function AdminImageUploadButton({
           <NoImagePlaceholder label="No image" />
         )}
 
-        <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-[#ece6d8] transition-opacity duration-200">
+        <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-fg transition-opacity duration-200">
           {isUploading ? "Uploading…" : "Change"}
         </span>
       </button>
@@ -105,7 +105,7 @@ export default function AdminImageUploadButton({
         className="hidden"
       />
 
-      {error && <p className="text-xs text-[#9c1d25] mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   );
 }

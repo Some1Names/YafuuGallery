@@ -22,11 +22,11 @@ export default function FeaturedManga({
     >
       <div className="flex flex-col gap-3 items-start px-10">
         <div className="flex flex-col gap-2 items-start">
-          <p className="text-[#b6b0a2] text-sm">FEATURED MANGA</p>
+          <p className="text-fg-secondary text-sm">FEATURED MANGA</p>
           <h1 className="text-5xl font-bold text-white max-w-xl">{title}</h1>
         </div>
 
-        <p className="text-[#b6b0a2] max-w-lg mt-6 line-clamp-3">{synopsis}</p>
+        <p className="text-fg-secondary max-w-lg mt-6 line-clamp-3">{synopsis}</p>
 
         <div className="flex gap-4 mt-8">
           {firstChapterId ? (

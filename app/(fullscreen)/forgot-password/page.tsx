@@ -38,9 +38,9 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#0a0a0a]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a] border-r-2 border-[#050505] relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-bg border-r-2 border-border relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: 'url("/wide.png")' }}
@@ -54,15 +54,15 @@ export default function ForgotPasswordPage() {
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">Forgot Password</h1>
-            <p className="mt-1 text-sm text-[#b6b0a2]">
+            <h1 className="text-2xl text-fg font-(family-name:--font-display)">Forgot Password</h1>
+            <p className="mt-1 text-sm text-fg-secondary">
               Enter your email and we&apos;ll send you a link to reset your password.
             </p>
           </div>
 
           {sent ? (
-            <div className="rounded-md border border-[#050505] bg-[#1b1a1c] p-4">
-              <p className="text-sm text-[#ece6d8]">
+            <div className="rounded-md border border-border bg-surface p-4">
+              <p className="text-sm text-fg">
                 If an account exists for <span className="font-medium">{email}</span>, a reset link has been
                 sent.
               </p>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm text-[#b6b0a2] mb-1.5">
+                <label htmlFor="email" className="block text-sm text-fg-secondary mb-1.5">
                   Email
                 </label>
                 <input
@@ -80,25 +80,25 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="e.g. you@example.com"
-                  className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+                  className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
                 />
               </div>
 
-              {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+              {error && <p className="text-sm text-danger">{error}</p>}
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full rounded-md bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold py-2.5 hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+                className="w-full rounded-md bg-fg text-bg text-sm font-semibold py-2.5 hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
               >
                 {isSubmitting ? "Sending…" : "Send Reset Link"}
               </button>
             </form>
           )}
 
-          <p className="text-sm text-[#b6b0a2] text-center mt-6">
+          <p className="text-sm text-fg-secondary text-center mt-6">
             Remembered your password?{" "}
-            <Link href="/login" className="text-[#ece6d8] font-medium hover:underline">
+            <Link href="/login" className="text-fg font-medium hover:underline">
               Log in
             </Link>
           </p>

@@ -152,25 +152,25 @@ export default function AdminDashboard({
 
   const tabClass = (isActive: boolean) =>
     "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
-    (isActive ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]");
+    (isActive ? "bg-surface-hover text-fg" : "text-fg-secondary hover:text-fg");
 
   return (
     <div>
       {/* Tabs — client-side only, same as the manga detail page's
           Chapters/Arcs switcher, so switching sections doesn't reload
           the page (everything's already fetched up front) */}
-      <div className="inline-flex items-center gap-1 p-1 mb-8 rounded-md border border-[#050505] bg-[#1b1a1c]">
+      <div className="inline-flex items-center gap-1 p-1 mb-8 rounded-md border border-border bg-surface">
         <button type="button" onClick={() => setActiveTab("manga")} className={tabClass(activeTab === "manga")}>
           Manga
-          <span className="ml-1.5 text-xs text-[#6b655e]">{mangaList.length}</span>
+          <span className="ml-1.5 text-xs text-fg-muted">{mangaList.length}</span>
         </button>
         <button type="button" onClick={() => setActiveTab("users")} className={tabClass(activeTab === "users")}>
           Users
-          <span className="ml-1.5 text-xs text-[#6b655e]">{users.length}</span>
+          <span className="ml-1.5 text-xs text-fg-muted">{users.length}</span>
         </button>
         <button type="button" onClick={() => setActiveTab("comments")} className={tabClass(activeTab === "comments")}>
           Comments
-          <span className="ml-1.5 text-xs text-[#6b655e]">{comments.length}</span>
+          <span className="ml-1.5 text-xs text-fg-muted">{comments.length}</span>
         </button>
       </div>
 
@@ -179,16 +179,16 @@ export default function AdminDashboard({
           <MangaCreateForm />
 
           {mangaList.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center">
-              <p className="text-[#b6b0a2] text-sm">No manga yet — create one above.</p>
+            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center">
+              <p className="text-fg-secondary text-sm">No manga yet — create one above.</p>
             </div>
           ) : (
             <>
               <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder="Search by title or author…" />
 
               {filteredMangaList.length === 0 ? (
-                <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
-                  <p className="text-[#b6b0a2] text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
+                <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
+                  <p className="text-fg-secondary text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 mt-4">
@@ -250,11 +250,11 @@ export default function AdminDashboard({
         <section>
           <AdminSearchInput value={userSearch} onChange={setUserSearch} placeholder="Search by name or email…" />
 
-          <div className="border border-[#050505] rounded-md overflow-hidden mt-4">
+          <div className="border border-border rounded-md overflow-hidden mt-4">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#1b1a1c] text-[#b6b0a2] text-xs uppercase">
+                  <tr className="bg-surface text-fg-secondary text-xs uppercase">
                     <th className="text-left px-4 py-2">Name</th>
                     <th className="text-left px-4 py-2">Email</th>
                     <th className="text-left px-4 py-2">Joined</th>
@@ -266,7 +266,7 @@ export default function AdminDashboard({
                 <tbody>
                   {filteredUsers.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-6 text-center text-sm text-[#b6b0a2]">
+                      <td colSpan={6} className="px-4 py-6 text-center text-sm text-fg-secondary">
                         No users match &quot;{userSearch}&quot;.
                       </td>
                     </tr>
@@ -277,12 +277,12 @@ export default function AdminDashboard({
 
                     return (
                       <Fragment key={u.id}>
-                        <tr className="border-t border-[#050505] hover:bg-[#1b1a1c]/40 transition-colors duration-200">
-                          <td className="px-4 py-2 text-[#ece6d8] whitespace-nowrap">
+                        <tr className="border-t border-border hover:bg-surface/40 transition-colors duration-200">
+                          <td className="px-4 py-2 text-fg whitespace-nowrap">
                             {u.name ? formatUsername(u.name, u.tag) : "—"}
                           </td>
-                          <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">{u.email}</td>
-                          <td className="px-4 py-2 text-[#b6b0a2] whitespace-nowrap">
+                          <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">{u.email}</td>
+                          <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">
                             {u.created_at.toLocaleDateString("en-US", {
                               month: "short",
                               day: "numeric",
@@ -297,7 +297,7 @@ export default function AdminDashboard({
                               type="button"
                               onClick={() => toggleUserComments(u.id)}
                               disabled={userComments.length === 0}
-                              className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] disabled:opacity-40 disabled:hover:text-[#b6b0a2] disabled:hover:border-[#050505] transition-colors duration-200"
+                              className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
                             >
                               {userComments.length} {isExpanded ? "− Close" : "· View"}
                             </button>
@@ -313,7 +313,7 @@ export default function AdminDashboard({
                         </tr>
 
                         {isExpanded && (
-                          <tr className="border-t border-[#050505] bg-[#0a0a0a]/40">
+                          <tr className="border-t border-border bg-bg/40">
                             <td colSpan={6} className="p-3">
                               <div className="flex flex-col gap-2">
                                 {userComments.map((c) => (
@@ -351,12 +351,12 @@ export default function AdminDashboard({
           />
 
           {comments.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
-              <p className="text-[#b6b0a2] text-sm">No comments yet.</p>
+            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
+              <p className="text-fg-secondary text-sm">No comments yet.</p>
             </div>
           ) : filteredComments.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-12 px-6 text-center mt-4">
-              <p className="text-[#b6b0a2] text-sm">No comments match &quot;{commentSearch}&quot;.</p>
+            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
+              <p className="text-fg-secondary text-sm">No comments match &quot;{commentSearch}&quot;.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2 mt-4">

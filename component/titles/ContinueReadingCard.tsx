@@ -26,7 +26,7 @@ export default function ContinueReadingCard({
   return (
     <Link
       href={`/viewer/${chapterId}`}
-      className="group relative block w-full aspect-square rounded-lg overflow-hidden bg-[#ece6d8]"
+      className="group relative block w-full aspect-square rounded-lg overflow-hidden bg-fg"
     >
       {coverImageUrl ? (
         <Image
@@ -39,14 +39,14 @@ export default function ContinueReadingCard({
       ) : (
         <NoImagePlaceholder />
       )}
-      <div className="absolute inset-0 bg-linear-to-t from-[#1b1a1c] via-[#1b1a1c]/10 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/10 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-3">
-        <div className="text-[#ece6d8]/70 text-xs truncate">{mangaTitle}</div>
-        <div className="text-[#ece6d8] text-lg font-(family-name:--font-display)">
+        <div className="text-fg/70 text-xs truncate">{mangaTitle}</div>
+        <div className="text-fg text-lg font-(family-name:--font-display)">
           {formatChapterBadge(chapterIsEx, displayNumber)}
         </div>
-        <div className="text-[#ece6d8]/80 text-xs truncate">{chapterName}</div>
+        <div className="text-fg/80 text-xs truncate">{chapterName}</div>
       </div>
     </Link>
   );

@@ -71,18 +71,18 @@ export default function MangaCard({
         </div>
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 flex flex-col gap-5 px-6 py-15 bg-[#0a0a0a]/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 flex flex-col gap-5 px-6 py-15 bg-bg/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="flex flex-col">
-            <div className="text-[#ece6d8] font-bold text-xl line-clamp-1">{title}</div>
-            <div className="text-[#b6b0a2] text-base">{author}</div>
+            <div className="text-fg font-bold text-xl line-clamp-1">{title}</div>
+            <div className="text-fg-secondary text-base">{author}</div>
           </div>
 
           {latestChapterName !== null && (
             <div className="flex flex-col">
-              <div className="self-start px-2 py-1 bg-[#ece6d8] text-[#0a0a0a] text-sm font-bold rounded-sm">
+              <div className="self-start px-2 py-1 bg-fg text-bg text-sm font-bold rounded-sm">
                 {formatChapterBadge(latestChapterIsEx, latestChapterDisplayNumber ?? undefined)}
               </div>
-              <div className="text-[#b6b0a2] text-lg">{latestChapterName}</div>
+              <div className="text-fg-secondary text-lg">{latestChapterName}</div>
             </div>
           )}
         </div>
@@ -90,7 +90,7 @@ export default function MangaCard({
         {/* Favorite toggle — rendered after the hover overlay so it stays
             on top and clickable even while hovering the card */}
         {isFavorited !== undefined && (
-          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[#0a0a0a]/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm flex items-center justify-center">
             <MangaFavoriteButton mangaId={id} initialFavorited={isFavorited} variant="icon" />
           </div>
         )}

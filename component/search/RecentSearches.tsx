@@ -66,11 +66,11 @@ export default function RecentSearches({ query }: RecentSearchesProps) {
   return (
     <div className="mb-10 -mt-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs uppercase tracking-widest text-[#6b655e]">Recent Searches</p>
+        <p className="text-xs uppercase tracking-widest text-fg-muted">Recent Searches</p>
         <button
           type="button"
           onClick={clearHistory}
-          className="text-xs text-[#6b655e] hover:text-[#ece6d8] transition-colors duration-200"
+          className="text-xs text-fg-muted hover:text-fg transition-colors duration-200"
         >
           Clear
         </button>
@@ -80,7 +80,7 @@ export default function RecentSearches({ query }: RecentSearchesProps) {
           <Link
             key={term}
             href={`/search?q=${encodeURIComponent(term)}`}
-            className="px-3 py-1.5 bg-[#1b1a1c] border border-[#050505] rounded-full text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+            className="px-3 py-1.5 bg-surface border border-border rounded-full text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
           >
             {term}
           </Link>

@@ -92,40 +92,40 @@ export default async function FavoritesPage({
 
   const tabClass = (isActive: boolean) =>
     "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
-    (isActive ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2] hover:text-[#ece6d8]");
+    (isActive ? "bg-surface-hover text-fg" : "text-fg-secondary hover:text-fg");
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a] px-6 sm:px-8 py-12">
+    <div className="relative min-h-screen bg-bg px-6 sm:px-8 py-12">
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
       </div>
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">
             Favorites
           </h1>
-          <p className="text-sm text-[#b6b0a2]">
+          <p className="text-sm text-fg-secondary">
             Manga and chapters you&apos;ve bookmarked, all in one place.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="inline-flex items-center gap-1 p-1 mb-10 rounded-md border border-[#050505] bg-[#1b1a1c]">
+        <div className="inline-flex items-center gap-1 p-1 mb-10 rounded-md border border-border bg-surface">
           <Link href="?tab=manga" className={tabClass(activeTab === "manga")}>
             Manga
-            <span className="ml-1.5 text-xs text-[#6b655e]">{bookmarkedManga.length}</span>
+            <span className="ml-1.5 text-xs text-fg-muted">{bookmarkedManga.length}</span>
           </Link>
           <Link href="?tab=chapters" className={tabClass(activeTab === "chapters")}>
             Chapters
-            <span className="ml-1.5 text-xs text-[#6b655e]">{favoritedChapters.length}</span>
+            <span className="ml-1.5 text-xs text-fg-muted">{favoritedChapters.length}</span>
           </Link>
         </div>
 
         {activeTab === "manga" ? (
           bookmarkedManga.length === 0 ? (
-            <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-              <p className="text-[#b6b0a2] text-sm">
+            <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
+              <p className="text-fg-secondary text-sm">
                 No manga bookmarked yet — hit &quot;Add to Favorites&quot; on a manga page to see it here.
               </p>
             </div>
@@ -152,8 +152,8 @@ export default async function FavoritesPage({
             </div>
           )
         ) : favoritedChapters.length === 0 ? (
-          <div className="border border-[#050505] rounded-md bg-[#1b1a1c]/60 py-16 px-6 text-center">
-            <p className="text-[#b6b0a2] text-sm">
+          <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
+            <p className="text-fg-secondary text-sm">
               No favorited chapters yet — tap the heart on any chapter to see it here.
             </p>
           </div>
@@ -163,7 +163,7 @@ export default async function FavoritesPage({
               <div key={group.mangaId}>
                 <Link
                   href={`/manga/titles/${group.mangaId}`}
-                  className="inline-block text-xl text-[#ece6d8] hover:text-white font-(family-name:--font-display) mb-4 transition-colors duration-200"
+                  className="inline-block text-xl text-fg hover:text-white font-(family-name:--font-display) mb-4 transition-colors duration-200"
                 >
                   {group.mangaTitle}
                 </Link>

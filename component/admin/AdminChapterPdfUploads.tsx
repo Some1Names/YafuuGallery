@@ -53,7 +53,7 @@ export default function AdminChapterPdfUploads({
 
   return (
     <div>
-      <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+      <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
         Chapter PDF{value.length > 1 ? "s" : ""}
       </label>
 
@@ -71,7 +71,7 @@ export default function AdminChapterPdfUploads({
                 value={t.language}
                 onChange={(e) => updateEntry(i, { language: e.target.value as Language })}
                 aria-label="PDF language"
-                className="shrink-0 bg-[#0a0a0a] border border-[#050505] rounded px-2 py-2.5 text-xs text-[#b6b0a2] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
+                className="shrink-0 bg-bg border border-border rounded px-2 py-2.5 text-xs text-fg-secondary focus:outline-none focus:border-fg-secondary transition-colors duration-200"
               >
                 {rowOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -95,7 +95,7 @@ export default function AdminChapterPdfUploads({
                 type="button"
                 onClick={() => removeEntry(i)}
                 aria-label={`Remove ${LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label} PDF`}
-                className="shrink-0 self-start p-2.5 border border-[#050505] rounded text-[#6b655e] hover:text-[#9c1d25] hover:border-[#9c1d25]/50 transition-colors duration-200"
+                className="shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger hover:border-danger/50 transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -108,7 +108,7 @@ export default function AdminChapterPdfUploads({
         <button
           type="button"
           onClick={addEntry}
-          className="flex items-center gap-1.5 mt-2 text-xs text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+          className="flex items-center gap-1.5 mt-2 text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
         >
           <Plus className="w-3.5 h-3.5" />
           Add another language

@@ -156,13 +156,13 @@ export default async function MangaDetailPage({
 
     return (
         <div
-            className="relative min-h-screen bg-[#0a0a0a] px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center"
+            className="relative min-h-screen bg-bg px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center"
         >
             <div className="hidden sm:block">
                 <MangaBackground imageUrl="/mangabg.png" />
             </div>
 
-            <div className="relative z-10 w-full max-w-350 text-[#ece6d8]">
+            <div className="relative z-10 w-full max-w-350 text-fg">
 
                 <div className="px-6 sm:px-0">
                     <Breadcrumb mangaTitle={manga.manga_title} />

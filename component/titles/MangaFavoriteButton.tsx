@@ -61,7 +61,7 @@ export default function MangaFavoriteButton({
         aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         className={
           "text-sm transition-colors duration-200 disabled:opacity-50 " +
-          (favorited ? "text-[#9c1d25]" : "text-white hover:text-[#9c1d25]")
+          (favorited ? "text-danger" : "text-white hover:text-danger")
         }
       >
         {favorited ? "❤" : "❤︎"}
@@ -77,7 +77,7 @@ export default function MangaFavoriteButton({
       className={
         "px-4 py-2 text-sm transition-colors duration-200 disabled:opacity-50 " +
         (favorited
-          ? "bg-[#9c1d25] text-[#ece6d8] hover:bg-[#9c1d25]/85"
+          ? "bg-danger text-fg hover:bg-danger/85"
           : "bg-white text-black hover:bg-white/70")
       }
     >

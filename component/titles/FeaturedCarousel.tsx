@@ -331,7 +331,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           }`}
         >
           <div className="flex flex-col gap-2 items-start">
-            <p className="text-[#b6b0a2] text-xs sm:text-sm">FEATURED MANGA</p>
+            <p className="text-fg-secondary text-xs sm:text-sm">FEATURED MANGA</p>
             <h1
               className="text-4xl md:text-5xl font-bold text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere"
               // line-clamp only caps the line count, it doesn't reserve
@@ -360,7 +360,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           </div>
 
           <p
-            className="text-[#b6b0a2] text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3"
+            className="text-fg-secondary text-sm sm:text-base max-w-lg mt-4 sm:mt-6 line-clamp-3"
             style={{ minHeight: "3lh" }}
           >
             {current.synopsis}

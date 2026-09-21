@@ -54,8 +54,8 @@ function ResetPasswordForm() {
 
   if (!token || tokenError) {
     return (
-      <div className="rounded-md border border-[#050505] bg-[#1b1a1c] p-4">
-        <p className="text-sm text-[#ece6d8]">
+      <div className="rounded-md border border-border bg-surface p-4">
+        <p className="text-sm text-fg">
           This reset link is invalid or has expired. Request a new one from the{" "}
           <Link href="/forgot-password" className="font-medium hover:underline">
             forgot password
@@ -69,7 +69,7 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="password" className="block text-sm text-[#b6b0a2] mb-1.5">
+        <label htmlFor="password" className="block text-sm text-fg-secondary mb-1.5">
           New Password
         </label>
         <div className="relative">
@@ -81,22 +81,22 @@ function ResetPasswordForm() {
             required
             minLength={8}
             placeholder="Enter a new password"
-            className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 pr-10 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+            className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-10 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#b6b0a2] hover:text-[#ece6d8]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-secondary hover:text-fg"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? "Hide" : "Show"}
           </button>
         </div>
-        <span className="text-xs text-[#6b655e] mt-1 block">Must be at least 8 characters.</span>
+        <span className="text-xs text-fg-muted mt-1 block">Must be at least 8 characters.</span>
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm text-[#b6b0a2] mb-1.5">
+        <label htmlFor="confirmPassword" className="block text-sm text-fg-secondary mb-1.5">
           Confirm Password
         </label>
         <input
@@ -106,16 +106,16 @@ function ResetPasswordForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           placeholder="Re-enter the new password"
-          className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+          className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
         />
       </div>
 
-      {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-md bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold py-2.5 hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+        className="w-full rounded-md bg-fg text-bg text-sm font-semibold py-2.5 hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
       >
         {isSubmitting ? "Resetting…" : "Reset Password"}
       </button>
@@ -125,9 +125,9 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#0a0a0a]">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a] border-r-2 border-[#050505] relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-bg border-r-2 border-border relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: 'url("/wide.png")' }}
@@ -141,8 +141,8 @@ export default function ResetPasswordPage() {
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">Reset Password</h1>
-            <p className="mt-1 text-sm text-[#b6b0a2]">Choose a new password for your account.</p>
+            <h1 className="text-2xl text-fg font-(family-name:--font-display)">Reset Password</h1>
+            <p className="mt-1 text-sm text-fg-secondary">Choose a new password for your account.</p>
           </div>
 
           <Suspense fallback={null}>

@@ -75,7 +75,7 @@ export default async function BrowsePage() {
   const recentProgress = session?.user?.id ? await getContinueReading(session.user.id, 6) : [];
 
   return (
-    <div className="bg-[#0a0a0a] min-h-screen">
+    <div className="bg-bg min-h-screen">
 
       {/* Hero */}
       <section className="relative min-h-100 sm:min-h-125 md:min-h-150 pt-0 sm:pt-24 md:pt-28">
@@ -88,7 +88,7 @@ export default async function BrowsePage() {
           }}
         />
 
-        <div className="hidden sm:block absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
+        <div className="hidden sm:block absolute inset-0 bg-linear-to-t from-bg via-bg/80 to-transparent" />
 
         <FeaturedCarousel manga={featuredSlides} />
       </section>
@@ -100,8 +100,8 @@ export default async function BrowsePage() {
       {!session?.user?.id ? (
         <section className="px-6 md:px-8 pt-6 sm:pt-8">
           <div className="max-w-350 mx-auto">
-            <p className="text-[#b6b0a2] text-sm">
-              <Link href="/login" className="text-[#ece6d8] underline underline-offset-2 hover:no-underline">
+            <p className="text-fg-secondary text-sm">
+              <Link href="/login" className="text-fg underline underline-offset-2 hover:no-underline">
                 Sign in
               </Link>{" "}
               to keep track of what you&apos;re reading.
@@ -113,7 +113,7 @@ export default async function BrowsePage() {
           <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
             <div className="max-w-350 mx-auto">
               <div className="mb-6 sm:mb-8">
-                <p className="text-[#b6b0a2] text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
+                <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
                 <h2 className="text-2xl sm:text-3xl text-white font-bold">Continue Reading</h2>
               </div>
 
@@ -141,7 +141,7 @@ export default async function BrowsePage() {
 
           <div className="flex items-end justify-between mb-6 sm:mb-8">
             <div>
-              <p className="text-[#b6b0a2] text-xs sm:text-sm">
+              <p className="text-fg-secondary text-xs sm:text-sm">
                 RECENTLY UPDATED
               </p>
 
@@ -177,7 +177,7 @@ export default async function BrowsePage() {
           </div>
 
           {mangaList.length === 0 && (
-            <p className="text-[#b6b0a2] text-center mt-12">
+            <p className="text-fg-secondary text-center mt-12">
               No manga published yet.
             </p>
           )}

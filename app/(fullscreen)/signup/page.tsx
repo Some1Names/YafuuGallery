@@ -46,10 +46,10 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[#0a0a0a]"
+      className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg"
     >
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a] border-r-2 border-[#050505] relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-[#1e1213] via-[#121113] to-bg border-r-2 border-border relative overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: 'url("/wide.png")' }}
@@ -63,14 +63,14 @@ export default function SignUpPage() {
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">Sign Up</h1>
-            <p className="mt-1 text-sm text-[#b6b0a2]">Create an account to start reading.</p>
+            <h1 className="text-2xl text-fg font-(family-name:--font-display)">Sign Up</h1>
+            <p className="mt-1 text-sm text-fg-secondary">Create an account to start reading.</p>
           </div>
 
           <button
             type="button"
             onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
-            className="w-full flex items-center justify-center gap-2 border border-[#2a2a2a] bg-[#1b1a1c] rounded-md py-2.5 text-sm text-[#ece6d8] font-medium hover:bg-[#232224] hover:border-[#b6b0a2] transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-2 border border-[#2a2a2a] bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
           >
             <GoogleIcon />
             Continue with Google
@@ -78,13 +78,13 @@ export default function SignUpPage() {
 
           <div className="flex items-center gap-3 my-6">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-[#b6b0a2]">OR</span>
+            <span className="text-xs text-fg-secondary">OR</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div>
-              <label htmlFor="name" className="block text-sm text-[#b6b0a2] mb-1.5">
+              <label htmlFor="name" className="block text-sm text-fg-secondary mb-1.5">
                 Username
               </label>
               <input
@@ -93,13 +93,13 @@ export default function SignUpPage() {
                 {...register("name")}
                 placeholder="e.g. uefa123"
                 aria-invalid={!!errors.name}
-                className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
               />
-              {errors.name && <p className="text-xs text-[#9c1d25] mt-1">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-danger mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm text-[#b6b0a2] mb-1.5">
+              <label htmlFor="email" className="block text-sm text-fg-secondary mb-1.5">
                 Email
               </label>
               <input
@@ -108,13 +108,13 @@ export default function SignUpPage() {
                 {...register("email")}
                 placeholder="e.g. you@example.com"
                 aria-invalid={!!errors.email}
-                className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
               />
-              {errors.email && <p className="text-xs text-[#9c1d25] mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm text-[#b6b0a2] mb-1.5">
+              <label htmlFor="password" className="block text-sm text-fg-secondary mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -124,12 +124,12 @@ export default function SignUpPage() {
                   {...register("password")}
                   placeholder="Enter your password"
                   aria-invalid={!!errors.password}
-                  className="w-full rounded-md border border-[#050505] bg-[#1b1a1c] px-3 py-2 pr-10 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#9c1d25] transition-colors"
+                  className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-10 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#b6b0a2] hover:text-[#ece6d8]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-secondary hover:text-fg"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
@@ -138,26 +138,26 @@ export default function SignUpPage() {
               <span
                 className={
                   "text-xs mt-1 block " +
-                  (errors.password ? "text-[#9c1d25]" : "text-[#6b655e]")
+                  (errors.password ? "text-danger" : "text-fg-muted")
                 }
               >
                 {errors.password?.message ?? "Must be at least 8 characters."}
               </span>
             </div>
 
-            {serverError && <p className="text-sm text-[#9c1d25]">{serverError}</p>}
+            {serverError && <p className="text-sm text-danger">{serverError}</p>}
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-md bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold py-2.5 hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+              className="w-full rounded-md bg-fg text-bg text-sm font-semibold py-2.5 hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
             >
               {isSubmitting ? "Creating account…" : "Sign Up"}
             </button>
 
-            <p className="text-sm text-[#b6b0a2] text-center">
+            <p className="text-sm text-fg-secondary text-center">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#ece6d8] font-medium hover:underline">
+              <Link href="/login" className="text-fg font-medium hover:underline">
                 Log in
               </Link>
             </p>

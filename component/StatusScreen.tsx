@@ -32,7 +32,7 @@ export default function StatusScreen({
 }: StatusScreenProps) {
   return (
     <div
-      className={`relative overflow-hidden bg-[#0a0a0a] flex items-center justify-center px-6 py-20 ${fullHeight ? "min-h-screen" : ""}`}
+      className={`relative overflow-hidden bg-bg flex items-center justify-center px-6 py-20 ${fullHeight ? "min-h-screen" : ""}`}
     >
       <div className="hidden sm:block">
         <MangaBackground fill />
@@ -41,10 +41,10 @@ export default function StatusScreen({
         <span className="text-8xl md:text-9xl leading-none tracking-wide text-white font-(family-name:--font-display)">
           {badge}
         </span>
-        <h1 className="text-2xl text-[#ece6d8] font-(family-name:--font-display) mt-4">{title}</h1>
-        <p className="text-sm text-[#b6b0a2] mt-3">{message}</p>
+        <h1 className="text-2xl text-fg font-(family-name:--font-display) mt-4">{title}</h1>
+        <p className="text-sm text-fg-secondary mt-3">{message}</p>
         {children && <div className="flex items-center gap-4 mt-8">{children}</div>}
-        {footnote && <p className="text-xs text-[#6b655e] mt-4">{footnote}</p>}
+        {footnote && <p className="text-xs text-fg-muted mt-4">{footnote}</p>}
       </div>
     </div>
   );

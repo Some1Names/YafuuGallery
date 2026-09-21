@@ -107,7 +107,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="self-start px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 transition-colors duration-200"
+        className="self-start px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 transition-colors duration-200"
       >
         + Create Chapter
       </button>
@@ -117,7 +117,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4"
+      className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4"
     >
       <div className="flex flex-col sm:flex-row gap-4">
         <AdminImageUploadButton
@@ -131,14 +131,14 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
         <div className="flex-1 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
                 Chapter Title
               </label>
-              <div className="flex items-stretch bg-[#0a0a0a] border border-[#050505] rounded overflow-hidden focus-within:border-[#b6b0a2] transition-colors duration-200">
+              <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
                 <select
                   value={chapterIsEx ? "ex" : "number"}
                   onChange={(e) => setChapterIsEx(e.target.value === "ex")}
-                  className="shrink-0 bg-[#0a0a0a] border-r border-[#050505] pl-3 pr-1.5 text-sm text-[#b6b0a2] focus:outline-none"
+                  className="shrink-0 bg-bg border-r border-border pl-3 pr-1.5 text-sm text-fg-secondary focus:outline-none"
                 >
                   <option value="number">#{String(totalCount + 1).padStart(3, "0")}</option>
                   <option value="ex">ex</option>
@@ -148,19 +148,19 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                   onChange={(e) => setChapterName(e.target.value)}
                   placeholder="Chapter title"
                   required
-                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none"
+                  className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="sm:w-48">
-              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
                 Arc
               </label>
               <select
                 value={arcId}
                 onChange={(e) => setArcId(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+                className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
               >
                 <option value="">No arc</option>
                 {arcs.map((a) => (
@@ -174,7 +174,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:w-40">
-              <label className="block text-[10px] uppercase tracking-widest text-[#6b655e] mb-1.5">
+              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
                 Published Date
               </label>
               <input
@@ -182,7 +182,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                 value={publishedDate}
                 onChange={(e) => setPublishedDate(e.target.value)}
                 required
-                className="w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+                className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
               />
             </div>
 
@@ -199,13 +199,13 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
         </div>
       </div>
 
-      {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-2 self-end">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+          className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
         >
           Cancel
         </button>
@@ -213,7 +213,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           type="submit"
           disabled={isSubmitting || !canSubmit}
           title={!canSubmit ? "Cover, title, date, and PDF are all required" : undefined}
-          className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+          className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Chapter"}
         </button>

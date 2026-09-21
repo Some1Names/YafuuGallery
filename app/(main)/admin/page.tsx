@@ -206,7 +206,7 @@ export default async function AdminPage() {
 
   return (
     <div
-      className="relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12"
+      className="relative min-h-screen bg-bg px-4 sm:px-6 py-12"
     >
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
@@ -214,17 +214,17 @@ export default async function AdminPage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">Admin</h1>
-          <p className="text-sm text-[#b6b0a2]">Manage manga, chapters, users, and comment moderation.</p>
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Admin</h1>
+          <p className="text-sm text-fg-secondary">Manage manga, chapters, users, and comment moderation.</p>
         </div>
 
         {/* Stats — always visible above the tabs, regardless of which
             section is open */}
         <div className="grid grid-cols-3 gap-4 mb-10">
           {stats.map((s) => (
-            <div key={s.label} className="border border-[#050505] rounded-md p-4 bg-[#1b1a1c]/60">
-              <div className="text-2xl text-[#ece6d8] font-(family-name:--font-display)">{s.value}</div>
-              <div className="text-xs text-[#b6b0a2] uppercase mt-1">{s.label}</div>
+            <div key={s.label} className="border border-border rounded-md p-4 bg-surface/60">
+              <div className="text-2xl text-fg font-(family-name:--font-display)">{s.value}</div>
+              <div className="text-xs text-fg-secondary uppercase mt-1">{s.label}</div>
             </div>
           ))}
         </div>

@@ -26,7 +26,7 @@ export default function FavoriteChapterCard({
     <div className="group relative flex flex-col gap-2">
       <Link
         href={`/viewer/${chapterId}`}
-        className="relative block w-full aspect-square rounded-lg overflow-hidden bg-[#ece6d8]"
+        className="relative block w-full aspect-square rounded-lg overflow-hidden bg-fg"
       >
         {coverImageUrl ? (
           <Image
@@ -39,16 +39,16 @@ export default function FavoriteChapterCard({
         ) : (
           <NoImagePlaceholder />
         )}
-        <div className="absolute inset-0 bg-linear-to-t from-[#1b1a1c] via-[#1b1a1c]/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/10 to-transparent" />
 
         <div className="absolute bottom-0 left-0 right-0 p-3">
-          <div className="text-[#ece6d8] text-lg font-(family-name:--font-display)">
+          <div className="text-fg text-lg font-(family-name:--font-display)">
             {formatChapterBadge(chapterIsEx, displayNumber)}
           </div>
-          <div className="text-[#ece6d8]/80 text-xs truncate">{chapterName}</div>
+          <div className="text-fg/80 text-xs truncate">{chapterName}</div>
         </div>
 
-        <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[#0a0a0a]/60 backdrop-blur-sm flex items-center justify-center">
+        <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm flex items-center justify-center">
           <ChapterFavoriteButton chapterId={chapterId} initialFavorited={true} />
         </div>
       </Link>

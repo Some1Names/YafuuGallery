@@ -50,31 +50,31 @@ export default function AdminCommentRow({
 
   return (
     <div
-      className={`border border-[#050505] rounded-md p-3 flex items-start justify-between gap-4 ${
+      className={`border border-border rounded-md p-3 flex items-start justify-between gap-4 ${
         hidden ? "opacity-50" : ""
       }`}
     >
       <div className="min-w-0">
-        <div className="text-xs text-[#b6b0a2] mb-1">
+        <div className="text-xs text-fg-secondary mb-1">
           {formatUsername(userName, userTag)} · {chapterLabel} ·{" "}
           {createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-          {hidden && <span className="text-[#9c1d25]"> · hidden</span>}
+          {hidden && <span className="text-danger"> · hidden</span>}
         </div>
-        <p className="text-sm text-[#ece6d8]">{body}</p>
+        <p className="text-sm text-fg">{body}</p>
       </div>
       <div className="flex gap-2 shrink-0">
         <button
           type="button"
           onClick={toggleHide}
           disabled={isPending}
-          className="text-xs px-3 py-1.5 border border-[#050505] rounded hover:border-[#b6b0a2] text-[#b6b0a2] hover:text-[#ece6d8] disabled:opacity-50 transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
         >
           {hidden ? "Unhide" : "Hide"}
         </button>
         <button
           type="button"
           onClick={remove}
-          className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+          className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
         >
           Delete
         </button>

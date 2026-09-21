@@ -134,25 +134,25 @@ export default function AdminPdfUploadButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-[#050505] bg-[#0a0a0a] text-left hover:border-[#b6b0a2] transition-colors duration-200 disabled:opacity-60"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-border bg-bg text-left hover:border-fg-secondary transition-colors duration-200 disabled:opacity-60"
       >
         {value ? (
           <CheckCircle2 className="w-4 h-4 text-[#4c8f5f] shrink-0" />
         ) : (
-          <FileText className="w-4 h-4 text-[#6b655e] shrink-0" />
+          <FileText className="w-4 h-4 text-fg-muted shrink-0" />
         )}
 
-        <span className="min-w-0 flex-1 text-sm text-[#ece6d8] truncate">
+        <span className="min-w-0 flex-1 text-sm text-fg truncate">
           {isUploading ? `Uploading… ${progress}%` : value ? (fileName ?? "PDF uploaded") : "No PDF uploaded"}
         </span>
 
-        <span className="text-xs text-[#b6b0a2] shrink-0">{value ? "Replace" : "Upload"}</span>
+        <span className="text-xs text-fg-secondary shrink-0">{value ? "Replace" : "Upload"}</span>
       </button>
 
       {isUploading && (
-        <div className="mt-1.5 h-1 rounded-full bg-[#0a0a0a] border border-[#050505] overflow-hidden">
+        <div className="mt-1.5 h-1 rounded-full bg-bg border border-border overflow-hidden">
           <div
-            className="h-full bg-[#ece6d8] transition-[width] duration-200"
+            className="h-full bg-fg transition-[width] duration-200"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -166,8 +166,8 @@ export default function AdminPdfUploadButton({
         className="hidden"
       />
 
-      {warning && <p className="text-xs text-[#b6b0a2] mt-1">{warning}</p>}
-      {error && <p className="text-xs text-[#9c1d25] mt-1">{error}</p>}
+      {warning && <p className="text-xs text-fg-secondary mt-1">{warning}</p>}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   );
 }

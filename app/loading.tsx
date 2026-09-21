@@ -4,8 +4,8 @@
 // loading.tsx later if it wants something more specific than this spinner.
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-      <div className="w-10 h-10 rounded-full border-2 border-[#1b1a1c] border-t-[#ece6d8] animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="w-10 h-10 rounded-full border-2 border-surface border-t-fg animate-spin" />
     </div>
   );
 }

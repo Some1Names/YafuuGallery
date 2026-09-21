@@ -185,9 +185,9 @@ export default function AdminMangaRow({
           e.preventDefault();
           save();
         }}
-        className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4"
+        className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4"
       >
-        <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Edit Manga Title</h3>
+        <h3 className="text-lg text-fg font-(family-name:--font-display)">Edit Manga Title</h3>
 
         {/* Same layout as the create form — one shared grid, 3fr:16fr
             columns, label/field rows col-span the full row on mobile */}
@@ -207,17 +207,17 @@ export default function AdminMangaRow({
             aspectRatio={32 / 9}
           />
 
-          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
             Manga Title
           </label>
           <input
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             required
-            className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8]"
+            className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
           />
 
-          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
             Synopsis
           </label>
           <textarea
@@ -225,7 +225,7 @@ export default function AdminMangaRow({
             onChange={(e) => setEditSynopsis(e.target.value)}
             required
             rows={3}
-            className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] resize-none"
+            className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg resize-none"
           />
         </div>
 
@@ -233,14 +233,14 @@ export default function AdminMangaRow({
           <button
             type="button"
             onClick={onToggleEdit}
-            className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+            className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+            className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
           >
             {isSaving ? "Saving…" : "Save"}
           </button>
@@ -250,7 +250,7 @@ export default function AdminMangaRow({
   }
 
   return (
-    <div className="border border-[#050505] rounded-md bg-[#1b1a1c] overflow-hidden">
+    <div className="border border-border rounded-md bg-surface overflow-hidden">
       {/* Cover — fixed at the site's standard manga-poster ratio (2:3, same
           as MangaCard and the cover uploaders) instead of stretching to
           match the content column's height. A stretched box meant a short
@@ -260,7 +260,7 @@ export default function AdminMangaRow({
           its own proportions (letterboxed on the container's bg) rather
           than cropping/zooming it like object-cover would. */}
       <div className="flex">
-        <div className="relative w-24 sm:w-32 aspect-2/3 shrink-0 self-start bg-[#0a0a0a]">
+        <div className="relative w-24 sm:w-32 aspect-2/3 shrink-0 self-start bg-bg">
           {coverImageUrl ? (
             <Image src={coverImageUrl} alt="" fill sizes="128px" className="object-contain" />
           ) : (
@@ -277,11 +277,11 @@ export default function AdminMangaRow({
               collapsed it to nothing rather than actually shrinking it. */}
           <div className="p-4 sm:p-8 flex-1 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
-              <Link href={`/manga/titles/${id}`} className="block text-lg text-[#ece6d8] hover:underline font-medium truncate">
+              <Link href={`/manga/titles/${id}`} className="block text-lg text-fg hover:underline font-medium truncate">
                 {title}
               </Link>
-              <p className="text-sm text-[#b6b0a2] mt-0.5 truncate">{authorName}</p>
-              <div className="flex items-center gap-4 mt-2 text-xs text-[#6b655e]">
+              <p className="text-sm text-fg-secondary mt-0.5 truncate">{authorName}</p>
+              <div className="flex items-center gap-4 mt-2 text-xs text-fg-muted">
                 <span className="flex items-center gap-1">
                   <Eye className="w-3.5 h-3.5" />
                   {viewCount.toLocaleString()}
@@ -307,8 +307,8 @@ export default function AdminMangaRow({
                   title={isFeatured ? "Remove from home page carousel" : "Add to home page carousel"}
                   className={`flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded transition-colors duration-200 disabled:opacity-50 ${
                     isFeatured
-                      ? "border-[#ece6d8]/50 text-[#ece6d8] bg-[#ece6d8]/10 hover:bg-[#ece6d8]/15"
-                      : "border-[#050505] text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2]"
+                      ? "border-fg/50 text-fg bg-fg/10 hover:bg-fg/15"
+                      : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary"
                   }`}
                 >
                   <Star className={`w-3.5 h-3.5 ${isFeatured ? "fill-current" : ""}`} />
@@ -317,13 +317,13 @@ export default function AdminMangaRow({
               )}
               <button
                 onClick={onToggleEdit}
-                className="text-xs px-3 py-1.5 border border-[#050505] rounded text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+                className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
               >
                 Edit
               </button>
               <button
                 onClick={remove}
-                className="text-xs px-3 py-1.5 border border-[#9c1d25]/50 rounded text-[#9c1d25] hover:bg-[#9c1d25]/10 transition-colors duration-200"
+                className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
               >
                 Delete
               </button>
@@ -335,19 +335,19 @@ export default function AdminMangaRow({
               picking a tab opens the row to that section, and each tab
               carries its own chevron (rotated when it's the open, active
               one) instead of one shared toggle. */}
-          <div className="px-8 py-3 border-t border-[#050505] flex items-center gap-1">
+          <div className="px-8 py-3 border-t border-border flex items-center gap-1">
             <button
               type="button"
               onClick={() => handleTabClick("arc")}
               aria-expanded={isExpanded && activeSection === "arc"}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
                 isExpanded && activeSection === "arc"
-                  ? "bg-[#232224] text-[#ece6d8]"
-                  : "text-[#b6b0a2] hover:text-[#ece6d8]"
+                  ? "bg-surface-hover text-fg"
+                  : "text-fg-secondary hover:text-fg"
               }`}
             >
               Arc
-              <span className="text-xs text-[#6b655e]">{arcs.length}</span>
+              <span className="text-xs text-fg-muted">{arcs.length}</span>
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform duration-200 ${
                   isExpanded && activeSection === "arc" ? "rotate-180" : ""
@@ -360,12 +360,12 @@ export default function AdminMangaRow({
               aria-expanded={isExpanded && activeSection === "chapters"}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
                 isExpanded && activeSection === "chapters"
-                  ? "bg-[#232224] text-[#ece6d8]"
-                  : "text-[#b6b0a2] hover:text-[#ece6d8]"
+                  ? "bg-surface-hover text-fg"
+                  : "text-fg-secondary hover:text-fg"
               }`}
             >
               Chapters
-              <span className="text-xs text-[#6b655e]">{chapters.length}</span>
+              <span className="text-xs text-fg-muted">{chapters.length}</span>
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform duration-200 ${
                   isExpanded && activeSection === "chapters" ? "rotate-180" : ""
@@ -377,7 +377,7 @@ export default function AdminMangaRow({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-[#050505] p-12 flex flex-col gap-4 bg-[#0a0a0a]/40">
+        <div className="border-t border-border p-12 flex flex-col gap-4 bg-bg/40">
           {activeSection === "arc" && (
             <div className="flex flex-col gap-4">
               <AdminArcCreateForm

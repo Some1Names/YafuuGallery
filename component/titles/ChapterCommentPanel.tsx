@@ -152,17 +152,17 @@ export default function ChapterCommentPanel({
       {isOpen && <div className="fixed inset-0 z-40 bg-black/50 sm:hidden" onClick={onClose} />}
 
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-[#1b1a1c] border-l border-[#050505] flex flex-col transition-transform duration-300 motion-reduce:transition-none ${
+        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-surface border-l border-border flex flex-col transition-transform duration-300 motion-reduce:transition-none ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-4 h-16 border-b border-[#050505] shrink-0">
-          <h2 className="text-sm font-semibold text-[#ece6d8] uppercase tracking-wide">Comments</h2>
+        <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
+          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide">Comments</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close comments"
-            className="p-1.5 text-[#b6b0a2] hover:text-[#ece6d8] transition-colors duration-200"
+            className="p-1.5 text-fg-secondary hover:text-fg transition-colors duration-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -170,36 +170,36 @@ export default function ChapterCommentPanel({
 
         <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
           {comments === null ? (
-            <p className="text-sm text-[#6b655e] text-center py-8">Loading comments…</p>
+            <p className="text-sm text-fg-muted text-center py-8">Loading comments…</p>
           ) : comments.length === 0 ? (
-            <p className="text-sm text-[#6b655e] text-center py-8">
+            <p className="text-sm text-fg-muted text-center py-8">
               No comments yet — be the first to say something.
             </p>
           ) : (
             comments.map((c) => (
               <div key={c.id} className="flex gap-2.5">
-                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-[#0a0a0a] border border-[#050505] flex items-center justify-center shrink-0">
+                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-bg border border-border flex items-center justify-center shrink-0">
                   {c.user.image ? (
                     <Image src={c.user.image} alt={c.user.name ?? "User"} fill sizes="32px" className="object-cover" />
                   ) : (
-                    <span className="text-xs text-[#ece6d8]">{(c.user.name ?? "?").charAt(0).toUpperCase()}</span>
+                    <span className="text-xs text-fg">{(c.user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm text-[#ece6d8] font-medium truncate">
+                    <span className="text-sm text-fg font-medium truncate">
                       {formatUsername(c.user.name, c.user.tag)}
                     </span>
-                    <span className="text-xs text-[#6b655e] shrink-0">{timeAgo(new Date(c.created_at))}</span>
+                    <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at))}</span>
                   </div>
-                  <p className="text-sm text-[#b6b0a2] whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
+                  <p className="text-sm text-fg-secondary whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
                   <button
                     type="button"
                     onClick={() => toggleLike(c)}
                     aria-pressed={c.likedByMe}
                     aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
                     className={`flex items-center gap-1 mt-1 text-xs transition-colors duration-200 ${
-                      c.likedByMe ? "text-[#9c1d25]" : "text-[#6b655e] hover:text-[#b6b0a2]"
+                      c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
                     }`}
                   >
                     <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
@@ -211,8 +211,8 @@ export default function ChapterCommentPanel({
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-[#050505] p-3 shrink-0">
-          {error && <p className="text-xs text-[#9c1d25] mb-2">{error}</p>}
+        <form onSubmit={handleSubmit} className="border-t border-border p-3 shrink-0">
+          {error && <p className="text-xs text-danger mb-2">{error}</p>}
           <div className="flex items-end gap-2">
             <textarea
               value={draft}
@@ -221,13 +221,13 @@ export default function ChapterCommentPanel({
               placeholder="Add a comment… (Enter to send, Shift+Enter for a new line)"
               rows={3}
               maxLength={MAX_BODY_LENGTH}
-              className="flex-1 min-w-0 resize-none bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] focus:outline-none focus:border-[#b6b0a2] transition-colors duration-200"
+              className="flex-1 min-w-0 resize-none bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-fg-secondary transition-colors duration-200"
             />
             <button
               type="submit"
               disabled={!draft.trim() || isSubmitting}
               aria-label="Post comment"
-              className="shrink-0 p-2.5 bg-[#ece6d8] text-[#0a0a0a] rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-40 transition-colors duration-200"
+              className="shrink-0 p-2.5 bg-fg text-bg rounded-md hover:bg-fg/85 disabled:opacity-40 transition-colors duration-200"
             >
               <Send className="w-4 h-4" />
             </button>

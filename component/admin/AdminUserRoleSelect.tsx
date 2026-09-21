@@ -33,7 +33,7 @@ export default function AdminUserRoleSelect({ userId, currentRole }: AdminUserRo
       value={role}
       disabled={isPending}
       onChange={(e) => handleChange(e.target.value as Role)}
-      className="bg-[#1b1a1c] border border-[#050505] rounded px-2 py-1 text-sm text-[#ece6d8] disabled:opacity-50"
+      className="bg-surface border border-border rounded px-2 py-1 text-sm text-fg disabled:opacity-50"
     >
       <option value="reader">Reader</option>
       <option value="author">Author</option>

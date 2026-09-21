@@ -75,7 +75,7 @@ export default function MangaCreateForm() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="mb-6 px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 transition-colors duration-200"
+        className="mb-6 px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 transition-colors duration-200"
       >
         + Create Manga
       </button>
@@ -83,8 +83,8 @@ export default function MangaCreateForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-[#050505] rounded-md p-12 bg-[#1b1a1c] flex flex-col gap-4 mb-6">
-      <h3 className="text-lg text-[#ece6d8] font-(family-name:--font-display)">Add New Manga Title</h3>
+    <form onSubmit={handleSubmit} className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4 mb-6">
+      <h3 className="text-lg text-fg font-(family-name:--font-display)">Add New Manga Title</h3>
 
       {/* One shared grid for the whole body instead of two separate grids
           with matching-by-hand column templates/gaps — change gap-x/the
@@ -114,7 +114,7 @@ export default function MangaCreateForm() {
           aspectRatio={32 / 9}
         />
 
-        <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+        <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
           Manga Title
         </label>
         <input
@@ -122,10 +122,10 @@ export default function MangaCreateForm() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Manga title"
           required
-          className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e]"
+          className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted"
         />
 
-        <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-[#6b655e] sm:pt-2">
+        <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
           Synopsis
         </label>
         <textarea
@@ -134,17 +134,17 @@ export default function MangaCreateForm() {
           placeholder="Synopsis"
           required
           rows={3}
-          className="col-span-2 sm:col-span-1 w-full bg-[#0a0a0a] border border-[#050505] rounded px-3 py-2 text-sm text-[#ece6d8] placeholder:text-[#6b655e] resize-none"
+          className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted resize-none"
         />
       </div>
 
-      {error && <p className="text-sm text-[#9c1d25]">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <div className="flex gap-2 self-end">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 border border-[#050505] rounded-md text-sm text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
+          className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
         >
           Cancel
         </button>
@@ -152,7 +152,7 @@ export default function MangaCreateForm() {
           type="submit"
           disabled={isSubmitting || !canSubmit}
           title={!canSubmit ? "Cover, banner, title, and synopsis are all required" : undefined}
-          className="px-4 py-2 bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold rounded-md hover:bg-[#ece6d8]/85 disabled:opacity-50 transition-colors duration-200"
+          className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Manga"}
         </button>

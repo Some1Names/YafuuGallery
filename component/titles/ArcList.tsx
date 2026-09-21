@@ -8,7 +8,7 @@ interface ArcListProps {
 
 export default function ArcList({ arcs, onSelectArc }: ArcListProps) {
   if (arcs.length === 0) {
-    return <p className="text-sm text-[#b6b0a2]">No arcs yet.</p>;
+    return <p className="text-sm text-fg-secondary">No arcs yet.</p>;
   }
 
   return (

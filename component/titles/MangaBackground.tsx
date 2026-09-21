@@ -26,7 +26,7 @@ export default function MangaBackground({ imageUrl = "/mangabg.png", fill = fals
         style={{ backgroundImage: `url('${imageUrl}')` }}
       />
       <div className="absolute inset-0 bg-black/55" />
-      <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-bg via-bg to-transparent" />
     </div>
   );
 }

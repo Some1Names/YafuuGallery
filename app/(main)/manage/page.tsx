@@ -92,15 +92,15 @@ export default async function ManageMangaPage() {
   }));
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a] px-4 sm:px-6 py-12">
+    <div className="relative min-h-screen bg-bg px-4 sm:px-6 py-12">
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
       </div>
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-[#ece6d8] font-(family-name:--font-display) mb-2">Manage Manga</h1>
-          <p className="text-sm text-[#b6b0a2]">Create and manage your own manga, arcs, and chapters.</p>
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Manage Manga</h1>
+          <p className="text-sm text-fg-secondary">Create and manage your own manga, arcs, and chapters.</p>
         </div>
 
         <ManageMangaDashboard
