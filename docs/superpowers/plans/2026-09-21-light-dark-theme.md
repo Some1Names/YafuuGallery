@@ -566,13 +566,13 @@ to:
 
 - [ ] **Step 3: Give the auth pages' decorative panel a light-mode gradient**
 
-In each of `app/(fullscreen)/login/page.tsx`, `signup/page.tsx`, `forgot-password/page.tsx`, `reset-password/page.tsx`, find the left-panel gradient:
+In each of `app/(fullscreen)/login/page.tsx`, `signup/page.tsx`, `forgot-password/page.tsx`, `reset-password/page.tsx`, find the left-panel gradient. Note: Task 4's script already converted this line's `to-[#0a0a0a]` segment to `to-bg` (`0a0a0a` is in the script's lookup table; `1e1213`/`121113` are not), so by this point in the file it reads:
 
 ```tsx
-bg-linear-to-b from-[#1e1213] via-[#121113] to-[#0a0a0a]
+bg-linear-to-b from-[#1e1213] via-[#121113] to-bg
 ```
 
-and change it to:
+Change it to:
 
 ```tsx
 bg-linear-to-b from-auth-panel-from via-auth-panel-via to-bg
