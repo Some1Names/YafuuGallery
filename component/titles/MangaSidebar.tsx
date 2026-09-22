@@ -20,7 +20,7 @@ export default function MangaSidebar({ mangaId, title, author, synopsis, isFavor
         <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />
       </div>
 
-      <div className="w-full h-px bg-white/20 my-6 sm:my-8" />
+      <div className="w-full h-px bg-border my-6 sm:my-8" />
 
       <p className="text-base leading-relaxed text-fg/90">{synopsis}</p>
     </div>

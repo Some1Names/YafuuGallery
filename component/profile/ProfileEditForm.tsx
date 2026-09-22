@@ -180,7 +180,7 @@ export default function ProfileEditForm({
           )}
 
           {/* Hover overlay */}
-          <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-fg transition-opacity duration-200">
+          <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-white transition-opacity duration-200">
             {isUploading ? "Uploading…" : "Change"}
           </span>
         </button>
