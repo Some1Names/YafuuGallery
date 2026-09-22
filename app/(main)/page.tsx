@@ -114,7 +114,7 @@ export default async function BrowsePage() {
             <div className="max-w-350 mx-auto">
               <div className="mb-6 sm:mb-8">
                 <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
-                <h2 className="text-2xl sm:text-3xl text-white font-bold">Continue Reading</h2>
+                <h2 className="text-2xl sm:text-3xl text-fg font-bold">Continue Reading</h2>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
@@ -145,7 +145,7 @@ export default async function BrowsePage() {
                 RECENTLY UPDATED
               </p>
 
-              <h2 className="text-2xl sm:text-3xl text-white font-bold">
+              <h2 className="text-2xl sm:text-3xl text-fg font-bold">
                 Latest Manga
               </h2>
             </div>

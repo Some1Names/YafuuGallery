@@ -298,7 +298,7 @@ export default function ProfileEditForm({
             const className = `sm:flex-1 sm:px-4 sm:first:pl-0 ${i > 0 ? "sm:border-l sm:border-border" : ""}`;
             const inner = (
               <>
-                <p className="text-2xl text-fg group-hover:text-white font-(family-name:--font-display) transition-colors duration-200">
+                <p className="text-2xl text-fg group-hover:text-fg-hover font-(family-name:--font-display) transition-colors duration-200">
                   {s.value}
                 </p>
                 <p className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-fg-muted group-hover:text-fg-secondary mt-1 transition-colors duration-200">

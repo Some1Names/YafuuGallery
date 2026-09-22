@@ -163,7 +163,7 @@ export default async function FavoritesPage({
               <div key={group.mangaId}>
                 <Link
                   href={`/manga/titles/${group.mangaId}`}
-                  className="inline-block text-xl text-fg hover:text-white font-(family-name:--font-display) mb-4 transition-colors duration-200"
+                  className="inline-block text-xl text-fg hover:text-fg-hover font-(family-name:--font-display) mb-4 transition-colors duration-200"
                 >
                   {group.mangaTitle}
                 </Link>

@@ -61,7 +61,7 @@ export default function MangaFavoriteButton({
         aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         className={
           "text-sm transition-colors duration-200 disabled:opacity-50 " +
-          (favorited ? "text-danger" : "text-white hover:text-danger")
+          (favorited ? "text-danger" : "text-fg hover:text-danger")
         }
       >
         {favorited ? "❤" : "❤︎"}
