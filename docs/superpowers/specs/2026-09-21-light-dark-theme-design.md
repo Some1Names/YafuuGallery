@@ -2,7 +2,13 @@
 
 ## Goal
 
-Add a user-toggleable light/dark theme to YafuuGallery. Dark is the default and matches the site's current look exactly (zero visual change for anyone who never touches the toggle). Light is an opt-in alternate palette.
+Add a user-toggleable light/dark theme to YafuuGallery. Dark is the default and matches the site's current look almost exactly (see the documented exceptions below) for anyone who never touches the toggle. Light is an opt-in alternate palette.
+
+**Addendum (post-implementation, added after the final whole-branch review flagged the original "matches...exactly" wording as self-contradicting the consolidations this same spec calls for):** dark mode is pixel-identical *except* for a small number of deliberate consolidations decided during design/planning, not implementation drift:
+- Three near-identical dark-mode hover-text hex variants (`#f6f1f2`/`#f2f0f2`/`#f2f0f0`) were consolidated into one `--color-fg-hover` value — sub-perceptual.
+- One near-duplicate hover-surface variant (`#2a292c` in `ProfileEditForm.tsx`) was folded into the existing `--color-surface-hover` token — sub-perceptual.
+- `AdminPdfUploadButton`'s dimmer success-green icon (`#4c8f5f`) became `text-success/70` (an opacity modifier on the shared success token) rather than a second hardcoded hex — a small, deliberate, perceptible shift in that one icon's exact shade, traded for not inventing a second green token.
+Everything else in dark mode is byte-identical to the pre-theme hex values.
 
 ## Scope decisions (confirmed with user)
 
@@ -63,6 +69,19 @@ Handled as one-off exceptions during implementation rather than folded into the 
 | `--color-texture` | `#ddd5c4` | |
 
 These are first-pass values, to be checked for real contrast (and adjusted live in the browser, not just eyeballed as hex) during implementation — this table is a starting point, not a final spec of exact pixels.
+
+**Addendum (post-implementation): contrast check results.** The final whole-branch review measured WCAG contrast ratios for these values against `--color-bg` and `--color-surface`:
+
+| Pair | Dark ratio | Light ratio | AA (4.5:1) |
+|---|---|---|---|
+| `fg` on `bg` | 15.91:1 | 13.61:1 | both pass |
+| `fg` on `surface` | 13.93:1 | 15.65:1 | both pass |
+| `fg-secondary` on `bg` | 9.16:1 | 5.18:1 | both pass |
+| `fg-secondary` on `surface` | 8.03:1 | 5.96:1 | both pass |
+| `fg-muted` on `bg` | 3.44:1 | 2.97:1 | both fail |
+| `fg-muted` on `surface` | 3.01:1 | 3.41:1 | both fail |
+
+`fg-muted` fails AA against both backgrounds in *both* themes — but this is a pre-existing property of the site's muted-text color that predates this feature (82 occurrences across the codebase use it), not something the light palette introduced or worsened. The light values closely mirror dark mode's own contrast profile rather than guessing independently, which was the actual goal of this check. Fixing `fg-muted`'s contrast site-wide is a separate, unrelated task, not part of this theme feature.
 
 ## Toggle mechanism
 
