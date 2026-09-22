@@ -30,7 +30,7 @@ html.light {
   --color-fg: #241f19;
   --color-fg-hover: #0f0c09;
   --color-fg-secondary: #6b5f4f;
-  --color-fg-muted: #8f8776;
+  --color-fg-muted: #6e6656;
   --color-texture: #ddd5c4;
   --color-auth-panel-from: #f7f4ec;
   --color-auth-panel-via: #f2ede2;
@@ -60,6 +60,15 @@ html.light {
 
 body {
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* The wordmark (Navbar) is a flat light-gray raster image drawn for the
+   dark navbar — on the light navbar it has almost no contrast against the
+   near-white background. Inverting it in light mode flips the same flat
+   tone dark, which reads cleanly since the mark has no other color to
+   distort. */
+html.light .site-wordmark {
+  filter: invert(1);
 }
 
 /* Fill animation for the featured carousel's active dot — shows how much
