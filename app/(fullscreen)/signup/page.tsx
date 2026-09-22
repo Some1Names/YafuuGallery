@@ -70,7 +70,7 @@ export default function SignUpPage() {
           <button
             type="button"
             onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
-            className="w-full flex items-center justify-center gap-2 border border-border bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-2 border border-google-border bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
           >
             <GoogleIcon />
             Continue with Google

@@ -3,15 +3,14 @@ export type Theme = "light" | "dark";
 const STORAGE_KEY = "theme";
 const listeners = new Set<() => void>();
 
-export function getStoredTheme(): Theme | null {
-  if (typeof window === "undefined") return null;
-  const value = window.localStorage.getItem(STORAGE_KEY);
-  return value === "light" || value === "dark" ? value : null;
-}
-
 export function setTheme(theme: Theme): void {
-  window.localStorage.setItem(STORAGE_KEY, theme);
   document.documentElement.classList.toggle("light", theme === "light");
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // Storage blocked (privacy mode / disabled storage) — the theme still
+    // applies for this page's lifetime, it just won't survive a reload.
+  }
   listeners.forEach((listener) => listener());
 }
 

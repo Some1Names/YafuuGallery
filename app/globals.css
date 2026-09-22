@@ -16,6 +16,9 @@
   --color-warning: #c9a648;
   --color-auth-panel-from: #1e1213;
   --color-auth-panel-via: #121113;
+  --color-google-border: #2a2a2a;
+
+  color-scheme: dark;
 }
 
 html.light {
@@ -31,6 +34,9 @@ html.light {
   --color-texture: #ddd5c4;
   --color-auth-panel-from: #f7f4ec;
   --color-auth-panel-via: #f2ede2;
+  --color-google-border: #e4ddd0; /* same as --color-border's light value — a standard border already reads fine against the light surface here, unlike dark mode where the highlight effect matters */
+
+  color-scheme: light;
 }
 
 @theme inline {
@@ -49,6 +55,7 @@ html.light {
   --color-warning: var(--color-warning);
   --color-auth-panel-from: var(--color-auth-panel-from);
   --color-auth-panel-via: var(--color-auth-panel-via);
+  --color-google-border: var(--color-google-border);
 }
 
 body {

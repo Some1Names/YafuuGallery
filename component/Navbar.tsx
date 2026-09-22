@@ -256,9 +256,7 @@ export default function Navbar({ user }: NavbarProps) {
               role="menu"
               className="absolute right-0 top-full mt-2 w-44 flex flex-col bg-surface border border-border rounded-md shadow-lg overflow-hidden"
             >
-              <div className="flex items-center justify-center px-4 py-2.5 border-b border-border">
-                <ThemeToggle />
-              </div>
+              <ThemeToggle variant="menuitem" />
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
