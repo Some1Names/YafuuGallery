@@ -99,8 +99,8 @@ export default async function ManageMangaPage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Manage Manga</h1>
-          <p className="text-sm text-fg-secondary">Create and manage your own manga, arcs, and chapters.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Manage Manga</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">Create and manage your own manga, arcs, and chapters.</p>
         </div>
 
         <ManageMangaDashboard

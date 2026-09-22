@@ -102,10 +102,10 @@ export default async function FavoritesPage({
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">
             Favorites
           </h1>
-          <p className="text-sm text-fg-secondary">
+          <p className="text-sm text-fg-secondary sm:text-white/70">
             Manga and chapters you&apos;ve bookmarked, all in one place.
           </p>
         </div>

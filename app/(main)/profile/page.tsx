@@ -46,8 +46,8 @@ export default async function ProfilePage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Profile</h1>
-          <p className="text-sm text-fg-secondary">Manage your account and see your activity.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Profile</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">Manage your account and see your activity.</p>
         </div>
 
         {/* Identity + edit form — no padding here so the avatar can bleed

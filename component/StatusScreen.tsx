@@ -41,8 +41,8 @@ export default function StatusScreen({
         <span className="text-8xl md:text-9xl leading-none tracking-wide text-white font-(family-name:--font-display)">
           {badge}
         </span>
-        <h1 className="text-2xl text-fg font-(family-name:--font-display) mt-4">{title}</h1>
-        <p className="text-sm text-fg-secondary mt-3">{message}</p>
+        <h1 className="text-2xl text-fg sm:text-white font-(family-name:--font-display) mt-4">{title}</h1>
+        <p className="text-sm text-fg-secondary sm:text-white/70 mt-3">{message}</p>
         {children && <div className="flex items-center gap-4 mt-8">{children}</div>}
         {footnote && <p className="text-xs text-fg-muted mt-4">{footnote}</p>}
       </div>

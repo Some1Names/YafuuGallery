@@ -214,8 +214,8 @@ export default async function AdminPage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">Admin</h1>
-          <p className="text-sm text-fg-secondary">Manage manga, chapters, users, and comment moderation.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Admin</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">Manage manga, chapters, users, and comment moderation.</p>
         </div>
 
         {/* Stats — always visible above the tabs, regardless of which
