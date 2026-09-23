@@ -211,7 +211,13 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       // Either way, a longer title or synopsis on one slide no longer
       // resizes the whole hero as the carousel advances — content is
       // centered inside it instead.
-      className="relative h-100 sm:h-auto sm:aspect-32/9 sm:min-h-95 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
+      //
+      // w-full is load-bearing: with width left auto, the browser transfers
+      // min-h-95 through the 32:9 ratio into a ~1351px minimum width, which
+      // overflowed the page (horizontal scrollbar) on any viewport narrower
+      // than that. An explicit width keeps the box at the container width
+      // and lets min-h-95 just stretch the height instead.
+      className="relative w-full h-100 sm:h-auto sm:aspect-32/9 sm:min-h-95 max-w-350 mx-auto flex items-center px-6 md:px-8 rounded-none sm:rounded-lg shadow-none sm:shadow-lg overflow-hidden touch-pan-y"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
