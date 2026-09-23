@@ -12,18 +12,6 @@ export default function Footer() {
 
   return (
     <footer className="mt-20 bg-nav">
-      {/* Panel gutter: the screentone dot texture from NoImagePlaceholder,
-          reused here as the seam between page and footer — manga panels
-          are separated by screentone-filled gutters, not blank rules. */}
-      <div
-        className="h-2"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          backgroundImage: "radial-gradient(circle, var(--color-texture) 1px, transparent 1.5px)",
-          backgroundSize: "8px 8px",
-        }}
-      />
-
       <div className="max-w-350 mx-auto px-6 md:px-8 py-12 flex flex-col gap-10 sm:grid sm:grid-cols-[1.5fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2">
