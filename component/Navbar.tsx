@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Home, Heart, User, LogOut, UserPlus, Search } from "lucide-react";
+import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
 import ThemeToggle from "@/component/ThemeToggle";
@@ -22,6 +22,21 @@ const navItems = [
   { href: "/favorites", label: "Favorites", icon: Heart },
 ];
 
+// Dropdown rows match the bar's plain style: no hover/active background
+// boxes, just text brightening on hover, and the current page marked by
+// the same 2px ink bar the desktop links use — here on the row's left
+// edge instead of underneath.
+function menuItemClass(isActive = false) {
+  return (
+    "relative flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors duration-200 " +
+    (isActive ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
+  );
+}
+
+function ActiveBar() {
+  return <span aria-hidden="true" className="absolute left-0 inset-y-2 w-0.5 bg-fg" />;
+}
+
 export default function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -30,6 +45,8 @@ export default function Navbar({ user }: NavbarProps) {
   const [isHidden, setIsHidden] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const accountMenuButtonRef = useRef<HTMLButtonElement>(null);
   const lastScrollY = useRef(0);
 
   const handleSignOut = () => {
@@ -38,6 +55,11 @@ export default function Navbar({ user }: NavbarProps) {
     });
   };
 
+  // The dropdowns are disclosure panels (a button toggling a plain list of
+  // links), not ARIA menus — so no role="menu" promising arrow-key
+  // navigation. They close on an outside click or Escape; Escape also
+  // returns focus to the toggle so keyboard users aren't dropped at the
+  // top of the page.
   useEffect(() => {
     if (!isMenuOpen) return;
     const onClickOutside = (e: MouseEvent) => {
@@ -45,8 +67,18 @@ export default function Navbar({ user }: NavbarProps) {
         setIsMenuOpen(false);
       }
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
     document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isMenuOpen]);
 
   useEffect(() => {
@@ -56,15 +88,30 @@ export default function Navbar({ user }: NavbarProps) {
         setIsAccountMenuOpen(false);
       }
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsAccountMenuOpen(false);
+        accountMenuButtonRef.current?.focus();
+      }
+    };
     document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isAccountMenuOpen]);
 
-  // close menus automatically on route change
-  useEffect(() => {
+  // Close menus automatically on route change. Done during render (React's
+  // "adjusting state when a prop changes" pattern) rather than in an
+  // effect, which would paint one frame with the menu still open and then
+  // re-render to close it.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setIsMenuOpen(false);
     setIsAccountMenuOpen(false);
-  }, [pathname]);
+  }
 
   // mobile-only auto-hide: slide the navbar away on scroll-down, bring it
   // back on scroll-up (or near the top), so it doesn't eat screen space on
@@ -102,60 +149,72 @@ export default function Navbar({ user }: NavbarProps) {
       }
     >
       <div className="max-w-350 mx-auto px-4 md:px-8 h-16 md:h-18 flex items-center justify-between">
-        {/* Wordmark */}
-        <Link href="/" className="shrink-0">
-          <Image
-            src="/¥afuuGallery.webp"
-            alt="YafuuGallery"
-            width={1529}
-            height={281}
-            priority
-            className="site-wordmark h-5 md:h-9 w-auto mt-1.5"
-          />
-        </Link>
+        {/* Left: wordmark, then the primary page links (desktop). The link
+            row stretches to the full bar height so the active link's ink
+            bar can sit exactly on the nav's bottom border. */}
+        <div className="flex items-center gap-6 lg:gap-10 self-stretch">
+          <Link href="/" className="shrink-0">
+            <Image
+              src="/¥afuuGallery.webp"
+              alt="YafuuGallery"
+              width={1529}
+              height={281}
+              priority
+              className="site-wordmark h-5 md:h-9 w-auto mt-1.5"
+            />
+          </Link>
 
-        {/* Desktop: inline nav links + profile/sign up, unchanged */}
-        <div className="hidden md:flex items-center gap-8">
-          <ThemeToggle />
+          <div className="hidden md:flex self-stretch">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={
+                    "relative flex items-center px-3 text-sm transition-colors duration-200 " +
+                    (isActive ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
+                  }
+                >
+                  {item.label}
+                  {/* -bottom-0.5 overlaps the nav's border-b-2 exactly */}
+                  {isActive && (
+                    <span aria-hidden="true" className="absolute inset-x-3 -bottom-0.5 h-0.5 bg-fg" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right (desktop): search, theme, account */}
+        <div className="hidden md:flex items-center gap-2">
           <Link
             href="/search"
             aria-label="Search"
             className={
-              "transition-colors duration-200 " +
+              "w-9 h-9 flex items-center justify-center transition-colors duration-200 " +
               (pathname === "/search" ? "text-fg" : "text-fg-secondary hover:text-fg")
             }
           >
             <Search className="w-4 h-4" />
           </Link>
 
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  "text-sm transition-colors duration-200 " +
-                  (isActive ? "text-fg" : "text-fg-secondary hover:text-fg")
-                }
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          <ThemeToggle />
 
           {user ? (
             <div className="relative" ref={accountMenuRef}>
               <button
+                ref={accountMenuButtonRef}
                 type="button"
                 onClick={() => setIsAccountMenuOpen((v) => !v)}
                 aria-expanded={isAccountMenuOpen}
-                aria-haspopup="menu"
                 className={
-                  "flex items-center gap-2 text-sm transition-colors duration-200 " +
+                  "flex items-center gap-2 h-9 pl-1 pr-2.5 ml-1 rounded-md text-sm transition-colors duration-200 " +
                   (pathname === "/profile" || isAccountMenuOpen
-                    ? "text-fg"
-                    : "text-fg-secondary hover:text-fg")
+                    ? "text-fg bg-surface-hover"
+                    : "text-fg-secondary hover:text-fg hover:bg-surface-hover")
                 }
               >
                 <span className="relative w-7 h-7 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
@@ -181,25 +240,21 @@ export default function Navbar({ user }: NavbarProps) {
 
               {isAccountMenuOpen && (
                 <div
-                  role="menu"
-                  className="absolute right-0 top-full mt-2 w-44 bg-surface border border-border rounded-md shadow-lg overflow-hidden"
+                  className="absolute right-0 top-full mt-2 w-44 py-1.5 bg-surface border border-border rounded-md shadow-lg overflow-hidden"
                 >
                   <Link
                     href="/profile"
-                    role="menuitem"
-                    className={
-                      "block px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (pathname === "/profile" ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
-                    }
+                    aria-current={pathname === "/profile" ? "page" : undefined}
+                    className={menuItemClass(pathname === "/profile")}
                   >
+                    {pathname === "/profile" && <ActiveBar />}
                     Profile
                   </Link>
-                  <div className="border-t border-border" />
+                  <div className="my-1.5 border-t border-border" />
                   <button
                     type="button"
-                    role="menuitem"
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-2.5 text-sm text-fg-secondary hover:bg-surface-hover hover:text-fg transition-colors duration-200"
+                    className={menuItemClass()}
                   >
                     Sign out
                   </button>
@@ -207,12 +262,20 @@ export default function Navbar({ user }: NavbarProps) {
               )}
             </div>
           ) : (
-            <Link
-              href="/signup"
-              className="text-sm px-3 py-1.5 bg-white hover:bg-white/80 border border-border rounded text-black transition-colors duration-200"
-            >
-              Sign up
-            </Link>
+            <>
+              <Link
+                href="/login"
+                className="flex items-center h-9 px-3 ml-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="flex items-center h-9 px-4 rounded-md bg-fg text-bg text-sm font-medium hover:bg-fg-hover transition-colors duration-200"
+              >
+                Sign up
+              </Link>
+            </>
           )}
         </div>
 
@@ -229,12 +292,12 @@ export default function Navbar({ user }: NavbarProps) {
 
           <div className="relative" ref={menuRef}>
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setIsMenuOpen((v) => !v)}
               aria-expanded={isMenuOpen}
-              aria-haspopup="menu"
-              aria-label="Open menu"
-              className="flex items-center gap-1"
+              aria-label="Menu"
+              className="group flex items-center gap-1"
             >
               {user ? (
                 <span className="relative w-8 h-8 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
@@ -245,7 +308,7 @@ export default function Navbar({ user }: NavbarProps) {
                   )}
                 </span>
               ) : (
-                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-fg-secondary">
+                <span className="w-8 h-8 flex items-center justify-center text-fg-secondary group-hover:text-fg transition-colors duration-200">
                   {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 </span>
               )}
@@ -253,10 +316,12 @@ export default function Navbar({ user }: NavbarProps) {
 
             {isMenuOpen && (
             <div
-              role="menu"
-              className="absolute right-0 top-full mt-2 w-44 flex flex-col bg-surface border border-border rounded-md shadow-lg overflow-hidden"
+              className="absolute right-0 top-full mt-2 w-48 py-1.5 flex flex-col bg-surface border border-border rounded-md shadow-lg overflow-hidden"
             >
               <ThemeToggle variant="menuitem" />
+
+              <div className="my-1.5 border-t border-border" />
+
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -264,52 +329,52 @@ export default function Navbar({ user }: NavbarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    role="menuitem"
-                    className={
-                      "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (isActive ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
-                    }
+                    aria-current={isActive ? "page" : undefined}
+                    className={menuItemClass(isActive)}
                   >
+                    {isActive && <ActiveBar />}
                     <Icon className="w-4 h-4" />
                     {item.label}
                   </Link>
                 );
               })}
 
-              <div className="border-t border-border" />
+              <div className="my-1.5 border-t border-border" />
 
               {user ? (
                 <>
                   <Link
                     href="/profile"
-                    role="menuitem"
-                    className={
-                      "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-200 " +
-                      (pathname === "/profile" ? "text-fg bg-surface-hover" : "text-fg-secondary hover:bg-surface-hover hover:text-fg")
-                    }
+                    aria-current={pathname === "/profile" ? "page" : undefined}
+                    className={menuItemClass(pathname === "/profile")}
                   >
+                    {pathname === "/profile" && <ActiveBar />}
                     <User className="w-4 h-4" />
                     {user.name ? formatUsername(user.name, user.tag) : "Profile"}
                   </Link>
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    role="menuitem"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-fg-secondary hover:bg-surface-hover hover:text-fg transition-colors duration-200"
+                    className={menuItemClass()}
                   >
                     <LogOut className="w-4 h-4" />
                     Sign out
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/signup"
-                  role="menuitem"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-fg hover:bg-surface-hover transition-colors duration-200"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Sign up
-                </Link>
+                <>
+                  <Link href="/login" className={menuItemClass()}>
+                    <LogIn className="w-4 h-4" />
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-fg hover:text-fg-hover transition-colors duration-200"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Sign up
+                  </Link>
+                </>
               )}
             </div>
           )}
