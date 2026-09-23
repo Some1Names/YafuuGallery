@@ -17,6 +17,9 @@
   --color-auth-panel-from: #1e1213;
   --color-auth-panel-via: #121113;
   --color-google-border: #2a2a2a;
+  --color-scrollbar-track: #000000;
+  --color-scrollbar-thumb: #ffffff;
+  --color-scrollbar-thumb-hover: #cccccc;
 
   color-scheme: dark;
 }
@@ -35,6 +38,9 @@ html.light {
   --color-auth-panel-from: #f7f4ec;
   --color-auth-panel-via: #f2ede2;
   --color-google-border: #e4ddd0; /* same as --color-border's light value — a standard border already reads fine against the light surface here, unlike dark mode where the highlight effect matters */
+  --color-scrollbar-track: #ffffff;
+  --color-scrollbar-thumb: #000000;
+  --color-scrollbar-thumb-hover: #333333;
 
   color-scheme: light;
 }
@@ -60,6 +66,37 @@ html.light {
 
 body {
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* Slim, rounded black-and-white scrollbars (ink on paper, inverted per
+   theme) instead of the OS default gray. Chrome/Edge/Safari use the ::-webkit-scrollbar rules;
+   Firefox only understands the standard scrollbar-color/-width, which are
+   scoped to browsers WITHOUT ::-webkit-scrollbar because Chrome drops all
+   of the ::-webkit-scrollbar styling (rounding, inset) whenever the
+   standard properties are also set. The transparent border + content-box
+   clip insets the thumb so it floats inside the track. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  }
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--color-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-scrollbar-thumb);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-scrollbar-thumb-hover);
 }
 
 /* The wordmark (Navbar) is a flat light-gray raster image drawn for the
