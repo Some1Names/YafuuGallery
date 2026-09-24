@@ -57,7 +57,7 @@ export default function AdminCommentRow({
   }
 
   async function remove() {
-    if (!confirm("Permanently delete this comment? This can't be undone.")) return;
+    if (!confirm("Permanently delete this comment and any replies to it? This can't be undone.")) return;
     const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" });
     if (res.ok) router.refresh();
   }

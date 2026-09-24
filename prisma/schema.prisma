@@ -258,9 +258,15 @@ model Comment {
   body       String
   hidden_at  DateTime?
   created_at DateTime  @default(now())
+  // Set on replies: the top-level comment of the thread. Threads are one
+  // level deep — replying to a reply attaches to the same top-level
+  // comment (the API normalises it). Deleting a comment deletes its replies.
+  parent_id  String?
 
   user    User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
   chapter Chapter         @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  parent  Comment?        @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies Comment[]       @relation("CommentReplies")
   likes   CommentLike[]
   reports CommentReport[]
 
@@ -268,6 +274,7 @@ model Comment {
   @@index([user_id])
   // the comment rate limit counts a user's recent comments
   @@index([user_id, created_at])
+  @@index([parent_id])
 }
 
 // A reader flagging someone else's comment for moderation — surfaces it in

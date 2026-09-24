@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { X, Send, Heart, Flag } from "lucide-react";
+import { X, Send, Heart, Flag, Reply } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
 import { formatUsername } from "@/lib/format-username";
 
@@ -16,11 +16,53 @@ interface CommentUser {
 interface CommentItem {
   id: string;
   body: string;
+  // a moderator-hidden top-level comment kept as a placeholder because it
+  // still has visible replies (body is empty then)
+  hidden: boolean;
   created_at: string;
   user: CommentUser;
   likeCount: number;
   likedByMe: boolean;
   reportedByMe: boolean;
+}
+
+// A top-level comment and its replies (one level deep — see the API).
+interface ThreadItem extends CommentItem {
+  replies: CommentItem[];
+}
+
+// Threads with more replies than this show only the latest
+// COLLAPSED_REPLIES_SHOWN until "Show N earlier replies" is clicked.
+const COLLAPSE_REPLIES_OVER = 3;
+const COLLAPSED_REPLIES_SHOWN = 2;
+
+// Apply `fn` to one comment, wherever it sits — top level or a reply.
+function mapComment(
+  threads: ThreadItem[] | null,
+  id: string,
+  fn: (c: CommentItem) => CommentItem
+): ThreadItem[] | null {
+  return (
+    threads?.map((t) =>
+      t.id === id
+        ? { ...t, ...fn(t) }
+        : t.replies.some((r) => r.id === id)
+          ? { ...t, replies: t.replies.map((r) => (r.id === id ? fn(r) : r)) }
+          : t
+    ) ?? threads
+  );
+}
+
+// created_at of the newest comment in a set of threads, replies included —
+// what the reader's "new comments" badge counts from.
+function newestCreatedAt(threads: ThreadItem[]): string | null {
+  let newest: string | null = null;
+  for (const t of threads) {
+    for (const c of [t, ...t.replies]) {
+      if (newest === null || c.created_at > newest) newest = c.created_at;
+    }
+  }
+  return newest;
 }
 
 interface ChapterCommentPanelProps {
@@ -50,7 +92,7 @@ export default function ChapterCommentPanel({
   onCommentPosted,
   onCommentsSeen,
 }: ChapterCommentPanelProps) {
-  const [comments, setComments] = useState<CommentItem[] | null>(null);
+  const [comments, setComments] = useState<ThreadItem[] | null>(null);
   // Whether the API has older comments beyond what's loaded — it serves
   // the newest page first, older pages on demand ("Show older comments").
   const [hasOlder, setHasOlder] = useState(false);
@@ -58,12 +100,21 @@ export default function ChapterCommentPanel({
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set while composing a reply: which thread it goes into, and who's being
+  // answered (shown above the box, with a cancel).
+  const [replyTo, setReplyTo] = useState<{ threadId: string; name: string } | null>(null);
+  // Collapsed long threads the reader has opened up.
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(() => new Set());
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   // What the list's scroll position should do after the next comments
-  // update: jump to the bottom (first load, own new comment), or keep the
-  // reader's place when older comments get prepended above. Null = leave
-  // it alone (e.g. toggling a like shouldn't yank the list anywhere).
-  const pendingScrollRef = useRef<"bottom" | { prevHeight: number; prevTop: number } | null>(null);
+  // update: jump to the bottom (first load, own new comment), keep the
+  // reader's place when older comments get prepended above, or bring a
+  // just-posted reply into view. Null = leave it alone (e.g. toggling a
+  // like shouldn't yank the list anywhere).
+  const pendingScrollRef = useRef<
+    "bottom" | { prevHeight: number; prevTop: number } | { commentId: string } | null
+  >(null);
 
   // Read through a ref so the fetch effect below doesn't re-run (and
   // refetch) whenever the parent passes a new callback function.
@@ -84,6 +135,8 @@ export default function ChapterCommentPanel({
       setComments(null);
       setHasOlder(false);
       setError(null);
+      setReplyTo(null);
+      setExpandedThreads(new Set());
     }
   }
 
@@ -95,13 +148,12 @@ export default function ChapterCommentPanel({
     let cancelled = false;
     fetch(`/api/chapters/${chapterId}/comments`)
       .then((res) => res.json())
-      .then((data: { comments: CommentItem[]; hasMore: boolean }) => {
+      .then((data: { comments: ThreadItem[]; hasMore: boolean }) => {
         if (cancelled) return;
         pendingScrollRef.current = "bottom";
         setComments(data.comments);
         setHasOlder(data.hasMore);
-        // the newest page arrives oldest-first, so the newest is last
-        onCommentsSeenRef.current?.(data.comments.at(-1)?.created_at ?? null);
+        onCommentsSeenRef.current?.(newestCreatedAt(data.comments));
       })
       .catch(() => {
         if (!cancelled) setComments([]);
@@ -121,6 +173,8 @@ export default function ChapterCommentPanel({
     pendingScrollRef.current = null;
     if (pending === "bottom") {
       list.scrollTo({ top: list.scrollHeight });
+    } else if ("commentId" in pending) {
+      document.getElementById(`comment-${pending.commentId}`)?.scrollIntoView({ block: "nearest" });
     } else {
       list.scrollTop = list.scrollHeight - pending.prevHeight + pending.prevTop;
     }
@@ -133,7 +187,7 @@ export default function ChapterCommentPanel({
     try {
       const res = await fetch(`/api/chapters/${chapterId}/comments?before=${encodeURIComponent(oldest.id)}`);
       if (!res.ok) throw new Error();
-      const data: { comments: CommentItem[]; hasMore: boolean } = await res.json();
+      const data: { comments: ThreadItem[]; hasMore: boolean } = await res.json();
       const list = listRef.current;
       if (list) pendingScrollRef.current = { prevHeight: list.scrollHeight, prevTop: list.scrollTop };
       setComments((prev) => [...data.comments, ...(prev ?? [])]);
@@ -156,7 +210,7 @@ export default function ChapterCommentPanel({
       const res = await fetch(`/api/chapters/${chapterId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ body, parent_id: replyTo?.threadId ?? null }),
       });
 
       if (!res.ok) {
@@ -165,9 +219,21 @@ export default function ChapterCommentPanel({
         return;
       }
 
-      const created: CommentItem = await res.json();
-      pendingScrollRef.current = "bottom";
-      setComments((prev) => [...(prev ?? []), created]);
+      const created: ThreadItem & { parent_id: string | null } = await res.json();
+      const { parent_id: parentId, ...createdItem } = created;
+      if (parentId) {
+        // a reply: into its thread, which opens up so the reply is visible
+        pendingScrollRef.current = { commentId: createdItem.id };
+        setComments(
+          (prev) =>
+            prev?.map((t) => (t.id === parentId ? { ...t, replies: [...t.replies, createdItem] } : t)) ?? prev
+        );
+        setExpandedThreads((prev) => new Set(prev).add(parentId));
+      } else {
+        pendingScrollRef.current = "bottom";
+        setComments((prev) => [...(prev ?? []), createdItem]);
+      }
+      setReplyTo(null);
       setDraft("");
       onCommentPosted?.();
       onCommentsSeenRef.current?.(created.created_at);
@@ -192,11 +258,30 @@ export default function ChapterCommentPanel({
     }
   }
 
+  // Reply uses the one comment box at the bottom. Answering a reply (not
+  // the thread's top comment) starts the text with @name, since everything
+  // in a thread sits at the same depth and would otherwise lose who's
+  // being answered.
+  function startReply(thread: ThreadItem, comment: CommentItem) {
+    const name = formatUsername(comment.user.name, comment.user.tag);
+    setReplyTo({ threadId: thread.id, name });
+    if (comment.id !== thread.id) {
+      const mention = `@${comment.user.name ?? name} `;
+      setDraft((d) => (d.startsWith(mention) ? d : mention + d));
+    }
+    textareaRef.current?.focus();
+  }
+
+  function cancelReply() {
+    setReplyTo(null);
+    textareaRef.current?.focus();
+  }
+
   // Confirm first (a report is sent to moderators), then mark it reported
   // straight away; on failure, put the button back and say why.
   async function reportComment(comment: CommentItem) {
     if (!confirm("Report this comment to the moderators?")) return;
-    setComments((prev) => prev?.map((c) => (c.id === comment.id ? { ...c, reportedByMe: true } : c)) ?? prev);
+    setComments((prev) => mapComment(prev, comment.id, (c) => ({ ...c, reportedByMe: true })));
     try {
       const res = await fetch(`/api/comments/${comment.id}/report`, { method: "POST" });
       if (!res.ok) {
@@ -204,7 +289,7 @@ export default function ChapterCommentPanel({
         throw new Error(data?.error ?? "Couldn't report this comment.");
       }
     } catch (err) {
-      setComments((prev) => prev?.map((c) => (c.id === comment.id ? { ...c, reportedByMe: false } : c)) ?? prev);
+      setComments((prev) => mapComment(prev, comment.id, (c) => ({ ...c, reportedByMe: false })));
       setError(err instanceof Error ? err.message : "Couldn't report this comment.");
     }
   }
@@ -218,8 +303,7 @@ export default function ChapterCommentPanel({
     const optimisticCount = comment.likeCount + (optimisticLiked ? 1 : -1);
 
     setComments((prev) =>
-      prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: optimisticLiked, likeCount: optimisticCount } : c)) ??
-      prev
+      mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: optimisticLiked, likeCount: optimisticCount }))
     );
 
     try {
@@ -227,15 +311,90 @@ export default function ChapterCommentPanel({
       if (!res.ok) throw new Error();
       const data: { liked: boolean; likeCount: number } = await res.json();
       setComments((prev) =>
-        prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: data.liked, likeCount: data.likeCount } : c)) ??
-        prev
+        mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: data.liked, likeCount: data.likeCount }))
       );
     } catch {
       setComments((prev) =>
-        prev?.map((c) => (c.id === comment.id ? { ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount } : c)) ??
-        prev
+        mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount }))
       );
     }
+  }
+
+  // One comment's markup — a thread's top comment or a reply (smaller
+  // avatar). A hidden top comment renders as a placeholder only.
+  function renderComment(c: CommentItem, thread: ThreadItem, isReply: boolean) {
+    const avatarSize = isReply ? "w-6 h-6" : "w-8 h-8";
+    if (c.hidden) {
+      return (
+        <div key={c.id} id={`comment-${c.id}`} className="flex gap-2.5">
+          <span className={`${avatarSize} rounded-full bg-bg border border-border shrink-0`} />
+          <p className="text-sm text-fg-muted italic self-center">This comment was hidden by a moderator.</p>
+        </div>
+      );
+    }
+    const author = formatUsername(c.user.name, c.user.tag);
+    return (
+      <div key={c.id} id={`comment-${c.id}`} className="flex gap-2.5">
+        <span
+          className={`relative ${avatarSize} rounded-full overflow-hidden bg-bg border border-border flex items-center justify-center shrink-0`}
+        >
+          {c.user.image ? (
+            <Image src={c.user.image} alt={c.user.name ?? "User"} fill sizes="32px" className="object-cover" />
+          ) : (
+            <span className="text-xs text-fg">{(c.user.name ?? "?").charAt(0).toUpperCase()}</span>
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm text-fg font-medium truncate">{author}</span>
+            <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at))}</span>
+          </div>
+          <p className="text-sm text-fg-secondary whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
+          <div className="flex items-center gap-4 mt-1">
+            <button
+              type="button"
+              onClick={() => toggleLike(c)}
+              aria-pressed={c.likedByMe}
+              aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
+              className={`flex items-center gap-1 text-xs transition-colors duration-200 ${
+                c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
+              {c.likeCount > 0 && c.likeCount}
+            </button>
+            <button
+              type="button"
+              onClick={() => startReply(thread, c)}
+              aria-label={`Reply to ${author}`}
+              className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
+            >
+              <Reply className="w-3.5 h-3.5" />
+              Reply
+            </button>
+            {/* Report — only on other people's comments. Stays as a quiet
+                "Reported" once sent (one per reader). */}
+            {c.user.id !== currentUserId &&
+              (c.reportedByMe ? (
+                <span className="flex items-center gap-1 text-xs text-fg-muted">
+                  <Flag className="w-3.5 h-3.5" />
+                  Reported
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => reportComment(c)}
+                  aria-label={`Report comment by ${author}`}
+                  className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  Report
+                </button>
+              ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -280,71 +439,66 @@ export default function ChapterCommentPanel({
                 {isLoadingOlder ? "Loading…" : "Show older comments"}
               </button>
             )}
-            {comments.map((c) => (
-              <div key={c.id} className="flex gap-2.5">
-                <span className="relative w-8 h-8 rounded-full overflow-hidden bg-bg border border-border flex items-center justify-center shrink-0">
-                  {c.user.image ? (
-                    <Image src={c.user.image} alt={c.user.name ?? "User"} fill sizes="32px" className="object-cover" />
-                  ) : (
-                    <span className="text-xs text-fg">{(c.user.name ?? "?").charAt(0).toUpperCase()}</span>
-                  )}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-sm text-fg font-medium truncate">
-                      {formatUsername(c.user.name, c.user.tag)}
-                    </span>
-                    <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at))}</span>
-                  </div>
-                  <p className="text-sm text-fg-secondary whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
-                  <div className="flex items-center gap-4 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => toggleLike(c)}
-                      aria-pressed={c.likedByMe}
-                      aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
-                      className={`flex items-center gap-1 text-xs transition-colors duration-200 ${
-                        c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
-                      }`}
-                    >
-                      <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
-                      {c.likeCount > 0 && c.likeCount}
-                    </button>
-                    {/* Report — only on other people's comments. Stays as
-                        a quiet "Reported" once sent (one per reader). */}
-                    {c.user.id !== currentUserId &&
-                      (c.reportedByMe ? (
-                        <span className="flex items-center gap-1 text-xs text-fg-muted">
-                          <Flag className="w-3.5 h-3.5" />
-                          Reported
-                        </span>
-                      ) : (
+            {comments.map((thread) => {
+              // long threads show only their latest replies until opened up
+              const isCollapsed =
+                thread.replies.length > COLLAPSE_REPLIES_OVER && !expandedThreads.has(thread.id);
+              const shownReplies = isCollapsed
+                ? thread.replies.slice(-COLLAPSED_REPLIES_SHOWN)
+                : thread.replies;
+              const hiddenCount = thread.replies.length - shownReplies.length;
+              return (
+                <div key={thread.id} className="flex flex-col gap-3">
+                  {renderComment(thread, thread, false)}
+                  {thread.replies.length > 0 && (
+                    <div className="ml-10 pl-3 border-l border-border flex flex-col gap-3">
+                      {hiddenCount > 0 && (
                         <button
                           type="button"
-                          onClick={() => reportComment(c)}
-                          aria-label={`Report comment by ${formatUsername(c.user.name, c.user.tag)}`}
-                          className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
+                          onClick={() => setExpandedThreads((prev) => new Set(prev).add(thread.id))}
+                          className="self-start text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
                         >
-                          <Flag className="w-3.5 h-3.5" />
-                          Report
+                          Show {hiddenCount} earlier {hiddenCount === 1 ? "reply" : "replies"}
                         </button>
-                      ))}
-                  </div>
+                      )}
+                      {shownReplies.map((reply) => renderComment(reply, thread, true))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             </>
           )}
         </div>
 
         <form onSubmit={handleSubmit} className="border-t border-border p-3 shrink-0">
           {error && <p className="text-xs text-danger mb-2">{error}</p>}
+          {replyTo && (
+            <div className="flex items-center justify-between gap-2 mb-2 text-xs text-fg-secondary">
+              <span className="truncate">
+                Replying to <span className="text-fg font-medium">{replyTo.name}</span>
+              </span>
+              <button
+                type="button"
+                onClick={cancelReply}
+                aria-label="Cancel reply"
+                className="shrink-0 p-1 text-fg-muted hover:text-fg transition-colors duration-200"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
           <div className="flex items-end gap-2">
             <textarea
+              ref={textareaRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={handleTextareaKeyDown}
-              placeholder="Add a comment… (Enter to send, Shift+Enter for a new line)"
+              placeholder={
+                replyTo
+                  ? `Reply to ${replyTo.name}…`
+                  : "Add a comment… (Enter to send, Shift+Enter for a new line)"
+              }
               rows={3}
               maxLength={MAX_BODY_LENGTH}
               className="flex-1 min-w-0 resize-none bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-fg-secondary transition-colors duration-200"
@@ -352,7 +506,7 @@ export default function ChapterCommentPanel({
             <button
               type="submit"
               disabled={!draft.trim() || isSubmitting}
-              aria-label="Post comment"
+              aria-label={replyTo ? "Post reply" : "Post comment"}
               className="shrink-0 p-2.5 bg-fg text-bg rounded-md hover:bg-fg/85 disabled:opacity-40 transition-colors duration-200"
             >
               <Send className="w-4 h-4" />

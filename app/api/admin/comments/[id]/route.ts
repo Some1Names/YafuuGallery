@@ -17,19 +17,31 @@ export async function DELETE(
 
   const comment = await prisma.comment.findUnique({
     where: { id },
-    select: { chapter_id: true, hidden_at: true },
+    select: {
+      chapter_id: true,
+      hidden_at: true,
+      // replies are deleted along with it (onDelete: Cascade)
+      _count: { select: { replies: { where: { hidden_at: null } } } },
+    },
   });
   if (!comment) {
     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   }
 
-  // comment_count counts VISIBLE comments — deleting one that was visible
-  // takes it off the count (a hidden one was already excluded). This used
-  // to never be decremented, so the chapter's comment badge drifted high.
+  // comment_count counts VISIBLE comments — deleting takes off this one if
+  // it was visible (a hidden one was already excluded) plus its visible
+  // replies, which go with it. This used to never be decremented, so the
+  // chapter's comment badge drifted high.
+  const removedVisible = (comment.hidden_at === null ? 1 : 0) + comment._count.replies;
   await prisma.$transaction([
     prisma.comment.delete({ where: { id } }),
-    ...(comment.hidden_at === null
-      ? [prisma.chapter.update({ where: { id: comment.chapter_id }, data: { comment_count: { decrement: 1 } } })]
+    ...(removedVisible > 0
+      ? [
+          prisma.chapter.update({
+            where: { id: comment.chapter_id },
+            data: { comment_count: { decrement: removedVisible } },
+          }),
+        ]
       : []),
   ]);
 
