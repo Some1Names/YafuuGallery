@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { GENRES, MANGA_STATUSES } from "@/lib/genres";
 import ActiveChipScroller from "@/component/search/ActiveChipScroller";
-import { SORTS, searchHref, type SearchFilters } from "@/lib/search-filters";
+import SortDropdown from "@/component/search/SortDropdown";
+import { searchHref, type SearchFilters } from "@/lib/search-filters";
 
 interface SearchFilterBarProps {
   filters: SearchFilters;
@@ -16,17 +17,13 @@ function chipClass(isOn: boolean) {
   );
 }
 
-// Same plain treatment as the site's tabs: text brightens on hover, the
-// current choice is ink with a 2px underline.
-function optionClass(isOn: boolean) {
+// One segment of the status pill: the current choice is filled with ink,
+// the others are plain text inside the shared rounded outline.
+function segmentClass(isOn: boolean) {
   return (
-    "relative py-1 text-sm transition-colors duration-200 " +
-    (isOn ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
+    "flex items-center h-full px-3.5 rounded-full text-sm whitespace-nowrap transition-colors duration-200 " +
+    (isOn ? "bg-fg text-bg font-medium" : "text-fg-secondary hover:text-fg")
   );
-}
-
-function Underline() {
-  return <span aria-hidden="true" className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-fg" />;
 }
 
 // Genre / status / sort for /search. Every option is a plain link to the
@@ -73,9 +70,13 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
         </ul>
       </ActiveChipScroller>
 
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-        <nav aria-label="Status" className="flex items-center gap-4">
-          <span className="text-xs uppercase tracking-widest text-fg-muted">Status</span>
+      {/* Status as a segmented pill on the left, sort as a dropdown on the
+          right — side by side, wrapping onto two lines on narrow phones. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <nav
+          aria-label="Status"
+          className="flex items-center h-9 p-0.5 rounded-full border border-border bg-surface"
+        >
           {[{ value: null, label: "All" }, ...MANGA_STATUSES].map((s) => {
             const isOn = filters.status === s.value;
             return (
@@ -84,33 +85,15 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
                 href={searchHref({ ...filters, status: s.value })}
                 scroll={false}
                 aria-current={isOn ? "true" : undefined}
-                className={optionClass(isOn)}
+                className={segmentClass(isOn)}
               >
                 {s.label}
-                {isOn && <Underline />}
               </Link>
             );
           })}
         </nav>
 
-        <nav aria-label="Sort by" className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="text-xs uppercase tracking-widest text-fg-muted">Sort</span>
-          {SORTS.map((s) => {
-            const isOn = filters.sort === s.value;
-            return (
-              <Link
-                key={s.value}
-                href={searchHref({ ...filters, sort: s.value })}
-                scroll={false}
-                aria-current={isOn ? "true" : undefined}
-                className={optionClass(isOn)}
-              >
-                {s.label}
-                {isOn && <Underline />}
-              </Link>
-            );
-          })}
-        </nav>
+        <SortDropdown filters={filters} />
       </div>
     </div>
   );

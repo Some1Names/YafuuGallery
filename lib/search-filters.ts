@@ -5,11 +5,10 @@ import { isGenreSlug, isMangaStatus, type GenreSlug, type MangaStatusValue } fro
 // plain shareable link and the page stays fully server-rendered.
 
 export const SORTS = [
-  // short labels so all four fit on one line on a phone
-  { value: "updated", label: "Updated" },
+  { value: "updated", label: "Recently updated" },
   { value: "new", label: "Newest" },
-  { value: "views", label: "Popular" }, // most viewed
-  { value: "title", label: "A–Z" },
+  { value: "views", label: "Most viewed" },
+  { value: "title", label: "Title A–Z" },
 ] as const;
 
 export type SortValue = (typeof SORTS)[number]["value"];
