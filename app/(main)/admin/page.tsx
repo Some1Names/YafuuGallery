@@ -45,6 +45,8 @@ export default async function AdminPage() {
           manga_synopsis: true,
           cover_image_url: true,
           banner_image_url: true,
+          genres: true,
+          manga_status: true,
           is_featured: true,
           author: { select: { name: true, email: true } },
           _count: { select: { chapters: true, bookmarks: true } },
@@ -145,6 +147,8 @@ export default async function AdminPage() {
     favoriteCount: m._count.bookmarks,
     coverImageUrl: m.cover_image_url,
     bannerImageUrl: m.banner_image_url,
+    genres: m.genres,
+    status: m.manga_status,
     isFeatured: m.is_featured,
     // Own cover/banner + every arc image + every chapter's cover and PDFs.
     storageBytes:

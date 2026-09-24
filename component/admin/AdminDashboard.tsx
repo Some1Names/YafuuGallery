@@ -20,6 +20,8 @@ interface MangaItem {
   favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
+  genres: string[];
+  status: "ongoing" | "completed";
   isFeatured: boolean;
   storageBytes: number;
 }
@@ -221,6 +223,8 @@ export default function AdminDashboard({
                       favoriteCount={m.favoriteCount}
                       coverImageUrl={m.coverImageUrl}
                       bannerImageUrl={m.bannerImageUrl}
+                      genres={m.genres}
+                      status={m.status}
                       isAdmin
                       isFeatured={m.isFeatured}
                       storageBytes={m.storageBytes}

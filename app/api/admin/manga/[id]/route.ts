@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
 import { deleteReplacedUrls, deleteUrls, isAllowedUrlWrite } from "@/lib/storage";
+import { isMangaStatus, parseGenres } from "@/lib/genres";
 
 // PATCH /api/admin/manga/[id] — update
 export async function PATCH(
@@ -16,7 +17,7 @@ export async function PATCH(
   }
 
   const body = await request.json().catch(() => null);
-  const { manga_title, manga_synopsis, cover_image_url, banner_image_url } = body ?? {};
+  const { manga_title, manga_synopsis, cover_image_url, banner_image_url, genres, manga_status } = body ?? {};
 
   if (!manga_title || !manga_synopsis) {
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
@@ -46,6 +47,9 @@ export async function PATCH(
       manga_synopsis,
       ...(cover_image_url !== undefined ? { cover_image_url: cover_image_url || null } : {}),
       ...(banner_image_url !== undefined ? { banner_image_url: banner_image_url || null } : {}),
+      // Left as-is when omitted, like the images above.
+      ...(genres !== undefined ? { genres: parseGenres(genres) } : {}),
+      ...(isMangaStatus(manga_status) ? { manga_status } : {}),
     },
   });
 

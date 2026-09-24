@@ -8,9 +8,11 @@ import {
   parseRecentSearches,
   subscribeToRecentSearches,
 } from "@/lib/recent-searches";
+import { searchHref, type SearchFilters } from "@/lib/search-filters";
 
 interface RecentSearchesProps {
   query: string;
+  filters: Omit<SearchFilters, "q">;
 }
 
 // Renders the viewer's recent searches (see lib/recent-searches.ts) as
@@ -18,7 +20,7 @@ interface RecentSearchesProps {
 // Recording happens elsewhere (SearchInput on Enter, SearchResultsRecorder
 // on opening a result). The server snapshot is null (not "") so nothing
 // renders until localStorage is actually readable on the client.
-export default function RecentSearches({ query }: RecentSearchesProps) {
+export default function RecentSearches({ query, filters }: RecentSearchesProps) {
   const raw = useSyncExternalStore(subscribeToRecentSearches, getRecentSearchesSnapshot, () => null);
   const history = useMemo(() => (raw === null ? null : parseRecentSearches(raw)), [raw]);
 
@@ -40,7 +42,7 @@ export default function RecentSearches({ query }: RecentSearchesProps) {
         {history.map((term) => (
           <Link
             key={term}
-            href={`/search?q=${encodeURIComponent(term)}`}
+            href={searchHref({ ...filters, q: term })}
             className="px-3 py-1.5 bg-surface border border-border rounded-full text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
           >
             {term}

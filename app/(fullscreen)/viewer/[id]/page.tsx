@@ -111,6 +111,10 @@ export default async function ViewerPage({
     // view_count before, so every "views" figure (admin, /manage, the home
     // hero's most-viewed fallback) was stuck at 0.
     await prisma.chapter.update({ where: { id }, data: { view_count: { increment: 1 } } });
+    // The manga's running total (what /search's "Most viewed" sorts on).
+    // Raw SQL on purpose: a Prisma update would also bump the manga's
+    // @updatedAt, making every read look like a new update.
+    await prisma.$executeRaw`UPDATE "Manga" SET "view_count" = "view_count" + 1 WHERE "id" = ${chapter.manga.id}`;
 
     // Record/bump reading progress so "Continue reading" has something to
     // show — one row per (user, chapter), updated_at refreshed on every

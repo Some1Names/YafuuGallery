@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "@/component/admin/AdminImageUploadButton";
+import MangaGenreFields from "@/component/manga/MangaGenreFields";
+import type { GenreSlug, MangaStatusValue } from "@/lib/genres";
 
 // Shared by /admin and /manage — creating a manga always attributes it to
 // the signed-in account. There's no "choose an author" picker: a manga's
@@ -15,6 +17,8 @@ export default function MangaCreateForm() {
   const [synopsis, setSynopsis] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
+  const [genres, setGenres] = useState<GenreSlug[]>([]);
+  const [status, setStatus] = useState<MangaStatusValue>("ongoing");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +33,8 @@ export default function MangaCreateForm() {
     setSynopsis("");
     setCoverImageUrl(null);
     setBannerImageUrl(null);
+    setGenres([]);
+    setStatus("ongoing");
     setError(null);
   }
 
@@ -51,6 +57,8 @@ export default function MangaCreateForm() {
           manga_synopsis: synopsis,
           cover_image_url: coverImageUrl,
           banner_image_url: bannerImageUrl,
+          genres,
+          manga_status: status,
         }),
       });
 
@@ -136,6 +144,8 @@ export default function MangaCreateForm() {
           rows={3}
           className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted resize-none"
         />
+
+        <MangaGenreFields genres={genres} onGenresChange={setGenres} status={status} onStatusChange={setStatus} />
       </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}

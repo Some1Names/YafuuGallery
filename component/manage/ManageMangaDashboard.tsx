@@ -41,6 +41,8 @@ interface MangaItem {
   favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
+  genres: string[];
+  status: "ongoing" | "completed";
 }
 
 interface CommentItem {
@@ -251,6 +253,8 @@ export default function ManageMangaDashboard({
                       favoriteCount={m.favoriteCount}
                       coverImageUrl={m.coverImageUrl}
                       bannerImageUrl={m.bannerImageUrl}
+                      genres={m.genres}
+                      status={m.status}
                       chapters={chapters
                         .filter((c) => c.mangaId === m.id)
                         .map((c) => ({

@@ -21,6 +21,13 @@ enum Language {
   ja
 }
 
+// A whole manga's publication state (the Ongoing/Completed filter on the
+// search page) — separate from ArcStatus, which is per arc.
+enum MangaStatus {
+  ongoing
+  completed
+}
+
 enum ArcStatus {
   ongoing
   completed
@@ -134,6 +141,16 @@ model Manga {
   // no separate manual-reorder UI. Meaningless while is_featured is false.
   is_featured      Boolean  @default(false)
   featured_order   Int      @default(0)
+  // Genre slugs from lib/genres.ts (the route handlers drop anything not
+  // on that list), picked by the author. Filtered with `has` on /search.
+  genres           String[] @default([])
+  manga_status     MangaStatus @default(ongoing)
+  // Sum of this manga's chapters' view_count, kept alongside it so /search
+  // can sort by "Most viewed" in the database (Prisma can't order by a
+  // relation's SUM). Incremented with raw SQL in the viewer — a Prisma
+  // update would also bump updated_at and make every read look like an
+  // "update".
+  view_count       Int      @default(0)
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -294,6 +311,11 @@ model Bookmark {
   user_id    String
   manga_id   String
   created_at DateTime @default(now())
+  // Chapters uploaded after this and not opened yet count as "new" for
+  // this reader (lib/favorite-updates.ts). Starts at favoriting time, so
+  // favoriting a finished series doesn't flood Updates with its back
+  // catalogue; "Mark all as read" moves it to now.
+  updates_seen_at DateTime @default(now())
 
   user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   manga Manga @relation(fields: [manga_id], references: [id], onDelete: Cascade)

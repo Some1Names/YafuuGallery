@@ -12,6 +12,8 @@ import AdminChapterList from "./AdminChapterList";
 import AdminArcCreateForm from "./AdminArcCreateForm";
 import AdminArcList from "./AdminArcList";
 import { formatBytes } from "@/lib/format-bytes";
+import MangaGenreFields from "@/component/manga/MangaGenreFields";
+import { knownGenres, type GenreSlug, type MangaStatusValue } from "@/lib/genres";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface ChapterItem {
@@ -48,6 +50,8 @@ interface AdminMangaRowProps {
   favoriteCount: number;
   coverImageUrl: string | null;
   bannerImageUrl: string | null;
+  genres: string[];
+  status: MangaStatusValue;
   chapters: ChapterItem[];
   arcs: ArcOption[];
   isExpanded: boolean;
@@ -77,6 +81,8 @@ export default function AdminMangaRow({
   favoriteCount,
   coverImageUrl,
   bannerImageUrl,
+  genres,
+  status,
   chapters,
   arcs,
   isExpanded,
@@ -92,6 +98,8 @@ export default function AdminMangaRow({
   const [editSynopsis, setEditSynopsis] = useState(synopsis);
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
   const [editBannerImageUrl, setEditBannerImageUrl] = useState(bannerImageUrl);
+  const [editGenres, setEditGenres] = useState<GenreSlug[]>(() => knownGenres(genres));
+  const [editStatus, setEditStatus] = useState<MangaStatusValue>(status);
   const [isSaving, setIsSaving] = useState(false);
   const [isTogglingFeatured, setIsTogglingFeatured] = useState(false);
 
@@ -163,6 +171,8 @@ export default function AdminMangaRow({
         manga_synopsis: editSynopsis,
         cover_image_url: editCoverImageUrl,
         banner_image_url: editBannerImageUrl,
+        genres: editGenres,
+        manga_status: editStatus,
       }),
     });
     setIsSaving(false);
@@ -226,6 +236,13 @@ export default function AdminMangaRow({
             required
             rows={3}
             className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg resize-none"
+          />
+
+          <MangaGenreFields
+            genres={editGenres}
+            onGenresChange={setEditGenres}
+            status={editStatus}
+            onStatusChange={setEditStatus}
           />
         </div>
 

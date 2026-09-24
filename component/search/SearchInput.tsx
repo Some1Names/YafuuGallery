@@ -4,10 +4,13 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { recordSearch } from "@/lib/recent-searches";
+import { DEFAULT_SORT, searchHref, type SearchFilters } from "@/lib/search-filters";
 
 interface SearchInputProps {
   // The query the page was rendered for (?q=), already trimmed.
   initialQuery: string;
+  // The genre/status/sort currently applied — kept when the query changes.
+  filters: Omit<SearchFilters, "q">;
 }
 
 const DEBOUNCE_MS = 300;
@@ -16,18 +19,13 @@ const DEBOUNCE_MS = 300;
 // any length, and emptying the box still auto-returns to "All manga".
 const MIN_AUTO_SEARCH_CHARS = 2;
 
-function searchHref(query: string) {
-  const trimmed = query.trim();
-  return trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search";
-}
-
 // Search-as-you-type: results update DEBOUNCE_MS after the last keystroke
 // (once there are MIN_AUTO_SEARCH_CHARS) by replacing the URL (?q=), which re-renders the server page — so the
 // query stays shareable/refreshable and the results logic lives in one
 // place. router.replace, not push, so typing doesn't stack up history
 // entries. Enter searches immediately and is what counts as a "committed"
 // search for recent-search history (keystrokes don't).
-export default function SearchInput({ initialQuery }: SearchInputProps) {
+export default function SearchInput({ initialQuery, filters }: SearchInputProps) {
   const router = useRouter();
   const [value, setValue] = useState(initialQuery);
   const [isPending, startTransition] = useTransition();
@@ -57,7 +55,7 @@ export default function SearchInput({ initialQuery }: SearchInputProps) {
   function navigate(next: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setLastSent(next.trim());
-    startTransition(() => router.replace(searchHref(next), { scroll: false }));
+    startTransition(() => router.replace(searchHref({ ...filters, q: next }), { scroll: false }));
   }
 
   function handleChange(next: string) {
@@ -83,6 +81,10 @@ export default function SearchInput({ initialQuery }: SearchInputProps) {
 
   return (
     <form action="/search" method="GET" onSubmit={handleSubmit} role="search" aria-busy={isPending} className="mb-10">
+      {/* Without JS the form submits natively — carry the filters along. */}
+      {filters.genre && <input type="hidden" name="genre" value={filters.genre} />}
+      {filters.status && <input type="hidden" name="status" value={filters.status} />}
+      {filters.sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={filters.sort} />}
       <div className="relative max-w-xl">
         <label htmlFor="search-input" className="sr-only">
           Search manga
