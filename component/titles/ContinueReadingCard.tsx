@@ -10,6 +10,8 @@ interface ContinueReadingCardProps {
   chapterName: string;
   coverImageUrl: string | null;
   mangaTitle: string;
+  // the reader finished the previous chapter and this is the next one
+  isNext?: boolean;
 }
 
 // Same square-grid visual language as FavoriteChapterCard, but per reading
@@ -22,6 +24,7 @@ export default function ContinueReadingCard({
   chapterName,
   coverImageUrl,
   mangaTitle,
+  isNext = false,
 }: ContinueReadingCardProps) {
   return (
     <Link
@@ -40,6 +43,13 @@ export default function ContinueReadingCard({
         <NoImagePlaceholder />
       )}
       <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/10 to-transparent" />
+
+      {/* Fixed colors, not theme tokens — it sits on cover art. */}
+      {isNext && (
+        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-sm bg-neutral-900/80 backdrop-blur-sm text-white text-xs font-semibold">
+          Up next
+        </div>
+      )}
 
       <div className="absolute bottom-0 left-0 right-0 p-3">
         <div className="text-fg/70 text-xs truncate">{mangaTitle}</div>

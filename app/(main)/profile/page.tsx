@@ -24,7 +24,7 @@ export default async function ProfilePage() {
       prisma.bookmark.count({ where: { user_id: userId } }),
       prisma.chapterBookmark.count({ where: { user_id: userId } }),
       prisma.comment.count({ where: { user_id: userId } }),
-      prisma.readingProgress.count({ where: { user_id: userId } }),
+      prisma.readingProgress.count({ where: { user_id: userId, completed: true } }),
       getContinueReading(userId, 4),
     ]);
 
@@ -33,9 +33,9 @@ export default async function ProfilePage() {
   const stats = [
     { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },
     { label: "Chapters favorited", value: chapterFavoriteCount, href: "/favorites?tab=chapters" },
-    // counts every chapter with a progress row — i.e. opened, not
-    // necessarily finished (ReadingProgress.completed is never set)
-    { label: "Chapters started", value: chaptersReadCount },
+    // read through to the last page (ReadingProgress.completed, set by
+    // the reader) — not just opened
+    { label: "Chapters finished", value: chaptersReadCount },
     { label: "Comments", value: commentCount },
   ];
 
@@ -93,6 +93,7 @@ export default async function ProfilePage() {
                   chapterName={p.chapterName}
                   coverImageUrl={p.coverImageUrl}
                   mangaTitle={p.mangaTitle}
+                  isNext={p.isNext}
                 />
               ))}
             </div>
