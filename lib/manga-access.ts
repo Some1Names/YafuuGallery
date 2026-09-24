@@ -25,6 +25,20 @@ export async function canManageArc(user: SessionUser, arcId: string): Promise<bo
   return arc?.manga.author_id === user.id;
 }
 
+// Hiding/unhiding a comment: admins anywhere, authors only on comments
+// left on their OWN manga's chapters. (Permanently deleting a comment
+// stays admin-only — see /api/admin/comments/[id].)
+export async function canModerateComment(user: SessionUser, commentId: string): Promise<boolean> {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  if (user.role !== "author") return false;
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    select: { chapter: { select: { manga: { select: { author_id: true } } } } },
+  });
+  return comment?.chapter.manga.author_id === user.id;
+}
+
 export async function canManageChapter(user: SessionUser, chapterId: string): Promise<boolean> {
   if (!user) return false;
   if (user.role === "admin") return true;

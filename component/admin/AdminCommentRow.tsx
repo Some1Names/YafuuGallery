@@ -12,6 +12,9 @@ interface AdminCommentRowProps {
   chapterLabel: string;
   createdAt: Date;
   initialHidden: boolean;
+  // Authors (on /manage) can hide/unhide comments on their own manga but
+  // not permanently delete them — the delete route is admin-only.
+  canDelete?: boolean;
 }
 
 export default function AdminCommentRow({
@@ -22,6 +25,7 @@ export default function AdminCommentRow({
   chapterLabel,
   createdAt,
   initialHidden,
+  canDelete = true,
 }: AdminCommentRowProps) {
   const router = useRouter();
   const [hidden, setHidden] = useState(initialHidden);
@@ -71,13 +75,15 @@ export default function AdminCommentRow({
         >
           {hidden ? "Unhide" : "Hide"}
         </button>
-        <button
-          type="button"
-          onClick={remove}
-          className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
-        >
-          Delete
-        </button>
+        {canDelete && (
+          <button
+            type="button"
+            onClick={remove}
+            className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   );
