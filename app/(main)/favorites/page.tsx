@@ -7,23 +7,33 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import FavoriteChapterCard from "@/component/titles/FavoriteChapterCard";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { loginHref } from "@/lib/login-redirect";
+import { getFavoriteUpdates, getNewChapterCounts } from "@/lib/favorite-updates";
+import { parsePageCount, splitExtraRow } from "@/lib/pagination";
+import FavoriteUpdateRow from "@/component/titles/FavoriteUpdateRow";
+import MarkUpdatesReadButton from "@/component/titles/MarkUpdatesReadButton";
+import ShowMoreLink from "@/component/ShowMoreLink";
+
+type Tab = "manga" | "chapters" | "updates";
+
+const UPDATES_PAGE_SIZE = 20;
 
 export default async function FavoritesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; page?: string | string[] }>;
 }) {
-  const { tab } = await searchParams;
-  const activeTab: "manga" | "chapters" = tab === "chapters" ? "chapters" : "manga";
+  const { tab, page } = await searchParams;
+  const activeTab: Tab = tab === "chapters" || tab === "updates" ? tab : "manga";
+  const updatesLimit = parsePageCount(page) * UPDATES_PAGE_SIZE;
 
   const session = await auth();
   if (!session?.user?.id) {
     // come straight back here (same tab) once signed in
-    redirect(loginHref(activeTab === "chapters" ? "/favorites?tab=chapters" : "/favorites"));
+    redirect(loginHref(activeTab === "manga" ? "/favorites" : `/favorites?tab=${activeTab}`));
   }
   const userId = session.user.id;
 
-  const [bookmarkedManga, favoritedChapters] = await Promise.all([
+  const [bookmarkedManga, favoritedChapters, newCounts, updateRows] = await Promise.all([
     prisma.bookmark.findMany({
       where: { user_id: userId },
       orderBy: { created_at: "desc" },
@@ -58,7 +68,12 @@ export default async function FavoritesPage({
         },
       },
     }),
+    getNewChapterCounts(userId),
+    // the feed is only fetched when it's the tab being shown
+    activeTab === "updates" ? getFavoriteUpdates(userId, updatesLimit) : Promise.resolve([]),
   ]);
+  const { items: updates, hasMore: hasMoreUpdates } = splitExtraRow(updateRows, updatesLimit);
+  const newTotal = [...newCounts.values()].reduce((sum, n) => sum + n, 0);
 
   // Chapter favorites can span any number of series — group them by manga
   // so the grid reads as "here's what you've saved from each title" rather
@@ -95,9 +110,12 @@ export default async function FavoritesPage({
   // Same tab treatment as the manga page's Chapters/Arcs and the navbar:
   // display face, count beside the label, current tab marked by a 2px ink
   // bar sitting on the row's bottom rule.
-  const tabs = [
-    { id: "manga" as const, label: "Manga", count: bookmarkedManga.length },
-    { id: "chapters" as const, label: "Chapters", count: favoritedChapters.length },
+  // Updates counts NEW chapters (in red when there are any), not every
+  // chapter in the feed — it's the tab's "you have something to read".
+  const tabs: { id: Tab; label: string; count: number; alert?: boolean }[] = [
+    { id: "manga", label: "Manga", count: bookmarkedManga.length },
+    { id: "chapters", label: "Chapters", count: favoritedChapters.length },
+    { id: "updates", label: "Updates", count: newTotal, alert: newTotal > 0 },
   ];
 
   return (
@@ -131,14 +149,53 @@ export default async function FavoritesPage({
                 }
               >
                 {tab.label}
-                <span className="ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
+                <span
+                  className={
+                    "ml-2 align-middle text-xs font-(family-name:--font-body) font-medium " +
+                    (tab.alert ? "text-red-500 [.light_&]:text-red-700" : "")
+                  }
+                >
+                  {tab.count}
+                  {tab.alert && <span className="sr-only"> new</span>}
+                </span>
                 {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
               </Link>
             );
           })}
         </div>
 
-        {activeTab === "manga" ? (
+        {activeTab === "updates" ? (
+          bookmarkedManga.length === 0 ? (
+            <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
+              <p className="text-fg-secondary text-sm">
+                Favorite a manga and its new chapters will show up here.
+              </p>
+            </div>
+          ) : updates.length === 0 ? (
+            <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
+              <p className="text-fg-secondary text-sm">Your favorite manga don&apos;t have any chapters yet.</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-4 mb-4 min-h-6">
+                <p className="text-sm text-fg-secondary">
+                  {newTotal > 0
+                    ? `${newTotal} new ${newTotal === 1 ? "chapter" : "chapters"} since you last caught up`
+                    : "You're all caught up."}
+                </p>
+                {newTotal > 0 && <MarkUpdatesReadButton />}
+              </div>
+              <div className="flex flex-col gap-2">
+                {updates.map((item) => (
+                  <FavoriteUpdateRow key={item.chapterId} item={item} />
+                ))}
+              </div>
+              {hasMoreUpdates && (
+                <ShowMoreLink href={`/favorites?tab=updates&page=${parsePageCount(page) + 1}`} />
+              )}
+            </>
+          )
+        ) : activeTab === "manga" ? (
           bookmarkedManga.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
@@ -162,6 +219,7 @@ export default async function FavoritesPage({
                     latestChapterName={latest?.chapter_name ?? null}
                     updatedAt={manga.updated_at}
                     isFavorited
+                    newChapterCount={newCounts.get(manga.id)}
                   />
                 );
               })}

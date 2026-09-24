@@ -15,6 +15,8 @@ interface NavbarProps {
     tag: string | null;
     image: string | null;
   } | null;
+  // Unread new chapters across the viewer's favorites (lib/favorite-updates.ts)
+  newChapterCount?: number;
 }
 
 const navItems = [
@@ -33,11 +35,28 @@ function menuItemClass(isActive = false) {
   );
 }
 
+// Red "something new" dot beside the Favorites link. The count itself is
+// spelled out for screen readers only.
+function NewDot({ count, className = "" }: { count: number; className?: string }) {
+  return (
+    <>
+      <span aria-hidden="true" className={"w-2 h-2 rounded-full bg-red-600 " + className} />
+      <span className="sr-only">
+        {` (${count} new ${count === 1 ? "chapter" : "chapters"})`}
+      </span>
+    </>
+  );
+}
+
 function ActiveBar() {
   return <span aria-hidden="true" className="absolute left-0 inset-y-2 w-0.5 bg-fg" />;
 }
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
+  const hasNew = newChapterCount > 0;
+  // With something new, Favorites opens straight on the Updates tab.
+  const hrefFor = (href: string) => (href === "/favorites" && hasNew ? "/favorites?tab=updates" : href);
+
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -170,14 +189,15 @@ export default function Navbar({ user }: NavbarProps) {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={hrefFor(item.href)}
                   aria-current={isActive ? "page" : undefined}
                   className={
-                    "relative flex items-center px-3 text-sm transition-colors duration-200 " +
+                    "relative flex items-center gap-1.5 px-3 text-sm transition-colors duration-200 " +
                     (isActive ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
                   }
                 >
                   {item.label}
+                  {item.href === "/favorites" && hasNew && <NewDot count={newChapterCount} />}
                   {/* -bottom-0.5 overlaps the nav's border-b-2 exactly */}
                   {isActive && (
                     <span aria-hidden="true" className="absolute inset-x-3 -bottom-0.5 h-0.5 bg-fg" />
@@ -296,9 +316,18 @@ export default function Navbar({ user }: NavbarProps) {
               type="button"
               onClick={() => setIsMenuOpen((v) => !v)}
               aria-expanded={isMenuOpen}
-              aria-label="Menu"
-              className="group flex items-center gap-1"
+              aria-label={hasNew ? `Menu (${newChapterCount} new ${newChapterCount === 1 ? "chapter" : "chapters"})` : "Menu"}
+              className="group relative flex items-center gap-1"
             >
+              {/* Favorites lives inside this menu on phones, so the dot
+                  shows on the button too. Only signed-in users can have
+                  favorites, so this always sits on the avatar. */}
+              {hasNew && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-0.5 -right-0.5 z-10 w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-nav"
+                />
+              )}
               {user ? (
                 <span className="relative w-8 h-8 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
                   {user.image ? (
@@ -328,13 +357,14 @@ export default function Navbar({ user }: NavbarProps) {
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={hrefFor(item.href)}
                     aria-current={isActive ? "page" : undefined}
                     className={menuItemClass(isActive)}
                   >
                     {isActive && <ActiveBar />}
                     <Icon className="w-4 h-4" />
                     {item.label}
+                    {item.href === "/favorites" && hasNew && <NewDot count={newChapterCount} className="ml-auto" />}
                   </Link>
                 );
               })}

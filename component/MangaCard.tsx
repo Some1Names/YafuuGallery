@@ -21,6 +21,9 @@ interface MangaCardProps {
   // omit entirely to hide the heart badge — only pages that already know
   // the viewer's favorite state (e.g. the favorites page) should pass this
   isFavorited?: boolean;
+  // Unread chapters uploaded since the reader last caught up (favorites
+  // page only — see lib/favorite-updates.ts). 0/omitted shows nothing.
+  newChapterCount?: number;
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -35,6 +38,7 @@ export default function MangaCard({
   latestChapterName,
   updatedAt,
   isFavorited,
+  newChapterCount = 0,
 }: MangaCardProps) {
   const isStale = Date.now() - updatedAt.getTime() > WEEK_MS;
 
@@ -79,6 +83,12 @@ export default function MangaCard({
             {timeAgo(updatedAt)}
           </div>
   
+          {newChapterCount > 0 && (
+            <div className="absolute bottom-2 left-2 px-2 py-1 rounded-sm bg-red-600 text-white text-xs font-bold tracking-wide shadow-md">
+              {newChapterCount} NEW
+            </div>
+          )}
+
           {/* Hover Overlay */}
           <div className="absolute inset-0 flex flex-col gap-5 px-6 py-15 bg-bg/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <div className="flex flex-col">

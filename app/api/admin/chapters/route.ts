@@ -107,6 +107,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // A new chapter IS the manga's update — bump its updated_at so it
+    // moves to the front of "Latest Manga" / search and its card's
+    // "updated X ago" badge turns fresh (nothing did this before, so those
+    // only moved when the title/synopsis/images were edited).
+    await prisma.manga.update({ where: { id: manga_id }, data: { updated_at: new Date() } });
+
     // Translation is keyed on chapter+language, so a chapter can carry a
     // PDF per language — one row created per language the admin uploaded.
     if (translations.length > 0) {

@@ -3,6 +3,7 @@ import Navbar from "@/component/Navbar";
 import Footer from "@/component/Footer";
 import SmoothScroll from "@/component/SmoothScroll";
 import { auth } from "@/auth";
+import { getNewChapterTotal } from "@/lib/favorite-updates";
 
 // auth() reads cookies(), which makes it "uncached/runtime" data — per
 // Next's loading.js docs, uncached data read directly in a layout (rather
@@ -23,7 +24,12 @@ async function NavbarWithSession() {
     ? { name: session.user.name ?? null, tag: session.user.tag ?? null, image: session.user.image ?? null }
     : null;
 
-  return <Navbar user={user} />;
+  // The Favorites link's "new chapters" dot. Cheap: one small bookmarks
+  // read + one COUNT. Re-read whenever this layout re-renders — on hard
+  // loads, on coming back from the (fullscreen) viewer, and router.refresh().
+  const newChapterCount = session?.user?.id ? await getNewChapterTotal(session.user.id) : 0;
+
+  return <Navbar user={user} newChapterCount={newChapterCount} />;
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
