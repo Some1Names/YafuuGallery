@@ -14,11 +14,12 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
       onClick={() => onSelect(arc.id)}
       className="h-24 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer text-left bg-surface/95 hover:bg-surface-hover border border-border hover:border-fg-hover transition-colors duration-200"
     >
-      {/* Mobile: width is driven by aspect-video off the row's own height
-          instead of a fixed w-24 — that used to crop the 16:9 arc image
-          into a near-square box. Desktop keeps its existing fixed-width
-          column (sm:aspect-auto cancels the ratio there). */}
-      <div className="relative aspect-video sm:aspect-auto w-auto sm:w-54 h-full overflow-hidden shrink-0 bg-surface">
+      {/* Mobile: width is driven by an aspect ratio off the row's own
+          height instead of a fixed w-24 — that used to crop the 16:9 arc
+          image into a near-square box. 3:2 to match ChapterRow, so the two
+          lists line up when switching between the Chapters/Arcs tabs.
+          Desktop keeps its fixed-width column (sm:aspect-auto). */}
+      <div className="relative aspect-3/2 sm:aspect-auto w-auto sm:w-54 h-full overflow-hidden shrink-0 bg-surface">
         {arc.arc_image_url ? (
           <>
             <Image
