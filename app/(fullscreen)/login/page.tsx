@@ -29,10 +29,21 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { error: signInError } = await authClient.signIn.email({ email, password });
+      const { error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+        // where a (re-sent) verification link should land them
+        callbackURL: getNextPath(),
+      });
 
       if (signInError) {
-        setError("Invalid email or password.");
+        // Right password, unverified email (once verification is on — see
+        // lib/auth.ts): this attempt has already emailed a fresh link.
+        setError(
+          signInError.code === "EMAIL_NOT_VERIFIED"
+            ? `Please verify your email first — we've just sent a new verification link to ${email}.`
+            : "Invalid email or password."
+        );
         return;
       }
 

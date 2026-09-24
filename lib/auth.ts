@@ -3,8 +3,17 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { createLocalAccountIssuer } from "@better-auth/core/db";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import { APIError } from "better-auth/api";
+import { CAN_EMAIL_ANY_ADDRESS, sendEmail } from "@/lib/email";
 import { generateUniqueTag } from "@/lib/user-tag";
+import { displayNameSchema } from "@/lib/signup-schema";
+
+// Email verification for email/password accounts — switched on
+// automatically once the site can email ANY address (CAN_EMAIL_ANY_ADDRESS:
+// a verified Resend domain via RESEND_FROM_ADDRESS). Until then it stays
+// off: the sandbox sender only reaches the Resend account owner, so
+// requiring verification would lock every other new user out.
+const EMAIL_VERIFICATION_ENABLED = CAN_EMAIL_ANY_ADDRESS;
 
 export const betterAuthInstance = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
@@ -12,6 +21,9 @@ export const betterAuthInstance = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    // Unverified email/password accounts can't sign in once verification
+    // is on — the sign-in attempt re-sends the link instead (sendOnSignIn).
+    requireEmailVerification: EMAIL_VERIFICATION_ENABLED,
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -20,6 +32,25 @@ export const betterAuthInstance = betterAuth({
           <p>Someone requested a password reset for your YafuuGallery account.</p>
           <p><a href="${url}">Click here to reset your password</a></p>
           <p>If you didn't request this, you can safely ignore this email.</p>
+        `,
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: EMAIL_VERIFICATION_ENABLED,
+    // an unverified sign-in attempt emails a fresh link, so there's no
+    // separate "resend" flow to build or lose track of
+    sendOnSignIn: EMAIL_VERIFICATION_ENABLED,
+    // clicking the link signs them straight in
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your YafuuGallery email",
+        html: `
+          <p>Welcome to YafuuGallery! Confirm this is your email address to finish creating your account.</p>
+          <p><a href="${url}">Verify my email</a></p>
+          <p>If you didn't create an account, you can safely ignore this email.</p>
         `,
       });
     },
@@ -40,15 +71,16 @@ export const betterAuthInstance = betterAuth({
   },
   account: {
     accountLinking: {
-      // There's no email-verification flow in this app yet, so every
-      // email/password account has emailVerified: false. Better Auth's
-      // default refuses to link a social sign-in onto an unverified local
-      // account (an account-takeover guard) — without this, anyone who
-      // already made an email/password account could never also sign in
-      // with Google using the same address. Since Google itself verifies
-      // the email on its end, that's an acceptable trade for now; revisit
-      // if/when real email verification is added.
-      requireLocalEmailVerified: false,
+      // Better Auth's default refuses to link a Google sign-in onto an
+      // UNVERIFIED local account — an account-takeover guard (someone
+      // could register your email with their own password first). Only
+      // enforced once email verification is actually on: before that, no
+      // account can ever become verified by email, so enforcing it would
+      // just stop people who signed up with a password from ever also
+      // using Google. (Accounts created before verification switches on
+      // are marked verified — see the user.create hook and
+      // scripts/mark-existing-users-verified.mjs.)
+      requireLocalEmailVerified: EMAIL_VERIFICATION_ENABLED,
       // Copy Google's name/profile picture onto the local account the
       // first time it links (brand-new Google sign-ups already get this
       // for free — this covers linking Google onto an existing
@@ -91,9 +123,33 @@ export const betterAuthInstance = betterAuth({
         // sign-ups, since both create the User row through this same
         // hook; for Google, mapProfileToUser above has already set
         // `user.name` by the time this fires.
-        before: async (user) => {
+        before: async (user, ctx) => {
+          // Email/password signups get the same display-name rule as the
+          // signup form and profile edits (lib/signup-schema.ts) —
+          // enforced here too, since the form's check only runs in the
+          // browser and the signup endpoint can be called directly. Not
+          // applied to Google sign-ups: their name comes from Google
+          // (possibly with spaces or non-Latin letters) and rejecting it
+          // would make Google sign-in fail outright.
+          if (ctx?.path === "/sign-up/email") {
+            const parsed = displayNameSchema.safeParse(user.name);
+            if (!parsed.success) {
+              throw new APIError("BAD_REQUEST", { message: parsed.error.issues[0].message });
+            }
+          }
+
           const tag = await generateUniqueTag(user.name);
-          return { data: { tag } };
+          return {
+            data: {
+              tag,
+              // While verification is off, nothing can verify an email —
+              // treat accounts created in that window like the existing
+              // ones (grandfathered as verified), so switching verification
+              // on later never locks them out. Once it's on, new accounts
+              // start unverified as normal.
+              ...(!EMAIL_VERIFICATION_ENABLED && { emailVerified: true }),
+            },
+          };
         },
       },
     },

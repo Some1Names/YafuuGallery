@@ -7,12 +7,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { signupSchema, type SignupFormValues } from "@/lib/signup-schema";
 import { authClient } from "@/lib/auth-client";
+import { safeNextPath } from "@/lib/login-redirect";
 import GoogleIcon from "@/component/icons/GoogleIcon";
 
 export default function SignUpPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  // Set when the account was created but needs its email verified before
+  // it can sign in — shows a "check your email" screen instead of the form.
+  const [verifyEmailSentTo, setVerifyEmailSentTo] = useState<string | null>(null);
 
   const {
     register,
@@ -27,14 +31,24 @@ export default function SignUpPage() {
     setServerError(null);
 
     try {
-      const { error } = await authClient.signUp.email({
+      const { data, error } = await authClient.signUp.email({
         email: values.email,
         password: values.password,
         name: values.name,
+        // where the verification link lands them (signed in) — back to the
+        // page that sent them to sign up, if any
+        callbackURL: safeNextPath(new URLSearchParams(window.location.search).get("next")),
       });
 
       if (error) {
         setServerError(error.message ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      // No session token = email verification is required first (see
+      // lib/auth.ts) — the verification email is already on its way.
+      if (!data?.token) {
+        setVerifyEmailSentTo(values.email);
         return;
       }
 
@@ -61,6 +75,22 @@ export default function SignUpPage() {
 
       {/* Right panel — form */}
       <div className="flex items-center justify-center px-6 py-16">
+        {verifyEmailSentTo ? (
+          <div className="w-full max-w-sm">
+            <h1 className="text-2xl text-fg font-(family-name:--font-display)">Check your email</h1>
+            <p className="mt-3 text-sm text-fg-secondary">
+              We sent a verification link to <span className="text-fg">{verifyEmailSentTo}</span>. Open it to
+              finish creating your account — it signs you straight in.
+            </p>
+            <p className="mt-3 text-sm text-fg-secondary">
+              Didn&apos;t get it? Check your spam folder, or{" "}
+              <Link href="/login" className="text-fg font-medium hover:underline">
+                try logging in
+              </Link>{" "}
+              to have a new link sent.
+            </p>
+          </div>
+        ) : (
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <h1 className="text-2xl text-fg font-(family-name:--font-display)">Sign Up</h1>
@@ -163,6 +193,7 @@ export default function SignUpPage() {
             </p>
           </form>
         </div>
+        )}
       </div>
     </div>
   );

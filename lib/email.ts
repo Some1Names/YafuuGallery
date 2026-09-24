@@ -8,6 +8,14 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 // once you're ready to send to arbitrary recipients.
 const FROM_ADDRESS = process.env.RESEND_FROM_ADDRESS ?? "YafuuGallery <onboarding@resend.dev>";
 
+// True only once email can actually reach ANY address: an API key plus a
+// verified sending domain (RESEND_FROM_ADDRESS). The sandbox sender only
+// delivers to the Resend account owner, so anything every user depends on
+// receiving — email verification (lib/auth.ts) — must stay off until this
+// is true, or new users would be locked out waiting for mail that never
+// arrives.
+export const CAN_EMAIL_ANY_ADDRESS = Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_ADDRESS);
+
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   if (!resend) {
     console.log(`[Email — RESEND_API_KEY not set] To: ${to} | Subject: ${subject}\n${html}`);
