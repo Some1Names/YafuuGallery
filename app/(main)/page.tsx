@@ -9,7 +9,7 @@ import { getContinueReading } from "@/lib/continue-reading";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 
-const LATEST_PAGE_SIZE = 20;
+const LATEST_PAGE_SIZE = 10;
 
 export default async function BrowsePage({
   searchParams,
