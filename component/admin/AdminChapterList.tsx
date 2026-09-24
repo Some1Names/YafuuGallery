@@ -117,9 +117,14 @@ export default function AdminChapterList({
   const dragOverIndexRef = useRef<number | null>(null);
   const rowRefs = useRef(new Map<number, HTMLDivElement>());
 
-  useEffect(() => {
+  // Re-sync with fresh server data (after router.refresh()) during render
+  // rather than in an effect, which would paint one frame of the stale
+  // order first (React's "adjusting state when a prop changes" pattern).
+  const [prevChapters, setPrevChapters] = useState(chapters);
+  if (chapters !== prevChapters) {
+    setPrevChapters(chapters);
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
-  }, [chapters]);
+  }
 
   const displayNumbers = new Map<string, number>();
   let regularCounter = 0;

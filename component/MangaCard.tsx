@@ -4,7 +4,7 @@ import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 import NoImagePlaceholder from "./NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
-import { timeAgo } from "@/lib/time-ago";
+import { isOlderThan, timeAgo } from "@/lib/time-ago";
 
 interface MangaCardProps {
   id: string;
@@ -40,7 +40,9 @@ export default function MangaCard({
   isFavorited,
   newChapterCount = 0,
 }: MangaCardProps) {
-  const isStale = Date.now() - updatedAt.getTime() > WEEK_MS;
+  // A server component, rendered once per request — reading the clock
+  // here (as timeAgo below does too) can't cause a re-render mismatch.
+  const isStale = isOlderThan(updatedAt, WEEK_MS);
 
   // The favorite toggle is a SIBLING of the card's link, positioned over
   // the cover's corner — not inside the <a>. A button inside a link is

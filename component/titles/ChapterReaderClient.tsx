@@ -185,8 +185,9 @@ export default function ChapterReaderClient({
   const isMobile = viewportWidth < 640;
 
   // top bar auto-hides in fullscreen mode unless the mouse is near the
-  // top edge of the screen — vertical mode always shows it
-  const [topBarVisible, setTopBarVisible] = useState(true);
+  // top edge of the screen — vertical mode always shows it. Opening
+  // straight into fullscreen (saved mode) starts it hidden.
+  const [topBarVisible, setTopBarVisible] = useState(!isFullscreen);
 
   // Comment panel — signed-out visitors never see it open at all (the
   // bubble button sends them to /signup instead), so no signed-out UI
@@ -234,9 +235,15 @@ export default function ChapterReaderClient({
     setIsCommentPanelOpen((v) => !v);
   }
 
-  useEffect(() => {
+  // Moving to another chapter closes the panel. Adjusted during render
+  // (React's "adjusting state when a prop changes" pattern) instead of in
+  // an effect, which would paint one frame of the old panel first — the
+  // same pattern is used for the page reset and top bar below.
+  const [panelChapterId, setPanelChapterId] = useState(currentChapterId);
+  if (currentChapterId !== panelChapterId) {
+    setPanelChapterId(currentChapterId);
     setIsCommentPanelOpen(false);
-  }, [currentChapterId]);
+  }
 
   // chapter-selector dropdown
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
@@ -586,9 +593,14 @@ export default function ChapterReaderClient({
     settleDrag(0);
   }
 
-  useEffect(() => {
+  // A different file (another chapter, or a language switch) starts on
+  // page 1; onDocumentLoadSuccess then resumes the saved page if there is
+  // one, once the new document has loaded.
+  const [pagePdfUrl, setPagePdfUrl] = useState(pdfUrl);
+  if (pdfUrl !== pagePdfUrl) {
+    setPagePdfUrl(pdfUrl);
     setCurrentPage(1);
-  }, [pdfUrl]);
+  }
 
   useEffect(() => {
     if (mode !== "horizontal") return;
@@ -622,13 +634,15 @@ export default function ChapterReaderClient({
     pageRefs.current.get(currentPageRef.current)?.scrollIntoView({ block: "start" });
   }, [mode]);
 
-  // top bar visibility follows the mouse only in fullscreen mode
+  // top bar visibility follows the mouse only in fullscreen mode: shown
+  // outside it, and hidden on entering it until the mouse moves up
+  const [barFullscreen, setBarFullscreen] = useState(isFullscreen);
+  if (isFullscreen !== barFullscreen) {
+    setBarFullscreen(isFullscreen);
+    setTopBarVisible(!isFullscreen);
+  }
   useEffect(() => {
-    if (!isFullscreen) {
-      setTopBarVisible(true);
-      return;
-    }
-    setTopBarVisible(false); // start hidden in fullscreen until the mouse moves up
+    if (!isFullscreen) return;
     const onMove = (e: MouseEvent) => {
       setTopBarVisible(e.clientY < 96);
     };

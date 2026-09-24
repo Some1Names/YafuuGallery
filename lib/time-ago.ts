@@ -26,3 +26,9 @@ export function timeAgo(date: Date): string {
 
   return rtf.format(-Math.round(value), unit);
 }
+
+// Whether `date` is more than `ms` in the past — MangaCard's "stale
+// update" check (its badge goes from red to gray after a week).
+export function isOlderThan(date: Date, ms: number): boolean {
+  return Date.now() - date.getTime() > ms;
+}

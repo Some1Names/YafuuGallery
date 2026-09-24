@@ -72,15 +72,27 @@ export default function ChapterCommentPanel({
     onCommentsSeenRef.current = onCommentsSeen;
   });
 
+  // Each opening (or a different chapter while open) starts from a clean
+  // loading state. Reset during render, not in the fetch effect below, so
+  // the stale list from the last opening is never painted for a frame
+  // (React's "adjusting state when a prop changes" pattern).
+  const openKey = isOpen ? chapterId : null;
+  const [prevOpenKey, setPrevOpenKey] = useState<string | null>(null);
+  if (openKey !== prevOpenKey) {
+    setPrevOpenKey(openKey);
+    if (openKey !== null) {
+      setComments(null);
+      setHasOlder(false);
+      setError(null);
+    }
+  }
+
   // Refetches fresh every time the panel opens (also covers switching
   // chapters, since ChapterReaderClient closes the panel on that and this
   // effect re-runs the moment it's reopened for the new chapterId).
   useEffect(() => {
     if (!isOpen) return;
     let cancelled = false;
-    setComments(null);
-    setHasOlder(false);
-    setError(null);
     fetch(`/api/chapters/${chapterId}/comments`)
       .then((res) => res.json())
       .then((data: { comments: CommentItem[]; hasMore: boolean }) => {

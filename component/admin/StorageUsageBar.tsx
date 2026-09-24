@@ -44,7 +44,7 @@ export default function StorageUsageBar({ bytesUsed, objectCount }: StorageUsage
 
       {isOver && (
         <p className="text-xs text-danger mt-2">
-          Over the free tier's 10 GB — R2 usage is now billed.
+          Over the free tier&apos;s 10 GB — R2 usage is now billed.
         </p>
       )}
     </div>

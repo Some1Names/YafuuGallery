@@ -104,9 +104,14 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
   const dragOverIndexRef = useRef<number | null>(null);
   const rowRefs = useRef(new Map<number, HTMLDivElement>());
 
-  useEffect(() => {
+  // Re-sync with fresh server data (after router.refresh()) during render
+  // rather than in an effect, which would paint one frame of the stale
+  // order first (React's "adjusting state when a prop changes" pattern).
+  const [prevArcs, setPrevArcs] = useState(arcs);
+  if (arcs !== prevArcs) {
+    setPrevArcs(arcs);
     setOrdered(arcs.slice().sort((a, b) => a.arc_order - b.arc_order));
-  }, [arcs]);
+  }
 
   const displayNumbers = new Map<string, number>();
   let regularCounter = 0;
