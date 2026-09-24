@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
+import { loginHref } from "@/lib/login-redirect";
 
 interface ChapterFavoriteButtonProps {
   chapterId: string;
@@ -11,11 +14,14 @@ export default function ChapterFavoriteButton({
   chapterId,
   initialFavorited,
 }: ChapterFavoriteButtonProps) {
+  const router = useRouter();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [isPending, startTransition] = useTransition();
 
   async function toggle(e: React.MouseEvent) {
-    // stop the click from also triggering the row's own onClick/navigation
+    // Belt-and-braces: callers render this as a sibling of their card/row
+    // link, never inside it, but stop the click anyway so nothing behind
+    // it navigates.
     e.preventDefault();
     e.stopPropagation();
 
@@ -31,8 +37,8 @@ export default function ChapterFavoriteButton({
 
         if (res.status === 401) {
           setFavorited(!next); // roll back
-          // TODO: once auth/login page exists, redirect there instead
-          alert("Sign in to favorite chapters.");
+          // signed out — sign in, then come straight back to this page
+          router.push(loginHref(window.location.pathname + window.location.search));
           return;
         }
 
@@ -57,11 +63,11 @@ export default function ChapterFavoriteButton({
       aria-pressed={favorited}
       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
       className={
-        "text-sm transition-colors duration-200 disabled:opacity-50 " +
-        (favorited ? "text-danger" : "text-fg-secondary hover:text-fg")
+        "flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
+        (favorited ? "text-red-500" : "text-fg-secondary hover:text-fg")
       }
     >
-      {favorited ? "❤" : "❤︎"}
+      <Heart className={"w-4 h-4 " + (favorited ? "fill-current" : "")} />
     </button>
   );
 }

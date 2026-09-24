@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
+import { loginHref } from "@/lib/login-redirect";
 
 interface MangaFavoriteButtonProps {
   mangaId: string;
@@ -19,11 +21,14 @@ export default function MangaFavoriteButton({
   initialFavorited,
   variant = "button",
 }: MangaFavoriteButtonProps) {
+  const router = useRouter();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [isPending, startTransition] = useTransition();
 
   function toggle(e: React.MouseEvent) {
-    // stop the click from also triggering the card's own Link navigation
+    // Belt-and-braces: MangaCard renders this as a sibling of its link,
+    // never inside it, but stop the click anyway so nothing behind it
+    // navigates.
     e.preventDefault();
     e.stopPropagation();
 
@@ -36,7 +41,8 @@ export default function MangaFavoriteButton({
 
         if (res.status === 401) {
           setFavorited(!next);
-          alert("Sign in to favorite manga.");
+          // signed out — sign in, then come straight back to this page
+          router.push(loginHref(window.location.pathname + window.location.search));
           return;
         }
         if (!res.ok) {
@@ -61,11 +67,11 @@ export default function MangaFavoriteButton({
         aria-pressed={favorited}
         aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         className={
-          "text-sm transition-colors duration-200 disabled:opacity-50 " +
-          (favorited ? "text-danger" : "text-fg hover:text-danger")
+          "flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
+          (favorited ? "text-red-500" : "text-fg hover:text-red-500")
         }
       >
-        {favorited ? "❤" : "❤︎"}
+        <Heart className={"w-4 h-4 " + (favorited ? "fill-current" : "")} />
       </button>
     );
   }

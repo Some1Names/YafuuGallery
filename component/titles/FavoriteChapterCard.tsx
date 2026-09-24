@@ -23,10 +23,12 @@ export default function FavoriteChapterCard({
   coverImageUrl,
 }: FavoriteChapterCardProps) {
   return (
-    <div className="group relative flex flex-col gap-2">
+    // The heart is a sibling of the link, positioned over its corner — a
+    // button nested inside an <a> is invalid HTML (see MangaCard).
+    <div className="group relative">
       <Link
         href={`/viewer/${chapterId}`}
-        className="relative block w-full aspect-square rounded-lg overflow-hidden bg-fg"
+        className="relative block w-full aspect-square rounded-lg overflow-hidden bg-surface"
       >
         {coverImageUrl ? (
           <Image
@@ -47,11 +49,11 @@ export default function FavoriteChapterCard({
           </div>
           <div className="text-fg/80 text-xs truncate">{chapterName}</div>
         </div>
-
-        <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm flex items-center justify-center">
-          <ChapterFavoriteButton chapterId={chapterId} initialFavorited={true} />
-        </div>
       </Link>
+
+      <div className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm flex items-center justify-center">
+        <ChapterFavoriteButton chapterId={chapterId} initialFavorited={true} />
+      </div>
     </div>
   );
 }

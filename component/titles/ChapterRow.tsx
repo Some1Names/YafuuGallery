@@ -19,10 +19,17 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
     year: "numeric",
   });
 
+  const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
+
+  // "Stretched link": the chapter number is the actual <a>, and its
+  // ::after covers the whole row, so the entire row is still one big click
+  // target — while the favorite heart sits above that overlay (relative
+  // z-10) as a real sibling button. Wrapping the whole row in the <a> put
+  // the button inside the link, which is invalid HTML. The row shows the
+  // keyboard focus ring for the link via has-[:focus-visible].
   return (
-    <Link
-      href={`/viewer/${chapter.id}`}
-      className="h-24 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer bg-surface/95 hover:bg-surface-hover border border-border hover:border-fg-hover transition-colors duration-200"
+    <div
+      className="relative h-24 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer bg-surface/95 hover:bg-surface-hover border border-border hover:border-fg-hover has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-fg transition-colors duration-200"
     >
       {/* Mobile: width is driven by an aspect ratio off the row's own
           height instead of a fixed w-24 — that used to crop the 16:9
@@ -53,12 +60,16 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
             phones, and the heart is shrink-0 so it always keeps its spot. */}
         <div className="flex items-center justify-between gap-4 w-full">
           <div className="flex items-baseline gap-2 min-w-0">
-            <span className="text-md sm:text-lg text-fg group-hover:text-fg-hover transition-colors duration-200 shrink-0">
-              {formatChapterBadge(chapter.chapter_is_ex, displayNumber)}
-            </span>
+            <Link
+              href={`/viewer/${chapter.id}`}
+              aria-label={`${badge} ${chapter.chapter_name}`}
+              className="text-md sm:text-lg text-fg group-hover:text-fg-hover transition-colors duration-200 shrink-0 outline-none after:absolute after:inset-0"
+            >
+              {badge}
+            </Link>
             <span className="min-w-0 truncate text-xs sm:text-sm text-fg-secondary">{publishedLabel}</span>
           </div>
-          <div className="shrink-0">
+          <div className="relative z-10 shrink-0">
             <ChapterFavoriteButton chapterId={chapter.id} initialFavorited={isFavorited} />
           </div>
         </div>
@@ -74,6 +85,6 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

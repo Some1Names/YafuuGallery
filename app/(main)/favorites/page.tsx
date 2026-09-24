@@ -6,19 +6,21 @@ import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import FavoriteChapterCard from "@/component/titles/FavoriteChapterCard";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { loginHref } from "@/lib/login-redirect";
 
 export default async function FavoritesPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
   const { tab } = await searchParams;
   const activeTab: "manga" | "chapters" = tab === "chapters" ? "chapters" : "manga";
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    // come straight back here (same tab) once signed in
+    redirect(loginHref(activeTab === "chapters" ? "/favorites?tab=chapters" : "/favorites"));
+  }
   const userId = session.user.id;
 
   const [bookmarkedManga, favoritedChapters] = await Promise.all([
@@ -90,9 +92,13 @@ export default async function FavoritesPage({
     ])
   );
 
-  const tabClass = (isActive: boolean) =>
-    "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
-    (isActive ? "bg-surface-hover text-fg" : "text-fg-secondary hover:text-fg");
+  // Same tab treatment as the manga page's Chapters/Arcs and the navbar:
+  // display face, count beside the label, current tab marked by a 2px ink
+  // bar sitting on the row's bottom rule.
+  const tabs = [
+    { id: "manga" as const, label: "Manga", count: bookmarkedManga.length },
+    { id: "chapters" as const, label: "Chapters", count: favoritedChapters.length },
+  ];
 
   return (
     <div className="relative min-h-screen bg-bg px-6 sm:px-8 py-12">
@@ -111,22 +117,32 @@ export default async function FavoritesPage({
         </div>
 
         {/* Tabs */}
-        <div className="inline-flex items-center gap-1 p-1 mb-10 rounded-md border border-border bg-surface">
-          <Link href="?tab=manga" className={tabClass(activeTab === "manga")}>
-            Manga
-            <span className="ml-1.5 text-xs text-fg-muted">{bookmarkedManga.length}</span>
-          </Link>
-          <Link href="?tab=chapters" className={tabClass(activeTab === "chapters")}>
-            Chapters
-            <span className="ml-1.5 text-xs text-fg-muted">{favoritedChapters.length}</span>
-          </Link>
+        <div className="flex gap-6 mb-10 border-b border-fg/10">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <Link
+                key={tab.id}
+                href={`?tab=${tab.id}`}
+                aria-current={isActive ? "page" : undefined}
+                className={
+                  "relative pb-3 text-lg sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
+                  (isActive ? "text-fg" : "text-fg-muted hover:text-fg-secondary")
+                }
+              >
+                {tab.label}
+                <span className="ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
+                {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
+              </Link>
+            );
+          })}
         </div>
 
         {activeTab === "manga" ? (
           bookmarkedManga.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
-                No manga bookmarked yet — hit &quot;Add to Favorites&quot; on a manga page to see it here.
+                No favorite manga yet. Tap &quot;Favorite&quot; on any manga page to save it here.
               </p>
             </div>
           ) : (
@@ -154,7 +170,7 @@ export default async function FavoritesPage({
         ) : favoritedChapters.length === 0 ? (
           <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
             <p className="text-fg-secondary text-sm">
-              No favorited chapters yet — tap the heart on any chapter to see it here.
+              No favorite chapters yet. Tap the heart on any chapter to save it here.
             </p>
           </div>
         ) : (

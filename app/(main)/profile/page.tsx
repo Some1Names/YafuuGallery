@@ -5,11 +5,12 @@ import ProfileEditForm from "@/component/profile/ProfileEditForm";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import { getContinueReading } from "@/lib/continue-reading";
+import { loginHref } from "@/lib/login-redirect";
 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect(loginHref("/profile"));
   }
 
   const userId = session.user.id;
@@ -27,7 +28,7 @@ export default async function ProfilePage() {
       getContinueReading(userId, 4),
     ]);
 
-  if (!user) redirect("/login");
+  if (!user) redirect(loginHref("/profile"));
 
   const stats = [
     { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },

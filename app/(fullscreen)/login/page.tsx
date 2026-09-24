@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import GoogleIcon from "@/component/icons/GoogleIcon";
+import { safeNextPath } from "@/lib/login-redirect";
+
+// Where to go after signing in: the page that sent the reader here
+// (?next=, see lib/login-redirect.ts), else home. Read from the live URL at
+// sign-in time rather than via useSearchParams, which would need its own
+// Suspense boundary just for this.
+function getNextPath(): string {
+  return safeNextPath(new URLSearchParams(window.location.search).get("next"));
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +36,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      router.push(getNextPath());
       router.refresh();
     } catch {
       setError("Network error — please try again.");
@@ -64,7 +73,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: "/" })}
+            onClick={() => authClient.signIn.social({ provider: "google", callbackURL: getNextPath() })}
             className="w-full flex items-center justify-center gap-2 border border-google-border bg-surface rounded-md py-2.5 text-sm text-fg font-medium hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
           >
             <GoogleIcon />
