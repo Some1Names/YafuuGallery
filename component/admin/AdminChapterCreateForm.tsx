@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
+import { todayLocalISODate } from "@/lib/dates";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -32,7 +33,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   const [arcId, setArcId] = useState("");
   const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
-  const [publishedDate, setPublishedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [publishedDate, setPublishedDate] = useState(todayLocalISODate);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,7 +55,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
     setArcId("");
     setChapterIsEx(false);
     setChapterName("");
-    setPublishedDate(new Date().toISOString().slice(0, 10));
+    setPublishedDate(todayLocalISODate());
     setError(null);
   }
 

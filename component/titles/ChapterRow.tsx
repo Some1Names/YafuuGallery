@@ -4,6 +4,7 @@ import { Heart, MessageCircle } from "lucide-react";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
+import { formatPublishedDate } from "@/lib/dates";
 import type { ChapterItem } from "./types";
 
 interface ChapterRowProps {
@@ -13,11 +14,7 @@ interface ChapterRowProps {
 }
 
 export default function ChapterRow({ chapter, displayNumber, isFavorited = false }: ChapterRowProps) {
-  const publishedLabel = chapter.published_date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const publishedLabel = formatPublishedDate(chapter.published_date);
 
   const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
 

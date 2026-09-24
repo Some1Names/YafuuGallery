@@ -9,6 +9,7 @@ import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import { formatBytes } from "@/lib/format-bytes";
+import { formatPublishedDate } from "@/lib/dates";
 
 interface AdminChapterRowProps {
   id: string;
@@ -166,7 +167,7 @@ export default function AdminChapterRow({
             </p>
             <p className="text-sm text-fg-secondary mt-0.5 truncate">
               {arcName ? `${arcName} · ` : ""}
-              {publishedDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              {formatPublishedDate(publishedDate)}
             </p>
             <div className="flex items-center gap-3 mt-1 text-xs text-fg-muted">
               <span className="flex items-center gap-1">
