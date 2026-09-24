@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import ChapterReaderClient from "@/component/titles/ChapterReaderClient";
+import ChapterReader from "@/component/titles/ChapterReader";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
 
 export async function generateMetadata({
@@ -67,7 +67,10 @@ export default async function ViewerPage({
       select: {
         chapter_number: true,
         chapter_name: true,
-        comment_count: true,
+        // Live count of VISIBLE comments rather than the stored
+        // comment_count column, which had drifted (it was never lowered
+        // when a comment was deleted, and counted admin-hidden ones).
+        _count: { select: { comments: { where: { hidden_at: null } } } },
         translations: { select: { file_url: true, language: true } },
         manga: {
           select: {
@@ -88,34 +91,54 @@ export default async function ViewerPage({
     notFound();
   }
 
-  // Record/bump reading progress so "Continue reading" on the profile page
-  // has something to show — one row per (user, chapter), updated_at refreshed
-  // on every visit via Prisma's @updatedAt. Deferred via after() instead of
-  // awaited: this is the single most-visited route in the app, and nothing
-  // on this page depends on the write succeeding before rendering — after()
-  // still guarantees it runs to completion (unlike a bare un-awaited
-  // promise, which a serverless platform can kill once the response ships).
-  if (session?.user?.id) {
-    const userId = session.user.id;
-    after(() =>
-      prisma.readingProgress.upsert({
+  const userId = session?.user?.id ?? null;
+
+  // Where this reader left off in this chapter (saved by the reader as they
+  // go — see /api/chapters/[id]/progress), so reopening it — e.g. from a
+  // "Continue" button — resumes on that page instead of page 1. A chapter
+  // they already finished starts over from the top.
+  const progress = userId
+    ? await prisma.readingProgress.findUnique({
+        where: { user_id_chapter_id: { user_id: userId, chapter_id: id } },
+        select: { last_page_read: true, completed: true },
+      })
+    : null;
+  const resumePage = progress && !progress.completed ? progress.last_page_read : 0;
+
+  // Deferred via after() instead of awaited: this is the single most-visited
+  // route in the app, and nothing on this page depends on these writes
+  // before rendering — after() still guarantees they run to completion
+  // (unlike a bare un-awaited promise, which a serverless platform can kill
+  // once the response ships).
+  after(async () => {
+    // Every visit counts as a view — signed in or not. Nothing incremented
+    // view_count before, so every "views" figure (admin, /manage, the home
+    // hero's most-viewed fallback) was stuck at 0.
+    await prisma.chapter.update({ where: { id }, data: { view_count: { increment: 1 } } });
+
+    // Record/bump reading progress so "Continue reading" has something to
+    // show — one row per (user, chapter), updated_at refreshed on every
+    // visit via Prisma's @updatedAt.
+    if (userId) {
+      await prisma.readingProgress.upsert({
         where: { user_id_chapter_id: { user_id: userId, chapter_id: id } },
         create: { user_id: userId, chapter_id: id },
         update: {},
-      })
-    );
-  }
+      });
+    }
+  });
 
   return (
-    <ChapterReaderClient
+    <ChapterReader
       translations={chapter.translations.map((t) => ({ language: t.language, url: t.file_url }))}
       currentChapterId={id}
       chapterName={chapter.chapter_name}
       mangaTitle={chapter.manga.manga_title}
       mangaId={chapter.manga.id}
       chapters={chapter.manga.chapters}
-      currentUserId={session?.user?.id ?? null}
-      initialCommentCount={chapter.comment_count}
+      currentUserId={userId}
+      initialCommentCount={chapter._count.comments}
+      resumePage={resumePage}
     />
   );
 }

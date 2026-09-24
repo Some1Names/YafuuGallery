@@ -21,10 +21,19 @@ export async function POST(
     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   }
 
-  const updated = await prisma.comment.update({
-    where: { id },
-    data: { hidden_at: comment.hidden_at ? null : new Date() },
-  });
+  // comment_count counts VISIBLE comments, so hiding takes one off and
+  // unhiding puts it back — in the same transaction as the toggle itself.
+  const hiding = comment.hidden_at === null;
+  const [updated] = await prisma.$transaction([
+    prisma.comment.update({
+      where: { id },
+      data: { hidden_at: hiding ? new Date() : null },
+    }),
+    prisma.chapter.update({
+      where: { id: comment.chapter_id },
+      data: { comment_count: hiding ? { decrement: 1 } : { increment: 1 } },
+    }),
+  ]);
 
   return NextResponse.json({ hidden: updated.hidden_at !== null });
 }

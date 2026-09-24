@@ -10,9 +10,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
 import { LANGUAGE_LABELS, type Language } from "@/lib/language";
+import { loginHref } from "@/lib/login-redirect";
+import { configurePdfWorker } from "@/lib/pdf-worker";
 import ChapterCommentPanel from "./ChapterCommentPanel";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+configurePdfWorker(pdfjs);
+
+// The reader's chosen mode persists across chapters and reloads. Safe to
+// read during the first render: this component only ever renders in the
+// browser (ChapterReader loads it with ssr: false).
+const READING_MODE_KEY = "yfgll_reading_mode";
+
+function readSavedMode(): "vertical" | "horizontal" {
+  try {
+    return localStorage.getItem(READING_MODE_KEY) === "horizontal" ? "horizontal" : "vertical";
+  } catch {
+    return "vertical";
+  }
+}
+
+// How long reading position has to sit still before it's saved — a scroll
+// through a chapter shouldn't fire a request for every page it passes.
+const PROGRESS_SAVE_DELAY_MS = 1500;
 
 const SWIPE_THRESHOLD_PX = 50;
 // Below this, a completed gesture is a tap (toggle the top bar) rather
@@ -48,6 +67,8 @@ interface ChapterReaderProps {
   // /signup instead of opening the panel when this is null.
   currentUserId: string | null;
   initialCommentCount: number;
+  // Saved page to reopen on (0 = start at the top) — from ReadingProgress.
+  resumePage: number;
 }
 
 export default function ChapterReaderClient({
@@ -59,6 +80,7 @@ export default function ChapterReaderClient({
   chapters,
   currentUserId,
   initialCommentCount,
+  resumePage,
 }: ChapterReaderProps) {
   const router = useRouter();
   const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
@@ -73,7 +95,7 @@ export default function ChapterReaderClient({
   const prevChapter = chapters[currentChapterIdx - 1];
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
   const chapterLabel = `Chapter ${currentIsEx ? "ex" : (currentDisplayNumber ?? 0)}: ${chapterName}`;
-  const [mode, setMode] = useState<ReadingMode>("vertical");
+  const [mode, setMode] = useState<ReadingMode>(readSavedMode);
 
   // Which language is currently showing. Falls back to the chapter's first
   // available translation whenever the picked one isn't actually in this
@@ -90,7 +112,10 @@ export default function ChapterReaderClient({
   // language-selector dropdown
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
+  const languageButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Closes on an outside click or Escape (focus back to the toggle, so a
+  // keyboard user isn't dropped at the top of the page).
   useEffect(() => {
     if (!isLanguageMenuOpen) return;
     const onClickOutside = (e: MouseEvent) => {
@@ -98,8 +123,18 @@ export default function ChapterReaderClient({
         setIsLanguageMenuOpen(false);
       }
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsLanguageMenuOpen(false);
+        languageButtonRef.current?.focus();
+      }
+    };
     document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isLanguageMenuOpen]);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageWidth, setPageWidth] = useState(760);
@@ -127,7 +162,8 @@ export default function ChapterReaderClient({
 
   function handleCommentButtonClick() {
     if (!currentUserId) {
-      router.push("/signup");
+      // sign in, then land straight back on this chapter
+      router.push(loginHref(`/viewer/${currentChapterId}`));
       return;
     }
     setIsCommentPanelOpen((v) => !v);
@@ -141,6 +177,7 @@ export default function ChapterReaderClient({
   // chapter-selector dropdown
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
   const chapterMenuRef = useRef<HTMLDivElement>(null);
+  const chapterButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isChapterMenuOpen) return;
@@ -149,9 +186,40 @@ export default function ChapterReaderClient({
         setIsChapterMenuOpen(false);
       }
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsChapterMenuOpen(false);
+        chapterButtonRef.current?.focus();
+      }
+    };
     document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isChapterMenuOpen]);
+
+  // The single source of truth for reading position, shared by both modes,
+  // so switching modes lands on the same page instead of jumping back to
+  // the start. Horizontal mode's spreadIdx is derived from it below;
+  // vertical mode's scroll position is synced to/from it via pageRefs.
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Vertical mode's page wrapper divs, keyed by page number — used to jump
+  // the scroll position to currentPage when entering vertical mode, and to
+  // read the currently-scrolled-to page when leaving it.
+  const pageRefs = useRef(new Map<number, HTMLDivElement>());
+
+  // Latest props/mode for onDocumentLoadSuccess, which is created once and
+  // would otherwise see stale values after navigating between chapters
+  // (this component persists across that navigation). Synced after every
+  // render further down.
+  const latestRef = useRef({ chapterId: currentChapterId, resumePage, mode: "vertical" as ReadingMode });
+  // Which chapter's saved position has been restored — progress saving
+  // waits for this, or the page-1 state a PDF opens on could be saved over
+  // the reader's real position before the resume below gets to run.
+  const restoredChapterRef = useRef<string | null>(null);
 
   const onDocumentLoadSuccess = useCallback(async (pdf: PDFDocumentProxy) => {
     setNumPages(pdf.numPages);
@@ -164,6 +232,25 @@ export default function ChapterReaderClient({
       })
     );
     setPageRatios(Object.fromEntries(entries));
+
+    // Resume where this reader left off, once per chapter (not again on a
+    // language switch, which reloads the document). Only possible now that
+    // pageRatios are known: vertical mode's page wrappers get their real
+    // heights from them, so scrolling to one lands in the right place.
+    const { chapterId, resumePage: savedPage, mode: currentMode } = latestRef.current;
+    if (restoredChapterRef.current !== chapterId) {
+      if (savedPage > 1) {
+        const page = Math.min(savedPage, pdf.numPages);
+        setCurrentPage(page);
+        if (currentMode === "vertical") {
+          // two frames: let React commit the sized wrappers first
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => pageRefs.current.get(page)?.scrollIntoView({ block: "start" }))
+          );
+        }
+      }
+      restoredChapterRef.current = chapterId;
+    }
   }, []);
 
   const spreads = useMemo(() => {
@@ -192,11 +279,6 @@ export default function ChapterReaderClient({
     return result;
   }, [numPages, pageRatios, isMobile]);
 
-  // The single source of truth for reading position, shared by both modes,
-  // so switching modes lands on the same page instead of jumping back to
-  // the start. Horizontal mode's spreadIdx is derived from it below;
-  // vertical mode's scroll position is synced to/from it via pageRefs.
-  const [currentPage, setCurrentPage] = useState(1);
   const currentPageRef = useRef(1);
   // Mirrored every render (no dependency array — meant to stay
   // unconditionally in sync) so the scroll-restore effect below can read
@@ -205,12 +287,8 @@ export default function ChapterReaderClient({
   // an actual mode switch.
   useEffect(() => {
     currentPageRef.current = currentPage;
+    latestRef.current = { chapterId: currentChapterId, resumePage, mode };
   });
-
-  // Vertical mode's page wrapper divs, keyed by page number — used to jump
-  // the scroll position to currentPage when entering vertical mode, and to
-  // read the currently-scrolled-to page when leaving it.
-  const pageRefs = useRef(new Map<number, HTMLDivElement>());
 
   const spreadIdx = useMemo(() => {
     const idx = spreads.findIndex((s) => s.includes(currentPage));
@@ -218,20 +296,37 @@ export default function ChapterReaderClient({
   }, [spreads, currentPage]);
   const currentSpread = spreads[spreadIdx] ?? [];
 
+  // Past the last spread, "next" continues into the next chapter (and past
+  // the first, "previous" into the previous one) — same as mobile swipe
+  // already did; desktop used to just stop dead at the chapter's edges.
+  const isLastSpread = spreadIdx >= spreads.length - 1;
+  const isFirstSpread = spreadIdx === 0;
+
+  const nextChapterId = nextChapter?.id;
+  const prevChapterId = prevChapter?.id;
+
   const goNext = useCallback(() => {
-    const next = spreads[Math.min(spreadIdx + 1, spreads.length - 1)];
+    if (spreadIdx >= spreads.length - 1) {
+      if (nextChapterId) router.push(`/viewer/${nextChapterId}`);
+      return;
+    }
+    const next = spreads[spreadIdx + 1];
     if (next?.[0] !== undefined) setCurrentPage(next[0]);
-  }, [spreads, spreadIdx]);
+  }, [spreads, spreadIdx, nextChapterId, router]);
 
   const goPrev = useCallback(() => {
-    const prev = spreads[Math.max(spreadIdx - 1, 0)];
+    if (spreadIdx === 0) {
+      if (prevChapterId) router.push(`/viewer/${prevChapterId}`);
+      return;
+    }
+    const prev = spreads[spreadIdx - 1];
     if (prev?.[0] !== undefined) setCurrentPage(prev[0]);
-  }, [spreads, spreadIdx]);
+  }, [spreads, spreadIdx, prevChapterId, router]);
 
   // Finds whichever page is nearest the viewport's vertical center in
   // vertical mode's scrolled list — used to capture reading position right
   // before switching into horizontal mode.
-  function findCurrentPageInVerticalView(): number {
+  const findCurrentPageInVerticalView = useCallback((): number => {
     const viewportCenter = window.innerHeight / 2;
     let closest = currentPageRef.current;
     let closestDist = Infinity;
@@ -244,13 +339,87 @@ export default function ChapterReaderClient({
       }
     });
     return closest;
-  }
+  }, []);
+
+  // Vertical mode used to only work out the current page at the moment of
+  // switching to horizontal. It's now tracked while scrolling, so reading
+  // progress can be saved from either mode. rAF-throttled: one update per
+  // frame at most, not one per scroll event.
+  useEffect(() => {
+    if (mode !== "vertical" || numPages === 0) return;
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setCurrentPage(findCurrentPageInVerticalView());
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [mode, numPages, findCurrentPageInVerticalView]);
+
+  // Save reading progress (signed-in readers only) once the position has
+  // settled for PROGRESS_SAVE_DELAY_MS, so reopening this chapter resumes
+  // here. "Completed" = the spread holding the last page was reached, which
+  // lets the manga page's Continue button move on to the next chapter.
+  // A save still pending when the reader leaves (another chapter, or the
+  // page itself) is sent right away with keepalive rather than dropped.
+  const pendingProgressRef = useRef<{ chapterId: string; page: number; completed: boolean } | null>(null);
+
+  const flushProgress = useCallback(() => {
+    const pending = pendingProgressRef.current;
+    if (!pending) return;
+    pendingProgressRef.current = null;
+    fetch(`/api/chapters/${pending.chapterId}/progress`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page: pending.page, completed: pending.completed }),
+      keepalive: true,
+    }).catch(() => {
+      // best-effort — a missed save just means resuming a little earlier
+    });
+  }, []);
+
+  const lastPageInView = currentSpread.length > 0 ? Math.max(...currentSpread) : currentPage;
+
+  useEffect(() => {
+    if (!currentUserId || numPages === 0) return;
+    // don't save until this chapter's saved position has been restored
+    if (restoredChapterRef.current !== currentChapterId) return;
+    pendingProgressRef.current = {
+      chapterId: currentChapterId,
+      page: currentPage,
+      completed: lastPageInView >= numPages,
+    };
+    const timer = window.setTimeout(flushProgress, PROGRESS_SAVE_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [currentUserId, currentChapterId, currentPage, lastPageInView, numPages, flushProgress]);
+
+  // Leaving: another chapter (currentChapterId changes) or the page
+  // (unmount / tab hidden) — send whatever's pending instead of losing it.
+  useEffect(() => {
+    const onPageHide = () => flushProgress();
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      flushProgress();
+    };
+  }, [currentChapterId, flushProgress]);
 
   function switchMode(next: ReadingMode) {
     if (mode === "vertical" && next === "horizontal") {
       setCurrentPage(findCurrentPageInVerticalView());
     }
     setMode(next);
+    try {
+      localStorage.setItem(READING_MODE_KEY, next);
+    } catch {
+      // storage unavailable (private browsing) — the mode just won't persist
+    }
   }
 
   // Mobile horizontal mode turns pages by swipe instead of the left/right
@@ -497,10 +666,11 @@ export default function ChapterReaderClient({
                 chapter in this manga */}
             <div className="relative shrink-0" ref={chapterMenuRef}>
               <button
+                ref={chapterButtonRef}
                 type="button"
                 onClick={() => setIsChapterMenuOpen((v) => !v)}
                 aria-expanded={isChapterMenuOpen}
-                aria-haspopup="listbox"
+                aria-label={`Chapter ${formatChapterBadge(currentIsEx, currentDisplayNumber)} — choose chapter`}
                 className="flex gap-1.5 px-2.5 py-1.5 border border-[#050505] rounded text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
               >
                 <span className="text-sm font-bold">
@@ -513,15 +683,18 @@ export default function ChapterReaderClient({
                 />
               </button>
 
+              {/* A plain list of chapter links (aria-current on this one),
+                  not role="listbox", whose children would have to be
+                  arrow-key-navigable options rather than links. */}
               {isChapterMenuOpen && (
                 <div
-                  role="listbox"
                   className="absolute top-full left-0 mt-2 w-64 max-h-80 overflow-y-auto bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg z-30"
                 >
                   {chapters.map((c) => (
                     <Link
                       key={c.id}
                       href={`/viewer/${c.id}`}
+                      aria-current={c.id === currentChapterId ? "page" : undefined}
                       onClick={() => setIsChapterMenuOpen(false)}
                       className={`flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#232224] transition-colors duration-200 ${
                         c.id === currentChapterId ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
@@ -568,13 +741,16 @@ export default function ChapterReaderClient({
                 more than one translation to switch between; with 0 or 1
                 there's nothing to pick, so the icon isn't rendered at all
                 rather than sitting there doing nothing. */}
+            {/* Shown on phones too — it used to be desktop-only (hidden
+                sm:block), leaving phone readers stuck on a chapter's first
+                language with no way to switch. */}
             {translations.length > 1 && (
-              <div className="relative hidden sm:block" ref={languageMenuRef}>
+              <div className="relative" ref={languageMenuRef}>
                 <button
+                  ref={languageButtonRef}
                   type="button"
                   onClick={() => setIsLanguageMenuOpen((v) => !v)}
                   aria-expanded={isLanguageMenuOpen}
-                  aria-haspopup="listbox"
                   aria-label="Change language"
                   title="Language"
                   className="inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
@@ -582,9 +758,11 @@ export default function ChapterReaderClient({
                   <Languages className="w-4 h-4" />
                 </button>
 
+                {/* A plain list of buttons (aria-pressed on the current
+                    one), not role="listbox" — that promises arrow-key
+                    option navigation this doesn't implement. */}
                 {isLanguageMenuOpen && (
                   <div
-                    role="listbox"
                     className="absolute top-full right-0 mt-2 w-36 bg-[#1b1a1c] border border-[#050505] rounded-md shadow-lg z-30"
                   >
                     {translations.map((t) => (
@@ -595,7 +773,7 @@ export default function ChapterReaderClient({
                           setSelectedLanguage(t.language);
                           setIsLanguageMenuOpen(false);
                         }}
-                        aria-current={t.language === activeLanguage}
+                        aria-pressed={t.language === activeLanguage}
                         className={`w-full text-left px-3 py-2 text-sm hover:bg-[#232224] transition-colors duration-200 ${
                           t.language === activeLanguage ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
                         }`}
@@ -772,8 +950,8 @@ export default function ChapterReaderClient({
                 <button
                   type="button"
                   onClick={goNext}
-                  disabled={spreadIdx >= spreads.length - 1}
-                  aria-label="Next page"
+                  disabled={isLastSpread && !nextChapter}
+                  aria-label={isLastSpread ? "Next chapter" : "Next page"}
                   className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
@@ -784,8 +962,8 @@ export default function ChapterReaderClient({
                 <button
                   type="button"
                   onClick={goPrev}
-                  disabled={spreadIdx === 0}
-                  aria-label="Previous page"
+                  disabled={isFirstSpread && !prevChapter}
+                  aria-label={isFirstSpread ? "Previous chapter" : "Previous page"}
                   className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
@@ -796,6 +974,35 @@ export default function ChapterReaderClient({
             )
           )}
         </Document>
+        )}
+
+        {/* End of chapter (vertical mode) — the scroll used to just stop at
+            the last page, and moving on meant scrolling all the way back
+            up to the chapter selector. Horizontal mode continues into the
+            next chapter by paging past the last spread instead. */}
+        {mode === "vertical" && (numPages > 0 || !pdfUrl) && (
+          <div className="mt-10 mb-6 flex flex-col items-center gap-4 text-center">
+            <p className="text-sm text-[#b6b0a2]">
+              End of {formatChapterBadge(currentIsEx, currentDisplayNumber)} {chapterName}
+            </p>
+            {nextChapter ? (
+              <Link
+                href={`/viewer/${nextChapter.id}`}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-md bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold hover:bg-[#f6f1f2] transition-colors duration-200"
+              >
+                Next chapter: {formatChapterBadge(nextChapter.chapter_is_ex, displayNumbers.get(nextChapter.id))}{" "}
+                {nextChapter.chapter_name}
+              </Link>
+            ) : (
+              <p className="text-base text-[#ece6d8]">You&apos;re all caught up.</p>
+            )}
+            <Link
+              href={`/manga/titles/${mangaId}`}
+              className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] underline underline-offset-2 transition-colors duration-200"
+            >
+              Back to {mangaTitle}
+            </Link>
+          </div>
         )}
       </div>
 

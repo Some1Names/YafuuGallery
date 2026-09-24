@@ -29,7 +29,7 @@ export async function GET(
                 chapter_name: true,
                 published_date: true,
                 view_count: true,
-                comment_count: true,
+                _count: { select: { comments: { where: { hidden_at: null } } } },
               },
             },
           },
@@ -43,7 +43,7 @@ export async function GET(
             chapter_name: true,
             published_date: true,
             view_count: true,
-            comment_count: true,
+            _count: { select: { comments: { where: { hidden_at: null } } } },
           },
         },
       },
@@ -53,6 +53,10 @@ export async function GET(
       return NextResponse.json({ error: "Manga not found" }, { status: 404 });
     }
 
+    // comment_count in the response is the live count of VISIBLE comments,
+    // not the stored column (which had drifted — see the comment routes).
+    const withCommentCount = <T extends { _count: { comments: number } }>(chapters: T[]) =>
+      chapters.map(({ _count, ...c }) => ({ ...c, comment_count: _count.comments }));
     // total_chapters / total_view are computed here, not stored on Arc —
     // matches the schema decision from earlier
     const arcs = manga.arcs.map((arc) => ({
@@ -62,7 +66,7 @@ export async function GET(
       arc_status: arc.arc_status,
       total_chapters: arc.chapters.length,
       total_view: arc.chapters.reduce((sum, c) => sum + c.view_count, 0),
-      chapters: arc.chapters,
+      chapters: withCommentCount(arc.chapters),
     }));
 
     return NextResponse.json({
@@ -72,7 +76,7 @@ export async function GET(
       cover_image_url: manga.cover_image_url,
       author: manga.author,
       arcs,
-      unassigned_chapters: manga.chapters,
+      unassigned_chapters: withCommentCount(manga.chapters),
     });
   } catch (err) {
     console.error("[GET /api/manga/[id]]", err);

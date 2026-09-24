@@ -94,7 +94,7 @@ export default async function MangaDetailPage({
                                 chapter_name: true,
                                 cover_image_url: true,
                                 published_date: true,
-                                _count: { select: { chapter_bookmarks: true, comments: true } },
+                                _count: { select: { chapter_bookmarks: true, comments: { where: { hidden_at: null } } } },
                             },
                         },
                     },
@@ -109,7 +109,7 @@ export default async function MangaDetailPage({
                         chapter_name: true,
                         cover_image_url: true,
                         published_date: true,
-                        _count: { select: { chapter_bookmarks: true, comments: true } },
+                        _count: { select: { chapter_bookmarks: true, comments: { where: { hidden_at: null } } } },
                     },
                 },
             },
@@ -128,12 +128,14 @@ export default async function MangaDetailPage({
             })
             : Promise.resolve([]),
         // Most recently read chapter of THIS manga, for the sidebar's
-        // "Continue" button (the viewer resumes at last_page_read itself).
+        // "Continue" button. The viewer itself resumes mid-chapter from the
+        // saved last_page_read; `completed` lets Continue move on to the
+        // next chapter once this one was read to the end.
         session?.user?.id
             ? prisma.readingProgress.findFirst({
                 where: { user_id: session.user.id, chapter: { manga_id: id } },
                 orderBy: { updated_at: "desc" },
-                select: { chapter_id: true },
+                select: { chapter_id: true, completed: true },
             })
             : Promise.resolve(null),
     ]);
@@ -163,17 +165,22 @@ export default async function MangaDetailPage({
     const arcs = manga.arcs.map((arc) => ({ ...arc, chapters: arc.chapters.map(toChapterItem) }));
     const looseChapters = manga.chapters.map(toChapterItem);
 
-    // Sidebar's primary action: resume the last chapter this reader opened,
-    // otherwise start from the first chapter (lowest chapter_number, across
-    // arcs and loose chapters alike). Null when the manga has no chapters.
-    const allChapters = [...arcs.flatMap((arc) => arc.chapters), ...looseChapters];
-    const firstChapter = allChapters.reduce<ChapterItem | null>(
-        (min, c) => (min === null || c.chapter_number < min.chapter_number ? c : min),
-        null
+    // Sidebar's primary action: resume the last chapter this reader opened
+    // (or, if they finished it, the chapter after it), otherwise start from
+    // the first chapter. Null when the manga has no chapters.
+    const allChapters = [...arcs.flatMap((arc) => arc.chapters), ...looseChapters].sort(
+        (a, b) => a.chapter_number - b.chapter_number
     );
-    const resumeChapter = lastProgress
-        ? (allChapters.find((c) => c.id === lastProgress.chapter_id) ?? null)
-        : null;
+    const firstChapter = allChapters[0] ?? null;
+    const lastReadIdx = lastProgress ? allChapters.findIndex((c) => c.id === lastProgress.chapter_id) : -1;
+    const resumeChapter =
+        lastReadIdx === -1
+            ? null
+            : lastProgress?.completed
+                // finished it — continue with the next one (or, if it was the
+                // latest chapter, offer it again rather than nothing)
+                ? (allChapters[lastReadIdx + 1] ?? allChapters[lastReadIdx])
+                : allChapters[lastReadIdx];
     const displayNumbers = getChapterDisplayNumbers(allChapters);
     const readAction = resumeChapter
         ? {

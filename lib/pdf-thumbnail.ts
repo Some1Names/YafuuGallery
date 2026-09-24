@@ -14,15 +14,15 @@
 // Rendered at a decent resolution — processImageForUpload downscales/crops
 // this afterward to the site's actual cover conventions, so this only
 // needs to be "big enough," not final-quality.
+import { configurePdfWorker } from "@/lib/pdf-worker";
+
 const RENDER_SCALE = 2;
 
 export async function renderPdfFirstPageToFile(pdfFile: File): Promise<File> {
   const { pdfjs } = await import("react-pdf");
-  // Same CDN worker + version-matching approach as ChapterReaderClient —
-  // kept separate rather than shared, since this file loads into a
-  // different bundle (the admin panel never imports the reader) and each
-  // needs its own GlobalWorkerOptions assignment to take effect there.
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  // Its own GlobalWorkerOptions assignment — this loads into a different
+  // bundle than the reader (the admin panel never imports it).
+  configurePdfWorker(pdfjs);
 
   const arrayBuffer = await pdfFile.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
