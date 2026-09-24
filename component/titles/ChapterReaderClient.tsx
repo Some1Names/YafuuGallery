@@ -78,6 +78,29 @@ const TAP_MAX_PX = 10;
 // finished sliding fully off/on screen, instead of jumping early.
 const DRAG_SETTLE_MS = 200;
 
+// Vertical mode only draws pages within this distance of the screen (as an
+// IntersectionObserver rootMargin — 200% = two screen-heights above and
+// below). Every page is a full-size canvas, so drawing a whole chapter at
+// once cost hundreds of MB and a long wait before the first page on long
+// chapters; pages scrolled far away are dropped again to free that memory.
+const NEAR_PAGES_MARGIN = "200% 0px";
+// Once the reader is this many pages from the end, the next chapter (its
+// page and its PDF) starts loading, so moving on is quick.
+const PRELOAD_NEXT_WITHIN_PAGES = 3;
+
+// The next chapter's PDF, downloaded near the end of the current one and
+// handed straight to the viewer when that chapter opens (by URL). Lives
+// out here, not in component state, because moving to another chapter
+// remounts this whole component (the page segment is keyed by the chapter
+// id), which would throw the download away. Holds at most one file — each
+// new preload replaces the last — so memory stays bounded.
+const preloadedPdfs = new Map<string, Blob>();
+
+// What <Document> should load for a URL: the preloaded copy if there is one.
+function documentSourceFor(url: string | null): string | Blob | null {
+  return (url && preloadedPdfs.get(url)) || url;
+}
+
 type ReadingMode = "vertical" | "horizontal";
 
 interface ChapterSummary {
@@ -104,6 +127,8 @@ interface ChapterReaderProps {
   currentUserId: string | null;
   // Saved page to reopen on (0 = start at the top) — from ReadingProgress.
   resumePage: number;
+  // The next chapter's files, preloaded near the end of this one
+  nextChapterTranslations: ChapterTranslation[];
 }
 
 export default function ChapterReaderClient({
@@ -115,6 +140,7 @@ export default function ChapterReaderClient({
   chapters,
   currentUserId,
   resumePage,
+  nextChapterTranslations,
 }: ChapterReaderProps) {
   const router = useRouter();
   const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
@@ -412,6 +438,34 @@ export default function ChapterReaderClient({
     return closest;
   }, []);
 
+  // Vertical mode: which pages are close enough to the screen to draw (see
+  // NEAR_PAGES_MARGIN). Only starts once every page's size is known — the
+  // wrappers are sized from pageRatios, and before that they're all zero
+  // height, so every page would count as "near" and get drawn at once.
+  const [nearPages, setNearPages] = useState<Set<number>>(() => new Set());
+  const ratiosReady = numPages > 0 && Object.keys(pageRatios).length === numPages;
+
+  useEffect(() => {
+    if (mode !== "vertical" || !ratiosReady) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setNearPages((prev) => {
+          const next = new Set(prev);
+          for (const entry of entries) {
+            const n = Number((entry.target as HTMLElement).dataset.page);
+            if (entry.isIntersecting) next.add(n);
+            else next.delete(n);
+          }
+          return next;
+        });
+      },
+      { rootMargin: NEAR_PAGES_MARGIN }
+    );
+    pageRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+    // pdfUrl: a new document mounts new wrapper elements to observe
+  }, [mode, ratiosReady, numPages, pdfUrl]);
+
   // Vertical mode used to only work out the current page at the moment of
   // switching to horizontal. It's now tracked while scrolling, so reading
   // progress can be saved from either mode. rAF-throttled: one update per
@@ -456,6 +510,43 @@ export default function ChapterReaderClient({
   }, []);
 
   const lastPageInView = currentSpread.length > 0 ? Math.max(...currentSpread) : currentPage;
+
+  // Near the end: start loading the next chapter — its route (router
+  // prefetch) and its PDF in the same language. The PDF is kept in memory
+  // as a Blob (preloadedPdfs, above) and handed straight to the viewer when
+  // that chapter opens: relying on the browser's HTTP cache doesn't work,
+  // since browsers won't cache a file this size (a 24 MB chapter was
+  // re-downloaded in full even with cache: "force-cache"). A Blob rather
+  // than an ArrayBuffer because react-pdf reads a fresh copy out of a Blob
+  // on every load, while an ArrayBuffer gets handed off to the pdf.js
+  // worker and can't be used twice. Once per chapter, and skipped when the
+  // reader has asked to save data.
+  const nextPdfUrl =
+    nextChapterTranslations.find((t) => t.language === activeLanguage)?.url ??
+    nextChapterTranslations[0]?.url ??
+    null;
+  const isNearEnd = numPages > 0 && lastPageInView >= numPages - PRELOAD_NEXT_WITHIN_PAGES;
+  const preloadedChapterRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isNearEnd || !nextChapterId || preloadedChapterRef.current === nextChapterId) return;
+    preloadedChapterRef.current = nextChapterId;
+    router.prefetch(`/viewer/${nextChapterId}`);
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (!nextPdfUrl || saveData) return;
+    fetch(nextPdfUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        preloadedPdfs.clear();
+        preloadedPdfs.set(nextPdfUrl, blob);
+      })
+      .catch(() => {
+        // best-effort — the next chapter just downloads when opened
+      });
+  }, [isNearEnd, nextChapterId, nextPdfUrl, router]);
 
   useEffect(() => {
     if (!currentUserId || numPages === 0) return;
@@ -596,10 +687,15 @@ export default function ChapterReaderClient({
   // A different file (another chapter, or a language switch) starts on
   // page 1; onDocumentLoadSuccess then resumes the saved page if there is
   // one, once the new document has loaded.
+  // What <Document> loads: normally the PDF's URL, or the Blob already
+  // downloaded when this chapter was preloaded near the end of the last one.
+  const [docFile, setDocFile] = useState(() => documentSourceFor(pdfUrl));
   const [pagePdfUrl, setPagePdfUrl] = useState(pdfUrl);
   if (pdfUrl !== pagePdfUrl) {
     setPagePdfUrl(pdfUrl);
     setCurrentPage(1);
+    setNearPages(new Set());
+    setDocFile(documentSourceFor(pdfUrl));
   }
 
   useEffect(() => {
@@ -918,7 +1014,7 @@ export default function ChapterReaderClient({
         ) : (
         <Document
           key={pdfUrl}
-          file={pdfUrl}
+          file={docFile}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<div className="text-center text-[#b6b0a2] py-20">Loading chapter…</div>}
           error={<div className="text-center text-[#b6b0a2] py-20">Couldn&apos;t load this chapter.</div>}
@@ -930,6 +1026,10 @@ export default function ChapterReaderClient({
                 return (
                   <div
                     key={n}
+                    data-page={n}
+                    // Same dark placeholder as a page that's still drawing
+                    // (.reader-page), for pages not drawn right now.
+                    className="bg-[#161616]"
                     ref={(el) => {
                       if (el) pageRefs.current.set(n, el);
                       else pageRefs.current.delete(n);
@@ -942,11 +1042,13 @@ export default function ChapterReaderClient({
                     // effect above depends on this being correct immediately.
                     style={pageRatios[n] ? { height: pageWidth / pageRatios[n] } : undefined}
                   >
-                    <Page
-                      pageNumber={n}
-                      width={pageWidth}
-                      {...PAGE_DISPLAY_PROPS}
-                    />
+                    {pageRatios[n] && nearPages.has(n) && (
+                      <Page
+                        pageNumber={n}
+                        width={pageWidth}
+                        {...PAGE_DISPLAY_PROPS}
+                      />
+                    )}
                   </div>
                 );
               })}

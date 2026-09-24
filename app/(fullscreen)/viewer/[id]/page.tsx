@@ -74,7 +74,15 @@ export default async function ViewerPage({
             manga_title: true,
             chapters: {
               orderBy: { chapter_number: "asc" },
-              select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
+              select: {
+                id: true,
+                chapter_number: true,
+                chapter_is_ex: true,
+                chapter_name: true,
+                // only the next chapter's are passed on (preloaded near
+                // the end of this one) — see nextChapterTranslations below
+                translations: { select: { file_url: true, language: true } },
+              },
             },
           },
         },
@@ -100,6 +108,13 @@ export default async function ViewerPage({
       })
     : null;
   const resumePage = progress && !progress.completed ? progress.last_page_read : 0;
+
+  // chapters is in reading order, so the next one is simply the one after
+  const chapterIdx = chapter.manga.chapters.findIndex((c) => c.id === id);
+  const nextChapterTranslations = (chapter.manga.chapters[chapterIdx + 1]?.translations ?? []).map((t) => ({
+    language: t.language,
+    url: t.file_url,
+  }));
 
   // Deferred via after() instead of awaited: this is the single most-visited
   // route in the app, and nothing on this page depends on these writes
@@ -135,9 +150,15 @@ export default async function ViewerPage({
       chapterName={chapter.chapter_name}
       mangaTitle={chapter.manga.manga_title}
       mangaId={chapter.manga.id}
-      chapters={chapter.manga.chapters}
+      chapters={chapter.manga.chapters.map((c) => ({
+        id: c.id,
+        chapter_number: c.chapter_number,
+        chapter_is_ex: c.chapter_is_ex,
+        chapter_name: c.chapter_name,
+      }))}
       currentUserId={userId}
       resumePage={resumePage}
+      nextChapterTranslations={nextChapterTranslations}
     />
   );
 }
