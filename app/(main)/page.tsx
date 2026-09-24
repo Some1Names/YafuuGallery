@@ -82,9 +82,13 @@ export default async function BrowsePage() {
         {/* background image hidden on phone — the featured box itself
             becomes the hero there, edge to edge, no separate backdrop.
             Faded to a texture: at full strength this sketch competed with
-            the (also sketch-drawn) featured banner in front of it. */}
+            the (also sketch-drawn) featured banner in front of it. Light
+            mode needs its own treatment — the sketch is gray lines on white
+            paper, so a plain fade over the cream background washed it out
+            to nothing; multiply drops the white paper and keeps just the
+            lines, as ink, at a higher strength. */}
         <div
-          className="hidden sm:block absolute inset-0 bg-cover bg-center opacity-20"
+          className="hidden sm:block absolute inset-0 bg-cover bg-center opacity-20 [.light_&]:opacity-55 [.light_&]:mix-blend-multiply"
           style={{
             backgroundImage: `url('/mangabg.png')`,
           }}

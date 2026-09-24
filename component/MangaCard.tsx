@@ -59,23 +59,17 @@ export default function MangaCard({
           <NoImagePlaceholder />
         )}
 
-        {/* Last Updated — an ink label rather than a solid red block, so a
-            timestamp isn't the loudest thing on the page. Red is kept only
-            as the small dot on recent updates (echoing the footer
-            wordmark's dot), which is the part actually worth drawing the
-            eye to. Fixed colors, not theme tokens: it sits on cover art,
-            and --color-danger is too dark to read as a 6px dot on black. */}
+        {/* Last Updated — red corner tab for updates within the last week,
+            translucent dark gray once stale. red-600 rather than red-500 so
+            the white text clears 4.5:1 contrast. Fixed colors, not theme
+            tokens: it sits on cover art, not on the page background. */}
         <div
           className={
-            "absolute top-0 left-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/75 backdrop-blur-sm text-xs font-medium rounded-br-lg " +
-            (isStale ? "text-white/70" : "text-white")
+            "absolute top-0 left-0 flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 text-white text-xs sm:text-sm font-semibold tracking-tight rounded-br-lg shadow-md " +
+            (isStale ? "bg-neutral-800/80 backdrop-blur-sm" : "bg-red-600")
           }
         >
-          {isStale ? (
-            <Clock className="w-3.5 h-3.5" />
-          ) : (
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />
-          )}
+          <Clock className="w-3.5 h-3.5" strokeWidth={2.5} />
           {timeAgo(updatedAt)}
         </div>
 
