@@ -8,7 +8,7 @@ import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 
-const RESULTS_PAGE_SIZE = 30;
+const RESULTS_PAGE_SIZE = 20;
 
 export default async function SearchPage({
   searchParams,
