@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X, Send, Heart } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
@@ -41,10 +41,19 @@ export default function ChapterCommentPanel({
   onCommentPosted,
 }: ChapterCommentPanelProps) {
   const [comments, setComments] = useState<CommentItem[] | null>(null);
+  // Whether the API has older comments beyond what's loaded — it serves
+  // the newest page first, older pages on demand ("Show older comments").
+  const [hasOlder, setHasOlder] = useState(false);
+  const [isLoadingOlder, setIsLoadingOlder] = useState(false);
   const [draft, setDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  // What the list's scroll position should do after the next comments
+  // update: jump to the bottom (first load, own new comment), or keep the
+  // reader's place when older comments get prepended above. Null = leave
+  // it alone (e.g. toggling a like shouldn't yank the list anywhere).
+  const pendingScrollRef = useRef<"bottom" | { prevHeight: number; prevTop: number } | null>(null);
 
   // Refetches fresh every time the panel opens (also covers switching
   // chapters, since ChapterReaderClient closes the panel on that and this
@@ -53,11 +62,15 @@ export default function ChapterCommentPanel({
     if (!isOpen) return;
     let cancelled = false;
     setComments(null);
+    setHasOlder(false);
     setError(null);
     fetch(`/api/chapters/${chapterId}/comments`)
       .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled) setComments(data);
+      .then((data: { comments: CommentItem[]; hasMore: boolean }) => {
+        if (cancelled) return;
+        pendingScrollRef.current = "bottom";
+        setComments(data.comments);
+        setHasOlder(data.hasMore);
       })
       .catch(() => {
         if (!cancelled) setComments([]);
@@ -67,9 +80,39 @@ export default function ChapterCommentPanel({
     };
   }, [isOpen, chapterId]);
 
-  useEffect(() => {
-    if (comments) listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  // Layout effect so the scroll adjustment lands before paint — with a
+  // plain effect, prepending older comments would flash the list jumping
+  // down and back.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const pending = pendingScrollRef.current;
+    if (!list || !pending) return;
+    pendingScrollRef.current = null;
+    if (pending === "bottom") {
+      list.scrollTo({ top: list.scrollHeight });
+    } else {
+      list.scrollTop = list.scrollHeight - pending.prevHeight + pending.prevTop;
+    }
   }, [comments]);
+
+  async function loadOlder() {
+    const oldest = comments?.[0];
+    if (!oldest || isLoadingOlder) return;
+    setIsLoadingOlder(true);
+    try {
+      const res = await fetch(`/api/chapters/${chapterId}/comments?before=${encodeURIComponent(oldest.id)}`);
+      if (!res.ok) throw new Error();
+      const data: { comments: CommentItem[]; hasMore: boolean } = await res.json();
+      const list = listRef.current;
+      if (list) pendingScrollRef.current = { prevHeight: list.scrollHeight, prevTop: list.scrollTop };
+      setComments((prev) => [...data.comments, ...(prev ?? [])]);
+      setHasOlder(data.hasMore);
+    } catch {
+      setError("Couldn't load older comments — please try again.");
+    } finally {
+      setIsLoadingOlder(false);
+    }
+  }
 
   async function submitComment() {
     const body = draft.trim();
@@ -92,6 +135,7 @@ export default function ChapterCommentPanel({
       }
 
       const created: CommentItem = await res.json();
+      pendingScrollRef.current = "bottom";
       setComments((prev) => [...(prev ?? []), created]);
       setDraft("");
       onCommentPosted?.();
@@ -176,7 +220,18 @@ export default function ChapterCommentPanel({
               No comments yet — be the first to say something.
             </p>
           ) : (
-            comments.map((c) => (
+            <>
+            {hasOlder && (
+              <button
+                type="button"
+                onClick={loadOlder}
+                disabled={isLoadingOlder}
+                className="self-center text-xs text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
+              >
+                {isLoadingOlder ? "Loading…" : "Show older comments"}
+              </button>
+            )}
+            {comments.map((c) => (
               <div key={c.id} className="flex gap-2.5">
                 <span className="relative w-8 h-8 rounded-full overflow-hidden bg-bg border border-border flex items-center justify-center shrink-0">
                   {c.user.image ? (
@@ -207,7 +262,8 @@ export default function ChapterCommentPanel({
                   </button>
                 </div>
               </div>
-            ))
+            ))}
+            </>
           )}
         </div>
 

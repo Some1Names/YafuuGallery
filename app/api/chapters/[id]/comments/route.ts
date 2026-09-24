@@ -3,21 +3,31 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 const MAX_BODY_LENGTH = 2000;
+const COMMENTS_PAGE_SIZE = 20;
 
-// GET /api/chapters/[id]/comments — public, oldest first (reads like a
-// chat log). Admin-hidden comments (hidden_at set) never show up here —
-// hiding still only happens through the admin moderation panel.
+// GET /api/chapters/[id]/comments[?before=<commentId>] — public. Returns
+// one page: the newest COMMENTS_PAGE_SIZE comments, or with `before`, the
+// page just older than that comment. Each page comes back oldest-first
+// (reads like a chat log, newest at the bottom), plus `hasMore` for the
+// panel's "Show older comments" button. Admin-hidden comments (hidden_at
+// set) never show up here — hiding only happens through the admin panel.
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const before = request.nextUrl.searchParams.get("before");
   const session = await auth();
   const viewerId = session?.user?.id;
 
-  const comments = await prisma.comment.findMany({
+  const rows = await prisma.comment.findMany({
     where: { chapter_id: id, hidden_at: null },
-    orderBy: { created_at: "asc" },
+    // newest first so `take` grabs the most recent page; id breaks ties
+    // between same-millisecond comments so the cursor order is stable
+    orderBy: [{ created_at: "desc" }, { id: "desc" }],
+    // one extra row just to learn whether an older page exists
+    take: COMMENTS_PAGE_SIZE + 1,
+    ...(before && { cursor: { id: before }, skip: 1 }),
     select: {
       id: true,
       body: true,
@@ -33,16 +43,20 @@ export async function GET(
     },
   });
 
-  return NextResponse.json(
-    comments.map((c) => ({
+  const hasMore = rows.length > COMMENTS_PAGE_SIZE;
+  const page = rows.slice(0, COMMENTS_PAGE_SIZE).reverse();
+
+  return NextResponse.json({
+    comments: page.map((c) => ({
       id: c.id,
       body: c.body,
       created_at: c.created_at,
       user: c.user,
       likeCount: c._count.likes,
       likedByMe: c.likes.length > 0,
-    }))
-  );
+    })),
+    hasMore,
+  });
 }
 
 // POST /api/chapters/[id]/comments — create, requires an account. The

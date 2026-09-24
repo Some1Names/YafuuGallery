@@ -6,14 +6,27 @@ import FeaturedCarousel from "@/component/titles/FeaturedCarousel";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { getContinueReading } from "@/lib/continue-reading";
+import { parsePageCount, splitExtraRow } from "@/lib/pagination";
+import ShowMoreLink from "@/component/ShowMoreLink";
 
-export default async function BrowsePage() {
+const LATEST_PAGE_SIZE = 20;
+
+export default async function BrowsePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string | string[] }>;
+}) {
+  const pageCount = parsePageCount((await searchParams).page);
+  const latestLimit = pageCount * LATEST_PAGE_SIZE;
+
   // session doesn't depend on the manga queries (or vice versa), so all
   // three run as one round trip instead of two sequential ones.
-  const [session, mangaList, curatedFeatured] = await Promise.all([
+  const [session, latestRows, curatedFeatured] = await Promise.all([
     auth(),
     prisma.manga.findMany({
       orderBy: { updated_at: "desc" },
+      // one extra row just to learn whether "Show more" is needed
+      take: latestLimit + 1,
       include: {
         author: { select: { name: true } },
         // chapter_number is a 0-indexed sort key, not the number shown to
@@ -38,6 +51,8 @@ export default async function BrowsePage() {
       },
     }),
   ]);
+
+  const { items: mangaList, hasMore: hasMoreLatest } = splitExtraRow(latestRows, latestLimit);
 
   let featuredManga = curatedFeatured;
   if (featuredManga.length === 0) {
@@ -156,9 +171,6 @@ export default async function BrowsePage() {
               </h2>
             </div>
 
-            {/* "View All" has nowhere else to go yet — this page already
-                lists every manga, unpaginated. Once you add pagination or a
-                dedicated /manga/browse page, point this there. */}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
@@ -187,6 +199,8 @@ export default async function BrowsePage() {
               No manga published yet.
             </p>
           )}
+
+          {hasMoreLatest && <ShowMoreLink href={`/?page=${pageCount + 1}`} />}
 
         </div>
       </section>

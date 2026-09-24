@@ -5,17 +5,25 @@ import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import RecentSearches from "@/component/search/RecentSearches";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { parsePageCount, splitExtraRow } from "@/lib/pagination";
+import ShowMoreLink from "@/component/ShowMoreLink";
+
+const RESULTS_PAGE_SIZE = 30;
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string | string[] }>;
 }) {
-  const { q } = await searchParams;
+  const { q, page } = await searchParams;
   const query = (q ?? "").trim();
+  const pageCount = parsePageCount(page);
+  const resultsLimit = pageCount * RESULTS_PAGE_SIZE;
 
-  const mangaList = query
+  const resultRows = query
     ? await prisma.manga.findMany({
+        // one extra row just to learn whether "Show more" is needed
+        take: resultsLimit + 1,
         where: {
           OR: [
             { manga_title: { contains: query, mode: "insensitive" } },
@@ -35,6 +43,7 @@ export default async function SearchPage({
         },
       })
     : [];
+  const { items: mangaList, hasMore } = splitExtraRow(resultRows, resultsLimit);
 
   return (
     <div
@@ -109,6 +118,10 @@ export default async function SearchPage({
               );
             })}
           </div>
+        )}
+
+        {hasMore && (
+          <ShowMoreLink href={`/search?${new URLSearchParams({ q: query, page: String(pageCount + 1) })}`} />
         )}
       </div>
     </div>
