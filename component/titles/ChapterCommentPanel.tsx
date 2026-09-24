@@ -27,6 +27,10 @@ interface ChapterCommentPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onCommentPosted?: () => void;
+  // Called with the created_at of the newest comment the reader has now
+  // seen (null if there are none) — when the panel loads its comments, and
+  // after posting one. The reader's "new comments" badge counts from here.
+  onCommentsSeen?: (newestCreatedAt: string | null) => void;
 }
 
 const MAX_BODY_LENGTH = 2000;
@@ -39,6 +43,7 @@ export default function ChapterCommentPanel({
   isOpen,
   onClose,
   onCommentPosted,
+  onCommentsSeen,
 }: ChapterCommentPanelProps) {
   const [comments, setComments] = useState<CommentItem[] | null>(null);
   // Whether the API has older comments beyond what's loaded — it serves
@@ -54,6 +59,13 @@ export default function ChapterCommentPanel({
   // reader's place when older comments get prepended above. Null = leave
   // it alone (e.g. toggling a like shouldn't yank the list anywhere).
   const pendingScrollRef = useRef<"bottom" | { prevHeight: number; prevTop: number } | null>(null);
+
+  // Read through a ref so the fetch effect below doesn't re-run (and
+  // refetch) whenever the parent passes a new callback function.
+  const onCommentsSeenRef = useRef(onCommentsSeen);
+  useEffect(() => {
+    onCommentsSeenRef.current = onCommentsSeen;
+  });
 
   // Refetches fresh every time the panel opens (also covers switching
   // chapters, since ChapterReaderClient closes the panel on that and this
@@ -71,6 +83,8 @@ export default function ChapterCommentPanel({
         pendingScrollRef.current = "bottom";
         setComments(data.comments);
         setHasOlder(data.hasMore);
+        // the newest page arrives oldest-first, so the newest is last
+        onCommentsSeenRef.current?.(data.comments.at(-1)?.created_at ?? null);
       })
       .catch(() => {
         if (!cancelled) setComments([]);
@@ -139,6 +153,7 @@ export default function ChapterCommentPanel({
       setComments((prev) => [...(prev ?? []), created]);
       setDraft("");
       onCommentPosted?.();
+      onCommentsSeenRef.current?.(created.created_at);
     } catch {
       setError("Network error — please try again.");
     } finally {

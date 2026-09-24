@@ -33,6 +33,27 @@ function readSavedMode(): "vertical" | "horizontal" {
 // through a chapter shouldn't fire a request for every page it passes.
 const PROGRESS_SAVE_DELAY_MS = 1500;
 
+// Per chapter: created_at of the newest comment this reader has seen, for
+// the "new comments" badge. A per-browser convenience like recent searches
+// — it doesn't sync between devices.
+const commentsSeenKey = (chapterId: string) => `yfgll_comments_seen:${chapterId}`;
+
+function readCommentsSeen(chapterId: string): string | null {
+  try {
+    return localStorage.getItem(commentsSeenKey(chapterId));
+  } catch {
+    return null;
+  }
+}
+
+function writeCommentsSeen(chapterId: string, createdAt: string) {
+  try {
+    localStorage.setItem(commentsSeenKey(chapterId), createdAt);
+  } catch {
+    // storage unavailable — the badge just won't remember
+  }
+}
+
 const SWIPE_THRESHOLD_PX = 50;
 // Below this, a completed gesture is a tap (toggle the top bar) rather
 // than an intentional-but-too-short drag (which just snaps back to center).
@@ -63,10 +84,9 @@ interface ChapterReaderProps {
   mangaTitle: string;
   mangaId: string;
   chapters: ChapterSummary[];
-  // null for a signed-out visitor — the comment bubble sends them to
-  // /signup instead of opening the panel when this is null.
+  // null for a signed-out visitor — the comment bubble sends them to sign
+  // in instead of opening the panel when this is null.
   currentUserId: string | null;
-  initialCommentCount: number;
   // Saved page to reopen on (0 = start at the top) — from ReadingProgress.
   resumePage: number;
 }
@@ -79,7 +99,6 @@ export default function ChapterReaderClient({
   mangaId,
   chapters,
   currentUserId,
-  initialCommentCount,
   resumePage,
 }: ChapterReaderProps) {
   const router = useRouter();
@@ -158,7 +177,38 @@ export default function ChapterReaderClient({
   // bubble button sends them to /signup instead), so no signed-out UI
   // exists inside ChapterCommentPanel itself.
   const [isCommentPanelOpen, setIsCommentPanelOpen] = useState(false);
-  const [commentCount, setCommentCount] = useState(initialCommentCount);
+
+  // The badge shows NEW comments only — visible comments posted since the
+  // newest one this reader has already seen on this chapter (kept per
+  // chapter in localStorage, as that comment's server-side created_at, so
+  // a wrong device clock can't skew it), excluding their own. No badge =
+  // nothing new. Tagged with the chapter it was fetched for, so a slow
+  // response for the previous chapter can't show on this one.
+  const [unread, setUnread] = useState<{ chapterId: string; count: number } | null>(null);
+  const unreadCount = unread?.chapterId === currentChapterId ? unread.count : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    const since = readCommentsSeen(currentChapterId);
+    fetch(`/api/chapters/${currentChapterId}/comments/unread${since ? `?since=${encodeURIComponent(since)}` : ""}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { count: number } | null) => {
+        if (!cancelled && data) setUnread({ chapterId: currentChapterId, count: data.count });
+      })
+      .catch(() => {
+        // no badge is the safe fallback
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentChapterId]);
+
+  // From the comment panel: the reader has now seen everything up to this
+  // comment (on opening the panel, or after posting their own).
+  function handleCommentsSeen(newestCreatedAt: string | null) {
+    if (newestCreatedAt) writeCommentsSeen(currentChapterId, newestCreatedAt);
+    setUnread({ chapterId: currentChapterId, count: 0 });
+  }
 
   function handleCommentButtonClick() {
     if (!currentUserId) {
@@ -171,8 +221,7 @@ export default function ChapterReaderClient({
 
   useEffect(() => {
     setIsCommentPanelOpen(false);
-    setCommentCount(initialCommentCount);
-  }, [currentChapterId, initialCommentCount]);
+  }, [currentChapterId]);
 
   // chapter-selector dropdown
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
@@ -720,19 +769,23 @@ export default function ChapterReaderClient({
               </span>
             )}
 
-            {/* Comments — signed-out visitors get sent to /signup instead
-                of the panel opening (handleCommentButtonClick). */}
+            {/* Comments — signed-out visitors get sent to sign in instead
+                of the panel opening (handleCommentButtonClick). The badge
+                is the NEW-comment count only (see `unread` above). */}
             <button
               type="button"
               onClick={handleCommentButtonClick}
-              aria-label="Comments"
+              aria-label={unreadCount > 0 ? `Comments, ${unreadCount} new` : "Comments"}
               title="Comments"
               className="relative inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
             >
               <MessageCircle className="w-4 h-4" />
-              {commentCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-[10px] font-semibold leading-4 text-center">
-                  {commentCount > 99 ? "99+" : commentCount}
+              {unreadCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-[10px] font-semibold leading-4 text-center"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
             </button>
@@ -1010,7 +1063,7 @@ export default function ChapterReaderClient({
         chapterId={currentChapterId}
         isOpen={isCommentPanelOpen}
         onClose={() => setIsCommentPanelOpen(false)}
-        onCommentPosted={() => setCommentCount((c) => c + 1)}
+        onCommentsSeen={handleCommentsSeen}
       />
     </div>
   );

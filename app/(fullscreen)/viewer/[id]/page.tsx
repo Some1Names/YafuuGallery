@@ -67,10 +67,6 @@ export default async function ViewerPage({
       select: {
         chapter_number: true,
         chapter_name: true,
-        // Live count of VISIBLE comments rather than the stored
-        // comment_count column, which had drifted (it was never lowered
-        // when a comment was deleted, and counted admin-hidden ones).
-        _count: { select: { comments: { where: { hidden_at: null } } } },
         translations: { select: { file_url: true, language: true } },
         manga: {
           select: {
@@ -137,7 +133,6 @@ export default async function ViewerPage({
       mangaId={chapter.manga.id}
       chapters={chapter.manga.chapters}
       currentUserId={userId}
-      initialCommentCount={chapter._count.comments}
       resumePage={resumePage}
     />
   );
