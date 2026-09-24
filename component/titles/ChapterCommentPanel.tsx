@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { X, Send, Heart } from "lucide-react";
+import { X, Send, Heart, Flag } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
 import { formatUsername } from "@/lib/format-username";
 
@@ -20,10 +20,14 @@ interface CommentItem {
   user: CommentUser;
   likeCount: number;
   likedByMe: boolean;
+  reportedByMe: boolean;
 }
 
 interface ChapterCommentPanelProps {
   chapterId: string;
+  // the reader (null when signed out — the panel never opens for them) —
+  // no Report button on their own comments
+  currentUserId: string | null;
   isOpen: boolean;
   onClose: () => void;
   onCommentPosted?: () => void;
@@ -40,6 +44,7 @@ const MAX_BODY_LENGTH = 2000;
 // this can open, so there's no signed-out state to handle in here.
 export default function ChapterCommentPanel({
   chapterId,
+  currentUserId,
   isOpen,
   onClose,
   onCommentPosted,
@@ -175,6 +180,23 @@ export default function ChapterCommentPanel({
     }
   }
 
+  // Confirm first (a report is sent to moderators), then mark it reported
+  // straight away; on failure, put the button back and say why.
+  async function reportComment(comment: CommentItem) {
+    if (!confirm("Report this comment to the moderators?")) return;
+    setComments((prev) => prev?.map((c) => (c.id === comment.id ? { ...c, reportedByMe: true } : c)) ?? prev);
+    try {
+      const res = await fetch(`/api/comments/${comment.id}/report`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error ?? "Couldn't report this comment.");
+      }
+    } catch (err) {
+      setComments((prev) => prev?.map((c) => (c.id === comment.id ? { ...c, reportedByMe: false } : c)) ?? prev);
+      setError(err instanceof Error ? err.message : "Couldn't report this comment.");
+    }
+  }
+
   // Optimistic toggle, same pattern as MangaFavoriteButton/ChapterFavoriteButton
   // — flip immediately, revert on failure, reconcile with the server's
   // actual count either way (a double-click race resolves to whatever the
@@ -263,18 +285,39 @@ export default function ChapterCommentPanel({
                     <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at))}</span>
                   </div>
                   <p className="text-sm text-fg-secondary whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
-                  <button
-                    type="button"
-                    onClick={() => toggleLike(c)}
-                    aria-pressed={c.likedByMe}
-                    aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
-                    className={`flex items-center gap-1 mt-1 text-xs transition-colors duration-200 ${
-                      c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
-                    }`}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
-                    {c.likeCount > 0 && c.likeCount}
-                  </button>
+                  <div className="flex items-center gap-4 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleLike(c)}
+                      aria-pressed={c.likedByMe}
+                      aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
+                      className={`flex items-center gap-1 text-xs transition-colors duration-200 ${
+                        c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
+                      }`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
+                      {c.likeCount > 0 && c.likeCount}
+                    </button>
+                    {/* Report — only on other people's comments. Stays as
+                        a quiet "Reported" once sent (one per reader). */}
+                    {c.user.id !== currentUserId &&
+                      (c.reportedByMe ? (
+                        <span className="flex items-center gap-1 text-xs text-fg-muted">
+                          <Flag className="w-3.5 h-3.5" />
+                          Reported
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => reportComment(c)}
+                          aria-label={`Report comment by ${formatUsername(c.user.name, c.user.tag)}`}
+                          className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
+                        >
+                          <Flag className="w-3.5 h-3.5" />
+                          Report
+                        </button>
+                      ))}
+                  </div>
                 </div>
               </div>
             ))}

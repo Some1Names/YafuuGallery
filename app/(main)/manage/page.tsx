@@ -67,6 +67,7 @@ export default async function ManageMangaPage() {
         id: true,
         body: true,
         hidden_at: true,
+        _count: { select: { reports: true } },
         created_at: true,
         user: { select: { id: true, name: true, tag: true } },
         chapter: {
@@ -94,6 +95,7 @@ export default async function ManageMangaPage() {
     )}`,
     createdAt: c.created_at,
     hidden: c.hidden_at !== null,
+    reportCount: c._count.reports,
   }));
 
   const mangaItems = mangaList.map((m) => ({

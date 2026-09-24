@@ -5,6 +5,13 @@ import { prisma } from "@/lib/prisma";
 const MAX_BODY_LENGTH = 2000;
 const COMMENTS_PAGE_SIZE = 20;
 
+// Per user, across all chapters. Generous for real conversation, tight
+// enough to stop a flood.
+const COMMENT_RATE_LIMITS = [
+  { windowMs: 60 * 1000, max: 5, label: "minute" },
+  { windowMs: 60 * 60 * 1000, max: 30, label: "little while" },
+] as const;
+
 // GET /api/chapters/[id]/comments[?before=<commentId>] — public. Returns
 // one page: the newest COMMENTS_PAGE_SIZE comments, or with `before`, the
 // page just older than that comment. Each page comes back oldest-first
@@ -40,6 +47,8 @@ export async function GET(
       // a signed-out viewer cleanly gets an empty array without needing a
       // differently-shaped select (which Prisma can't type-check as well).
       likes: { where: { user_id: viewerId ?? "" }, select: { id: true } },
+      // same trick: just "did I report this", so the panel can show it
+      reports: { where: { reporter_id: viewerId ?? "" }, select: { id: true } },
     },
   });
 
@@ -54,6 +63,7 @@ export async function GET(
       user: c.user,
       likeCount: c._count.likes,
       likedByMe: c.likes.length > 0,
+      reportedByMe: c.reports.length > 0,
     })),
     hasMore,
   });
@@ -87,6 +97,27 @@ export async function POST(
     );
   }
 
+  // Rate limit, so one account (or a script) can't flood a chapter.
+  // Counted from the database rather than in memory: on serverless hosting
+  // each request can land on a different instance, so an in-memory counter
+  // would never see the burst. Indexed on (user_id, created_at).
+  const now = Date.now();
+  const [lastMinute, lastHour] = await Promise.all(
+    COMMENT_RATE_LIMITS.map(({ windowMs }) =>
+      prisma.comment.count({
+        where: { user_id: session.user.id, created_at: { gt: new Date(now - windowMs) } },
+      })
+    )
+  );
+  const hit = [lastMinute, lastHour].findIndex((count, i) => count >= COMMENT_RATE_LIMITS[i].max);
+  if (hit !== -1) {
+    const { windowMs, label } = COMMENT_RATE_LIMITS[hit];
+    return NextResponse.json(
+      { error: `You're commenting too fast — please wait a ${label} and try again.` },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(windowMs / 1000)) } }
+    );
+  }
+
   try {
     const [comment] = await prisma.$transaction([
       prisma.comment.create({
@@ -102,7 +133,7 @@ export async function POST(
     ]);
 
     // A brand-new comment has no likes yet — no need to query for it.
-    return NextResponse.json({ ...comment, likeCount: 0, likedByMe: false }, { status: 201 });
+    return NextResponse.json({ ...comment, likeCount: 0, likedByMe: false, reportedByMe: false }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/chapters/[id]/comments]", err);
     return NextResponse.json({ error: "Failed to post comment." }, { status: 500 });

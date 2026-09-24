@@ -58,6 +58,7 @@ model User {
   translations      Translation[]     @relation("TranslatedBy")
   comments          Comment[]
   comment_likes     CommentLike[]
+  comment_reports   CommentReport[]   @relation("CommentReports")
   bookmarks         Bookmark[]
   chapter_bookmarks ChapterBookmark[]
   reading_progress  ReadingProgress[]
@@ -241,12 +242,31 @@ model Comment {
   hidden_at  DateTime?
   created_at DateTime  @default(now())
 
-  user    User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  chapter Chapter       @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chapter Chapter         @relation(fields: [chapter_id], references: [id], onDelete: Cascade)
   likes   CommentLike[]
+  reports CommentReport[]
 
   @@index([chapter_id])
   @@index([user_id])
+  // the comment rate limit counts a user's recent comments
+  @@index([user_id, created_at])
+}
+
+// A reader flagging someone else's comment for moderation — surfaces it in
+// the admin and author Comments tabs. One report per reader per comment;
+// cleared when a moderator dismisses them (or the comment is deleted).
+model CommentReport {
+  id          String   @id @default(cuid())
+  comment_id  String
+  reporter_id String
+  created_at  DateTime @default(now())
+
+  comment  Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  reporter User    @relation("CommentReports", fields: [reporter_id], references: [id], onDelete: Cascade)
+
+  @@unique([comment_id, reporter_id])
+  @@index([comment_id])
 }
 
 // ---------- Comment Like ----------

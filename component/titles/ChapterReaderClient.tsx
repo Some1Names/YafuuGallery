@@ -1066,6 +1066,7 @@ export default function ChapterReaderClient({
 
       <ChapterCommentPanel
         chapterId={currentChapterId}
+        currentUserId={currentUserId}
         isOpen={isCommentPanelOpen}
         onClose={() => setIsCommentPanelOpen(false)}
         onCommentsSeen={handleCommentsSeen}

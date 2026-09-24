@@ -51,6 +51,7 @@ interface CommentItem {
   chapterLabel: string;
   createdAt: Date;
   hidden: boolean;
+  reportCount: number;
 }
 
 interface ManageMangaDashboardProps {
@@ -80,6 +81,8 @@ export default function ManageMangaDashboard({
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
   const [mangaSearch, setMangaSearch] = useState("");
   const [commentSearch, setCommentSearch] = useState("");
+  const [reportedOnly, setReportedOnly] = useState(false);
+  const reportedCount = comments.filter((c) => c.reportCount > 0).length;
 
   const filteredMangaList = useMemo(() => {
     const q = mangaSearch.trim().toLowerCase();
@@ -89,14 +92,15 @@ export default function ManageMangaDashboard({
 
   const filteredComments = useMemo(() => {
     const q = commentSearch.trim().toLowerCase();
-    if (!q) return comments;
-    return comments.filter(
+    const pool = reportedOnly ? comments.filter((c) => c.reportCount > 0) : comments;
+    if (!q) return pool;
+    return pool.filter(
       (c) =>
         c.userName.toLowerCase().includes(q) ||
         c.chapterLabel.toLowerCase().includes(q) ||
         c.body.toLowerCase().includes(q)
     );
-  }, [comments, commentSearch]);
+  }, [comments, commentSearch, reportedOnly]);
 
   // At-a-glance totals across all of this author's manga (the rows below
   // only show them per manga).
@@ -174,13 +178,27 @@ export default function ManageMangaDashboard({
             onChange={setCommentSearch}
             placeholder="Search by reader, chapter, or text…"
           />
+        {/* Moderation shortcut: just the comments readers have reported. */}
+        <button
+          type="button"
+          onClick={() => setReportedOnly((v) => !v)}
+          aria-pressed={reportedOnly}
+          className={
+            "mt-3 text-xs px-3 py-1.5 rounded border transition-colors duration-200 " +
+            (reportedOnly
+              ? "border-danger/60 text-danger"
+              : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
+          }
+        >
+          Reported only ({reportedCount})
+        </button>
           {comments.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
               <p className="text-fg-secondary text-sm">No comments on your manga yet.</p>
             </div>
           ) : filteredComments.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-              <p className="text-fg-secondary text-sm">No comments match &quot;{commentSearch}&quot;.</p>
+              <p className="text-fg-secondary text-sm">{commentSearch ? <>No comments match &quot;{commentSearch}&quot;.</> : "No reported comments."}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2 mt-4">
@@ -194,6 +212,7 @@ export default function ManageMangaDashboard({
                   chapterLabel={c.chapterLabel}
                   createdAt={c.createdAt}
                   initialHidden={c.hidden}
+                  reportCount={c.reportCount}
                   canDelete={false}
                 />
               ))}
