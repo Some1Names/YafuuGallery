@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import NextImage from "next/image";
-import { Check, X, Pencil, ArrowUpRight } from "lucide-react";
+import { Check, X, Pencil, ArrowUpRight, Camera } from "lucide-react";
 import { processImageForUpload } from "@/lib/image-processing";
+import { displayNameSchema, MAX_DISPLAY_NAME_LENGTH } from "@/lib/signup-schema";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -37,10 +38,11 @@ export default function ProfileEditForm({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Shared save path for both the name edit (blur/Enter) and the avatar
-  // upload — neither has its own explicit "Save" button anymore, so each
-  // persists itself as soon as its edit is committed.
-  async function saveProfile(nextName: string, nextImage: string | null) {
+  // Shared save path for both the name edit and the avatar upload — neither
+  // has its own explicit "Save" button, so each persists itself as soon as
+  // its edit is committed. Sends only the field being changed. Returns
+  // whether it saved, so callers can keep their edit state on failure.
+  async function saveProfile(changes: { name?: string; image?: string | null }): Promise<boolean> {
     setIsSaving(true);
     setError(null);
 
@@ -48,18 +50,20 @@ export default function ProfileEditForm({
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: nextName, image: nextImage }),
+        body: JSON.stringify(changes),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         setError(data?.error ?? "Failed to save.");
-        return;
+        return false;
       }
 
       router.refresh();
+      return true;
     } catch {
       setError("Network error — please try again.");
+      return false;
     } finally {
       setIsSaving(false);
     }
@@ -95,8 +99,8 @@ export default function ProfileEditForm({
         setError(data.error ?? "Upload failed");
         return;
       }
-      setImage(data.url);
-      await saveProfile(name, data.url);
+      // Only show the new avatar once it's actually saved to the profile.
+      if (await saveProfile({ image: data.url })) setImage(data.url);
     } catch {
       setError("Upload failed — please try again.");
     } finally {
@@ -114,19 +118,17 @@ export default function ProfileEditForm({
   // Explicit confirm/cancel instead of save-on-blur — clicking away (or
   // just tabbing past the field) no longer silently commits a change.
   async function confirmNameEdit() {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setError("Name can't be empty");
-      return;
-    }
-    if (/\s/.test(trimmed)) {
-      setError("Display name can't contain spaces");
+    // Same rule as signup and the server (lib/signup-schema.ts).
+    const parsed = displayNameSchema.safeParse(name);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0].message);
       return;
     }
 
-    setIsEditingName(false);
-    setName(trimmed);
-    await saveProfile(trimmed, image);
+    setName(parsed.data);
+    // Stay in edit mode if the save fails, so the field doesn't sit there
+    // showing an unsaved name as if it had been saved.
+    if (await saveProfile({ name: parsed.data })) setIsEditingName(false);
   }
 
   function cancelNameEdit() {
@@ -155,6 +157,8 @@ export default function ProfileEditForm({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          aria-label={isUploading ? "Uploading profile picture" : "Change profile picture"}
           // Password-manager/form-filler extensions tag interactive elements
           // with a `fdprocessedid` attribute before React hydrates, which
           // React would otherwise flag as a hydration mismatch even though
@@ -179,10 +183,29 @@ export default function ProfileEditForm({
             </span>
           )}
 
-          {/* Hover overlay */}
-          <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-white transition-opacity duration-200">
+          {/* Overlay: "Change" on hover (desktop), but held visible for the
+              whole upload so a phone user — who never hovers — still sees
+              that something's happening. */}
+          <span
+            aria-hidden="true"
+            className={
+              "absolute inset-0 bg-black/60 flex items-center justify-center text-xs text-white transition-opacity duration-200 " +
+              (isUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100")
+            }
+          >
             {isUploading ? "Uploading…" : "Change"}
           </span>
+
+          {/* Always-visible camera badge — touch screens have no hover, so
+              without it nothing says the avatar can be tapped to change it. */}
+          {!isUploading && (
+            <span
+              aria-hidden="true"
+              className="absolute bottom-1 right-1 sm:bottom-3 sm:right-3 w-8 h-8 rounded-full bg-bg/80 backdrop-blur-sm border border-fg/20 flex items-center justify-center text-fg"
+            >
+              <Camera className="w-4 h-4" />
+            </span>
+          )}
         </button>
 
         <input
@@ -199,10 +222,7 @@ export default function ProfileEditForm({
         {/* Name — read-only until the pencil is clicked; saves itself on
             blur/Enter instead of a separate Save button */}
         <div>
-          <label
-            htmlFor="name"
-            className="block text-[10px] uppercase tracking-widest text-fg-muted mb-2"
-          >
+          <label htmlFor="name" className="block text-xs text-fg-secondary mb-1">
             Display name
           </label>
 
@@ -215,6 +235,7 @@ export default function ProfileEditForm({
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={handleNameKeyDown}
                 readOnly={!isEditingName}
+                maxLength={MAX_DISPLAY_NAME_LENGTH}
                 suppressHydrationWarning
                 className={
                   "w-full bg-transparent border-b px-0 py-2 text-base text-fg outline-none transition-colors " +
@@ -267,22 +288,27 @@ export default function ProfileEditForm({
           {tag && <p className="text-xs text-fg-muted mt-2">Your tag is #{tag} — shown as {name}#{tag}, and never changes.</p>}
         </div>
 
-        {/* Role / email / member-since, with the manage-manga action
-            alongside it for authors and admins */}
+        {/* Email / member-since, with a role badge and the manage-manga
+            action for authors and admins. Plain readers don't get a role
+            line at all — "reader" is an internal account type, not
+            something they need shown back to them. */}
         <div className="mt-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-fg font-bold uppercase tracking-wide">{role}</p>
-            <p className="text-sm text-fg-secondary mt-1">{email}</p>
+            {role !== "reader" && (
+              <span className="inline-flex mb-2 px-2 py-0.5 rounded-full border border-fg/25 text-xs font-medium text-fg">
+                {role === "admin" ? "Admin" : "Author"}
+              </span>
+            )}
+            <p className="text-sm text-fg-secondary">{email}</p>
             <p className="text-xs text-fg-muted mt-1">
-              member since{" "}
-              {createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              Member since {createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </p>
           </div>
 
           {(role === "author" || role === "admin") && (
             <Link
               href={role === "admin" ? "/admin" : "/manage"}
-              className="self-start shrink-0 text-xs uppercase tracking-wide px-3 py-1.5 rounded bg-surface-hover border border-border text-fg hover:bg-surface-hover hover:border-fg-secondary transition-colors duration-200"
+              className="self-start shrink-0 flex items-center h-9 px-4 rounded-md border border-fg/25 text-sm font-medium text-fg hover:border-fg/60 transition-colors duration-200"
             >
               {role === "admin" ? "Admin panel" : "Manage manga"}
             </Link>
@@ -301,7 +327,7 @@ export default function ProfileEditForm({
                 <p className="text-2xl text-fg group-hover:text-fg-hover font-(family-name:--font-display) transition-colors duration-200">
                   {s.value}
                 </p>
-                <p className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-fg-muted group-hover:text-fg-secondary mt-1 transition-colors duration-200">
+                <p className="flex items-center gap-1 text-xs text-fg-secondary group-hover:text-fg mt-1 transition-colors duration-200">
                   {s.label}
                   {s.href && <ArrowUpRight className="w-3 h-3" />}
                 </p>

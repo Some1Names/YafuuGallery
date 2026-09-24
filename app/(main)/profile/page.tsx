@@ -33,7 +33,9 @@ export default async function ProfilePage() {
   const stats = [
     { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },
     { label: "Chapters favorited", value: chapterFavoriteCount, href: "/favorites?tab=chapters" },
-    { label: "Chapters read", value: chaptersReadCount },
+    // counts every chapter with a progress row — i.e. opened, not
+    // necessarily finished (ReadingProgress.completed is never set)
+    { label: "Chapters started", value: chaptersReadCount },
     { label: "Comments", value: commentCount },
   ];
 
