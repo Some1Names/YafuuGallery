@@ -226,7 +226,10 @@ export default function ProfileEditForm({
             Display name
           </label>
 
-          <div className="flex items-start gap-3">
+          {/* items-baseline: the error / "Saving…" text sits on the same text
+              line as the name in the input, not top-aligned to the field box
+              (which left the smaller text floating ~4px above the name). */}
+          <div className="flex items-baseline gap-3">
             <div className="relative max-w-xs w-full">
               <input
                 ref={nameInputRef}
@@ -277,8 +280,8 @@ export default function ProfileEditForm({
               )}
             </div>
 
-            {error && <p className="text-sm text-danger pt-2">{error}</p>}
-            {isSaving && <p className="text-xs text-fg-muted pt-2">Saving…</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
+            {isSaving && <p className="text-xs text-fg-muted whitespace-nowrap">Saving…</p>}
           </div>
 
           {/* Fixed for the life of the account (see User.tag in the
