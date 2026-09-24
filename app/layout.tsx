@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black } from "next/font/google";
 import RouteProgressBar from "@/component/RouteProgressBar";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 // Loaded once here instead of per-page — every page and component gets
@@ -9,6 +10,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
 const archivoBlack = Archivo_Black({ subsets: ["latin"], weight: "400", variable: "--font-display" });
 
 export const metadata: Metadata = {
+  // Base for any relative URL in metadata (Open Graph images, canonical
+  // links) — search engines and link previews need absolute ones.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "YafuuGallery",
     template: "%s | YafuuGallery",
