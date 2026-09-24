@@ -54,6 +54,21 @@ function writeCommentsSeen(chapterId: string, createdAt: string) {
   }
 }
 
+// Shared by every <Page> in the reader. No text/annotation layers (these
+// are image scans). `reader-page` (globals.css) replaces react-pdf's inline
+// WHITE page background with a dark placeholder: pdf.js keeps each page's
+// canvas hidden until it's finished drawing, so on this dark reader every
+// page used to flash as a blank white sheet — on opening a chapter, turning
+// pages, and swiping. The drawn canvas is opaque and covers the
+// placeholder entirely. loading: null drops react-pdf's "Loading page…"
+// text inside each page box.
+const PAGE_DISPLAY_PROPS = {
+  renderAnnotationLayer: false,
+  renderTextLayer: false,
+  className: "overflow-hidden reader-page",
+  loading: null,
+} as const;
+
 const SWIPE_THRESHOLD_PX = 50;
 // Below this, a completed gesture is a tap (toggle the top bar) rather
 // than an intentional-but-too-short drag (which just snaps back to center).
@@ -916,9 +931,7 @@ export default function ChapterReaderClient({
                     <Page
                       pageNumber={n}
                       width={pageWidth}
-                      renderAnnotationLayer={false}
-                      renderTextLayer={false}
-                      className="overflow-hidden"
+                      {...PAGE_DISPLAY_PROPS}
                     />
                   </div>
                 );
@@ -954,9 +967,7 @@ export default function ChapterReaderClient({
                     <Page
                       pageNumber={peekSpread[0]}
                       {...pageSizeProps(peekSpread[0])}
-                      renderAnnotationLayer={false}
-                      renderTextLayer={false}
-                      className="overflow-hidden"
+                      {...PAGE_DISPLAY_PROPS}
                     />
                   </div>
                 )}
@@ -970,9 +981,7 @@ export default function ChapterReaderClient({
                     <Page
                       pageNumber={currentSpread[0]}
                       {...pageSizeProps(currentSpread[0])}
-                      renderAnnotationLayer={false}
-                      renderTextLayer={false}
-                      className="overflow-hidden"
+                      {...PAGE_DISPLAY_PROPS}
                     />
                   </div>
                 )}
@@ -985,18 +994,14 @@ export default function ChapterReaderClient({
                   <Page
                     pageNumber={currentSpread[1]}
                     {...pageSizeProps(currentSpread[1])}
-                    renderAnnotationLayer={false}
-                    renderTextLayer={false}
-                    className="overflow-hidden"
+                    {...PAGE_DISPLAY_PROPS}
                   />
                 )}
                 {currentSpread[0] !== undefined && (
                   <Page
                     pageNumber={currentSpread[0]}
                     {...pageSizeProps(currentSpread[0])}
-                    renderAnnotationLayer={false}
-                    renderTextLayer={false}
-                    className="overflow-hidden"
+                    {...PAGE_DISPLAY_PROPS}
                   />
                 )}
 

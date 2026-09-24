@@ -108,6 +108,34 @@ html.light .site-wordmark {
   filter: invert(1);
 }
 
+/* Reader pages (react-pdf): react-pdf paints each page box with an INLINE
+   white background, and pdf.js keeps the page's canvas hidden until it has
+   finished drawing — so every page flashed as a blank white sheet on the
+   dark reader while it rendered. !important is needed to beat that inline
+   style. Deliberately NOT done via react-pdf's canvasBackground prop: that
+   also changes the paper color pdf.js paints the page itself with. Once
+   drawn, the opaque canvas covers the placeholder entirely.
+   A slow pulse marks it as "still loading" — only while the canvas is
+   still hidden, so finished pages don't keep repainting behind their
+   canvas for nothing (browsers without :has() just get the static
+   placeholder). */
+.reader-page {
+  background-color: #161616 !important;
+}
+.reader-page:has(> canvas[style*="visibility: hidden"]) {
+  animation: reader-page-pulse 1.6s ease-in-out infinite;
+}
+@keyframes reader-page-pulse {
+  50% {
+    background-color: #1f1e1f;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reader-page {
+    animation: none;
+  }
+}
+
 /* Fill animation for the featured carousel's active dot — shows how much
    longer until it auto-advances to the next slide. Restarted by giving the
    fill element a `key` tied to the active slide, in FeaturedCarousel. */
