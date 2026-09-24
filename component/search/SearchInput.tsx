@@ -11,6 +11,10 @@ interface SearchInputProps {
 }
 
 const DEBOUNCE_MS = 300;
+// Typing only auto-searches from this many characters — a single letter
+// matches nearly everything, so it's a wasted query. Enter still searches
+// any length, and emptying the box still auto-returns to "All manga".
+const MIN_AUTO_SEARCH_CHARS = 2;
 
 function searchHref(query: string) {
   const trimmed = query.trim();
@@ -18,7 +22,7 @@ function searchHref(query: string) {
 }
 
 // Search-as-you-type: results update DEBOUNCE_MS after the last keystroke
-// by replacing the URL (?q=), which re-renders the server page — so the
+// (once there are MIN_AUTO_SEARCH_CHARS) by replacing the URL (?q=), which re-renders the server page — so the
 // query stays shareable/refreshable and the results logic lives in one
 // place. router.replace, not push, so typing doesn't stack up history
 // entries. Enter searches immediately and is what counts as a "committed"
@@ -59,7 +63,10 @@ export default function SearchInput({ initialQuery }: SearchInputProps) {
   function handleChange(next: string) {
     setValue(next);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => navigate(next), DEBOUNCE_MS);
+    const length = next.trim().length;
+    if (length === 0 || length >= MIN_AUTO_SEARCH_CHARS) {
+      debounceRef.current = setTimeout(() => navigate(next), DEBOUNCE_MS);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
