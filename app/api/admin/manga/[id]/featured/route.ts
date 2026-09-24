@@ -24,6 +24,15 @@ export async function PATCH(
     return NextResponse.json({ error: "is_featured (boolean) is required" }, { status: 400 });
   }
 
+  // Featuring is curation, not an update to the manga itself — keep its
+  // updated_at as it was, or toggling it would jump the manga to the front
+  // of "Latest Manga"/search and refresh its "updated" badge. Prisma's
+  // @updatedAt only stays put when a value is passed explicitly.
+  const current = await prisma.manga.findUnique({ where: { id }, select: { updated_at: true } });
+  if (!current) {
+    return NextResponse.json({ error: "Manga not found" }, { status: 404 });
+  }
+
   // Turning it on appends to the end of the carousel order; turning it off
   // just clears the flag (featured_order is meaningless while unfeatured).
   const data = is_featured
@@ -34,7 +43,7 @@ export async function PATCH(
       }
     : { is_featured: false };
 
-  const manga = await prisma.manga.update({ where: { id }, data });
+  const manga = await prisma.manga.update({ where: { id }, data: { ...data, updated_at: current.updated_at } });
 
   return NextResponse.json(manga);
 }
