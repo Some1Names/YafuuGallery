@@ -150,28 +150,41 @@ export default function AdminDashboard({
     setExpandedUserId((current) => (current === userId ? null : userId));
   }
 
-  const tabClass = (isActive: boolean) =>
-    "px-4 py-1.5 rounded text-sm transition-colors duration-200 " +
-    (isActive ? "bg-surface-hover text-fg" : "text-fg-secondary hover:text-fg");
+  const tabs: { id: Tab; label: string; count: number }[] = [
+    { id: "manga", label: "Manga", count: mangaList.length },
+    { id: "users", label: "Users", count: users.length },
+    { id: "comments", label: "Comments", count: comments.length },
+  ];
 
   return (
     <div>
       {/* Tabs — client-side only, same as the manga detail page's
           Chapters/Arcs switcher, so switching sections doesn't reload
-          the page (everything's already fetched up front) */}
-      <div className="inline-flex items-center gap-1 p-1 mb-8 rounded-md border border-border bg-surface">
-        <button type="button" onClick={() => setActiveTab("manga")} className={tabClass(activeTab === "manga")}>
-          Manga
-          <span className="ml-1.5 text-xs text-fg-muted">{mangaList.length}</span>
-        </button>
-        <button type="button" onClick={() => setActiveTab("users")} className={tabClass(activeTab === "users")}>
-          Users
-          <span className="ml-1.5 text-xs text-fg-muted">{users.length}</span>
-        </button>
-        <button type="button" onClick={() => setActiveTab("comments")} className={tabClass(activeTab === "comments")}>
-          Comments
-          <span className="ml-1.5 text-xs text-fg-muted">{comments.length}</span>
-        </button>
+          the page (everything's already fetched up front). Same look as
+          that switcher, the Favorites tabs, and the navbar: display face,
+          count beside the label, 2px ink bar under the active tab.
+          aria-pressed toggles rather than role="tab", which would promise
+          arrow-key navigation this doesn't implement. */}
+      <div className="flex gap-6 mb-8 border-b border-fg/10">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => setActiveTab(tab.id)}
+              className={
+                "relative pb-3 text-lg sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
+                (isActive ? "text-fg" : "text-fg-muted hover:text-fg-secondary")
+              }
+            >
+              {tab.label}
+              <span className="ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
+              {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === "manga" && (
@@ -254,7 +267,7 @@ export default function AdminDashboard({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-surface text-fg-secondary text-xs uppercase">
+                  <tr className="bg-surface text-fg-secondary text-xs">
                     <th className="text-left px-4 py-2">Name</th>
                     <th className="text-left px-4 py-2">Email</th>
                     <th className="text-left px-4 py-2">Joined</th>
@@ -290,7 +303,20 @@ export default function AdminDashboard({
                             })}
                           </td>
                           <td className="px-4 py-2">
-                            <AdminUserRoleSelect userId={u.id} currentRole={u.role} />
+                            {/* No dropdown on your own row — changing your
+                                own role would drop your admin access
+                                instantly (the API refuses it too). */}
+                            {u.id === currentUserId ? (
+                              <span className="text-sm text-fg-secondary whitespace-nowrap">
+                                {u.role === "admin" ? "Admin" : u.role === "author" ? "Author" : "Reader"} (you)
+                              </span>
+                            ) : (
+                              <AdminUserRoleSelect
+                                userId={u.id}
+                                currentRole={u.role}
+                                userLabel={u.name ? formatUsername(u.name, u.tag) : u.email}
+                              />
+                            )}
                           </td>
                           <td className="px-4 py-2">
                             <button

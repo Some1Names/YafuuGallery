@@ -131,7 +131,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
         <div className="flex-1 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+              <label className="block text-xs text-fg-secondary mb-1.5">
                 Chapter Title
               </label>
               <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
@@ -154,7 +154,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
             </div>
 
             <div className="sm:w-48">
-              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+              <label className="block text-xs text-fg-secondary mb-1.5">
                 Arc
               </label>
               <select
@@ -174,7 +174,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:w-40">
-              <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+              <label className="block text-xs text-fg-secondary mb-1.5">
                 Published Date
               </label>
               <input

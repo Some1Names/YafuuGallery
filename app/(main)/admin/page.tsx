@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getObjectSizes, keyFromPublicUrl } from "@/lib/storage";
+import { keyFromPublicUrl, listObjects } from "@/lib/storage";
+import { findOrphanedObjects, getReferencedStorageKeys } from "@/lib/storage-references";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
 import UnattributedStorage from "@/component/admin/UnattributedStorage";
+import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -18,7 +20,8 @@ export default async function AdminPage() {
     userCount,
     mangaCount,
     chapterCount,
-    objectSizes,
+    storedObjects,
+    referencedKeys,
     users,
     mangaList,
     chapters,
@@ -28,7 +31,8 @@ export default async function AdminPage() {
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
-      getObjectSizes(),
+      listObjects(),
+      getReferencedStorageKeys(),
       prisma.user.findMany({
         orderBy: { created_at: "desc" },
         select: { id: true, name: true, tag: true, email: true, role: true, created_at: true, image: true },
@@ -85,13 +89,17 @@ export default async function AdminPage() {
           user: { select: { id: true, name: true, tag: true } },
           chapter: {
             select: {
-              chapter_number: true,
+              id: true,
+              chapter_is_ex: true,
+              manga_id: true,
               manga: { select: { manga_title: true } },
             },
           },
         },
       }),
     ]);
+
+  const objectSizes = new Map(storedObjects.map((o) => [o.key, o.size]));
 
   const stats = [
     { label: "Users", value: userCount },
@@ -115,37 +123,13 @@ export default async function AdminPage() {
     chapterBytes.set(c.id, bytes);
   }
 
-  // Every *_url column in the schema that can point at an R2 object —
-  // whatever key isn't referenced by any of these is a leftover no manga,
-  // chapter, arc, or user is still holding onto (an old avatar after a
-  // re-upload, or a cover picked mid-edit and then abandoned by Cancel).
-  const referencedKeys = new Set<string>();
-  for (const m of mangaList) {
-    for (const url of [m.cover_image_url, m.banner_image_url]) {
-      const key = keyFromPublicUrl(url);
-      if (key) referencedKeys.add(key);
-    }
-  }
-  for (const a of arcs) {
-    const key = keyFromPublicUrl(a.arc_image_url);
-    if (key) referencedKeys.add(key);
-  }
-  for (const c of chapters) {
-    const key = keyFromPublicUrl(c.cover_image_url);
-    if (key) referencedKeys.add(key);
-    for (const t of c.translations) {
-      const tKey = keyFromPublicUrl(t.file_url);
-      if (tKey) referencedKeys.add(tKey);
-    }
-  }
-  for (const u of users) {
-    const key = keyFromPublicUrl(u.image);
-    if (key) referencedKeys.add(key);
-  }
-
-  const orphanedObjects = [...objectSizes.entries()]
-    .filter(([key]) => !referencedKeys.has(key))
-    .map(([key, size]) => ({ key, size }))
+  // Leftovers no manga, chapter, arc, or user still points at (an old
+  // avatar after a re-upload, a cover picked mid-edit then abandoned by
+  // Cancel). Same shared definition the delete route re-checks against at
+  // delete time (lib/storage-references.ts) — including skipping anything
+  // uploaded too recently to be safely called orphaned.
+  const orphanedObjects = findOrphanedObjects(storedObjects, referencedKeys)
+    .map(({ key, size }) => ({ key, size }))
     .sort((a, b) => b.size - a.size);
 
   const mangaItems = mangaList.map((m) => ({
@@ -193,13 +177,30 @@ export default async function AdminPage() {
     storageBytes: chapterBytes.get(c.id) ?? 0,
   }));
 
+  // chapter_number is a 0-indexed sort key that also counts "ex" chapters,
+  // not the number readers see — labeling comments with it showed "#000"
+  // for the first chapter and drifted after any ex. Compute real display
+  // numbers per manga, same as everywhere else (lib/chapter-number.ts).
+  const displayNumbersByManga = new Map<string, Map<string, number>>();
+  for (const c of chapters) {
+    if (!displayNumbersByManga.has(c.manga_id)) {
+      displayNumbersByManga.set(
+        c.manga_id,
+        getChapterDisplayNumbers(chapters.filter((x) => x.manga_id === c.manga_id))
+      );
+    }
+  }
+
   const commentItems = comments.map((c) => ({
     id: c.id,
     userId: c.user.id,
     body: c.body,
     userName: c.user.name ?? "Unknown",
     userTag: c.user.tag,
-    chapterLabel: `${c.chapter.manga.manga_title} #${String(c.chapter.chapter_number).padStart(3, "0")}`,
+    chapterLabel: `${c.chapter.manga.manga_title} ${formatChapterBadge(
+      c.chapter.chapter_is_ex,
+      displayNumbersByManga.get(c.chapter.manga_id)?.get(c.chapter.id)
+    )}`,
     createdAt: c.created_at,
     hidden: c.hidden_at !== null,
   }));
@@ -224,7 +225,7 @@ export default async function AdminPage() {
           {stats.map((s) => (
             <div key={s.label} className="border border-border rounded-md p-4 bg-surface/60">
               <div className="text-2xl text-fg font-(family-name:--font-display)">{s.value}</div>
-              <div className="text-xs text-fg-secondary uppercase mt-1">{s.label}</div>
+              <div className="text-xs text-fg-secondary mt-1">{s.label}</div>
             </div>
           ))}
         </div>

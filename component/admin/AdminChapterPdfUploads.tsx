@@ -53,7 +53,7 @@ export default function AdminChapterPdfUploads({
 
   return (
     <div>
-      <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+      <label className="block text-xs text-fg-secondary mb-1.5">
         Chapter PDF{value.length > 1 ? "s" : ""}
       </label>
 

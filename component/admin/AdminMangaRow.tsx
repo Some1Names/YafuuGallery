@@ -207,7 +207,7 @@ export default function AdminMangaRow({
             aspectRatio={32 / 9}
           />
 
-          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
+          <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
             Manga Title
           </label>
           <input
@@ -217,7 +217,7 @@ export default function AdminMangaRow({
             className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
           />
 
-          <label className="col-span-2 sm:col-span-1 text-[10px] uppercase tracking-widest text-fg-muted sm:pt-2">
+          <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
             Synopsis
           </label>
           <textarea

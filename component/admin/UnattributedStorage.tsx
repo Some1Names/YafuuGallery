@@ -24,18 +24,31 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
   const [isExpanded, setIsExpanded] = useState(false);
   const [deletingKeys, setDeletingKeys] = useState<Set<string>>(new Set());
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  // The server re-checks every key at delete time and skips any that have
+  // since been put back in use — say so, rather than letting a file the
+  // admin asked to delete quietly reappear after the refresh.
+  const [notice, setNotice] = useState<string | null>(null);
 
   if (objects.length === 0) return null;
 
   const totalBytes = objects.reduce((sum, o) => sum + o.size, 0);
 
   async function deleteKeys(keys: string[]) {
+    setNotice(null);
     const res = await fetch("/api/admin/storage/orphaned", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keys }),
     });
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      const data: { skippedCount?: number } = await res.json().catch(() => ({}));
+      if (data.skippedCount) {
+        setNotice(
+          `${data.skippedCount} file${data.skippedCount === 1 ? " was" : "s were"} skipped — now in use again, so not deleted.`
+        );
+      }
+      router.refresh();
+    }
     return res.ok;
   }
 
@@ -81,9 +94,12 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
       {isExpanded && (
         <div className="border-t border-border p-4 flex flex-col gap-3">
           <p className="text-xs text-fg-muted">
-            R2 objects no manga, chapter, arc, or user is still linked to — leftovers from re-uploads
-            or edits that were cancelled after picking a file. Safe to delete.
+            Files no manga, chapter, arc, or user is linked to — leftovers from re-uploads or edits
+            that were cancelled after picking a file. Files uploaded in the last 24 hours aren&apos;t
+            listed, since they may still be mid-save. Each file is checked again before it&apos;s
+            deleted.
           </p>
+          {notice && <p className="text-xs text-fg-secondary">{notice}</p>}
 
           <div className="flex flex-col gap-1.5 max-h-80 overflow-y-auto">
             {objects.map((o) => (

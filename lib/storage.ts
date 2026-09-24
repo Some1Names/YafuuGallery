@@ -105,8 +105,14 @@ export function isAllowedUrlWrite(
 // so the only way to total storage is listing every object and summing
 // Size. Paginated via ContinuationToken since ListObjectsV2 caps a single
 // page at 1000 keys.
-export async function getObjectSizes(): Promise<Map<string, number>> {
-  const sizes = new Map<string, number>();
+export interface StoredObject {
+  key: string;
+  size: number;
+  lastModified: Date | null;
+}
+
+export async function listObjects(): Promise<StoredObject[]> {
+  const objects: StoredObject[] = [];
   let continuationToken: string | undefined;
 
   do {
@@ -115,13 +121,17 @@ export async function getObjectSizes(): Promise<Map<string, number>> {
     );
 
     for (const obj of page.Contents ?? []) {
-      if (obj.Key) sizes.set(obj.Key, obj.Size ?? 0);
+      if (obj.Key) objects.push({ key: obj.Key, size: obj.Size ?? 0, lastModified: obj.LastModified ?? null });
     }
 
     continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
   } while (continuationToken);
 
-  return sizes;
+  return objects;
+}
+
+export async function getObjectSizes(): Promise<Map<string, number>> {
+  return new Map((await listObjects()).map((o) => [o.key, o.size]));
 }
 
 export async function getStorageUsage(): Promise<{ bytesUsed: number; objectCount: number }> {

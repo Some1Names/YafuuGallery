@@ -178,7 +178,7 @@ export default function AdminArcRow({
 
             <div className="flex-1 flex flex-col gap-4">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+                <label className="block text-xs text-fg-secondary mb-1.5">
                   Arc Title
                 </label>
                 <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
@@ -200,7 +200,7 @@ export default function AdminArcRow({
               </div>
 
               <div className="sm:w-40">
-                <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+                <label className="block text-xs text-fg-secondary mb-1.5">
                   Status
                 </label>
                 <select

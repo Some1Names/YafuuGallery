@@ -21,8 +21,25 @@ export async function POST(
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 
-  // an admin can't demote their own last-admin account by accident here —
-  // that's a real edge case, but out of scope for now; flag if you want it
+  // An admin changing their OWN role would drop their admin access
+  // instantly, mid-session — the dashboard doesn't offer it, and this is
+  // the real enforcement.
+  if (id === session.user.id) {
+    return NextResponse.json({ error: "You can't change your own role." }, { status: 400 });
+  }
+
+  // Never leave the site with zero admins — nobody could get admin access
+  // back without editing the database directly.
+  if (role !== "admin") {
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (target?.role === "admin") {
+      const adminCount = await prisma.user.count({ where: { role: "admin" } });
+      if (adminCount <= 1) {
+        return NextResponse.json({ error: "Can't remove the last admin." }, { status: 400 });
+      }
+    }
+  }
+
   await prisma.user.update({
     where: { id },
     data: { role },

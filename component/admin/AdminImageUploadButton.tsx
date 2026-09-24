@@ -77,7 +77,7 @@ export default function AdminImageUploadButton({
 
   return (
     <div>
-      <label className="block text-[10px] uppercase tracking-widest text-fg-muted mb-1.5">
+      <label className="block text-xs text-fg-secondary mb-1.5">
         {label}
       </label>
 
