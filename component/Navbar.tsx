@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search } from "lucide-react";
+import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
 import ThemeToggle from "@/component/ThemeToggle";
@@ -21,6 +21,9 @@ interface NavbarProps {
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
+  // /search with no query is the browse-all listing (genre/status/sort);
+  // the search icon on the right goes to the same page, ready to type.
+  { href: "/search", label: "Browse", icon: Compass },
   { href: "/favorites", label: "Favorites", icon: Heart },
 ];
 
@@ -300,7 +303,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
         </div>
 
         {/* Mobile: search is its own trigger, separate from the menu button
-            below (which only opens Home/Favorites + account) */}
+            below (which only opens Home/Browse/Favorites + account) */}
         <div className="flex items-center gap-2 md:hidden">
           <Link
             href="/search"

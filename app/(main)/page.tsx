@@ -8,8 +8,60 @@ import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { getContinueReading } from "@/lib/continue-reading";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
+import { GENRES } from "@/lib/genres";
+import { searchHref } from "@/lib/search-filters";
 
 const LATEST_PAGE_SIZE = 10;
+// One row of the 5-column grid. The Popular row only shows once the
+// library has MORE manga than this — until then it'd be the exact same
+// covers as Latest Manga right below it, just reordered.
+const POPULAR_COUNT = 5;
+
+// Every card needs the manga's chapter list to work out its latest
+// chapter's display number (see lib/chapter-number.ts).
+const CARD_INCLUDE = {
+  author: { select: { name: true } },
+  chapters: { select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true } },
+} as const;
+
+type CardManga = {
+  id: string;
+  manga_title: string;
+  cover_image_url: string | null;
+  updated_at: Date;
+  author: { name: string | null };
+  chapters: { id: string; chapter_number: number; chapter_is_ex: boolean; chapter_name: string }[];
+};
+
+function renderCard(manga: CardManga) {
+  const latest = manga.chapters.slice().sort((a, b) => b.chapter_number - a.chapter_number)[0];
+  const displayNumbers = getChapterDisplayNumbers(manga.chapters);
+  return (
+    <MangaCard
+      key={manga.id}
+      id={manga.id}
+      title={manga.manga_title}
+      author={manga.author.name ?? "Unknown"}
+      coverImageUrl={manga.cover_image_url}
+      latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
+      latestChapterIsEx={latest?.chapter_is_ex ?? false}
+      latestChapterName={latest?.chapter_name ?? null}
+      updatedAt={manga.updated_at}
+    />
+  );
+}
+
+// "See all →" beside a section heading
+function SeeAllLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="shrink-0 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+    >
+      {label} <span aria-hidden="true">→</span>
+    </Link>
+  );
+}
 
 export default async function BrowsePage({
   searchParams,
@@ -21,22 +73,13 @@ export default async function BrowsePage({
 
   // session doesn't depend on the manga queries (or vice versa), so all
   // three run as one round trip instead of two sequential ones.
-  const [session, latestRows, curatedFeatured] = await Promise.all([
+  const [session, latestRows, curatedFeatured, mangaCount, popularManga, genreRows] = await Promise.all([
     auth(),
     prisma.manga.findMany({
       orderBy: { updated_at: "desc" },
       // one extra row just to learn whether "Show more" is needed
       take: latestLimit + 1,
-      include: {
-        author: { select: { name: true } },
-        // chapter_number is a 0-indexed sort key, not the number shown to
-        // readers, and doesn't skip "ex" entries — computing the real
-        // display number needs every chapter, not just the highest
-        // chapter_number one (see lib/chapter-number.ts)
-        chapters: {
-          select: { id: true, chapter_number: true, chapter_is_ex: true, chapter_name: true },
-        },
-      },
+      include: CARD_INCLUDE,
     }),
     // Home page hero — admin-curated via the "Featured" toggle in the admin
     // panel (is_featured + featured_order, set in the order manga were
@@ -50,7 +93,21 @@ export default async function BrowsePage({
         chapters: { orderBy: { chapter_number: "asc" }, take: 1, select: { id: true } },
       },
     }),
+    prisma.manga.count(),
+    prisma.manga.findMany({
+      orderBy: [{ view_count: "desc" }, { updated_at: "desc" }],
+      take: POPULAR_COUNT,
+      include: CARD_INCLUDE,
+    }),
+    // How many manga carry each genre, for the "Browse by genre" strip —
+    // only genres something is actually tagged with get a chip, so none
+    // of them leads to an empty page.
+    prisma.$queryRaw<{ genre: string; count: number }[]>`
+      SELECT g AS genre, COUNT(*)::int AS count FROM "Manga", unnest("genres") AS g GROUP BY g`,
   ]);
+  const genreCounts = new Map(genreRows.map((r) => [r.genre, r.count]));
+  const genresInUse = GENRES.filter((g) => genreCounts.has(g.slug));
+  const showPopular = mangaCount > POPULAR_COUNT;
 
   const { items: mangaList, hasMore: hasMoreLatest } = splitExtraRow(latestRows, latestLimit);
 
@@ -148,6 +205,7 @@ export default async function BrowsePage({
                     chapterName={p.chapterName}
                     coverImageUrl={p.coverImageUrl}
                     mangaTitle={p.mangaTitle}
+                    isNext={p.isNext}
                   />
                 ))}
               </div>
@@ -156,11 +214,49 @@ export default async function BrowsePage({
         )
       )}
 
+      {showPopular && (
+        <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
+          <div className="max-w-350 mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
+              <div>
+                <p className="text-fg-secondary text-xs sm:text-sm">MOST READ</p>
+                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Popular</h2>
+              </div>
+              <SeeAllLink href={searchHref({ sort: "views" })} label="See all" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+              {popularManga.map(renderCard)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {genresInUse.length > 0 && (
+        <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
+          <div className="max-w-350 mx-auto">
+            <h2 className="text-xl text-fg font-(family-name:--font-display) mb-4">Browse by genre</h2>
+            <ul className="flex flex-wrap gap-2">
+              {genresInUse.map((g) => (
+                <li key={g.slug}>
+                  <Link
+                    href={searchHref({ genre: g.slug })}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border bg-surface text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
+                  >
+                    {g.label}
+                    <span className="text-xs text-fg-muted">{genreCounts.get(g.slug)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {/* Latest Updates */}
       <section className="px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
         <div className="max-w-350 mx-auto">
 
-          <div className="flex items-end justify-between mb-6 sm:mb-8">
+          <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
             <div>
               <p className="text-fg-secondary text-xs sm:text-sm">
                 RECENTLY UPDATED
@@ -170,28 +266,12 @@ export default async function BrowsePage({
                 Latest Manga
               </h2>
             </div>
+            {mangaList.length > 0 && <SeeAllLink href="/search" label="Browse all" />}
 
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-            {mangaList.map((manga) => {
-              const latest = manga.chapters.slice().sort((a, b) => b.chapter_number - a.chapter_number)[0];
-              const displayNumbers = getChapterDisplayNumbers(manga.chapters);
-
-              return (
-                <MangaCard
-                  key={manga.id}
-                  id={manga.id}
-                  title={manga.manga_title}
-                  author={manga.author.name ?? "Unknown"}
-                  coverImageUrl={manga.cover_image_url}
-                  latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
-                  latestChapterIsEx={latest?.chapter_is_ex ?? false}
-                  latestChapterName={latest?.chapter_name ?? null}
-                  updatedAt={manga.updated_at}
-                />
-              );
-            })}
+            {mangaList.map(renderCard)}
           </div>
 
           {mangaList.length === 0 && (
