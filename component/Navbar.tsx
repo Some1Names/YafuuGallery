@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass } from "lucide-react";
+import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass, History } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
 import ThemeToggle from "@/component/ThemeToggle";
@@ -273,6 +273,14 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     {pathname === "/profile" && <ActiveBar />}
                     Profile
                   </Link>
+                  <Link
+                    href="/history"
+                    aria-current={pathname === "/history" ? "page" : undefined}
+                    className={menuItemClass(pathname === "/history")}
+                  >
+                    {pathname === "/history" && <ActiveBar />}
+                    Reading history
+                  </Link>
                   <div className="my-1.5 border-t border-border" />
                   <button
                     type="button"
@@ -384,6 +392,15 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     {pathname === "/profile" && <ActiveBar />}
                     <User className="w-4 h-4" />
                     {user.name ? formatUsername(user.name, user.tag) : "Profile"}
+                  </Link>
+                  <Link
+                    href="/history"
+                    aria-current={pathname === "/history" ? "page" : undefined}
+                    className={menuItemClass(pathname === "/history")}
+                  >
+                    {pathname === "/history" && <ActiveBar />}
+                    <History className="w-4 h-4" />
+                    Reading history
                   </Link>
                   <button
                     type="button"

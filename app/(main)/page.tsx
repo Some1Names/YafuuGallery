@@ -190,9 +190,12 @@ export default async function BrowsePage({
         recentProgress.length > 0 && (
           <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
             <div className="max-w-350 mx-auto">
-              <div className="mb-6 sm:mb-8">
-                <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
-                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Continue Reading</h2>
+              <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
+                <div>
+                  <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
+                  <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Continue Reading</h2>
+                </div>
+                <SeeAllLink href="/history" label="History" />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">

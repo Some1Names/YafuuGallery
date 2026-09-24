@@ -45,3 +45,21 @@ export async function POST(
 
   return NextResponse.json({ success: true });
 }
+
+// DELETE /api/chapters/[id]/progress — "remove from history" on /history.
+// Deletes only the signed-in reader's own row (the where clause is scoped
+// to their user id), which also drops the chapter from Continue Reading and
+// forgets its saved page.
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await prisma.readingProgress.deleteMany({ where: { user_id: session.user.id, chapter_id: id } });
+  return NextResponse.json({ success: true });
+}

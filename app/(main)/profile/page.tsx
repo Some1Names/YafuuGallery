@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -73,9 +74,17 @@ export default async function ProfilePage() {
         {/* Recently read — up to 4 chapters, any title. 2x2 on phone,
             one row of 4 from sm up, so the last item never wraps alone. */}
         <section>
-          <h2 className="text-xl text-fg font-(family-name:--font-display) mb-4">
-            Continue reading
-          </h2>
+          <div className="flex items-baseline justify-between gap-4 mb-4">
+            <h2 className="text-xl text-fg font-(family-name:--font-display)">Continue reading</h2>
+            {recentProgress.length > 0 && (
+              <Link
+                href="/history"
+                className="shrink-0 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+              >
+                Reading history <span aria-hidden="true">→</span>
+              </Link>
+            )}
+          </div>
           {recentProgress.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
