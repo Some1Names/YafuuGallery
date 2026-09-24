@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ArrowDownUp } from "lucide-react";
 import ChapterList from "./ChapterList";
 import ArcList from "./ArcList";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
@@ -41,59 +42,62 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
     );
   }, [arcs, looseChapters, filteredArc, sortOrder]);
 
+  // The tab's count is the whole manga's, not the (possibly arc-filtered)
+  // list below it — that list shows its own arc filter chip instead.
+  const allChapterCount = arcs.reduce((n, arc) => n + arc.chapters.length, 0) + looseChapters.length;
+
   function selectArc(arcId: string) {
     setFilteredArcId(arcId);
     setActiveView("chapters");
   }
 
+  const tabs = [
+    { id: "chapters" as const, label: "Chapters", count: allChapterCount },
+    { id: "arcs" as const, label: "Arcs", count: arcs.length },
+  ];
+
   return (
     <>
-      <h2 className="text-xl uppercase tracking-wide mb-4 flex justify-between items-center font-(family-name:--font-display)">
-        <div className="flex items-end gap-3">
-          <button
-            type="button"
-            onClick={() => setActiveView("chapters")}
-            className={
-              "transition-all duration-200 " +
-              (activeView === "chapters"
-                ? "text-xl text-fg"
-                : "text-sm text-fg-secondary hover:text-fg")
-            }
-          >
-            Chapters
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveView("arcs")}
-            className={
-              "transition-all duration-200 " +
-              (activeView === "arcs"
-                ? "text-xl text-fg"
-                : "text-sm text-fg-secondary hover:text-fg")
-            }
-          >
-            Arcs
-          </button>
+      {/* Tab row: same size for both tabs (the old version resized the
+          text on switch, which made the row jump), the active one marked by
+          the same 2px ink bar the navbar uses, sitting on the row's own
+          bottom rule. */}
+      <div className="flex items-end justify-between gap-4 mb-5 border-b border-fg/10">
+        {/* Plain toggle buttons (aria-pressed), not role="tab" — the tab
+            pattern promises arrow-key navigation this doesn't implement. */}
+        <div className="flex gap-6">
+          {tabs.map((tab) => {
+            const isActive = activeView === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => setActiveView(tab.id)}
+                className={
+                  "relative pb-3 text-lg sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
+                  (isActive ? "text-fg" : "text-fg-muted hover:text-fg-secondary")
+                }
+              >
+                {tab.label}
+                <span className="ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
+                {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
+              </button>
+            );
+          })}
         </div>
 
         {activeView === "chapters" && (
-          <div className="flex items-center gap-3">
-            <span className="text-xs normal-case text-fg-secondary">
-              {chapters.length} chapters
-            </span>
-
-            <button
-              type="button"
-              onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
-              className="flex items-center gap-1 text-xs normal-case text-fg-secondary hover:text-fg border border-border rounded px-2 py-1 transition-colors duration-200"
-              title={sortOrder === "asc" ? "Sort: oldest first" : "Sort: newest first"}
-            >
-              Ch. #{sortOrder === "asc" ? "↑" : "↓"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
+            className="flex items-center gap-1.5 pb-3 text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
+          >
+            <ArrowDownUp className="w-3.5 h-3.5" />
+            {sortOrder === "asc" ? "Oldest first" : "Newest first"}
+          </button>
         )}
-      </h2>
+      </div>
 
       {activeView === "chapters" && filteredArc && (
         <button

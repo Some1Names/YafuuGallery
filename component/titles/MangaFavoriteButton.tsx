@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Heart } from "lucide-react";
 
 interface MangaFavoriteButtonProps {
   mangaId: string;
@@ -69,19 +70,22 @@ export default function MangaFavoriteButton({
     );
   }
 
+  // Outline, secondary to the sidebar's solid "Start reading" button. The
+  // border is a faded fg rather than --color-border, which is near-black
+  // in dark mode and would leave the outline invisible. Favorited state is
+  // carried by the filled red heart, not a red block.
   return (
     <button
       type="button"
       onClick={toggle}
       disabled={isPending}
-      className={
-        "px-4 py-2 text-sm transition-colors duration-200 disabled:opacity-50 " +
-        (favorited
-          ? "bg-danger text-fg hover:bg-danger/85"
-          : "bg-white text-black hover:bg-white/70")
-      }
+      aria-pressed={favorited}
+      className="flex items-center justify-center gap-2 h-11 px-4 rounded-md border border-fg/25 text-fg text-sm font-medium hover:border-fg/60 transition-colors duration-200 disabled:opacity-50"
     >
-      {favorited ? "✓ Added to Favorites" : "+ Add to Favorites"}
+      <Heart
+        className={"w-4 h-4 transition-colors duration-200 " + (favorited ? "fill-red-500 text-red-500" : "")}
+      />
+      {favorited ? "Favorited" : "Favorite"}
     </button>
   );
 }

@@ -8,6 +8,7 @@ import MangaHero from "@/component/titles/MangaHero";
 import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import type { ChapterItem } from "@/component/titles/types";
+import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 // Meta descriptions get cut off by search engines/link previews well before
 // a full synopsis ends — trim to a plain, unbroken sentence length instead.
@@ -64,7 +65,7 @@ export default async function MangaDetailPage({
     // so those three run as one round trip instead of two sequential ones.
     const session = await auth();
 
-    const [manga, bookmark, favoritedChapters] = await Promise.all([
+    const [manga, bookmark, favoritedChapters, lastProgress] = await Promise.all([
         prisma.manga.findUnique({
             where: { id },
             // select instead of a bare include — the page only ever reads
@@ -126,6 +127,15 @@ export default async function MangaDetailPage({
                 select: { chapter_id: true },
             })
             : Promise.resolve([]),
+        // Most recently read chapter of THIS manga, for the sidebar's
+        // "Continue" button (the viewer resumes at last_page_read itself).
+        session?.user?.id
+            ? prisma.readingProgress.findFirst({
+                where: { user_id: session.user.id, chapter: { manga_id: id } },
+                orderBy: { updated_at: "desc" },
+                select: { chapter_id: true },
+            })
+            : Promise.resolve(null),
     ]);
 
     if (!manga) {
@@ -153,6 +163,27 @@ export default async function MangaDetailPage({
     const arcs = manga.arcs.map((arc) => ({ ...arc, chapters: arc.chapters.map(toChapterItem) }));
     const looseChapters = manga.chapters.map(toChapterItem);
 
+    // Sidebar's primary action: resume the last chapter this reader opened,
+    // otherwise start from the first chapter (lowest chapter_number, across
+    // arcs and loose chapters alike). Null when the manga has no chapters.
+    const allChapters = [...arcs.flatMap((arc) => arc.chapters), ...looseChapters];
+    const firstChapter = allChapters.reduce<ChapterItem | null>(
+        (min, c) => (min === null || c.chapter_number < min.chapter_number ? c : min),
+        null
+    );
+    const resumeChapter = lastProgress
+        ? (allChapters.find((c) => c.id === lastProgress.chapter_id) ?? null)
+        : null;
+    const displayNumbers = getChapterDisplayNumbers(allChapters);
+    const readAction = resumeChapter
+        ? {
+            href: `/viewer/${resumeChapter.id}`,
+            label: `Continue ${formatChapterBadge(resumeChapter.chapter_is_ex, displayNumbers.get(resumeChapter.id))}`,
+        }
+        : firstChapter
+            ? { href: `/viewer/${firstChapter.id}`, label: "Start reading" }
+            : null;
+
     return (
         <div
             className="relative min-h-screen bg-bg px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center"
@@ -168,15 +199,18 @@ export default async function MangaDetailPage({
                 {/* Mobile: title/synopsis/favorite stack above the
                     Chapters/Arcs tabs, same order as always. From sm up,
                     they move into a right-hand column that starts level
-                    with the tabs row, with the tabs + list taking the left. */}
+                    with the tabs row, with the tabs + list taking the left.
+                    That column sticks below the navbar (h-16/md:h-18) so
+                    the read button stays in reach down a long chapter list. */}
                 <div className="sm:flex sm:gap-8 sm:items-start">
-                    <div className="px-6 sm:px-0 mb-8 sm:mb-0 sm:order-2 sm:w-80 md:w-96 sm:shrink-0">
+                    <div className="px-6 sm:px-0 mb-8 sm:mb-0 sm:order-2 sm:w-80 md:w-96 sm:shrink-0 sm:sticky sm:top-24 md:top-26">
                         <MangaSidebar
                             mangaId={manga.id}
                             title={manga.manga_title}
                             author={manga.author.name ?? "Unknown"}
                             synopsis={manga.manga_synopsis}
                             isFavorited={bookmark !== null}
+                            readAction={readAction}
                         />
                     </div>
 
