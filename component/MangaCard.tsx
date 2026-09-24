@@ -59,14 +59,23 @@ export default function MangaCard({
           <NoImagePlaceholder />
         )}
 
-        {/* Last Updated */}
+        {/* Last Updated — an ink label rather than a solid red block, so a
+            timestamp isn't the loudest thing on the page. Red is kept only
+            as the small dot on recent updates (echoing the footer
+            wordmark's dot), which is the part actually worth drawing the
+            eye to. Fixed colors, not theme tokens: it sits on cover art,
+            and --color-danger is too dark to read as a 6px dot on black. */}
         <div
           className={
-            "absolute top-0 left-0 flex items-center gap-1.5 px-3 py-2 text-white text-sm font-bold rounded-br-xl " +
-            (isStale ? "bg-gray-500" : "bg-red-500")
+            "absolute top-0 left-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/75 backdrop-blur-sm text-xs font-medium rounded-br-lg " +
+            (isStale ? "text-white/70" : "text-white")
           }
         >
-          <Clock className="w-4 h-4" />
+          {isStale ? (
+            <Clock className="w-3.5 h-3.5" />
+          ) : (
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />
+          )}
           {timeAgo(updatedAt)}
         </div>
 

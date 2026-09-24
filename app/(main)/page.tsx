@@ -80,9 +80,11 @@ export default async function BrowsePage() {
       {/* Hero */}
       <section className="relative min-h-100 sm:min-h-125 md:min-h-150 pt-0 sm:pt-24 md:pt-28">
         {/* background image hidden on phone — the featured box itself
-            becomes the hero there, edge to edge, no separate backdrop */}
+            becomes the hero there, edge to edge, no separate backdrop.
+            Faded to a texture: at full strength this sketch competed with
+            the (also sketch-drawn) featured banner in front of it. */}
         <div
-          className="hidden sm:block absolute inset-0 bg-cover bg-center"
+          className="hidden sm:block absolute inset-0 bg-cover bg-center opacity-20"
           style={{
             backgroundImage: `url('/mangabg.png')`,
           }}
@@ -114,7 +116,7 @@ export default async function BrowsePage() {
             <div className="max-w-350 mx-auto">
               <div className="mb-6 sm:mb-8">
                 <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
-                <h2 className="text-2xl sm:text-3xl text-fg font-bold">Continue Reading</h2>
+                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Continue Reading</h2>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
@@ -145,7 +147,7 @@ export default async function BrowsePage() {
                 RECENTLY UPDATED
               </p>
 
-              <h2 className="text-2xl sm:text-3xl text-fg font-bold">
+              <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">
                 Latest Manga
               </h2>
             </div>

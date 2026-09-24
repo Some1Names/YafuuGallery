@@ -18,11 +18,16 @@ interface MangaBackgroundProps {
 // shifting as a page got taller. Anchoring to a fixed height instead makes
 // it behave like a real page-header banner: constant regardless of content
 // length below it.
+//
+// The image itself is faded (opacity-40) so it reads as a texture behind
+// the page's own banner/art rather than a second busy image competing with
+// it. The black tint above it is unchanged — that's what keeps the white
+// page headers legible in both themes.
 export default function MangaBackground({ imageUrl = "/mangabg.png", fill = false }: MangaBackgroundProps) {
   return (
     <div className={fill ? "absolute inset-0" : "absolute inset-x-0 top-0 h-125 md:h-150"}>
       <div
-        className="absolute inset-0 bg-cover bg-top bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-40"
         style={{ backgroundImage: `url('${imageUrl}')` }}
       />
       <div className="absolute inset-0 bg-black/55" />

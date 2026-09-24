@@ -389,7 +389,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           <div className="flex flex-col justify-end gap-2 items-start min-h-26 sm:min-h-27 md:min-h-31">
             <p className="text-white/70 text-xs sm:text-sm">FEATURED MANGA</p>
             <h1
-              className="text-4xl md:text-5xl font-bold text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere"
+              className="text-4xl md:text-5xl text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere font-(family-name:--font-display)"
               // min-w-0 is load-bearing for break-words to actually do
               // anything on a narrow (mobile) screen: as a flex column
               // item this h1's default min-width is "auto", which floors
