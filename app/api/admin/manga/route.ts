@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canCreateManga } from "@/lib/manga-access";
+import { isAllowedUrlWrite } from "@/lib/storage";
 
 // POST /api/admin/manga — create
 export async function POST(request: NextRequest) {
@@ -15,6 +16,15 @@ export async function POST(request: NextRequest) {
 
   if (!manga_title || !manga_synopsis) {
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
+  }
+
+  // SECURITY: see isAllowedUrlWrite — whatever URLs are stored here get
+  // deleted from R2 when this manga is later deleted or its images replaced.
+  if (
+    !isAllowedUrlWrite(cover_image_url, session!.user!.id) ||
+    !isAllowedUrlWrite(banner_image_url, session!.user!.id)
+  ) {
+    return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
   }
 
   const manga = await prisma.manga.create({

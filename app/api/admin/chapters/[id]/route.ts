@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageChapter } from "@/lib/manga-access";
-import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls, isAllowedUrlWrite } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -99,6 +99,18 @@ export async function PATCH(
         translations: { select: { language: true, file_url: true } },
       },
     });
+
+    // SECURITY: see isAllowedUrlWrite — replaced/removed covers and PDFs
+    // get deleted from R2, so every submitted URL must be the editor's own
+    // upload or one this chapter already holds.
+    const editorId = session!.user!.id;
+    const existingPdfUrls = previous?.translations.map((t) => t.file_url) ?? [];
+    if (
+      !isAllowedUrlWrite(cover_image_url, editorId, [previous?.cover_image_url]) ||
+      translations.some((t) => !isAllowedUrlWrite(t.file_url, editorId, existingPdfUrls))
+    ) {
+      return NextResponse.json({ error: "Invalid file URL" }, { status: 400 });
+    }
 
     const chapter = await prisma.chapter.update({
       where: { id },

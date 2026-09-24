@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
+import { isAllowedUrlWrite } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -82,6 +83,16 @@ export async function POST(request: NextRequest) {
 
   const isEx = chapter_is_ex === true;
   const translations = parseTranslations(translationsInput);
+
+  // SECURITY: see isAllowedUrlWrite — whatever URLs are stored here get
+  // deleted from R2 when this chapter is later deleted or edited.
+  const editorId = session!.user!.id;
+  if (
+    !isAllowedUrlWrite(cover_image_url, editorId) ||
+    translations.some((t) => !isAllowedUrlWrite(t.file_url, editorId))
+  ) {
+    return NextResponse.json({ error: "Invalid file URL" }, { status: 400 });
+  }
 
   try {
     const chapter = await prisma.chapter.create({

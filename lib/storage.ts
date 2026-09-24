@@ -53,6 +53,52 @@ export function keyFromPublicUrl(url: string | null | undefined): string | null 
   return url.slice(PUBLIC_URL_BASE.length + 1);
 }
 
+// Upload keys carry the uploader's user id, so ownership can be checked
+// from the URL alone: /api/upload writes uploads/<userId>-<ms>.<ext>, and
+// /api/admin/chapters/pdf-upload-url writes chapters/<userId>-<uuid>.pdf.
+export function ownImageKey(userId: string): string {
+  return `uploads/${userId}-${Date.now()}`;
+}
+export function ownPdfKey(userId: string, uuid: string): string {
+  return `chapters/${userId}-${uuid}.pdf`;
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isOwnUploadKey(key: string, userId: string): boolean {
+  const id = escapeRegExp(userId);
+  return (
+    new RegExp(`^uploads/${id}-\\d+\\.(png|jpeg|webp)$`).test(key) ||
+    new RegExp(`^chapters/${id}-[0-9a-f-]{36}\\.pdf$`).test(key)
+  );
+}
+
+// SECURITY — gate for every client-supplied *_url written to the database.
+// Stored URLs get DELETED from R2 when they're later replaced
+// (deleteReplacedUrls) or their row is deleted (deleteUrls). If a client
+// could write ANY URL, a user could point their own record at someone
+// else's file (another manga's cover, a chapter PDF — all public URLs) and
+// then replace/delete their record to make the server delete that file;
+// or store an off-site URL that next/image refuses to render, breaking
+// every page showing it. So a write is only allowed to:
+//   - clear the field (null/undefined/""),
+//   - keep a value the record already holds (`currentValues` — including
+//     legacy values like a Google avatar or a seeded /public path), or
+//   - reference one of THIS user's own uploads.
+export function isAllowedUrlWrite(
+  next: unknown,
+  userId: string,
+  currentValues: (string | null | undefined)[] = []
+): boolean {
+  if (next === undefined || next === null || next === "") return true;
+  if (typeof next !== "string") return false;
+  if (currentValues.includes(next)) return true;
+  const key = keyFromPublicUrl(next);
+  return key !== null && isOwnUploadKey(key, userId);
+}
+
 // R2's S3-compatible API has no "bucket size" endpoint — the object-scoped
 // credentials this app holds can't reach Cloudflare's account-level
 // analytics API either (see AdminImageUploadButton's CORS-check history),

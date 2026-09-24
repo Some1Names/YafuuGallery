@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageArc } from "@/lib/manga-access";
-import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls, isAllowedUrlWrite } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -50,6 +50,11 @@ export async function PATCH(
     // Grabbed before the update so a replaced image's old R2 object can be
     // deleted afterward instead of lingering as an orphan.
     const previous = await prisma.arc.findUnique({ where: { id }, select: { arc_image_url: true } });
+
+    // SECURITY: see isAllowedUrlWrite — replaced URLs get deleted from R2.
+    if (!isAllowedUrlWrite(arc_image_url, session!.user!.id, [previous?.arc_image_url])) {
+      return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+    }
 
     const arc = await prisma.arc.update({
       where: { id },

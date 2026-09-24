@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { auth } from "@/auth";
 import { canManageManga } from "@/lib/manga-access";
-import { getPresignedUploadUrl, publicUrlFor } from "@/lib/storage";
+import { getPresignedUploadUrl, ownPdfKey, publicUrlFor } from "@/lib/storage";
 
 const MAX_SIZE_BYTES = 200 * 1024 * 1024;
 
@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const key = `chapters/${randomUUID()}.pdf`;
+    // uploader id in the key so later writes can verify ownership (lib/storage.ts isAllowedUrlWrite)
+    const key = ownPdfKey(session!.user!.id, randomUUID());
     const uploadUrl = await getPresignedUploadUrl(key, content_type);
 
     return NextResponse.json({ uploadUrl, publicUrl: publicUrlFor(key) });

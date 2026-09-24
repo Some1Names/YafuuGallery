@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
+import { isAllowedUrlWrite } from "@/lib/storage";
 
 // `instanceof Prisma.PrismaClientKnownRequestError` doesn't reliably match
 // here — Turbopack ends up with more than one instance of the generated
@@ -41,6 +42,12 @@ export async function POST(request: NextRequest) {
 
   const status = arc_status === "completed" ? "completed" : "ongoing";
   const isEx = arc_is_ex === true;
+
+  // SECURITY: see isAllowedUrlWrite — whatever URL is stored here gets
+  // deleted from R2 when this arc is later deleted or its image replaced.
+  if (!isAllowedUrlWrite(arc_image_url, session!.user!.id)) {
+    return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+  }
 
   try {
     const arc = await prisma.arc.create({

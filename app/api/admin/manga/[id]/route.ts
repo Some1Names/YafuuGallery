@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
-import { deleteReplacedUrls, deleteUrls } from "@/lib/storage";
+import { deleteReplacedUrls, deleteUrls, isAllowedUrlWrite } from "@/lib/storage";
 
 // PATCH /api/admin/manga/[id] — update
 export async function PATCH(
@@ -28,6 +28,16 @@ export async function PATCH(
     where: { id },
     select: { cover_image_url: true, banner_image_url: true },
   });
+
+  // SECURITY: see isAllowedUrlWrite — replaced URLs get deleted from R2,
+  // so new ones must be the editor's own uploads (or unchanged/cleared).
+  const current = [previous?.cover_image_url, previous?.banner_image_url];
+  if (
+    !isAllowedUrlWrite(cover_image_url, session!.user!.id, current) ||
+    !isAllowedUrlWrite(banner_image_url, session!.user!.id, current)
+  ) {
+    return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+  }
 
   const manga = await prisma.manga.update({
     where: { id },

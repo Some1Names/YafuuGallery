@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { uploadFile } from "@/lib/storage";
+import { ownImageKey, uploadFile } from "@/lib/storage";
 import { auth } from "@/auth";
 import { getImageDimensions, MAX_IMAGE_DIMENSION } from "@/lib/image-dimensions";
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const extension = file.type.split("/")[1];
-    const url = await uploadFile(`uploads/${session.user.id}-${Date.now()}.${extension}`, file);
+    const url = await uploadFile(`${ownImageKey(session.user.id)}.${extension}`, file);
 
     return NextResponse.json({ url });
   } catch (err) {
