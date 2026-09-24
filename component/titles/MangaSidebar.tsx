@@ -7,6 +7,7 @@ interface MangaSidebarProps {
   mangaId: string;
   title: string;
   author: string;
+  authorId: string;
   synopsis: string;
   status: MangaStatusValue;
   genres: string[];
@@ -20,6 +21,7 @@ export default function MangaSidebar({
   mangaId,
   title,
   author,
+  authorId,
   synopsis,
   status,
   genres,
@@ -31,7 +33,13 @@ export default function MangaSidebar({
   return (
     <div>
       <h1 className="text-3xl sm:text-4xl leading-tight wrap-anywhere font-(family-name:--font-display)">{title}</h1>
-      <p className="text-fg-secondary text-base sm:text-lg mt-2">{author}</p>
+      {/* opens the author's page — everything else they've published */}
+      <Link
+        href={`/manga/authors/${authorId}`}
+        className="inline-block text-fg-secondary text-base sm:text-lg mt-2 underline-offset-4 hover:text-fg hover:underline transition-colors duration-200"
+      >
+        {author}
+      </Link>
 
       {/* Status, then genres — each genre opens /search filtered to it. */}
       <ul className="flex flex-wrap items-center gap-2 mt-4" aria-label="Status and genres">

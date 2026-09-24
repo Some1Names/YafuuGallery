@@ -79,7 +79,7 @@ export default async function MangaDetailPage({
                 banner_image_url: true,
                 genres: true,
                 manga_status: true,
-                author: { select: { name: true } },
+                author: { select: { id: true, name: true } },
                 arcs: {
                     orderBy: { arc_order: "asc" },
                     select: {
@@ -217,6 +217,7 @@ export default async function MangaDetailPage({
                             mangaId={manga.id}
                             title={manga.manga_title}
                             author={manga.author.name ?? "Unknown"}
+                            authorId={manga.author.id}
                             synopsis={manga.manga_synopsis}
                             status={manga.manga_status}
                             genres={manga.genres}
