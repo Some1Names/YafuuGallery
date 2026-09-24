@@ -7,7 +7,6 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import MangaHero from "@/component/titles/MangaHero";
 import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
-import Breadcrumb from "@/component/titles/Breadcrumb";
 import type { ChapterItem } from "@/component/titles/types";
 
 // Meta descriptions get cut off by search engines/link previews well before
@@ -163,10 +162,6 @@ export default async function MangaDetailPage({
             </div>
 
             <div className="relative z-10 w-full max-w-350 text-fg">
-
-                <div className="px-6 sm:px-0">
-                    <Breadcrumb mangaTitle={manga.manga_title} />
-                </div>
 
                 <MangaHero imageUrl={manga.banner_image_url} />
 
