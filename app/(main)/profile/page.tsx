@@ -79,9 +79,11 @@ export default async function ProfilePage() {
             {recentProgress.length > 0 && (
               <Link
                 href="/history"
-                className="shrink-0 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+                className="shrink-0 py-2 -my-2 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
               >
-                Reading history <span aria-hidden="true">→</span>
+                {/* short on phones so the heading beside it stays on one line */}
+                <span className="sm:hidden">History</span>
+                <span className="hidden sm:inline">Reading history</span> <span aria-hidden="true">→</span>
               </Link>
             )}
           </div>

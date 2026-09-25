@@ -219,7 +219,7 @@ export default function ProfileEditForm({
       </div>
 
       {/* Content */}
-      <div className="min-w-0 flex flex-col p-6 sm:p-8">
+      <div className="min-w-0 flex flex-col p-5 min-[360px]:p-6 sm:p-8">
         {/* Name — read-only until the pencil is clicked; saves itself on
             blur/Enter instead of a separate Save button */}
         <div>
@@ -243,18 +243,20 @@ export default function ProfileEditForm({
                 suppressHydrationWarning
                 className={
                   "w-full bg-transparent border-b px-0 py-2 text-base text-fg outline-none transition-colors " +
-                  (isEditingName ? "border-fg pr-16" : "border-border cursor-default pr-8")
+                  (isEditingName ? "border-fg pr-20" : "border-border cursor-default pr-8")
                 }
               />
 
+              {/* 40px tap targets around 16px icons; -right-3 keeps each
+                  icon's right edge flush with the input's as before. */}
               {isEditingName ? (
-                <div className="absolute right-0 bottom-1.5 flex items-center gap-1">
+                <div className="absolute -right-3 bottom-0 flex items-center gap-1">
                   <button
                     type="button"
                     onClick={confirmNameEdit}
                     disabled={isSaving}
                     aria-label="Confirm name change"
-                    className="p-1 text-fg-muted hover:text-success disabled:opacity-50 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-success disabled:opacity-50 transition-colors"
                   >
                     <Check className="w-4 h-4" />
                   </button>
@@ -263,7 +265,7 @@ export default function ProfileEditForm({
                     onClick={cancelNameEdit}
                     disabled={isSaving}
                     aria-label="Cancel name change"
-                    className="p-1 text-fg-muted hover:text-danger disabled:opacity-50 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-danger disabled:opacity-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -274,7 +276,7 @@ export default function ProfileEditForm({
                   onClick={startEditingName}
                   aria-label="Edit display name"
                   suppressHydrationWarning
-                  className="absolute right-0 bottom-2 text-fg-muted hover:text-fg transition-colors"
+                  className="absolute -right-3 bottom-0 w-10 h-10 flex items-center justify-center text-fg-muted hover:text-fg transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
@@ -323,17 +325,23 @@ export default function ProfileEditForm({
             tab instead of just sitting there as inert numbers. 2-column
             grid on mobile (a single unwrapped row of 4 was overflowing off
             the right edge of the card), one row from sm up. */}
-        <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:gap-0">
+        <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-x-4 min-[360px]:gap-x-6 gap-y-4 sm:flex sm:gap-0">
           {stats.map((s, i) => {
             const className = `sm:flex-1 sm:px-4 sm:first:pl-0 ${i > 0 ? "sm:border-l sm:border-border" : ""}`;
+            // If a label still wraps, the arrow stays glued to its last word
+            // instead of floating beside a two-line block.
+            const splitAt = s.label.lastIndexOf(" ") + 1;
             const inner = (
               <>
                 <p className="text-2xl text-fg group-hover:text-fg-hover font-(family-name:--font-display) transition-colors duration-200">
                   {s.value}
                 </p>
-                <p className="flex items-center gap-1 text-xs text-fg-secondary group-hover:text-fg mt-1 transition-colors duration-200">
-                  {s.label}
-                  {s.href && <ArrowUpRight className="w-3 h-3" />}
+                <p className="text-[11px] min-[360px]:text-xs text-fg-secondary group-hover:text-fg mt-1 transition-colors duration-200">
+                  {s.label.slice(0, splitAt)}
+                  <span className="whitespace-nowrap">
+                    {s.label.slice(splitAt)}
+                    {s.href && <ArrowUpRight className="inline-block w-3 h-3 ml-1 align-[-2px]" />}
+                  </span>
                 </p>
               </>
             );

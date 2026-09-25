@@ -41,7 +41,7 @@ export default function FavoriteChapterCard({
         ) : (
           <NoImagePlaceholder />
         )}
-        <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/80 via-55% sm:via-40% to-transparent" />
 
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <div className="text-fg text-lg font-(family-name:--font-display)">

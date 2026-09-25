@@ -42,7 +42,7 @@ export default function ContinueReadingCard({
       ) : (
         <NoImagePlaceholder />
       )}
-      <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/10 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/80 via-55% sm:via-40% to-transparent" />
 
       {/* Fixed colors, not theme tokens — it sits on cover art. */}
       {isNext && (
