@@ -1,14 +1,12 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { formatUsername } from "@/lib/format-username";
 import { keyFromPublicUrl, listObjects } from "@/lib/storage";
 import { findOrphanedObjects, getReferencedStorageKeys } from "@/lib/storage-references";
 import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
 import UnattributedStorage from "@/component/admin/UnattributedStorage";
-import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -23,21 +21,17 @@ export default async function AdminPage() {
     chapterCount,
     storedObjects,
     referencedKeys,
-    users,
     mangaList,
     chapters,
     arcs,
-    comments,
+    commentCount,
+    reportedCount,
   ] = await Promise.all([
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
       listObjects(),
       getReferencedStorageKeys(),
-      prisma.user.findMany({
-        orderBy: { created_at: "desc" },
-        select: { id: true, name: true, tag: true, email: true, role: true, created_at: true, image: true },
-      }),
       prisma.manga.findMany({
         orderBy: { created_at: "desc" },
         select: {
@@ -82,27 +76,10 @@ export default async function AdminPage() {
           manga_id: true,
         },
       }),
-      prisma.comment.findMany({
-        orderBy: { created_at: "desc" },
-        select: {
-          id: true,
-          body: true,
-          hidden_at: true,
-          _count: { select: { reports: true } },
-          created_at: true,
-          user: { select: { id: true, name: true, tag: true } },
-          // replies: who they answer, shown as "↳ reply to name#tag"
-          parent: { select: { user: { select: { name: true, tag: true } } } },
-          chapter: {
-            select: {
-              id: true,
-              chapter_is_ex: true,
-              manga_id: true,
-              manga: { select: { manga_title: true } },
-            },
-          },
-        },
-      }),
+      // Users and Comments load a page at a time in their own tabs
+      // (lib/admin-lists.ts) — only the tab counts are needed here.
+      prisma.comment.count(),
+      prisma.comment.count({ where: { reports: { some: {} } } }),
     ]);
 
   const objectSizes = new Map(storedObjects.map((o) => [o.key, o.size]));
@@ -185,37 +162,6 @@ export default async function AdminPage() {
     storageBytes: chapterBytes.get(c.id) ?? 0,
   }));
 
-  // chapter_number is a 0-indexed sort key that also counts "ex" chapters,
-  // not the number readers see — labeling comments with it showed "#000"
-  // for the first chapter and drifted after any ex. Compute real display
-  // numbers per manga, same as everywhere else (lib/chapter-number.ts).
-  const displayNumbersByManga = new Map<string, Map<string, number>>();
-  for (const c of chapters) {
-    if (!displayNumbersByManga.has(c.manga_id)) {
-      displayNumbersByManga.set(
-        c.manga_id,
-        getChapterDisplayNumbers(chapters.filter((x) => x.manga_id === c.manga_id))
-      );
-    }
-  }
-
-  const commentItems = comments.map((c) => ({
-    id: c.id,
-    userId: c.user.id,
-    body: c.body,
-    userName: c.user.name ?? "Unknown",
-    userTag: c.user.tag,
-    chapterLabel: `${c.chapter.manga.manga_title} ${formatChapterBadge(
-      c.chapter.chapter_is_ex,
-      displayNumbersByManga.get(c.chapter.manga_id)?.get(c.chapter.id)
-    )}`,
-    chapterId: c.chapter.id,
-    replyToName: c.parent ? formatUsername(c.parent.user.name, c.parent.user.tag) : null,
-    createdAt: c.created_at,
-    hidden: c.hidden_at !== null,
-    reportCount: c._count.reports,
-  }));
-
   return (
     <div
       className="relative min-h-screen bg-bg px-4 sm:px-6 py-12"
@@ -252,8 +198,9 @@ export default async function AdminPage() {
           mangaList={mangaItems}
           chapters={chapterItems}
           arcs={arcs}
-          users={users}
-          comments={commentItems}
+          userCount={userCount}
+          commentCount={commentCount}
+          reportedCount={reportedCount}
           currentUserId={session.user.id}
         />
       </div>

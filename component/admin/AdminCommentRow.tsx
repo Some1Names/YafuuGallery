@@ -17,13 +17,17 @@ interface AdminCommentRowProps {
   chapterId: string;
   // set for replies: who the reply answers (display name incl. tag)
   replyToName?: string | null;
-  createdAt: Date;
+  createdAt: Date | string;
   initialHidden: boolean;
   // How many readers have reported this comment (0 = none).
   reportCount: number;
   // Authors (on /manage) can hide/unhide comments on their own manga but
   // not permanently delete them — the delete route is admin-only.
   canDelete?: boolean;
+  // Let the list this row sits in update itself (drop a deleted row, clear
+  // its report count) instead of refetching everything.
+  onDeleted?: () => void;
+  onReportsDismissed?: () => void;
 }
 
 export default function AdminCommentRow({
@@ -38,6 +42,8 @@ export default function AdminCommentRow({
   initialHidden,
   reportCount,
   canDelete = true,
+  onDeleted,
+  onReportsDismissed,
 }: AdminCommentRowProps) {
   const router = useRouter();
   const [hidden, setHidden] = useState(initialHidden);
@@ -47,7 +53,10 @@ export default function AdminCommentRow({
   // dashboard's "Reported" filter/count update too.
   async function dismissReports() {
     const res = await fetch(`/api/admin/comments/${commentId}/reports`, { method: "DELETE" });
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      onReportsDismissed?.();
+      router.refresh(); // the tab counts on the page
+    }
   }
 
   function toggleHide() {
@@ -68,7 +77,10 @@ export default function AdminCommentRow({
   async function remove() {
     if (!confirm("Permanently delete this comment and any replies to it? This can't be undone.")) return;
     const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" });
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      onDeleted?.();
+      router.refresh(); // the tab counts on the page
+    }
   }
 
   // Phones: the action buttons go under the comment (side by side they

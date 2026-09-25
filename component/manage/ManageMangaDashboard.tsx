@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "@/component/admin/AdminMangaRow";
 import AdminSearchInput from "@/component/admin/AdminSearchInput";
-import AdminCommentRow from "@/component/admin/AdminCommentRow";
-import { formatUsername } from "@/lib/format-username";
+import AdminCommentList from "@/component/admin/AdminCommentList";
 import type { ChapterTranslationDraft } from "@/component/admin/AdminChapterPdfUploads";
 
 interface ChapterItem {
@@ -46,24 +45,14 @@ interface MangaItem {
   status: "ongoing" | "completed";
 }
 
-interface CommentItem {
-  id: string;
-  body: string;
-  userName: string;
-  userTag: string | null;
-  chapterLabel: string;
-  chapterId: string;
-  replyToName: string | null;
-  createdAt: Date;
-  hidden: boolean;
-  reportCount: number;
-}
-
 interface ManageMangaDashboardProps {
   mangaList: MangaItem[];
   chapters: ChapterItem[];
   arcs: ArcOption[];
-  comments: CommentItem[];
+  // Comments load a page at a time in their own tab (AdminCommentList,
+  // scoped server-side to this author's manga); only the counts come in.
+  commentCount: number;
+  reportedCount: number;
   authorName: string;
 }
 
@@ -78,34 +67,20 @@ export default function ManageMangaDashboard({
   mangaList,
   chapters,
   arcs,
-  comments,
+  commentCount,
+  reportedCount,
   authorName,
 }: ManageMangaDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("manga");
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
   const [mangaSearch, setMangaSearch] = useState("");
-  const [commentSearch, setCommentSearch] = useState("");
-  const [reportedOnly, setReportedOnly] = useState(false);
-  const reportedCount = comments.filter((c) => c.reportCount > 0).length;
 
   const filteredMangaList = useMemo(() => {
     const q = mangaSearch.trim().toLowerCase();
     if (!q) return mangaList;
     return mangaList.filter((m) => m.title.toLowerCase().includes(q));
   }, [mangaList, mangaSearch]);
-
-  const filteredComments = useMemo(() => {
-    const q = commentSearch.trim().toLowerCase();
-    const pool = reportedOnly ? comments.filter((c) => c.reportCount > 0) : comments;
-    if (!q) return pool;
-    return pool.filter(
-      (c) =>
-        formatUsername(c.userName, c.userTag).toLowerCase().includes(q) ||
-        c.chapterLabel.toLowerCase().includes(q) ||
-        c.body.toLowerCase().includes(q)
-    );
-  }, [comments, commentSearch, reportedOnly]);
 
   // At-a-glance totals across all of this author's manga (the rows below
   // only show them per manga).
@@ -118,7 +93,7 @@ export default function ManageMangaDashboard({
 
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "manga", label: "Manga", count: mangaList.length },
-    { id: "comments", label: "Comments", count: comments.length },
+    { id: "comments", label: "Comments", count: commentCount },
   ];
 
   // A manga's title-edit form and its Arc/Chapters panel are mutually
@@ -183,53 +158,12 @@ export default function ManageMangaDashboard({
 
       {activeTab === "comments" && (
         <section>
-          <AdminSearchInput
-            value={commentSearch}
-            onChange={setCommentSearch}
-            placeholder="Search by reader, chapter, or text…"
+          <AdminCommentList
+            canDelete={false}
+            reportedTotal={reportedCount}
+            searchPlaceholder="Search by reader, manga, or text…"
+            emptyText="No comments on your manga yet."
           />
-        {/* Moderation shortcut: just the comments readers have reported. */}
-        <button
-          type="button"
-          onClick={() => setReportedOnly((v) => !v)}
-          aria-pressed={reportedOnly}
-          className={
-            "mt-3 text-xs px-3 py-1.5 rounded border transition-colors duration-200 " +
-            (reportedOnly
-              ? "border-danger/60 text-danger"
-              : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
-          }
-        >
-          Reported only ({reportedCount})
-        </button>
-          {comments.length === 0 ? (
-            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-              <p className="text-fg-secondary text-sm">No comments on your manga yet.</p>
-            </div>
-          ) : filteredComments.length === 0 ? (
-            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-              <p className="text-fg-secondary text-sm">{commentSearch ? <>No comments match &quot;{commentSearch}&quot;.</> : "No reported comments."}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2 mt-4">
-              {filteredComments.map((c) => (
-                <AdminCommentRow
-                  key={c.id}
-                  commentId={c.id}
-                  body={c.body}
-                  userName={c.userName}
-                  userTag={c.userTag}
-                  chapterLabel={c.chapterLabel}
-                  chapterId={c.chapterId}
-                  replyToName={c.replyToName}
-                  createdAt={c.createdAt}
-                  initialHidden={c.hidden}
-                  reportCount={c.reportCount}
-                  canDelete={false}
-                />
-              ))}
-            </div>
-          )}
         </section>
       )}
 

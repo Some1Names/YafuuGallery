@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { formatUsername } from "@/lib/format-username";
 import MangaBackground from "@/component/titles/MangaBackground";
 import ManageMangaDashboard from "@/component/manage/ManageMangaDashboard";
-import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
 
 export default async function ManageMangaPage() {
   const session = await auth();
@@ -15,7 +13,7 @@ export default async function ManageMangaPage() {
 
   const authorId = session.user.id;
 
-  const [mangaList, chapters, arcs, comments] = await Promise.all([
+  const [mangaList, chapters, arcs, commentCount, reportedCount] = await Promise.all([
     prisma.manga.findMany({
       where: { author_id: authorId },
       orderBy: { created_at: "desc" },
@@ -61,49 +59,11 @@ export default async function ManageMangaPage() {
         manga_id: true,
       },
     }),
-    // Comments readers left on this author's own manga — authors can
-    // hide/unhide these (see canModerateComment), not delete them.
-    prisma.comment.findMany({
-      where: { chapter: { manga: { author_id: authorId } } },
-      orderBy: { created_at: "desc" },
-      select: {
-        id: true,
-        body: true,
-        hidden_at: true,
-        _count: { select: { reports: true } },
-        created_at: true,
-        user: { select: { id: true, name: true, tag: true } },
-        // replies: who they answer, shown as "↳ reply to name#tag"
-        parent: { select: { user: { select: { name: true, tag: true } } } },
-        chapter: {
-          select: { id: true, chapter_is_ex: true, manga_id: true, manga: { select: { manga_title: true } } },
-        },
-      },
-    }),
+    // Comments on this author's manga load a page at a time in their tab
+    // (lib/admin-lists.ts) — only the counts are needed here.
+    prisma.comment.count({ where: { chapter: { manga: { author_id: authorId } } } }),
+    prisma.comment.count({ where: { chapter: { manga: { author_id: authorId } }, reports: { some: {} } } }),
   ]);
-
-  // Real display numbers per manga (chapter_number is a 0-indexed sort key
-  // that also counts "ex" entries — see lib/chapter-number.ts).
-  const displayNumbersByManga = new Map<string, Map<string, number>>();
-  for (const m of mangaList) {
-    displayNumbersByManga.set(m.id, getChapterDisplayNumbers(chapters.filter((c) => c.manga_id === m.id)));
-  }
-
-  const commentItems = comments.map((c) => ({
-    id: c.id,
-    body: c.body,
-    userName: c.user.name ?? "Unknown",
-    userTag: c.user.tag,
-    chapterLabel: `${c.chapter.manga.manga_title} ${formatChapterBadge(
-      c.chapter.chapter_is_ex,
-      displayNumbersByManga.get(c.chapter.manga_id)?.get(c.chapter.id)
-    )}`,
-    chapterId: c.chapter.id,
-    replyToName: c.parent ? formatUsername(c.parent.user.name, c.parent.user.tag) : null,
-    createdAt: c.created_at,
-    hidden: c.hidden_at !== null,
-    reportCount: c._count.reports,
-  }));
 
   const mangaItems = mangaList.map((m) => ({
     id: m.id,
@@ -155,7 +115,8 @@ export default async function ManageMangaPage() {
           mangaList={mangaItems}
           chapters={chapterItems}
           arcs={arcs}
-          comments={commentItems}
+          commentCount={commentCount}
+          reportedCount={reportedCount}
           authorName={session.user.name ?? session.user.email ?? "You"}
         />
       </div>

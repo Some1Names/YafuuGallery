@@ -1,14 +1,11 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "./AdminMangaRow";
-import AdminUserRoleSelect from "./AdminUserRoleSelect";
-import AdminUserDeleteButton from "./AdminUserDeleteButton";
-import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
-import { formatUsername } from "@/lib/format-username";
-import LocalDate from "@/component/LocalDate";
+import AdminUserList from "./AdminUserList";
+import AdminCommentList from "./AdminCommentList";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface MangaItem {
@@ -53,35 +50,15 @@ interface ArcOption {
   manga_id: string;
 }
 
-interface UserItem {
-  id: string;
-  name: string | null;
-  tag: string | null;
-  email: string;
-  role: "reader" | "author" | "admin";
-  created_at: Date;
-}
-
-interface CommentItem {
-  id: string;
-  userId: string;
-  body: string;
-  userName: string;
-  userTag: string | null;
-  chapterLabel: string;
-  chapterId: string;
-  replyToName: string | null;
-  createdAt: Date;
-  hidden: boolean;
-  reportCount: number;
-}
-
 interface AdminDashboardProps {
   mangaList: MangaItem[];
   chapters: ChapterItem[];
   arcs: ArcOption[];
-  users: UserItem[];
-  comments: CommentItem[];
+  // Users and Comments are loaded a page at a time by their own tabs (see
+  // AdminUserList / AdminCommentList); the page only passes the counts.
+  userCount: number;
+  commentCount: number;
+  reportedCount: number;
   currentUserId: string;
 }
 
@@ -91,20 +68,16 @@ export default function AdminDashboard({
   mangaList,
   chapters,
   arcs,
-  users,
-  comments,
+  userCount,
+  commentCount,
+  reportedCount,
   currentUserId,
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("manga");
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const [mangaSearch, setMangaSearch] = useState("");
-  const [userSearch, setUserSearch] = useState("");
-  const [commentSearch, setCommentSearch] = useState("");
-  const [reportedOnly, setReportedOnly] = useState(false);
-  const reportedCount = comments.filter((c) => c.reportCount > 0).length;
 
   const filteredMangaList = useMemo(() => {
     const q = mangaSearch.trim().toLowerCase();
@@ -113,27 +86,6 @@ export default function AdminDashboard({
       (m) => m.title.toLowerCase().includes(q) || m.authorName.toLowerCase().includes(q)
     );
   }, [mangaList, mangaSearch]);
-
-  const filteredUsers = useMemo(() => {
-    const q = userSearch.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter(
-      // formatUsername gives "name#tag", so "yafuu", "yafuu#3021" and "#3021" all match
-      (u) => formatUsername(u.name, u.tag).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-    );
-  }, [users, userSearch]);
-
-  const filteredComments = useMemo(() => {
-    const q = commentSearch.trim().toLowerCase();
-    const pool = reportedOnly ? comments.filter((c) => c.reportCount > 0) : comments;
-    if (!q) return pool;
-    return pool.filter(
-      (c) =>
-        formatUsername(c.userName, c.userTag).toLowerCase().includes(q) ||
-        c.chapterLabel.toLowerCase().includes(q) ||
-        c.body.toLowerCase().includes(q)
-    );
-  }, [comments, commentSearch, reportedOnly]);
 
   // A manga's title-edit form and its Arc/Chapters panel are mutually
   // exclusive across the WHOLE list, not just within one row — opening
@@ -156,74 +108,11 @@ export default function AdminDashboard({
     });
   }
 
-  function toggleUserComments(userId: string) {
-    setExpandedUserId((current) => (current === userId ? null : userId));
-  }
-
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "manga", label: "Manga", count: mangaList.length },
-    { id: "users", label: "Users", count: users.length },
-    { id: "comments", label: "Comments", count: comments.length },
+    { id: "users", label: "Users", count: userCount },
+    { id: "comments", label: "Comments", count: commentCount },
   ];
-
-  // Per-user controls, shared by the phone cards and the table rows.
-  const userLabel = (u: UserItem) => (u.name ? formatUsername(u.name, u.tag) : u.email);
-  const commentsOf = (u: UserItem) => comments.filter((c) => c.userId === u.id);
-
-  // No dropdown for yourself — changing your own role would drop your
-  // admin access instantly (the API refuses it too).
-  function roleControl(u: UserItem) {
-    if (u.id === currentUserId) {
-      return (
-        <span className="text-sm text-fg-secondary whitespace-nowrap">
-          {u.role === "admin" ? "Admin" : u.role === "author" ? "Author" : "Reader"} (you)
-        </span>
-      );
-    }
-    return <AdminUserRoleSelect userId={u.id} currentRole={u.role} userLabel={userLabel(u)} />;
-  }
-
-  function commentsButton(u: UserItem) {
-    const count = commentsOf(u).length;
-    const isExpanded = expandedUserId === u.id;
-    return (
-      <button
-        type="button"
-        onClick={() => toggleUserComments(u.id)}
-        disabled={count === 0}
-        aria-expanded={isExpanded}
-        className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
-      >
-        {count} {count === 1 ? "comment" : "comments"} {count > 0 && (isExpanded ? "− Close" : "· View")}
-      </button>
-    );
-  }
-
-  function deleteControl(u: UserItem) {
-    return u.id === currentUserId ? null : <AdminUserDeleteButton userId={u.id} userLabel={userLabel(u)} />;
-  }
-
-  function userCommentList(u: UserItem) {
-    return (
-      <div className="flex flex-col gap-2">
-        {commentsOf(u).map((c) => (
-          <AdminCommentRow
-            key={c.id}
-            commentId={c.id}
-            body={c.body}
-            userName={c.userName}
-            userTag={c.userTag}
-            chapterLabel={c.chapterLabel}
-            chapterId={c.chapterId}
-            replyToName={c.replyToName}
-            createdAt={c.createdAt}
-            initialHidden={c.hidden}
-            reportCount={c.reportCount}
-          />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -335,142 +224,11 @@ export default function AdminDashboard({
         </section>
       )}
 
-      {activeTab === "users" && (
-        <section>
-          <AdminSearchInput value={userSearch} onChange={setUserSearch} placeholder="Search by name or email…" />
-
-          {filteredUsers.length === 0 && (
-            <div className="border border-border rounded-md bg-surface/60 py-6 px-4 mt-4 text-center text-sm text-fg-secondary">
-              No users match &quot;{userSearch}&quot;.
-            </div>
-          )}
-
-          {/* Phones: one card per user. The 6-column table only fit by
-              scrolling sideways there. Same controls as the table rows
-              below (shared helpers), just stacked. */}
-          {filteredUsers.length > 0 && (
-            <ul className="sm:hidden mt-4 flex flex-col gap-3">
-              {filteredUsers.map((u) => (
-                <li key={u.id} className="border border-border rounded-md bg-surface/60 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-fg font-medium truncate">
-                        {u.name ? formatUsername(u.name, u.tag) : "—"}
-                      </div>
-                      <div className="text-sm text-fg-secondary truncate">{u.email}</div>
-                      <div className="text-xs text-fg-muted mt-0.5">
-                        Joined <LocalDate date={u.created_at} />
-                      </div>
-                    </div>
-                    <div className="shrink-0">{roleControl(u)}</div>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-border">
-                    {commentsButton(u)}
-                    {deleteControl(u)}
-                  </div>
-                  {expandedUserId === u.id && <div className="mt-3">{userCommentList(u)}</div>}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* sm and up: the table */}
-          {filteredUsers.length > 0 && (
-            <div className="hidden sm:block border border-border rounded-md overflow-hidden mt-4">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-surface text-fg-secondary text-xs">
-                      <th className="text-left px-4 py-2">Name</th>
-                      <th className="text-left px-4 py-2">Email</th>
-                      <th className="text-left px-4 py-2">Joined</th>
-                      <th className="text-left px-4 py-2">Role</th>
-                      <th className="text-left px-4 py-2">Comments</th>
-                      <th className="text-left px-4 py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map((u) => (
-                      <Fragment key={u.id}>
-                        <tr className="border-t border-border hover:bg-surface/40 transition-colors duration-200">
-                          <td className="px-4 py-2 text-fg whitespace-nowrap">
-                            {u.name ? formatUsername(u.name, u.tag) : "—"}
-                          </td>
-                          <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">{u.email}</td>
-                          <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">
-                            <LocalDate date={u.created_at} />
-                          </td>
-                          <td className="px-4 py-2">{roleControl(u)}</td>
-                          <td className="px-4 py-2">{commentsButton(u)}</td>
-                          <td className="px-4 py-2">{deleteControl(u)}</td>
-                        </tr>
-
-                        {expandedUserId === u.id && (
-                          <tr className="border-t border-border bg-bg/40">
-                            <td colSpan={6} className="p-3">
-                              {userCommentList(u)}
-                            </td>
-                          </tr>
-                        )}
-                      </Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </section>
-      )}
+      {activeTab === "users" && <AdminUserList currentUserId={currentUserId} />}
 
       {activeTab === "comments" && (
         <section>
-          <AdminSearchInput
-            value={commentSearch}
-            onChange={setCommentSearch}
-            placeholder="Search by user, chapter, or text…"
-          />
-        {/* Moderation shortcut: just the comments readers have reported. */}
-        <button
-          type="button"
-          onClick={() => setReportedOnly((v) => !v)}
-          aria-pressed={reportedOnly}
-          className={
-            "mt-3 text-xs px-3 py-1.5 rounded border transition-colors duration-200 " +
-            (reportedOnly
-              ? "border-danger/60 text-danger"
-              : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
-          }
-        >
-          Reported only ({reportedCount})
-        </button>
-
-          {comments.length === 0 ? (
-            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-              <p className="text-fg-secondary text-sm">No comments yet.</p>
-            </div>
-          ) : filteredComments.length === 0 ? (
-            <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-              <p className="text-fg-secondary text-sm">{commentSearch ? <>No comments match &quot;{commentSearch}&quot;.</> : "No reported comments."}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2 mt-4">
-              {filteredComments.map((c) => (
-                <AdminCommentRow
-                  key={c.id}
-                  commentId={c.id}
-                  body={c.body}
-                  userName={c.userName}
-                  userTag={c.userTag}
-                  chapterLabel={c.chapterLabel}
-                  chapterId={c.chapterId}
-                  replyToName={c.replyToName}
-                  createdAt={c.createdAt}
-                  initialHidden={c.hidden}
-                  reportCount={c.reportCount}
-                />
-              ))}
-            </div>
-          )}
+          <AdminCommentList reportedTotal={reportedCount} />
         </section>
       )}
     </div>
