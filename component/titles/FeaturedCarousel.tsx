@@ -419,8 +419,9 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           </p>
 
           {/* Phones: app-style controls — a white pill "Start Reading" with a
-              book icon (same icon as the manga page's read button) filling the
-              row, plus a round frosted-glass ⓘ button for the manga page. The
+              book icon (same icon as the manga page's read button), sized to
+              its label rather than stretched across the row, plus a matching
+              44px round frosted-glass ⓘ button for the manga page. The
               pair fits side by side even on a 320px screen (two full-width
               stacked buttons used to cover ~110px of the banner). From sm up
               it's the original pair of rectangular buttons, unchanged. */}
@@ -428,13 +429,13 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             {current.firstChapterId ? (
               <Link
                 href={`/viewer/${current.firstChapterId}`}
-                className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center gap-2 whitespace-nowrap h-12 sm:h-auto px-5 sm:px-6 sm:py-3 rounded-full sm:rounded-md bg-white text-black text-[15px] font-semibold sm:text-base sm:font-normal shadow-lg shadow-black/30 sm:shadow-md active:scale-[0.98] hover:bg-white/85 transition duration-200"
+                className="pointer-events-auto shrink-0 inline-flex items-center justify-center gap-2 whitespace-nowrap h-11 sm:h-auto px-6 sm:py-3 rounded-full sm:rounded-md bg-white text-black text-[15px] font-semibold sm:text-base sm:font-normal shadow-lg shadow-black/30 sm:shadow-md active:scale-[0.98] hover:bg-white/85 transition duration-200"
               >
                 <BookOpen className="w-4.5 h-4.5 sm:hidden" aria-hidden="true" />
                 Start Reading
               </Link>
             ) : (
-              <span className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center whitespace-nowrap h-12 sm:h-auto px-5 sm:px-6 sm:py-3 rounded-full sm:rounded-md bg-white/40 text-black/60 text-[15px] font-semibold sm:text-base sm:font-normal shadow-md cursor-not-allowed">
+              <span className="pointer-events-auto shrink-0 inline-flex items-center justify-center whitespace-nowrap h-11 sm:h-auto px-6 sm:py-3 rounded-full sm:rounded-md bg-white/40 text-black/60 text-[15px] font-semibold sm:text-base sm:font-normal shadow-md cursor-not-allowed">
                 No chapters yet
               </span>
             )}
@@ -444,7 +445,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
               href={`/manga/titles/${current.id}`}
               aria-label={`View ${current.title}`}
               title="View Manga"
-              className="sm:hidden pointer-events-auto shrink-0 w-12 h-12 inline-flex items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md shadow-lg shadow-black/30 active:scale-95 hover:bg-white/25 transition duration-200"
+              className="sm:hidden pointer-events-auto shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md shadow-lg shadow-black/30 active:scale-95 hover:bg-white/25 transition duration-200"
             >
               <Info className="w-5 h-5" aria-hidden="true" />
             </Link>
