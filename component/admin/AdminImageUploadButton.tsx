@@ -84,18 +84,34 @@ export default function AdminImageUploadButton({
         {label}
       </label>
 
+      {/* The label above isn't a <label for> (there's no input to point
+          at — the file input is hidden), so the button carries its own
+          name for screen readers: "Upload cover image" / "Change cover
+          image" / "Uploading cover image". */}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
+        disabled={isUploading}
+        aria-label={`${isUploading ? "Uploading" : value ? "Change" : "Upload"} ${label.toLowerCase()} image`}
+        aria-busy={isUploading}
         className={`group relative block ${boxClassName} overflow-hidden rounded border border-border bg-bg`}
       >
         {value ? (
-          <NextImage src={value} alt={label} fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
+          <NextImage src={value} alt="" fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
         ) : (
           <NoImagePlaceholder label="No image" />
         )}
 
-        <span className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-white transition-opacity duration-200">
+        {/* "Change" on hover; "Uploading…" always while it runs — it used
+            to show only on hover, so on a phone nothing said an upload
+            was in progress */}
+        <span
+          aria-hidden="true"
+          className={
+            "absolute inset-0 bg-black/60 flex items-center justify-center text-xs text-white transition-opacity duration-200 " +
+            (isUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100")
+          }
+        >
           {isUploading ? "Uploading…" : "Change"}
         </span>
       </button>
@@ -108,7 +124,11 @@ export default function AdminImageUploadButton({
         className="hidden"
       />
 
-      {error && <p className="text-xs text-danger-text mt-1">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-danger-text mt-1">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

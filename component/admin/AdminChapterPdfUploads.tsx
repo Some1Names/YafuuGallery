@@ -92,6 +92,7 @@ export default function AdminChapterPdfUploads({
                   onChange={(url, fileName) => updateEntry(i, { url, fileName })}
                   generateCoverIfMissing={generateCoverIfMissing}
                   onCoverGenerated={onCoverGenerated}
+                  languageLabel={LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label}
                 />
               </div>
 

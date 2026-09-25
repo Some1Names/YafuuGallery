@@ -19,6 +19,9 @@ interface AdminPdfUploadButtonProps {
   // error, since the PDF itself already uploaded fine.
   generateCoverIfMissing?: boolean;
   onCoverGenerated?: (url: string) => void;
+  // e.g. "English" — names the button for screen readers ("Upload
+  // English PDF"); its visible text alone read as "No PDF uploadedUpload"
+  languageLabel?: string;
 }
 
 const HARD_LIMIT_BYTES = 200 * 1024 * 1024;
@@ -44,6 +47,7 @@ export default function AdminPdfUploadButton({
   onChange,
   generateCoverIfMissing = false,
   onCoverGenerated,
+  languageLabel,
 }: AdminPdfUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -128,12 +132,21 @@ export default function AdminPdfUploadButton({
     }
   }
 
+  const pdfName = languageLabel ? `${languageLabel} PDF` : "PDF";
+
   return (
     <div>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
+        aria-label={
+          isUploading
+            ? `Uploading ${pdfName}, ${progress}%`
+            : value
+              ? `Replace ${pdfName} (${fileName ?? "uploaded"})`
+              : `Upload ${pdfName}`
+        }
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-border bg-bg text-left hover:border-fg-secondary transition-colors duration-200 disabled:opacity-60"
       >
         {value ? (
