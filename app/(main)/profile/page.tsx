@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -8,6 +9,8 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import { getContinueReading } from "@/lib/continue-reading";
 import { fullRowCount } from "@/lib/grid-rows";
 import { loginHref } from "@/lib/login-redirect";
+
+export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const session = await auth();

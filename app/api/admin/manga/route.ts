@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkText, MAX_MANGA_TITLE_LENGTH, MAX_SYNOPSIS_LENGTH } from "@/lib/content-limits";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canCreateManga } from "@/lib/manga-access";
@@ -19,6 +20,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
   }
 
+  // type, blank and length checks (lib/content-limits.ts); stores trimmed text
+  const title = checkText(manga_title, "Title", MAX_MANGA_TITLE_LENGTH);
+  if ("error" in title) return NextResponse.json({ error: title.error }, { status: 400 });
+  const synopsis = checkText(manga_synopsis, "Synopsis", MAX_SYNOPSIS_LENGTH);
+  if ("error" in synopsis) return NextResponse.json({ error: synopsis.error }, { status: 400 });
+
   // SECURITY: see isAllowedUrlWrite — whatever URLs are stored here get
   // deleted from R2 when this manga is later deleted or its images replaced.
   if (
@@ -30,8 +37,8 @@ export async function POST(request: NextRequest) {
 
   const manga = await prisma.manga.create({
     data: {
-      manga_title,
-      manga_synopsis,
+      manga_title: title.value,
+      manga_synopsis: synopsis.value,
       // A manga's author is whoever creates it, not a separately assignable
       // field — no admin override, so this can't be spoofed via the body.
       author_id: session!.user!.id,

@@ -11,6 +11,7 @@ import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import { formatBytes } from "@/lib/format-bytes";
 import { MIN_PUBLISHED_DATE, formatPublishedDate, todayLocalISODate } from "@/lib/dates";
+import { MAX_CHAPTER_NAME_LENGTH } from "@/lib/content-limits";
 
 interface AdminChapterRowProps {
   id: string;
@@ -261,6 +262,7 @@ export default function AdminChapterRow({
                     </select>
                     <input
                       value={editName}
+                      maxLength={MAX_CHAPTER_NAME_LENGTH}
                       onChange={(e) => setEditName(e.target.value)}
                       required
                       className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-fg focus:outline-none"

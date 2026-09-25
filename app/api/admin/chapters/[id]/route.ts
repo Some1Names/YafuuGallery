@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkText, MAX_CHAPTER_NAME_LENGTH } from "@/lib/content-limits";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { PUBLISHED_DATE_ERROR, parsePublishedDate } from "@/lib/dates";
@@ -76,6 +77,10 @@ export async function PATCH(
     );
   }
 
+  // type, blank and length checks (lib/content-limits.ts); stores trimmed text
+  const name = checkText(chapter_name, "Chapter title", MAX_CHAPTER_NAME_LENGTH);
+  if ("error" in name) return NextResponse.json({ error: name.error }, { status: 400 });
+
   // A real calendar date in a sane range — new Date() alone let a blank
   // or zero value through as 1969-12-31 / 1970-01-01 (see lib/dates.ts).
   const publishedDate = parsePublishedDate(published_date);
@@ -126,7 +131,7 @@ export async function PATCH(
         arc_id: arc_id || null,
         chapter_number: number,
         chapter_is_ex: isEx,
-        chapter_name,
+        chapter_name: name.value,
         published_date: publishedDate,
         cover_image_url: cover_image_url || null,
       },

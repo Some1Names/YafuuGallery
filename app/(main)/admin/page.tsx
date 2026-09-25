@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -7,6 +8,8 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
 import UnattributedStorage from "@/component/admin/UnattributedStorage";
+
+export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminPage() {
   const session = await auth();

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -12,6 +13,8 @@ import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import FavoriteUpdateRow from "@/component/titles/FavoriteUpdateRow";
 import MarkUpdatesReadButton from "@/component/titles/MarkUpdatesReadButton";
 import ShowMoreLink from "@/component/ShowMoreLink";
+
+export const metadata: Metadata = { title: "Favorites" };
 
 type Tab = "manga" | "chapters" | "updates";
 

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import { MIN_PUBLISHED_DATE, todayLocalISODate } from "@/lib/dates";
+import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
+import { MAX_CHAPTER_NAME_LENGTH } from "@/lib/content-limits";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -148,6 +150,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                 </select>
                 <input
                   value={chapterName}
+                  maxLength={MAX_CHAPTER_NAME_LENGTH}
                   onChange={(e) => setChapterName(e.target.value)}
                   placeholder="Chapter title"
                   required
@@ -206,6 +209,15 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
       {error && <p className="text-sm text-danger-text">{error}</p>}
 
+      <MissingFieldsHint
+        missing={[
+          !coverImageUrl && "cover",
+          !chapterName.trim() && "title",
+          !publishedDate && "date",
+          !translations.some((t) => t.url !== null) && "PDF",
+        ]}
+      />
+
       <div className="flex gap-2 self-end">
         <button
           type="button"
@@ -217,7 +229,6 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
         <button
           type="submit"
           disabled={isSubmitting || !canSubmit}
-          title={!canSubmit ? "Cover, title, date, and PDF are all required" : undefined}
           className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Chapter"}

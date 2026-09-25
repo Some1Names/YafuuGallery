@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkText, MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageArc } from "@/lib/manga-access";
@@ -35,6 +36,10 @@ export async function PATCH(
     );
   }
 
+  // type, blank and length checks (lib/content-limits.ts); stores trimmed text
+  const name = checkText(arc_name, "Arc name", MAX_ARC_NAME_LENGTH);
+  if ("error" in name) return NextResponse.json({ error: name.error }, { status: 400 });
+
   const order = Number(arc_order);
   if (!Number.isInteger(order) || order < 0) {
     return NextResponse.json(
@@ -59,7 +64,7 @@ export async function PATCH(
     const arc = await prisma.arc.update({
       where: { id },
       data: {
-        arc_name,
+        arc_name: name.value,
         arc_order: order,
         arc_is_ex: isEx,
         arc_status: status,

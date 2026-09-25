@@ -16,6 +16,8 @@ import { formatBytes } from "@/lib/format-bytes";
 import MangaGenreFields from "@/component/manga/MangaGenreFields";
 import { knownGenres, type GenreSlug, type MangaStatusValue } from "@/lib/genres";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
+import SynopsisField from "@/component/manga/SynopsisField";
+import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
 
 interface ChapterItem {
   id: string;
@@ -233,6 +235,7 @@ export default function AdminMangaRow({
           </label>
           <input
             value={editTitle}
+            maxLength={MAX_MANGA_TITLE_LENGTH}
             onChange={(e) => setEditTitle(e.target.value)}
             required
             className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
@@ -241,13 +244,7 @@ export default function AdminMangaRow({
           <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
             Synopsis
           </label>
-          <textarea
-            value={editSynopsis}
-            onChange={(e) => setEditSynopsis(e.target.value)}
-            required
-            rows={3}
-            className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg resize-none"
-          />
+          <SynopsisField value={editSynopsis} onChange={setEditSynopsis} />
 
           <MangaGenreFields
             genres={editGenres}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
+import { MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";
 
 interface AdminArcRowProps {
   id: string;
@@ -195,6 +196,7 @@ export default function AdminArcRow({
                   </select>
                   <input
                     value={editName}
+                    maxLength={MAX_ARC_NAME_LENGTH}
                     onChange={(e) => setEditName(e.target.value)}
                     required
                     className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-fg focus:outline-none"

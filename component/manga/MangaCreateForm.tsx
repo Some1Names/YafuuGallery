@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "@/component/admin/AdminImageUploadButton";
 import MangaGenreFields from "@/component/manga/MangaGenreFields";
 import type { GenreSlug, MangaStatusValue } from "@/lib/genres";
+import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
+import SynopsisField from "@/component/manga/SynopsisField";
+import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
 
 // Shared by /admin and /manage — creating a manga always attributes it to
 // the signed-in account. There's no "choose an author" picker: a manga's
@@ -130,6 +133,7 @@ export default function MangaCreateForm() {
         </label>
         <input
           value={title}
+          maxLength={MAX_MANGA_TITLE_LENGTH}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Manga title"
           required
@@ -139,19 +143,16 @@ export default function MangaCreateForm() {
         <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
           Synopsis
         </label>
-        <textarea
-          value={synopsis}
-          onChange={(e) => setSynopsis(e.target.value)}
-          placeholder="Synopsis"
-          required
-          rows={3}
-          className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted resize-none"
-        />
+        <SynopsisField value={synopsis} onChange={setSynopsis} placeholder="Synopsis" />
 
         <MangaGenreFields genres={genres} onGenresChange={setGenres} status={status} onStatusChange={setStatus} />
       </div>
 
       {error && <p className="text-sm text-danger-text">{error}</p>}
+
+      <MissingFieldsHint
+        missing={[!coverImageUrl && "cover", !bannerImageUrl && "banner", !title.trim() && "title", !synopsis.trim() && "synopsis"]}
+      />
 
       <div className="flex gap-2 self-end">
         <button
@@ -164,7 +165,6 @@ export default function MangaCreateForm() {
         <button
           type="submit"
           disabled={isSubmitting || !canSubmit}
-          title={!canSubmit ? "Cover, banner, title, and synopsis are all required" : undefined}
           className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
           {isSubmitting ? "Creating…" : "+ Create Manga"}

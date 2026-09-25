@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import MangaBackground from "@/component/titles/MangaBackground";
 import ManageMangaDashboard from "@/component/manage/ManageMangaDashboard";
+
+export const metadata: Metadata = { title: "Manage manga" };
 
 export default async function ManageMangaPage() {
   const session = await auth();

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkText, MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canManageManga } from "@/lib/manga-access";
@@ -28,6 +29,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // type, blank and length checks (lib/content-limits.ts); stores trimmed text
+  const name = checkText(arc_name, "Arc name", MAX_ARC_NAME_LENGTH);
+  if ("error" in name) return NextResponse.json({ error: name.error }, { status: 400 });
+
   if (!(await canManageManga(session?.user, manga_id))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest) {
     const arc = await prisma.arc.create({
       data: {
         manga_id,
-        arc_name,
+        arc_name: name.value,
         arc_order: order,
         arc_is_ex: isEx,
         arc_status: status,
