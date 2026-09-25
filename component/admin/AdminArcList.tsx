@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { alertRequestFailed } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminArcRow from "./AdminArcRow";
@@ -151,16 +152,17 @@ export default function AdminArcList({ mangaId, arcs, editingArcId, onToggleEdit
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ manga_id: mangaId, ordered_ids: nextOrdered.map((a) => a.id) }),
-    });
+    }).catch(() => null);
 
-    if (res.ok) {
+    if (res?.ok) {
       setOrdered(nextOrdered);
       router.refresh();
       return true;
     }
 
-    // Snap back to the last known-good server order on failure.
+    // Snap back to the last known-good server order on failure, and say so.
     setOrdered(arcs.slice().sort((a, b) => a.arc_order - b.arc_order));
+    void alertRequestFailed("Couldn't reorder arcs", res);
     return false;
   }
 

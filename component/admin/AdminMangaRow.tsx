@@ -110,9 +110,10 @@ export default function AdminMangaRow({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_featured: !isFeatured }),
-    });
+    }).catch(() => null);
     setIsTogglingFeatured(false);
-    if (res.ok) router.refresh();
+    if (!res?.ok) return alertRequestFailed(isFeatured ? "Couldn't unfeature manga" : "Couldn't feature manga", res);
+    router.refresh();
   }
 
   // The arc create form and an arc row's edit form are mutually

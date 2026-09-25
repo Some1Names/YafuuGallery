@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { alertRequestFailed } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
 import AdminChapterRow from "./AdminChapterRow";
@@ -168,16 +169,17 @@ export default function AdminChapterList({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ manga_id: mangaId, ordered_ids: nextOrdered.map((c) => c.id) }),
-    });
+    }).catch(() => null);
 
-    if (res.ok) {
+    if (res?.ok) {
       setOrdered(nextOrdered);
       router.refresh();
       return true;
     }
 
-    // Snap back to the last known-good server order on failure.
+    // Snap back to the last known-good server order on failure, and say so.
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
+    void alertRequestFailed("Couldn't reorder chapters", res);
     return false;
   }
 

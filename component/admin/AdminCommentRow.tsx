@@ -64,9 +64,11 @@ export default function AdminCommentRow({
     setHidden(!hidden);
 
     startTransition(async () => {
-      const res = await fetch(`/api/admin/comments/${commentId}/hide`, { method: "POST" });
-      if (!res.ok) {
+      const res = await fetch(`/api/admin/comments/${commentId}/hide`, { method: "POST" }).catch(() => null);
+      if (!res?.ok) {
         setHidden(previous);
+        // not awaited, so the button isn't left pending while it's open
+        void alertRequestFailed(previous ? "Couldn't unhide comment" : "Couldn't hide comment", res);
         return;
       }
       const data = await res.json();
