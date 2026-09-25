@@ -234,24 +234,6 @@ export default function AdminChapterRow({
                 boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
                 aspectRatio={16 / 9}
               />
-              {/* Read-only — favorites/comments come from readers, not
-                  something the admin sets here. */}
-              <div className="flex items-center gap-3 text-xs text-fg-muted">
-                <span className="flex items-center gap-1">
-                  <Heart className="w-3.5 h-3.5" />
-                  {favoriteCount.toLocaleString()}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  {commentCount.toLocaleString()}
-                </span>
-                {typeof storageBytes === "number" && (
-                  <span className="flex items-center gap-1">
-                    <HardDrive className="w-3.5 h-3.5" />
-                    {formatBytes(storageBytes)}
-                  </span>
-                )}
-              </div>
             </div>
 
             <div className="flex-1 flex flex-col gap-4">
