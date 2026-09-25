@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -53,11 +53,10 @@ export default function AdminCommentRow({
   // Dismissing clears the reports (the comment stays up) — refresh so the
   // dashboard's "Reported" filter/count update too.
   async function dismissReports() {
-    const res = await fetch(`/api/admin/comments/${commentId}/reports`, { method: "DELETE" });
-    if (res.ok) {
-      onReportsDismissed?.();
-      router.refresh(); // the tab counts on the page
-    }
+    const res = await fetch(`/api/admin/comments/${commentId}/reports`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return alertRequestFailed("Couldn't dismiss reports", res);
+    onReportsDismissed?.();
+    router.refresh(); // the tab counts on the page
   }
 
   function toggleHide() {
@@ -83,11 +82,10 @@ export default function AdminCommentRow({
       tone: "danger",
     });
     if (!confirmed) return;
-    const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" });
-    if (res.ok) {
-      onDeleted?.();
-      router.refresh(); // the tab counts on the page
-    }
+    const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return alertRequestFailed("Couldn't delete comment", res);
+    onDeleted?.();
+    router.refresh(); // the tab counts on the page
   }
 
   // Phones: the action buttons go under the comment (side by side they

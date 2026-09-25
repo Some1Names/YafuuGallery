@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { alertRequestFailed } from "@/component/Dialog";
 
 // The × on a /history row. No confirm — it's one entry, and reading the
 // chapter again brings it straight back.
@@ -13,8 +14,9 @@ export default function RemoveFromHistoryButton({ chapterId, label }: { chapterI
   async function remove() {
     setIsPending(true);
     try {
-      const res = await fetch(`/api/chapters/${chapterId}/progress`, { method: "DELETE" });
-      if (res.ok) router.refresh();
+      const res = await fetch(`/api/chapters/${chapterId}/progress`, { method: "DELETE" }).catch(() => null);
+      if (!res?.ok) return await alertRequestFailed("Couldn't remove from history", res);
+      router.refresh();
     } finally {
       setIsPending(false);
     }

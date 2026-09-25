@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -191,8 +191,9 @@ export default function AdminMangaRow({
       tone: "danger",
     });
     if (!confirmed) return;
-    const res = await fetch(`/api/admin/manga/${id}`, { method: "DELETE" });
-    if (res.ok) router.refresh();
+    const res = await fetch(`/api/admin/manga/${id}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return alertRequestFailed("Couldn't delete manga", res);
+    router.refresh();
   }
 
   if (isEditing) {

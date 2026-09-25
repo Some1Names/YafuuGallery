@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
@@ -85,8 +85,9 @@ export default function AdminArcRow({
       tone: "danger",
     });
     if (!confirmed) return;
-    const res = await fetch(`/api/admin/arcs/${id}`, { method: "DELETE" });
-    if (res.ok) router.refresh();
+    const res = await fetch(`/api/admin/arcs/${id}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return alertRequestFailed("Couldn't delete arc", res);
+    router.refresh();
   }
 
   function cancelEdit() {

@@ -71,6 +71,27 @@ export async function alertDialog(options: DialogOptions): Promise<void> {
   await request("alert", { tone: "error", ...options });
 }
 
+// For a request that failed:
+//
+//   const res = await fetch(url, { method: "DELETE" }).catch(() => null);
+//   if (!res?.ok) return alertRequestFailed("Couldn't delete chapter", res);
+//
+// Shows the API's own { error } message when it sent one ("You can't delete
+// your own account"), except for the bare "Unauthorized"/"Forbidden" of a
+// 401/403, which get a plain-words version. With no response at all
+// (offline, server down) it says to check the connection.
+export async function alertRequestFailed(title: string, res: Response | null): Promise<void> {
+  const data = res ? await res.json().catch(() => null) : null;
+  const message = !res
+    ? "Couldn't reach the server. Check your connection and try again."
+    : res.status === 401 || res.status === 403
+      ? "You don't have permission to do that. You may have been signed out — try signing in again."
+      : typeof data?.error === "string"
+        ? data.error
+        : "Something went wrong on the server. Please try again.";
+  await alertDialog({ title, message });
+}
+
 const TONES: Record<DialogTone, { icon: LucideIcon; ring: string }> = {
   // red-400 in dark mode: --color-danger is too dark to read on the dark surface
   danger: { icon: Trash2, ring: "bg-danger/15 text-red-400 [.light_&]:text-danger" },

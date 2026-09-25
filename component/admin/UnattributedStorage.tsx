@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { formatBytes } from "@/lib/format-bytes";
@@ -40,17 +40,19 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keys }),
-    });
-    if (res.ok) {
-      const data: { skippedCount?: number } = await res.json().catch(() => ({}));
-      if (data.skippedCount) {
-        setNotice(
-          `${data.skippedCount} file${data.skippedCount === 1 ? " was" : "s were"} skipped — now in use again, so not deleted.`
-        );
-      }
-      router.refresh();
+    }).catch(() => null);
+    if (!res?.ok) {
+      await alertRequestFailed(keys.length === 1 ? "Couldn't delete object" : "Couldn't delete objects", res);
+      return false;
     }
-    return res.ok;
+    const data: { skippedCount?: number } = await res.json().catch(() => ({}));
+    if (data.skippedCount) {
+      setNotice(
+        `${data.skippedCount} file${data.skippedCount === 1 ? " was" : "s were"} skipped — now in use again, so not deleted.`
+      );
+    }
+    router.refresh();
+    return true;
   }
 
   async function handleDeleteOne(key: string) {

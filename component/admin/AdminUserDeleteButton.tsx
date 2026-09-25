@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { alertDialog, confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 
 export default function AdminUserDeleteButton({
   userId,
@@ -24,14 +24,10 @@ export default function AdminUserDeleteButton({
       tone: "danger",
     });
     if (!confirmed) return;
-    const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
-    if (res.ok) {
-      onDeleted?.();
-      router.refresh(); // the tab counts on the page
-    } else {
-      const data = await res.json().catch(() => null);
-      await alertDialog({ title: "Couldn't delete user", message: data?.error ?? "Please try again." });
-    }
+    const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return alertRequestFailed("Couldn't delete user", res);
+    onDeleted?.();
+    router.refresh(); // the tab counts on the page
   }
 
   return (
