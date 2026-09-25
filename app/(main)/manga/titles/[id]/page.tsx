@@ -77,6 +77,8 @@ export default async function MangaDetailPage({
                 manga_title: true,
                 manga_synopsis: true,
                 banner_image_url: true,
+                // chapter rows without their own cover fall back to these
+                cover_image_url: true,
                 genres: true,
                 manga_status: true,
                 author: { select: { id: true, name: true } },
@@ -151,6 +153,10 @@ export default async function MangaDetailPage({
     // total_chapters/total_view-style: favorite/comment counts aren't
     // stored on Chapter, so map Prisma's _count into the flat shape
     // ChapterItem expects (same convention as the admin dashboard).
+    // No chapter cover: rows use the manga's wide banner (their cover box is
+    // landscape), else its cover — not an empty placeholder.
+    const fallbackCoverUrl = manga.banner_image_url ?? manga.cover_image_url;
+
     function toChapterItem(c: {
         id: string;
         chapter_number: number;
@@ -161,7 +167,12 @@ export default async function MangaDetailPage({
         _count: { chapter_bookmarks: number; comments: number };
     }): ChapterItem {
         const { _count, ...rest } = c;
-        return { ...rest, favoriteCount: _count.chapter_bookmarks, commentCount: _count.comments };
+        return {
+            ...rest,
+            cover_image_url: rest.cover_image_url ?? fallbackCoverUrl,
+            favoriteCount: _count.chapter_bookmarks,
+            commentCount: _count.comments,
+        };
     }
 
     const arcs = manga.arcs.map((arc) => ({ ...arc, chapters: arc.chapters.map(toChapterItem) }));
