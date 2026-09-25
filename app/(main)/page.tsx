@@ -52,15 +52,38 @@ function renderCard(manga: CardManga) {
   );
 }
 
-// "See all →" beside a section heading
-function SeeAllLink({ href, label }: { href: string; label: string }) {
+// A section's eyebrow + heading, with an optional "See all →" link. From
+// sm up the link sits at the right, level with the heading. On phones it
+// moves up to the eyebrow's line so the heading gets the full width —
+// beside the link, "Continue Reading" and "Browse by Genre" wrapped onto
+// two lines at 320px.
+function SectionHeader({
+  eyebrow,
+  title,
+  link,
+  className = "mb-6 sm:mb-8",
+}: {
+  eyebrow: string;
+  title: string;
+  link?: { href: string; label: string } | null;
+  className?: string;
+}) {
   return (
-    <Link
-      href={href}
-      className="shrink-0 inline-block py-1.5 -my-1.5 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
-    >
-      {label} <span aria-hidden="true">→</span>
-    </Link>
+    <div className={`grid grid-cols-[1fr_auto] items-center gap-x-4 ${className}`}>
+      <p className="col-start-1 row-start-1 text-fg-secondary text-xs sm:text-sm">{eyebrow}</p>
+      <h2 className="col-span-2 sm:col-span-1 row-start-2 text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">
+        {title}
+      </h2>
+      {link && (
+        <Link
+          href={link.href}
+          // py/-my: a 40px-tall tap area without adding height
+          className="col-start-2 row-start-1 sm:row-span-2 sm:self-end whitespace-nowrap py-2.5 -my-2.5 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+        >
+          {link.label} <span aria-hidden="true">→</span>
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -183,25 +206,42 @@ export default async function BrowsePage({
       {!session?.user?.id ? (
         <section className="px-6 md:px-8 pt-6 sm:pt-8">
           <div className="max-w-350 mx-auto">
-            <p className="text-fg-secondary text-sm">
-              <Link href="/login" className="text-fg underline underline-offset-2 hover:no-underline">
-                Sign in
-              </Link>{" "}
-              to keep track of what you&apos;re reading.
-            </p>
+            {/* The home page's only invitation to make an account — a card
+                with real buttons, not a small text link that was easy to miss
+                (and 17px tall to tap). */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-border rounded-md bg-surface/60 p-4 sm:p-5">
+              <div>
+                <p className="text-fg font-medium">Keep your place in every story</p>
+                <p className="mt-0.5 text-sm text-fg-secondary">
+                  Save favorites, see new chapters, and pick up where you left off.
+                </p>
+              </div>
+              <div className="flex gap-2 sm:shrink-0">
+                <Link
+                  href="/signup"
+                  className="flex-1 sm:flex-none flex items-center justify-center h-10 px-4 rounded-md bg-fg text-bg text-sm font-semibold whitespace-nowrap hover:bg-fg-hover transition-colors duration-200"
+                >
+                  Create account
+                </Link>
+                <Link
+                  href="/login"
+                  className="flex-1 sm:flex-none flex items-center justify-center h-10 px-4 rounded-md border border-fg/25 text-fg text-sm font-medium whitespace-nowrap hover:border-fg/60 transition-colors duration-200"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       ) : (
         recentProgress.length > 0 && (
           <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
             <div className="max-w-350 mx-auto">
-              <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
-                <div>
-                  <p className="text-fg-secondary text-xs sm:text-sm">PICK UP WHERE YOU LEFT OFF</p>
-                  <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Continue Reading</h2>
-                </div>
-                <SeeAllLink href="/history" label="History" />
-              </div>
+              <SectionHeader
+                eyebrow="PICK UP WHERE YOU LEFT OFF"
+                title="Continue Reading"
+                link={{ href: "/history", label: "History" }}
+              />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {recentProgress.map((p, i) => (
@@ -226,13 +266,11 @@ export default async function BrowsePage({
       {showPopular && (
         <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
           <div className="max-w-350 mx-auto">
-            <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
-              <div>
-                <p className="text-fg-secondary text-xs sm:text-sm">MOST READ</p>
-                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Popular</h2>
-              </div>
-              <SeeAllLink href={searchHref({ sort: "views" })} label="See all" />
-            </div>
+            <SectionHeader
+              eyebrow="MOST READ"
+              title="Popular"
+              link={{ href: searchHref({ sort: "views" }), label: "See all" }}
+            />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
               {popularManga.map(renderCard)}
             </div>
@@ -244,19 +282,11 @@ export default async function BrowsePage({
       <section className={"px-6 md:px-8 pt-8 " + (genresInUse.length > 0 ? "" : "pb-16 sm:pb-20 md:pb-28")}>
         <div className="max-w-350 mx-auto">
 
-          <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
-            <div>
-              <p className="text-fg-secondary text-xs sm:text-sm">
-                RECENTLY UPDATED
-              </p>
-
-              <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">
-                Latest Manga
-              </h2>
-            </div>
-            {mangaList.length > 0 && <SeeAllLink href="/search" label="Browse all" />}
-
-          </div>
+          <SectionHeader
+            eyebrow="RECENTLY UPDATED"
+            title="Latest Manga"
+            link={mangaList.length > 0 ? { href: "/search", label: "Browse all" } : null}
+          />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {mangaList.map(renderCard)}
@@ -282,13 +312,12 @@ export default async function BrowsePage({
       {genresInUse.length > 0 && (
         <section className="px-6 md:px-8 pt-12 sm:pt-16 pb-16 sm:pb-20 md:pb-28">
           <div className="max-w-350 mx-auto">
-            <div className="flex items-end justify-between gap-4 mb-5 sm:mb-6">
-              <div>
-                <p className="text-fg-secondary text-xs sm:text-sm">EXPLORE</p>
-                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Browse by Genre</h2>
-              </div>
-              <SeeAllLink href="/search" label="All genres" />
-            </div>
+            <SectionHeader
+              eyebrow="EXPLORE"
+              title="Browse by Genre"
+              link={{ href: "/search", label: "All genres" }}
+              className="mb-5 sm:mb-6"
+            />
             <div className="-mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto [scrollbar-width:none]">
               <ul className="flex gap-2 w-max md:w-auto md:flex-wrap">
                 {genresInUse.map((g) => (

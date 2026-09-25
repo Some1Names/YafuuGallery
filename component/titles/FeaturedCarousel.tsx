@@ -465,7 +465,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
               type="button"
               onClick={() => setIsUserPaused(!isPausedByChoice)}
               aria-label={isPausedByChoice ? "Play slideshow" : "Pause slideshow"}
-              className="pointer-events-auto -ml-1.5 mr-1 w-6 h-6 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
+              className="pointer-events-auto -ml-3.5 -mr-1 -my-2 w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
             >
               {isPausedByChoice ? (
                 <Play className="w-3.5 h-3.5 fill-current" />
@@ -473,9 +473,11 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 <Pause className="w-3.5 h-3.5 fill-current" />
               )}
             </button>
-            {/* Each dot is a 24px-tall button with the small visible dot
+            {/* Each dot is a 40px-tall button with the small visible dot
                 inside — the bare 6px dots were too small to hit on a phone.
-                px-1 on each keeps the visible spacing between dots at 8px. */}
+                px-2 with -mx-1 keeps the visible spacing between dots at 8px
+                while each tap area reaches 4px past it; -my-2 keeps the row
+                24px tall. The pause button uses the same trick (40x40). */}
             <div className="flex items-center">
             {manga.map((m, i) => (
               <button
@@ -484,7 +486,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 onClick={() => goTo(i)}
                 aria-label={`Show ${m.title}`}
                 aria-current={i === activeIndex}
-                className="group pointer-events-auto flex items-center h-6 px-1"
+                className="group pointer-events-auto flex items-center h-10 -my-2 px-2 -mx-1"
               >
                 <span
                   className={`relative block h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
