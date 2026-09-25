@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AuthMobileLogo, AuthSidePanel } from "@/component/AuthBrand";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,19 +63,12 @@ export default function SignUpPage() {
     <div
       className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg"
     >
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-auth-panel-from via-auth-panel-via to-bg border-r-2 border-border relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url("/wide.png")' }}
-        />
-        <Link href="/" className="relative text-2xl tracking-wide text-black">
-          YafuuGallery
-        </Link>
-      </div>
+      {/* Left panel (large screens) */}
+      <AuthSidePanel />
 
       {/* Right panel — form */}
-      <div className="flex items-center justify-center px-6 py-16">
+      <div className="relative flex items-center justify-center px-6 py-16">
+        <AuthMobileLogo />
         {verifyEmailSentTo ? (
           <div className="w-full max-w-sm">
             <h1 className="text-2xl text-fg font-(family-name:--font-display)">Check your email</h1>
@@ -152,6 +146,7 @@ export default function SignUpPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   aria-invalid={!!errors.password}
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-14 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
@@ -173,6 +168,25 @@ export default function SignUpPage() {
               >
                 {errors.password?.message ?? "Must be at least 8 characters."}
               </span>
+            </div>
+
+            {/* Same Show/Hide as the password above — one toggle for both */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm text-fg-secondary mb-1.5">
+                Confirm password
+              </label>
+              <input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                {...register("confirmPassword")}
+                autoComplete="new-password"
+                placeholder="Type your password again"
+                aria-invalid={!!errors.confirmPassword}
+                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
+              />
+              {errors.confirmPassword && (
+                <p className="text-xs text-danger-text mt-1">{errors.confirmPassword.message}</p>
+              )}
             </div>
 
             {serverError && <p className="text-sm text-danger-text">{serverError}</p>}

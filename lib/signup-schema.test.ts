@@ -22,9 +22,18 @@ describe("displayNameSchema", () => {
 });
 
 describe("signupSchema", () => {
+  const valid = { name: "yafuu", email: "a@b.co", password: "12345678", confirmPassword: "12345678" };
+
   it("requires a valid email and an 8+ character password", () => {
-    expect(signupSchema.safeParse({ name: "yafuu", email: "a@b.co", password: "12345678" }).success).toBe(true);
-    expect(signupSchema.safeParse({ name: "yafuu", email: "nope", password: "12345678" }).success).toBe(false);
-    expect(signupSchema.safeParse({ name: "yafuu", email: "a@b.co", password: "short" }).success).toBe(false);
+    expect(signupSchema.safeParse(valid).success).toBe(true);
+    expect(signupSchema.safeParse({ ...valid, email: "nope" }).success).toBe(false);
+    expect(signupSchema.safeParse({ ...valid, password: "short", confirmPassword: "short" }).success).toBe(false);
+  });
+
+  it("requires the password typed the same twice, and says so on the confirm field", () => {
+    const mismatch = signupSchema.safeParse({ ...valid, confirmPassword: "12345679" });
+    expect(mismatch.success).toBe(false);
+    expect(mismatch.error?.issues[0].path).toEqual(["confirmPassword"]);
+    expect(signupSchema.safeParse({ ...valid, confirmPassword: "" }).success).toBe(false);
   });
 });

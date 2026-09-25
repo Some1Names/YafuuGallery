@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { AuthMobileLogo, AuthSidePanel } from "@/component/AuthBrand";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
@@ -126,19 +127,12 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg">
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-b from-auth-panel-from via-auth-panel-via to-bg border-r-2 border-border relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url("/wide.png")' }}
-        />
-        <Link href="/" className="relative text-2xl tracking-wide text-black">
-          YafuuGallery
-        </Link>
-      </div>
+      {/* Left panel (large screens) */}
+      <AuthSidePanel />
 
       {/* Right panel — form */}
-      <div className="flex items-center justify-center px-6 py-16">
+      <div className="relative flex items-center justify-center px-6 py-16">
+        <AuthMobileLogo />
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <h1 className="text-2xl text-fg font-(family-name:--font-display)">Reset Password</h1>
