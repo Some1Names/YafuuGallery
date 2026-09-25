@@ -171,44 +171,6 @@ export default async function BrowsePage({
         <FeaturedCarousel manga={featuredSlides} />
       </section>
 
-      {/* Genre bar — a compact jump-off into browsing right under the hero,
-          not a full section with its own big heading (it's one row of
-          chips; as a section it read like a stray subheading wedged
-          between the others). Same chips as /search's genre filter; only
-          genres something is tagged with, so none leads to an empty page.
-          One sideways-scrolling row on phones (bleeding to the screen
-          edges so it visibly continues), wrapping from md up. */}
-      {genresInUse.length > 0 && (
-        <nav aria-label="Browse by genre" className="px-6 md:px-8 pt-6 sm:pt-8">
-          <div className="max-w-350 mx-auto">
-          <div className="-mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto [scrollbar-width:none]">
-            <ul className="flex items-center gap-2 w-max md:w-auto md:flex-wrap">
-              <li className="mr-1 text-xs uppercase tracking-widest text-fg-muted">Genres</li>
-              {genresInUse.map((g) => (
-                <li key={g.slug}>
-                  <Link
-                    href={searchHref({ genre: g.slug })}
-                    className="inline-flex items-center gap-2 whitespace-nowrap px-3.5 py-1.5 rounded-full border border-border bg-surface text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
-                  >
-                    {g.label}
-                    <span className="text-xs text-fg-muted">{genreCounts.get(g.slug)}</span>
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link
-                  href="/search"
-                  className="inline-flex items-center gap-1 whitespace-nowrap px-2 py-1.5 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
-                >
-                  All <span aria-hidden="true">→</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-          </div>
-        </nav>
-      )}
-
       {/* Continue reading. Three states: signed out gets a small nudge
           (no cards to show anyway), signed in with history gets the real
           section, signed in with none yet gets nothing — a brand-new
@@ -273,7 +235,7 @@ export default async function BrowsePage({
       )}
 
       {/* Latest Updates */}
-      <section className="px-6 md:px-8 pt-8 pb-16 sm:pb-20 md:pb-28">
+      <section className={"px-6 md:px-8 pt-8 " + (genresInUse.length > 0 ? "" : "pb-16 sm:pb-20 md:pb-28")}>
         <div className="max-w-350 mx-auto">
 
           <div className="flex items-end justify-between gap-4 mb-6 sm:mb-8">
@@ -304,6 +266,41 @@ export default async function BrowsePage({
 
         </div>
       </section>
+
+      {/* Browse by genre — last on the page: once someone reaches the end of
+          Latest Manga, picking a genre is the natural next step. Same
+          header treatment as the sections above (eyebrow + display heading
+          + "see all" link). Only genres something is tagged with, so no
+          chip leads to an empty page; one sideways-scrolling row on phones
+          (bleeding to the screen edges), wrapping from md up. */}
+      {genresInUse.length > 0 && (
+        <section className="px-6 md:px-8 pt-12 sm:pt-16 pb-16 sm:pb-20 md:pb-28">
+          <div className="max-w-350 mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-5 sm:mb-6">
+              <div>
+                <p className="text-fg-secondary text-xs sm:text-sm">EXPLORE</p>
+                <h2 className="text-2xl sm:text-3xl text-fg font-(family-name:--font-display)">Browse by Genre</h2>
+              </div>
+              <SeeAllLink href="/search" label="All genres" />
+            </div>
+            <div className="-mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto [scrollbar-width:none]">
+              <ul className="flex gap-2 w-max md:w-auto md:flex-wrap">
+                {genresInUse.map((g) => (
+                  <li key={g.slug}>
+                    <Link
+                      href={searchHref({ genre: g.slug })}
+                      className="inline-flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-full border border-border bg-surface text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
+                    >
+                      {g.label}
+                      <span className="text-xs text-fg-muted">{genreCounts.get(g.slug)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
     </div>
   );
