@@ -403,7 +403,11 @@ export default function ChapterCommentPanel({
           the reader visible alongside the panel, so no dimming there. */}
       {isOpen && <div className="fixed inset-0 z-40 bg-black/50 sm:hidden" onClick={onClose} />}
 
+      {/* inert while closed: it's only slid off-screen, so otherwise its
+          buttons and comment box stayed in the Tab order (and readable by
+          screen readers) while invisible. */}
       <div
+        inert={!isOpen}
         className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-surface border-l border-border flex flex-col transition-transform duration-300 motion-reduce:transition-none ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}

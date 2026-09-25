@@ -220,7 +220,7 @@ export default function AdminChapterRow({
             e.preventDefault();
             save();
           }}
-          className="border-t border-border p-12 flex flex-col gap-4"
+          className="border-t border-border p-4 sm:p-8 md:p-12 flex flex-col gap-4"
         >
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="shrink-0 flex flex-col gap-2">

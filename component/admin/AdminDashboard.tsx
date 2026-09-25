@@ -171,7 +171,11 @@ export default function AdminDashboard({
           count beside the label, 2px ink bar under the active tab.
           aria-pressed toggles rather than role="tab", which would promise
           arrow-key navigation this doesn't implement. */}
-      <div className="flex gap-6 mb-8 border-b border-fg/10">
+      {/* Tab row: slightly smaller on phones so it fits a 375px screen, and
+          sideways-scrollable as a fallback on anything narrower (the border
+          and active bar live on the inner row, so the scroller can't clip them). */}
+      <div className="mb-8 overflow-x-auto [scrollbar-width:none]">
+      <div className="flex gap-4 sm:gap-6 border-b border-fg/10 w-max min-w-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -181,7 +185,7 @@ export default function AdminDashboard({
               aria-pressed={isActive}
               onClick={() => setActiveTab(tab.id)}
               className={
-                "relative pb-3 text-lg sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
+                "relative pb-3 whitespace-nowrap text-base sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
                 (isActive ? "text-fg" : "text-fg-muted hover:text-fg-secondary")
               }
             >
@@ -191,6 +195,7 @@ export default function AdminDashboard({
             </button>
           );
         })}
+      </div>
       </div>
 
       {activeTab === "manga" && (

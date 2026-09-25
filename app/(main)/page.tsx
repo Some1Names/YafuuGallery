@@ -56,7 +56,7 @@ function SeeAllLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="shrink-0 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+      className="shrink-0 inline-block py-1.5 -my-1.5 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
     >
       {label} <span aria-hidden="true">→</span>
     </Link>

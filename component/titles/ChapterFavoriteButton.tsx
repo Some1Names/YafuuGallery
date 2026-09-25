@@ -63,7 +63,9 @@ export default function ChapterFavoriteButton({
       aria-pressed={favorited}
       aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
       className={
-        "flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
+        // 32x32 hit area around the 16px heart; the negative margin keeps
+        // it taking the heart's own space in the row it sits in
+        "w-8 h-8 -m-2 flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
         (favorited ? "text-red-500" : "text-fg-secondary hover:text-fg")
       }
     >

@@ -823,14 +823,19 @@ export default function ChapterReaderClient({
           isFullscreen ? "border-transparent" : "border-[#050505]"
         } ${isFullscreen && !topBarVisible ? "-translate-y-full" : "translate-y-0"}`}
       >
-        <div className="mx-auto px-6 md:px-32 h-20 flex items-center justify-between gap-4">
-          <div className="flex gap-5 items-center min-w-0 flex-1">
+        {/* Phones get tighter padding/gaps, a single mode button and the
+            page counter moved to the bottom (below) — with everything at
+            desktop size, the bar ran past a 320-375px screen's edge once
+            the language picker or horizontal mode's counter was showing. */}
+        <div className="mx-auto px-4 sm:px-6 md:px-32 h-20 flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex gap-3 sm:gap-5 items-center min-w-0 flex-1">
+            {/* 40x40 hit area — the bare "‹" alone was 9px wide */}
             <Link
               href={`/manga/titles/${mangaId}`}
               aria-label="Back to manga title"
-              className="text-2xl text-[#ece6d8] hover:text-[#b6b0a2] transition-colors duration-200 shrink-0"
+              className="-ml-2.5 w-10 h-10 inline-flex items-center justify-center text-2xl text-[#ece6d8] hover:text-[#b6b0a2] transition-colors duration-200 shrink-0"
             >
-              <span>‹</span>
+              <span aria-hidden="true">‹</span>
             </Link>
             <div className="hidden sm:block text-lg uppercase text-[#ece6d8] tracking-wide shrink-0">
               {mangaTitle}
@@ -887,9 +892,9 @@ export default function ChapterReaderClient({
             <div className="hidden sm:block text-sm text-[#b6b0a2] truncate min-w-0">{chapterLabel}</div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {mode === "horizontal" && (
-              <span className="text-sm text-[#b6b0a2] px-2.5 py-1.5 border border-[#050505] rounded bg-[#0a0a0a]/60">
+              <span className="hidden sm:inline text-sm text-[#b6b0a2] px-2.5 py-1.5 border border-[#050505] rounded bg-[#0a0a0a]/60">
                 {pageCounterText}
               </span>
             )}
@@ -964,8 +969,18 @@ export default function ChapterReaderClient({
               </div>
             )}
 
-            {/* Mode toggle */}
-            <div className="flex border border-[#050505] rounded-md overflow-hidden">
+            {/* Mode toggle. Phones: one button that switches to the other
+                mode (showing that mode's icon), to save room in the bar. */}
+            <button
+              type="button"
+              onClick={() => switchMode(mode === "vertical" ? "horizontal" : "vertical")}
+              aria-label={mode === "vertical" ? "Switch to horizontal reading" : "Switch to vertical reading"}
+              title={mode === "vertical" ? "Horizontal" : "Vertical"}
+              className="sm:hidden inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
+            >
+              {mode === "vertical" ? <Columns2 className="w-4 h-4" /> : <Rows2 className="w-4 h-4" />}
+            </button>
+            <div className="hidden sm:flex border border-[#050505] rounded-md overflow-hidden">
               <button
                 type="button"
                 onClick={() => switchMode("vertical")}
@@ -998,6 +1013,19 @@ export default function ChapterReaderClient({
           </div>
         </div>
       </div>
+
+      {/* Phones, horizontal mode: the page counter as a pill at the bottom
+          (no room for it in the top bar), shown and hidden with the bar. */}
+      {mode === "horizontal" && (
+        <div
+          aria-hidden={!topBarVisible}
+          className={`sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#050505] text-xs text-[#b6b0a2] tabular-nums pointer-events-none transition-opacity duration-300 ${
+            topBarVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {pageCounterText}
+        </div>
+      )}
 
       {/* Reader */}
       <div
@@ -1172,7 +1200,7 @@ export default function ChapterReaderClient({
             )}
             <Link
               href={`/manga/titles/${mangaId}`}
-              className="text-sm text-[#b6b0a2] hover:text-[#ece6d8] underline underline-offset-2 transition-colors duration-200"
+              className="inline-block py-1.5 -my-1.5 text-sm text-[#b6b0a2] hover:text-[#ece6d8] underline underline-offset-2 transition-colors duration-200"
             >
               Back to {mangaTitle}
             </Link>

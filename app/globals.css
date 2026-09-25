@@ -195,3 +195,16 @@ input[type="search"]::-webkit-search-cancel-button {
     animation: none;
   }
 }
+
+/* Phones: form fields at 16px. iOS Safari zooms the whole page in when a
+   field with smaller text is focused (and doesn't zoom back out), which
+   every login/signup/search/comment box here triggered at text-sm (14px).
+   Deliberately unlayered, so it beats the text-sm utility on these
+   elements — but only below the sm breakpoint; desktop keeps text-sm. */
+@media (max-width: 639.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

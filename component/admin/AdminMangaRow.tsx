@@ -195,7 +195,7 @@ export default function AdminMangaRow({
           e.preventDefault();
           save();
         }}
-        className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4"
+        className="border border-border rounded-md p-4 sm:p-8 md:p-12 bg-surface flex flex-col gap-4"
       >
         <h3 className="text-lg text-fg font-(family-name:--font-display)">Edit Manga Title</h3>
 
@@ -394,7 +394,7 @@ export default function AdminMangaRow({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-border p-12 flex flex-col gap-4 bg-bg/40">
+        <div className="border-t border-border p-4 sm:p-8 md:p-12 flex flex-col gap-4 bg-bg/40">
           {activeSection === "arc" && (
             <div className="flex flex-col gap-4">
               <AdminArcCreateForm

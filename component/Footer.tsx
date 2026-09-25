@@ -31,7 +31,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+                    className="inline-block py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -48,7 +48,7 @@ export default function Footer() {
                   href="https://www.instagram.com/yafuuyufaa/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+                  className="inline-flex items-center gap-1 py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                 >
                   Instagram
                   <ArrowUpRight className="w-3.5 h-3.5" />

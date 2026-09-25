@@ -91,7 +91,7 @@ export default function MangaCreateForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4 mb-6">
+    <form onSubmit={handleSubmit} className="border border-border rounded-md p-4 sm:p-8 md:p-12 bg-surface flex flex-col gap-4 mb-6">
       <h3 className="text-lg text-fg font-(family-name:--font-display)">Add New Manga Title</h3>
 
       {/* One shared grid for the whole body instead of two separate grids

@@ -118,7 +118,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   return (
     <form
       onSubmit={handleSubmit}
-      className="border border-border rounded-md p-12 bg-surface flex flex-col gap-4"
+      className="border border-border rounded-md p-4 sm:p-8 md:p-12 bg-surface flex flex-col gap-4"
     >
       <div className="flex flex-col sm:flex-row gap-4">
         <AdminImageUploadButton

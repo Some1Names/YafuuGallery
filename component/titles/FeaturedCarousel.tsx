@@ -437,7 +437,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         </div>
 
         {count > 1 && (
-          <div className="flex items-center gap-2 mt-10">
+          <div className="flex items-center gap-1 mt-10">
             <button
               type="button"
               onClick={() => setIsUserPaused(!isPausedByChoice)}
@@ -450,6 +450,10 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 <Pause className="w-3.5 h-3.5 fill-current" />
               )}
             </button>
+            {/* Each dot is a 24px-tall button with the small visible dot
+                inside — the bare 6px dots were too small to hit on a phone.
+                px-1 on each keeps the visible spacing between dots at 8px. */}
+            <div className="flex items-center">
             {manga.map((m, i) => (
               <button
                 key={m.id}
@@ -457,10 +461,13 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 onClick={() => goTo(i)}
                 aria-label={`Show ${m.title}`}
                 aria-current={i === activeIndex}
-                className={`pointer-events-auto relative h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
-                  i === activeIndex ? "w-6 bg-white/30" : "w-1.5 bg-white/40 hover:bg-white/60"
-                }`}
+                className="group pointer-events-auto flex items-center h-6 px-1"
               >
+                <span
+                  className={`relative block h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
+                    i === activeIndex ? "w-6 bg-white/30" : "w-1.5 bg-white/40 group-hover:bg-white/60"
+                  }`}
+                >
                 {/* Fills over AUTO_ADVANCE_MS to show when the carousel
                     will switch next — and its animationend is what
                     actually advances it (see isPaused above). Keyed on
@@ -485,8 +492,10 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                     }}
                   />
                 )}
+                </span>
               </button>
             ))}
+            </div>
           </div>
         )}
       </div>

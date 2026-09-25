@@ -118,7 +118,7 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm text-fg-secondary">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-xs text-fg-secondary hover:text-fg">
+                <Link href="/forgot-password" className="inline-block py-1 -my-1 text-xs text-fg-secondary hover:text-fg">
                   Forgot password?
                 </Link>
               </div>
@@ -130,12 +130,12 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Enter your password"
-                  className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-10 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
+                  className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-14 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-secondary hover:text-fg"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-9 px-2 text-xs text-fg-secondary hover:text-fg"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
