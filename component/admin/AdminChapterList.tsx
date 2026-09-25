@@ -158,7 +158,10 @@ export default function AdminChapterList({
   const currentPage = Math.min(page, totalPages - 1);
   const pageStart = currentPage * PAGE_SIZE;
   const pageItems = isSearching ? filtered : ordered.slice(pageStart, pageStart + PAGE_SIZE);
-  const placeholderCount = isSearching ? 0 : PAGE_SIZE - pageItems.length;
+  // Padding rows keep the list the same height from page to page — only
+  // worth it when there IS more than one page; with a single page they
+  // were just blank space under the last row.
+  const placeholderCount = isSearching || totalCount <= PAGE_SIZE ? 0 : PAGE_SIZE - pageItems.length;
 
   async function commitOrder(nextOrdered: ChapterItem[]): Promise<boolean> {
     const res = await fetch("/api/admin/chapters/reorder", {
@@ -327,8 +330,11 @@ export default function AdminChapterList({
         // copies share the same pointer-down handler for this row; move/up
         // tracking happens on window (see the effect above).
         const gripHandle = !isBeingEdited && !isSearching && (
+          // px-2/-mx-2: a 32px-wide grab area (full row height) around the
+          // 16px icon, without moving anything — the icon alone was a thin
+          // strip to hit with a thumb
           <span
-            className="flex items-center cursor-grab active:cursor-grabbing touch-none select-none"
+            className="flex items-center self-stretch px-2 -mx-2 cursor-grab active:cursor-grabbing touch-none select-none"
             onPointerDown={(e) => handleGripPointerDown(e, index)}
           >
             <GripVertical className="w-4 h-4" />

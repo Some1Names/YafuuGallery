@@ -18,6 +18,8 @@ interface AdminImageUploadButtonProps {
   // to before it's compressed and uploaded — should match boxClassName's
   // own ratio. Omit to keep the source image's own aspect ratio.
   aspectRatio?: number;
+  // Classes for the outer wrapper (label + box) — e.g. its grid placement.
+  className?: string;
 }
 
 // Thin wrapper around the same /api/upload endpoint ProfileEditForm's
@@ -30,6 +32,7 @@ export default function AdminImageUploadButton({
   onChange,
   boxClassName = "w-full aspect-square",
   aspectRatio,
+  className,
 }: AdminImageUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -76,7 +79,7 @@ export default function AdminImageUploadButton({
   }
 
   return (
-    <div>
+    <div className={className}>
       <label className="block text-xs text-fg-secondary mb-1.5">
         {label}
       </label>

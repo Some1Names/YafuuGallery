@@ -211,6 +211,8 @@ export default function AdminMangaRow({
           />
           <AdminImageUploadButton
             label="Banner"
+            // phones: full width, above the cover (see MangaCreateForm)
+            className="order-first col-span-2 sm:order-none sm:col-span-1"
             value={editBannerImageUrl}
             onChange={setEditBannerImageUrl}
             boxClassName="w-full aspect-32/9"
@@ -263,6 +265,55 @@ export default function AdminMangaRow({
           </button>
         </div>
       </form>
+    );
+  }
+
+  // Divider + the Arc/Chapters tab switcher — it IS the expand control
+  // here (no separate generic chevron button): picking a tab opens the row
+  // to that section, and each tab carries its own chevron (rotated when
+  // it's the open, active one). Rendered in one of two places depending on
+  // screen width (see its two uses below); `layout` carries the
+  // show/hide and padding for each.
+  function tabBar(layout: string) {
+    return (
+      <div className={`${layout} py-3 border-t border-border items-center gap-1`}>
+        <button
+          type="button"
+          onClick={() => handleTabClick("arc")}
+          aria-expanded={isExpanded && activeSection === "arc"}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
+            isExpanded && activeSection === "arc"
+              ? "bg-surface-hover text-fg"
+              : "text-fg-secondary hover:text-fg"
+          }`}
+        >
+          Arc
+          <span className="text-xs text-fg-muted">{arcs.length}</span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+              isExpanded && activeSection === "arc" ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabClick("chapters")}
+          aria-expanded={isExpanded && activeSection === "chapters"}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
+            isExpanded && activeSection === "chapters"
+              ? "bg-surface-hover text-fg"
+              : "text-fg-secondary hover:text-fg"
+          }`}
+        >
+          Chapters
+          <span className="text-xs text-fg-muted">{chapters.length}</span>
+          <ChevronDown
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+              isExpanded && activeSection === "chapters" ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </div>
     );
   }
 
@@ -347,51 +398,16 @@ export default function AdminMangaRow({
             </div>
           </div>
 
-          {/* Divider + footer row — the Arc/Chapters tab switcher IS the
-              expand control here (no separate generic chevron button):
-              picking a tab opens the row to that section, and each tab
-              carries its own chevron (rotated when it's the open, active
-              one) instead of one shared toggle. */}
-          <div className="px-8 py-3 border-t border-border flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => handleTabClick("arc")}
-              aria-expanded={isExpanded && activeSection === "arc"}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
-                isExpanded && activeSection === "arc"
-                  ? "bg-surface-hover text-fg"
-                  : "text-fg-secondary hover:text-fg"
-              }`}
-            >
-              Arc
-              <span className="text-xs text-fg-muted">{arcs.length}</span>
-              <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                  isExpanded && activeSection === "arc" ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabClick("chapters")}
-              aria-expanded={isExpanded && activeSection === "chapters"}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm transition-colors duration-200 ${
-                isExpanded && activeSection === "chapters"
-                  ? "bg-surface-hover text-fg"
-                  : "text-fg-secondary hover:text-fg"
-              }`}
-            >
-              Chapters
-              <span className="text-xs text-fg-muted">{chapters.length}</span>
-              <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                  isExpanded && activeSection === "chapters" ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-          </div>
+          {/* sm and up: the Arc/Chapters switcher sits under the title,
+              beside the cover (see tabBar below) */}
+          {tabBar("hidden sm:flex px-8")}
         </div>
       </div>
+
+      {/* Phones: the switcher runs the full width of the row, under the
+          cover. Beside the cover it only had ~180px, and "Chapters" was
+          cut off at the row's edge (to "Chapter…" at 320px). */}
+      {tabBar("flex sm:hidden px-3")}
 
       {isExpanded && (
         <div className="border-t border-border p-4 sm:p-8 md:p-12 flex flex-col gap-4 bg-bg/40">

@@ -65,8 +65,12 @@ export default function AdminChapterPdfUploads({
             (opt) => opt.value === t.language || !usedLanguages.has(opt.value)
           );
 
+          // Phones: language + remove on one line, the upload button full
+          // width underneath — squeezed between them on one line, its "No
+          // PDF uploaded" / file-name label shrank to nothing. sm and up:
+          // all three in a row, as before.
           return (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className="flex flex-wrap sm:flex-nowrap items-center gap-2">
               <select
                 value={t.language}
                 onChange={(e) => updateEntry(i, { language: e.target.value as Language })}
@@ -80,7 +84,7 @@ export default function AdminChapterPdfUploads({
                 ))}
               </select>
 
-              <div className="flex-1 min-w-0">
+              <div className="order-last sm:order-none basis-full sm:basis-auto sm:flex-1 min-w-0">
                 <AdminPdfUploadButton
                   mangaId={mangaId}
                   value={t.url}
@@ -95,7 +99,7 @@ export default function AdminChapterPdfUploads({
                 type="button"
                 onClick={() => removeEntry(i)}
                 aria-label={`Remove ${LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label} PDF`}
-                className="shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger hover:border-danger/50 transition-colors duration-200"
+                className="ml-auto sm:ml-0 shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger hover:border-danger/50 transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
               </button>

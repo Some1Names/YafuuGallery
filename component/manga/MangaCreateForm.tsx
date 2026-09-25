@@ -116,6 +116,9 @@ export default function MangaCreateForm() {
         />
         <AdminImageUploadButton
           label="Banner"
+          // phones: full width, above the cover — sharing a 2-column row
+          // with the cover left the 32:9 banner a ~140x40px sliver
+          className="order-first col-span-2 sm:order-none sm:col-span-1"
           value={bannerImageUrl}
           onChange={setBannerImageUrl}
           boxClassName="w-full aspect-32/9"
