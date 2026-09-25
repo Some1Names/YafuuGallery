@@ -33,7 +33,7 @@ export default function MarkUpdatesReadButton() {
         type="button"
         onClick={markRead}
         disabled={isPending}
-        className="flex items-center gap-1.5 text-sm text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
+        className="shrink-0 whitespace-nowrap flex items-center gap-1.5 text-sm text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
       >
         <CheckCheck className="w-4 h-4" />
         {isPending ? "Marking…" : "Mark all as read"}

@@ -127,7 +127,7 @@ export default function AdminDashboard({
           sideways-scrollable as a fallback on anything narrower (the border
           and active bar live on the inner row, so the scroller can't clip them). */}
       <div className="mb-8 overflow-x-auto [scrollbar-width:none]">
-      <div className="flex gap-4 sm:gap-6 border-b border-fg/10 w-max min-w-full">
+      <div className="flex gap-3 min-[360px]:gap-4 sm:gap-6 border-b border-fg/10 w-max min-w-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -137,12 +137,12 @@ export default function AdminDashboard({
               aria-pressed={isActive}
               onClick={() => setActiveTab(tab.id)}
               className={
-                "relative pb-3 whitespace-nowrap text-base sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
+                "relative pb-3 whitespace-nowrap text-[15px] min-[360px]:text-base sm:text-xl transition-colors duration-200 font-(family-name:--font-display) " +
                 (isActive ? "text-fg" : "text-fg-muted hover:text-fg-secondary")
               }
             >
               {tab.label}
-              <span className="ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
+              <span className="ml-1.5 sm:ml-2 align-middle text-xs font-(family-name:--font-body) font-medium">{tab.count}</span>
               {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
             </button>
           );

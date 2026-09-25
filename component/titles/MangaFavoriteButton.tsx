@@ -66,8 +66,10 @@ export default function MangaFavoriteButton({
         disabled={isPending}
         aria-pressed={favorited}
         aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+        // fills the round backdrop it sits in (MangaCard), so the whole
+        // 32px circle is the tap target — not just the 16px heart
         className={
-          "flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
+          "w-full h-full rounded-full flex items-center justify-center transition-colors duration-200 disabled:opacity-50 " +
           (favorited ? "text-red-500" : "text-fg hover:text-red-500")
         }
       >

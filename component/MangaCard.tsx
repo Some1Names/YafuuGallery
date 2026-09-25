@@ -121,12 +121,16 @@ export default function MangaCard({
       </Link>
 
       {/* Favorite toggle — after the link in the DOM (and z-10) so it sits
-          above the cover's hover overlay and stays clickable. top-2 right-2
-          of this wrapper = the cover's top-right corner, since the cover is
-          the first thing in the card. */}
+          above the cover's hover overlay and stays clickable. Placed on a
+          box the same shape as the cover (top of the card, full width, 2:3),
+          in its BOTTOM-right corner: at the top-right it collided with the
+          "updated X ago" badge on narrow cards ("10 hours ago" ran 23px
+          under it at 320px). Bottom-left is the "N NEW" badge. */}
       {isFavorited !== undefined && (
-        <div className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm flex items-center justify-center">
-          <MangaFavoriteButton mangaId={id} initialFavorited={isFavorited} variant="icon" />
+        <div className="absolute inset-x-0 top-0 aspect-2/3 z-10 pointer-events-none">
+          <div className="pointer-events-auto absolute bottom-2 right-2 w-8 h-8 rounded-full bg-bg/60 backdrop-blur-sm">
+            <MangaFavoriteButton mangaId={id} initialFavorited={isFavorited} variant="icon" />
+          </div>
         </div>
       )}
     </div>
