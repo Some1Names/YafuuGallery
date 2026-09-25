@@ -35,7 +35,10 @@ export default function HistoryRow({ item }: { item: ReadingHistoryItem }) {
           <div className="text-xs sm:text-sm text-fg-secondary truncate">{item.mangaTitle}</div>
           <div className="mt-0.5 flex items-baseline gap-2 min-w-0">
             <span className="shrink-0 text-fg font-(family-name:--font-display)">{badge}</span>
-            <span className="truncate text-sm sm:text-base text-fg">{item.chapterName}</span>
+            {/* phones: up to two lines — on one it was cut to ~10 characters */}
+            <span className="min-w-0 line-clamp-2 sm:line-clamp-1 wrap-break-word text-sm sm:text-base text-fg">
+              {item.chapterName}
+            </span>
           </div>
           <div className="mt-0.5 text-xs text-fg-muted">
             <span className={item.completed ? "text-fg-secondary" : undefined}>{progressLabel(item)}</span>
@@ -45,7 +48,7 @@ export default function HistoryRow({ item }: { item: ReadingHistoryItem }) {
         </div>
       </Link>
 
-      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2">
         <RemoveFromHistoryButton chapterId={item.chapterId} label={`${item.mangaTitle} ${badge}`} />
       </div>
     </div>

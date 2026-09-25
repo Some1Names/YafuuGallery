@@ -63,7 +63,7 @@ export default async function FavoritesPage({
             chapter_is_ex: true,
             chapter_name: true,
             cover_image_url: true,
-            manga: { select: { id: true, manga_title: true } },
+            manga: { select: { id: true, manga_title: true, cover_image_url: true } },
           },
         },
       },
@@ -262,7 +262,8 @@ export default async function FavoritesPage({
                       displayNumber={favDisplayNumbers.get(group.mangaId)?.get(chapter.id) ?? 0}
                       chapterIsEx={chapter.chapter_is_ex}
                       chapterName={chapter.chapter_name}
-                      coverImageUrl={chapter.cover_image_url}
+                      // no chapter cover → the manga's, not an empty card
+                      coverImageUrl={chapter.cover_image_url ?? chapter.manga.cover_image_url}
                     />
                   ))}
                 </div>

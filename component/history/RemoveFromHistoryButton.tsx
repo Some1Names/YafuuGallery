@@ -29,7 +29,7 @@ export default function RemoveFromHistoryButton({ chapterId, label }: { chapterI
       disabled={isPending}
       aria-label={`Remove ${label} from history`}
       title="Remove from history"
-      className="w-8 h-8 flex items-center justify-center rounded-full text-fg-muted hover:text-fg hover:bg-surface-hover disabled:opacity-50 transition-colors duration-200"
+      className="w-10 h-10 flex items-center justify-center rounded-full text-fg-muted hover:text-fg hover:bg-surface-hover disabled:opacity-50 transition-colors duration-200"
     >
       <X className="w-4 h-4" />
     </button>

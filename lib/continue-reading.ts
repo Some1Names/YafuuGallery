@@ -37,7 +37,7 @@ export async function getContinueReading(userId: string, limit: number): Promise
       id: true,
       chapter_id: true,
       completed: true,
-      chapter: { select: { manga: { select: { id: true, manga_title: true } } } },
+      chapter: { select: { manga: { select: { id: true, manga_title: true, cover_image_url: true } } } },
     },
   });
 
@@ -78,7 +78,8 @@ export async function getContinueReading(userId: string, limit: number): Promise
       displayNumber: getChapterDisplayNumbers(chapters).get(target.id) ?? 0,
       chapterIsEx: target.chapter_is_ex,
       chapterName: target.chapter_name,
-      coverImageUrl: target.cover_image_url,
+      // chapters without their own cover show the manga's, not an empty card
+      coverImageUrl: target.cover_image_url ?? p.chapter.manga.cover_image_url,
       mangaTitle: p.chapter.manga.manga_title,
       isNext: p.completed,
     });
