@@ -9,7 +9,7 @@ import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import { formatBytes } from "@/lib/format-bytes";
-import { formatPublishedDate } from "@/lib/dates";
+import { MIN_PUBLISHED_DATE, formatPublishedDate, todayLocalISODate } from "@/lib/dates";
 
 interface AdminChapterRowProps {
   id: string;
@@ -76,6 +76,9 @@ export default function AdminChapterRow({
   const [editDate, setEditDate] = useState(publishedDate.toISOString().slice(0, 10));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Same range the server enforces (parsePublishedDate). A chapter still
+  // carrying an old blank-date 1969-12-31 can't be saved until it's fixed.
+  const [maxDate] = useState(todayLocalISODate);
 
   async function save() {
     setIsSaving(true);
@@ -304,6 +307,8 @@ export default function AdminChapterRow({
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
                     required
+                    min={MIN_PUBLISHED_DATE}
+                    max={maxDate}
                     className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
                   />
                 </div>

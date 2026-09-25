@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminChapterPdfUploads";
-import { todayLocalISODate } from "@/lib/dates";
+import { MIN_PUBLISHED_DATE, todayLocalISODate } from "@/lib/dates";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -34,6 +34,8 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
   const [chapterIsEx, setChapterIsEx] = useState(false);
   const [chapterName, setChapterName] = useState("");
   const [publishedDate, setPublishedDate] = useState(todayLocalISODate);
+  // latest pickable date — the server allows the same range (parsePublishedDate)
+  const [maxDate] = useState(todayLocalISODate);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -183,6 +185,8 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                 value={publishedDate}
                 onChange={(e) => setPublishedDate(e.target.value)}
                 required
+                min={MIN_PUBLISHED_DATE}
+                max={maxDate}
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
               />
             </div>

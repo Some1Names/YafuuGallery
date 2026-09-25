@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { PUBLISHED_DATE_ERROR, parsePublishedDate } from "@/lib/dates";
 import { canManageManga } from "@/lib/manga-access";
 import { isAllowedUrlWrite } from "@/lib/storage";
 
@@ -73,6 +74,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // A real calendar date in a sane range — new Date() alone let a blank
+  // or zero value through as 1969-12-31 / 1970-01-01 (see lib/dates.ts).
+  const publishedDate = parsePublishedDate(published_date);
+  if (!publishedDate) {
+    return NextResponse.json({ error: PUBLISHED_DATE_ERROR }, { status: 400 });
+  }
+
   const number = Number(chapter_number);
   if (!Number.isInteger(number) || number < 0) {
     return NextResponse.json(
@@ -102,7 +110,7 @@ export async function POST(request: NextRequest) {
         chapter_number: number,
         chapter_is_ex: isEx,
         chapter_name,
-        published_date: new Date(published_date),
+        published_date: publishedDate,
         cover_image_url: cover_image_url || null,
       },
     });

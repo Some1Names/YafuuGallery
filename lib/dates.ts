@@ -24,3 +24,27 @@ export function todayLocalISODate(): string {
   const day = String(now.getDate()).padStart(2, "0");
   return `${now.getFullYear()}-${month}-${day}`;
 }
+
+// Oldest publish date a chapter can have. Well before this site existed
+// (older series can keep their real dates), but late enough to reject the
+// 1969-12-31 / 1970-01-01 a blank or zero date turns into.
+export const MIN_PUBLISHED_DATE = "1990-01-01";
+
+// Server-side check for a chapter's published_date from the admin forms.
+// Returns the date to store (UTC midnight — see formatPublishedDate), or
+// null when it's missing, not a real YYYY-MM-DD calendar date (2026-02-30),
+// before MIN_PUBLISHED_DATE, or in the future. "Future" allows one extra
+// day: the form fills in the author's LOCAL today, which east of UTC is
+// already tomorrow's UTC date for part of the day.
+export function parsePublishedDate(input: unknown, now: Date = new Date()): Date | null {
+  if (typeof input !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(input)) return null;
+  const date = new Date(`${input}T00:00:00.000Z`);
+  // Date rolls impossible days over (Feb 30 -> Mar 2), so it has to
+  // round-trip back to the same string to be a real calendar date.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== input) return null;
+  const latest = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  if (input < MIN_PUBLISHED_DATE || date.getTime() > latest) return null;
+  return date;
+}
+
+export const PUBLISHED_DATE_ERROR = `Publish date must be a real date between ${MIN_PUBLISHED_DATE} and today.`;
