@@ -53,7 +53,8 @@ export default function SortDropdown({ filters }: { filters: SearchFilters }) {
         <ArrowUpDown className="w-3.5 h-3.5" aria-hidden="true" />
         <span>
           <span className="sr-only">Sort by: </span>
-          {current.label}
+          <span className="sm:hidden">{current.short}</span>
+          <span className="hidden sm:inline">{current.label}</span>
         </span>
         <ChevronDown
           className={"w-3.5 h-3.5 transition-transform duration-200 " + (isOpen ? "rotate-180" : "")}
@@ -65,7 +66,7 @@ export default function SortDropdown({ filters }: { filters: SearchFilters }) {
         // Left-aligned on phones, where the button wraps onto its own line
         // at the left edge (right-aligned, the menu would run off-screen);
         // right-aligned from sm up, where the button sits at the right.
-        <ul className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-20 w-48 py-1.5 bg-surface border border-border rounded-md shadow-lg">
+        <ul className="absolute right-0 top-full mt-2 z-20 w-48 py-1.5 bg-surface border border-border rounded-md shadow-lg">
           {SORTS.map((s) => {
             const isOn = s.value === filters.sort;
             return (

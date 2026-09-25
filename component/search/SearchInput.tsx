@@ -52,6 +52,13 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
     if (debounceRef.current) clearTimeout(debounceRef.current);
   }, []);
 
+  // Start in the box on desktop, but not on phones/tablets: there, focus
+  // pops the on-screen keyboard over half the page — even for people who
+  // arrived from a genre tag to browse, not type.
+  useEffect(() => {
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) inputRef.current?.focus();
+  }, []);
+
   function navigate(next: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setLastSent(next.trim());
@@ -80,7 +87,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
   }
 
   return (
-    <form action="/search" method="GET" onSubmit={handleSubmit} role="search" aria-busy={isPending} className="mb-10">
+    <form action="/search" method="GET" onSubmit={handleSubmit} role="search" aria-busy={isPending} className="mb-6 sm:mb-10">
       {/* Without JS the form submits natively — carry the filters along. */}
       {filters.genre && <input type="hidden" name="genre" value={filters.genre} />}
       {filters.status && <input type="hidden" name="status" value={filters.status} />}
@@ -97,8 +104,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
           name="q"
           value={value}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder="Search by title, author, or chapter…"
-          autoFocus
+          placeholder="Title, author or chapter"
           autoComplete="off"
           className="w-full bg-surface border border-border rounded-md pl-10 pr-10 py-2.5 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-fg-secondary transition-colors duration-200"
         />
@@ -109,7 +115,8 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
             type="button"
             onClick={handleClear}
             aria-label="Clear search"
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors duration-200"
+            // p-3: a 40px tap area; right-0.5 keeps the icon where it was
+            className="absolute right-0.5 top-1/2 -translate-y-1/2 p-3 text-fg-muted hover:text-fg transition-colors duration-200"
           >
             <X className="w-4 h-4" />
           </button>

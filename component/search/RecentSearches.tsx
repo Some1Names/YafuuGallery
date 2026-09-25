@@ -27,13 +27,14 @@ export default function RecentSearches({ query, filters }: RecentSearchesProps) 
   if (query !== "" || !history || history.length === 0) return null;
 
   return (
-    <div className="mb-10 -mt-4">
+    <div className="mb-6 -mt-2 sm:mb-10 sm:-mt-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs uppercase tracking-widest text-fg-muted">Recent Searches</p>
         <button
           type="button"
           onClick={clearRecentSearches}
-          className="text-xs text-fg-muted hover:text-fg transition-colors duration-200"
+          // padding + negative margin: a 40px-tall tap area in the same space
+          className="py-3 -my-3 px-2 -mx-2 text-xs text-fg-muted hover:text-fg transition-colors duration-200"
         >
           Clear
         </button>

@@ -4,11 +4,13 @@ import { isGenreSlug, isMangaStatus, type GenreSlug, type MangaStatusValue } fro
 // (not client state) like the query itself, so every filtered view is a
 // plain shareable link and the page stays fully server-rendered.
 
+// `short` is the sort button's label on phones, where it shares a line
+// with the results heading
 export const SORTS = [
-  { value: "updated", label: "Recently updated" },
-  { value: "new", label: "Newest" },
-  { value: "views", label: "Most viewed" },
-  { value: "title", label: "Title A–Z" },
+  { value: "updated", label: "Recently updated", short: "Updated" },
+  { value: "new", label: "Newest", short: "Newest" },
+  { value: "views", label: "Most viewed", short: "Popular" },
+  { value: "title", label: "Title A–Z", short: "A–Z" },
 ] as const;
 
 export type SortValue = (typeof SORTS)[number]["value"];

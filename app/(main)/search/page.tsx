@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +11,7 @@ import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-numb
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 import SearchFilterBar from "@/component/search/SearchFilterBar";
+import SortDropdown from "@/component/search/SortDropdown";
 import { genreLabel } from "@/lib/genres";
 import { parseSearchFilters, searchHref, type SortValue } from "@/lib/search-filters";
 
@@ -23,6 +25,19 @@ const ORDER_BY: Record<SortValue, Prisma.MangaOrderByWithRelationInput[]> = {
   views: [{ view_count: "desc" }, { updated_at: "desc" }],
   title: [{ manga_title: "asc" }, { created_at: "asc" }],
 };
+
+// The tab/history title says what's on the page: the search term, else
+// the genre being browsed, else just "Search".
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const { q, genre } = parseSearchFilters(await searchParams);
+  if (q) return { title: `“${q}” – Search` };
+  if (genre) return { title: `${genreLabel(genre)} manga` };
+  return { title: "Search" };
+}
 
 export default async function SearchPage({
   searchParams,
@@ -89,6 +104,14 @@ export default async function SearchPage({
 
   const needle = query.toLowerCase();
 
+  // Phones: the sort button sits at the end of the results heading line
+  // (the filter bar has no room for it beside the status pill there).
+  const phoneSort = (
+    <div className="sm:hidden shrink-0">
+      <SortDropdown filters={filters} />
+    </div>
+  );
+
   const grid = (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
       {mangaList.map((manga) => {
@@ -124,7 +147,7 @@ export default async function SearchPage({
             {firstMatch && (
               <Link
                 href={`/viewer/${firstMatch.id}`}
-                className="mt-1.5 text-sm text-fg-secondary hover:text-fg truncate transition-colors duration-200"
+                className="mt-1.5 text-sm text-fg-secondary hover:text-fg line-clamp-2 wrap-break-word transition-colors duration-200"
               >
                 Matches{" "}
                 <span className="text-fg">
@@ -149,7 +172,7 @@ export default async function SearchPage({
       </div>
 
       <div className="relative z-10 max-w-350 mx-auto">
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">
             Search
           </h1>
@@ -170,10 +193,13 @@ export default async function SearchPage({
             </p>
           ) : (
             <>
-              <p className="text-sm text-fg-secondary mb-5">
-                {totalCount} {totalCount === 1 ? "result" : "results"} for{" "}
-                <span className="text-fg">&ldquo;{query}&rdquo;</span>
-              </p>
+              <div className="flex items-center justify-between gap-3 mb-5">
+                <p className="min-w-0 text-sm text-fg-secondary wrap-anywhere">
+                  {totalCount} {totalCount === 1 ? "result" : "results"} for{" "}
+                  <span className="text-fg">&ldquo;{query}&rdquo;</span>
+                </p>
+                {phoneSort}
+              </div>
               <SearchResultsRecorder query={query}>{grid}</SearchResultsRecorder>
             </>
           )
@@ -183,12 +209,15 @@ export default async function SearchPage({
           </p>
         ) : (
           <>
-            <h2 className="text-xl text-fg mb-5 font-(family-name:--font-display)">
-              {genre ? genreLabel(genre) : "All manga"}
-              <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
-                {totalCount}
-              </span>
-            </h2>
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <h2 className="min-w-0 text-xl text-fg font-(family-name:--font-display)">
+                {genre ? genreLabel(genre) : "All manga"}
+                <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
+                  {totalCount}
+                </span>
+              </h2>
+              {phoneSort}
+            </div>
             {grid}
           </>
         )}

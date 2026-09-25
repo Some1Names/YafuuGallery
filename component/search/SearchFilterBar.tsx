@@ -33,7 +33,7 @@ function segmentClass(isOn: boolean) {
 // it is instead of jumping to the top of the page on every tap.
 export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
   return (
-    <div className="mb-8 flex flex-col gap-4">
+    <div className="mb-6 sm:mb-8 flex flex-col gap-4">
       {/* One scrolling row on phones (bleeds to the screen edges so the
           chips visibly continue), wrapping onto more lines from sm up. */}
       <ActiveChipScroller
@@ -71,7 +71,8 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
       </ActiveChipScroller>
 
       {/* Status as a segmented pill on the left, sort as a dropdown on the
-          right — side by side, wrapping onto two lines on narrow phones. */}
+          right. Phones: the two don't fit on one line, so sort moves up
+          beside the results heading instead (search/page.tsx). */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <nav
           aria-label="Status"
@@ -93,7 +94,9 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
           })}
         </nav>
 
-        <SortDropdown filters={filters} />
+        <div className="hidden sm:block">
+          <SortDropdown filters={filters} />
+        </div>
       </div>
     </div>
   );
