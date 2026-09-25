@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import MangaFavoriteButton from "@/component/titles/MangaFavoriteButton";
+import MangaSynopsis from "@/component/titles/MangaSynopsis";
 import { genreLabel, knownGenres, type MangaStatusValue } from "@/lib/genres";
 
 interface MangaSidebarProps {
@@ -33,15 +34,18 @@ export default function MangaSidebar({
   return (
     <div>
       <h1 className="text-3xl sm:text-4xl leading-tight wrap-anywhere font-(family-name:--font-display)">{title}</h1>
-      {/* opens the author's page — everything else they've published */}
+      {/* opens the author's page — everything else they've published.
+          py-2/-my-2: a 40px-tall tap area in the same space. */}
       <Link
         href={`/manga/authors/${authorId}`}
-        className="inline-block text-fg-secondary text-base sm:text-lg mt-2 underline-offset-4 hover:text-fg hover:underline transition-colors duration-200"
+        className="inline-block py-2 -my-2 text-fg-secondary text-base sm:text-lg mt-2 underline-offset-4 hover:text-fg hover:underline transition-colors duration-200"
       >
         {author}
       </Link>
 
-      {/* Status, then genres — each genre opens /search filtered to it. */}
+      {/* Status, then genres — each genre opens /search filtered to it.
+          The ::before stretches each genre's tap area to ~40px tall
+          without making the pill itself any bigger. */}
       <ul className="flex flex-wrap items-center gap-2 mt-4" aria-label="Status and genres">
         <li
           className={
@@ -55,7 +59,7 @@ export default function MangaSidebar({
           <li key={slug}>
             <Link
               href={`/search?genre=${slug}`}
-              className="block text-xs px-2.5 py-1 rounded-full border border-border text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
+              className="relative block text-xs px-2.5 py-1 rounded-full before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] border border-border text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
               {genreLabel(slug)}
             </Link>
@@ -83,7 +87,9 @@ export default function MangaSidebar({
         <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />
       </div>
 
-      <p className="mt-8 pt-6 border-t border-border text-base leading-relaxed text-fg/90">{synopsis}</p>
+      <div className="mt-8 pt-6 border-t border-border">
+        <MangaSynopsis text={synopsis} />
+      </div>
     </div>
   );
 }

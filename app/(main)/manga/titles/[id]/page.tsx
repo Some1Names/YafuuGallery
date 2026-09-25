@@ -153,8 +153,8 @@ export default async function MangaDetailPage({
     // total_chapters/total_view-style: favorite/comment counts aren't
     // stored on Chapter, so map Prisma's _count into the flat shape
     // ChapterItem expects (same convention as the admin dashboard).
-    // No chapter cover: rows use the manga's wide banner (their cover box is
-    // landscape), else its cover — not an empty placeholder.
+    // No chapter cover / arc image: rows use the manga's wide banner (their
+    // picture box is landscape), else its cover — not an empty placeholder.
     const fallbackCoverUrl = manga.banner_image_url ?? manga.cover_image_url;
 
     function toChapterItem(c: {
@@ -175,7 +175,12 @@ export default async function MangaDetailPage({
         };
     }
 
-    const arcs = manga.arcs.map((arc) => ({ ...arc, chapters: arc.chapters.map(toChapterItem) }));
+    const arcs = manga.arcs.map((arc) => ({
+        ...arc,
+        // same fallback as chapter rows — the arc rows share their layout
+        arc_image_url: arc.arc_image_url ?? fallbackCoverUrl,
+        chapters: arc.chapters.map(toChapterItem),
+    }));
     const looseChapters = manga.chapters.map(toChapterItem);
 
     // Sidebar's primary action: resume the last chapter this reader opened

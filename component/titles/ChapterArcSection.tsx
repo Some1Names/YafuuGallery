@@ -91,10 +91,14 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
           <button
             type="button"
             onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
-            className="flex items-center gap-1.5 pb-3 text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
+            aria-label={sortOrder === "asc" ? "Sorted oldest first" : "Sorted newest first"}
+            className="flex items-center gap-1.5 pb-3 text-xs text-fg-secondary hover:text-fg whitespace-nowrap transition-colors duration-200"
           >
             <ArrowDownUp className="w-3.5 h-3.5" />
-            {sortOrder === "asc" ? "Oldest first" : "Newest first"}
+            {/* just "Oldest"/"Newest" on phones — the full label wrapped
+                onto two lines beside the tabs at 320px */}
+            {sortOrder === "asc" ? "Oldest" : "Newest"}
+            <span className="hidden sm:inline">first</span>
           </button>
         )}
       </div>
@@ -111,7 +115,11 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
       )}
 
       {activeView === "chapters" ? (
-        <ChapterList chapters={chapters} favoritedChapterIds={favoritedChapterIds} displayNumbers={displayNumbers} />
+        chapters.length === 0 && filteredArc ? (
+          <p className="text-sm text-fg-secondary">No chapters in this arc yet.</p>
+        ) : (
+          <ChapterList chapters={chapters} favoritedChapterIds={favoritedChapterIds} displayNumbers={displayNumbers} />
+        )
       ) : (
         <ArcList arcs={arcs} onSelectArc={selectArc} />
       )}
