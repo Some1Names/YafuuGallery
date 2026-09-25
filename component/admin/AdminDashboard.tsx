@@ -8,6 +8,7 @@ import AdminUserDeleteButton from "./AdminUserDeleteButton";
 import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
 import { formatUsername } from "@/lib/format-username";
+import LocalDate from "@/component/LocalDate";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 
 interface MangaItem {
@@ -68,6 +69,8 @@ interface CommentItem {
   userName: string;
   userTag: string | null;
   chapterLabel: string;
+  chapterId: string;
+  replyToName: string | null;
   createdAt: Date;
   hidden: boolean;
   reportCount: number;
@@ -115,7 +118,8 @@ export default function AdminDashboard({
     const q = userSearch.trim().toLowerCase();
     if (!q) return users;
     return users.filter(
-      (u) => (u.name ?? "").toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      // formatUsername gives "name#tag", so "yafuu", "yafuu#3021" and "#3021" all match
+      (u) => formatUsername(u.name, u.tag).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     );
   }, [users, userSearch]);
 
@@ -125,7 +129,7 @@ export default function AdminDashboard({
     if (!q) return pool;
     return pool.filter(
       (c) =>
-        c.userName.toLowerCase().includes(q) ||
+        formatUsername(c.userName, c.userTag).toLowerCase().includes(q) ||
         c.chapterLabel.toLowerCase().includes(q) ||
         c.body.toLowerCase().includes(q)
     );
@@ -309,11 +313,7 @@ export default function AdminDashboard({
                           </td>
                           <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">{u.email}</td>
                           <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">
-                            {u.created_at.toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                            <LocalDate date={u.created_at} />
                           </td>
                           <td className="px-4 py-2">
                             {/* No dropdown on your own row — changing your
@@ -363,9 +363,11 @@ export default function AdminDashboard({
                                     userName={c.userName}
                                     userTag={c.userTag}
                                     chapterLabel={c.chapterLabel}
+                                    chapterId={c.chapterId}
+                                    replyToName={c.replyToName}
                                     createdAt={c.createdAt}
                                     initialHidden={c.hidden}
-                  reportCount={c.reportCount}
+                                    reportCount={c.reportCount}
                                   />
                                 ))}
                               </div>
@@ -422,6 +424,8 @@ export default function AdminDashboard({
                   userName={c.userName}
                   userTag={c.userTag}
                   chapterLabel={c.chapterLabel}
+                  chapterId={c.chapterId}
+                  replyToName={c.replyToName}
                   createdAt={c.createdAt}
                   initialHidden={c.hidden}
                   reportCount={c.reportCount}

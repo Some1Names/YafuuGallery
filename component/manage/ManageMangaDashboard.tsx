@@ -5,6 +5,7 @@ import MangaCreateForm from "@/component/manga/MangaCreateForm";
 import AdminMangaRow from "@/component/admin/AdminMangaRow";
 import AdminSearchInput from "@/component/admin/AdminSearchInput";
 import AdminCommentRow from "@/component/admin/AdminCommentRow";
+import { formatUsername } from "@/lib/format-username";
 import type { ChapterTranslationDraft } from "@/component/admin/AdminChapterPdfUploads";
 
 interface ChapterItem {
@@ -51,6 +52,8 @@ interface CommentItem {
   userName: string;
   userTag: string | null;
   chapterLabel: string;
+  chapterId: string;
+  replyToName: string | null;
   createdAt: Date;
   hidden: boolean;
   reportCount: number;
@@ -98,7 +101,7 @@ export default function ManageMangaDashboard({
     if (!q) return pool;
     return pool.filter(
       (c) =>
-        c.userName.toLowerCase().includes(q) ||
+        formatUsername(c.userName, c.userTag).toLowerCase().includes(q) ||
         c.chapterLabel.toLowerCase().includes(q) ||
         c.body.toLowerCase().includes(q)
     );
@@ -217,6 +220,8 @@ export default function ManageMangaDashboard({
                   userName={c.userName}
                   userTag={c.userTag}
                   chapterLabel={c.chapterLabel}
+                  chapterId={c.chapterId}
+                  replyToName={c.replyToName}
                   createdAt={c.createdAt}
                   initialHidden={c.hidden}
                   reportCount={c.reportCount}

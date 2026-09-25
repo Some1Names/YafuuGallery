@@ -40,7 +40,36 @@ export async function DELETE(
     return NextResponse.json({ error: "Can't delete the last admin." }, { status: 400 });
   }
 
-  await prisma.user.delete({ where: { id } });
+  // Deleting the user deletes their comments, and — through the reply
+  // cascade — other people's replies to those comments. Chapter.comment_count
+  // counts VISIBLE comments and isn't recomputed automatically, so take every
+  // visible one that's about to disappear off its chapter in the same
+  // transaction (this used to leave the counts too high, like the drift the
+  // recount script repaired). Replies are grouped separately and exclude the
+  // user's own, so nothing is subtracted twice.
+  const [ownVisible, repliesToThem] = await Promise.all([
+    prisma.comment.groupBy({
+      by: ["chapter_id"],
+      where: { user_id: id, hidden_at: null },
+      _count: { _all: true },
+    }),
+    prisma.comment.groupBy({
+      by: ["chapter_id"],
+      where: { parent: { user_id: id }, user_id: { not: id }, hidden_at: null },
+      _count: { _all: true },
+    }),
+  ]);
+  const removedPerChapter = new Map<string, number>();
+  for (const row of [...ownVisible, ...repliesToThem]) {
+    removedPerChapter.set(row.chapter_id, (removedPerChapter.get(row.chapter_id) ?? 0) + row._count._all);
+  }
+
+  await prisma.$transaction([
+    ...[...removedPerChapter].map(([chapterId, removed]) =>
+      prisma.chapter.update({ where: { id: chapterId }, data: { comment_count: { decrement: removed } } })
+    ),
+    prisma.user.delete({ where: { id } }),
+  ]);
 
   return NextResponse.json({ success: true });
 }

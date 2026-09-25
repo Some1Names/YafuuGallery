@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { formatUsername } from "@/lib/format-username";
 import MangaBackground from "@/component/titles/MangaBackground";
 import ManageMangaDashboard from "@/component/manage/ManageMangaDashboard";
 import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
@@ -72,6 +73,8 @@ export default async function ManageMangaPage() {
         _count: { select: { reports: true } },
         created_at: true,
         user: { select: { id: true, name: true, tag: true } },
+        // replies: who they answer, shown as "↳ reply to name#tag"
+        parent: { select: { user: { select: { name: true, tag: true } } } },
         chapter: {
           select: { id: true, chapter_is_ex: true, manga_id: true, manga: { select: { manga_title: true } } },
         },
@@ -95,6 +98,8 @@ export default async function ManageMangaPage() {
       c.chapter.chapter_is_ex,
       displayNumbersByManga.get(c.chapter.manga_id)?.get(c.chapter.id)
     )}`,
+    chapterId: c.chapter.id,
+    replyToName: c.parent ? formatUsername(c.parent.user.name, c.parent.user.tag) : null,
     createdAt: c.created_at,
     hidden: c.hidden_at !== null,
     reportCount: c._count.reports,

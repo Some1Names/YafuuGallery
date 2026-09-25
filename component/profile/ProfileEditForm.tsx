@@ -6,6 +6,7 @@ import Link from "next/link";
 import NextImage from "next/image";
 import { Check, X, Pencil, ArrowUpRight, Camera } from "lucide-react";
 import { processImageForUpload } from "@/lib/image-processing";
+import LocalDate from "@/component/LocalDate";
 import { displayNameSchema, MAX_DISPLAY_NAME_LENGTH } from "@/lib/signup-schema";
 
 interface ProfileEditFormProps {
@@ -304,7 +305,7 @@ export default function ProfileEditForm({
             )}
             <p className="text-sm text-fg-secondary">{email}</p>
             <p className="text-xs text-fg-muted mt-1">
-              Member since {createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              Member since <LocalDate date={createdAt} options={{ month: "long", year: "numeric" }} />
             </p>
           </div>
 

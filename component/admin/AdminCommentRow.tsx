@@ -2,6 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import LocalDate from "@/component/LocalDate";
 import { formatUsername } from "@/lib/format-username";
 
 interface AdminCommentRowProps {
@@ -10,6 +13,10 @@ interface AdminCommentRowProps {
   userName: string;
   userTag: string | null;
   chapterLabel: string;
+  // the chapter it was posted on — the label links there
+  chapterId: string;
+  // set for replies: who the reply answers (display name incl. tag)
+  replyToName?: string | null;
   createdAt: Date;
   initialHidden: boolean;
   // How many readers have reported this comment (0 = none).
@@ -25,6 +32,8 @@ export default function AdminCommentRow({
   userName,
   userTag,
   chapterLabel,
+  chapterId,
+  replyToName = null,
   createdAt,
   initialHidden,
   reportCount,
@@ -62,16 +71,31 @@ export default function AdminCommentRow({
     if (res.ok) router.refresh();
   }
 
+  // Phones: the action buttons go under the comment (side by side they
+  // left the text ~70px wide). From sm up they sit on the right as before.
   return (
     <div
-      className={`border border-border rounded-md p-3 flex items-start justify-between gap-4 ${
+      className={`border border-border rounded-md p-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 ${
         hidden ? "opacity-50" : ""
       }`}
     >
       <div className="min-w-0">
         <div className="text-xs text-fg-secondary mb-1">
-          {formatUsername(userName, userTag)} · {chapterLabel} ·{" "}
-          {createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          {formatUsername(userName, userTag)}
+          {replyToName && <span className="text-fg-muted"> ↳ reply to {replyToName}</span>} ·{" "}
+          {/* opens the chapter in a new tab so the moderation list (and its
+              search/filter) is still here to come back to */}
+          <Link
+            href={`/viewer/${chapterId}`}
+            target="_blank"
+            rel="noopener"
+            title="Open this chapter in a new tab"
+            className="inline-flex items-center gap-0.5 text-fg-secondary underline underline-offset-2 decoration-fg/25 hover:text-fg hover:decoration-fg/60 transition-colors duration-200"
+          >
+            {chapterLabel}
+            <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
+          </Link>{" "}
+          · <LocalDate date={createdAt} />
           {hidden && <span className="text-danger"> · hidden</span>}
           {reportCount > 0 && (
             <span className="text-danger">
@@ -80,9 +104,11 @@ export default function AdminCommentRow({
             </span>
           )}
         </div>
-        <p className="text-sm text-fg">{body}</p>
+        {/* keep the author's line breaks; long links/strings wrap instead of
+            running out of the row */}
+        <p className="text-sm text-fg whitespace-pre-wrap wrap-anywhere">{body}</p>
       </div>
-      <div className="flex gap-2 shrink-0">
+      <div className="flex flex-wrap gap-2 sm:shrink-0">
         {reportCount > 0 && (
           <button
             type="button"

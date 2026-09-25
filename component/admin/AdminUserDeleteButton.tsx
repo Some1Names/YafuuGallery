@@ -6,7 +6,14 @@ export default function AdminUserDeleteButton({ userId, userLabel }: { userId: s
   const router = useRouter();
 
   async function remove() {
-    if (!confirm(`Delete ${userLabel}? This can't be undone.`)) return;
+    if (
+      !confirm(
+        `Delete ${userLabel}?
+
+Their comments (and any replies to them), favorites and reading history will be deleted too. This can't be undone.`
+      )
+    )
+      return;
     const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
     if (res.ok) {
       router.refresh();
