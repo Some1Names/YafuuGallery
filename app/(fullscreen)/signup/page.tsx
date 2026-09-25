@@ -185,6 +185,18 @@ export default function SignUpPage() {
               {isSubmitting ? "Creating account…" : "Sign Up"}
             </button>
 
+            <p className="text-xs text-fg-muted text-center">
+              By signing up, you agree to our{" "}
+              <Link href="/terms" className="text-fg-secondary underline underline-offset-2 hover:text-fg whitespace-nowrap">
+                Terms of use
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-fg-secondary underline underline-offset-2 hover:text-fg whitespace-nowrap">
+                Privacy policy
+              </Link>
+              .
+            </p>
+
             <p className="text-sm text-fg-secondary text-center">
               Already have an account?{" "}
               <Link href="/login" className="text-fg font-medium hover:underline">

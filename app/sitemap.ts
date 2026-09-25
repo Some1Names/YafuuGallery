@@ -30,6 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${SITE_URL}/`, lastModified: latestUpdate, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/search`, lastModified: latestUpdate, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
     ...manga.map((m) => ({
       url: `${SITE_URL}/manga/titles/${m.id}`,
       lastModified: m.updated_at,

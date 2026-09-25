@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { CONTACT_URL } from "@/component/LegalPage";
 
 const browseLinks = [
   { href: "/", label: "Home" },
   { href: "/favorites", label: "Favorites" },
   { href: "/search", label: "Search" },
+];
+
+const aboutLinks = [
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/terms", label: "Terms of use" },
 ];
 
 export default function Footer() {
@@ -20,7 +26,7 @@ export default function Footer() {
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true" />
           </div>
-          <p className="text-sm text-fg-secondary mt-3 max-w-60">Scanlations, read your way.</p>
+          <p className="text-sm text-fg-secondary mt-3 max-w-60">Original manga and translations, read your way.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-8 sm:contents">
@@ -41,16 +47,28 @@ export default function Footer() {
           </div>
 
           <div>
-            <span className="text-xs text-fg-muted">Follow</span>
+            <span className="text-xs text-fg-muted">About</span>
             <ul className="mt-3 flex flex-col gap-2.5">
+              {aboutLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="inline-block py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              {/* Instagram DMs are the contact channel — questions, account
+                  deletion, takedown requests (see /privacy, /terms) */}
               <li>
                 <a
-                  href="https://www.instagram.com/yafuuyufaa/"
+                  href={CONTACT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                 >
-                  Instagram
+                  Contact on Instagram
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </li>

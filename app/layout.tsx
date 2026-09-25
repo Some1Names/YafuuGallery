@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | YafuuGallery",
   },
   description:
-    "Read original manga, explore stories, and follow every chapter.",
+    "Read original manga and translations, explore stories, and follow every chapter.",
 };
 
 // Bare wrapper only — no Navbar here anymore. What renders below this is
