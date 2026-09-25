@@ -406,30 +406,40 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             </h1>
           </div>
 
+          {/* Phones skip the synopsis: at 14px over the banner's line art it
+              was hard to read, clamped mid-sentence anyway, and together with
+              stacked buttons the text covered nearly all of the artwork. The
+              full synopsis is one tap away on the manga page. max-sm:hidden,
+              not hidden — line-clamp sets its own display value. */}
           <p
-            className="text-white/70 text-sm sm:text-base max-w-lg mt-1 sm:mt-2 line-clamp-3"
+            className="max-sm:hidden text-white/70 text-sm sm:text-base max-w-lg mt-1 sm:mt-2 line-clamp-3"
             style={{ minHeight: "3lh" }}
           >
             {current.synopsis}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto mt-2">
+          {/* Side by side (stacked full-width on phones they took ~110px of
+              the banner). flex-wrap + flex-auto: each button starts at its
+              own width and they share the row; only when both can't fit (the
+              narrowest ~320px phones) does the second drop to its own line,
+              each then filling the width. */}
+          <div className="flex flex-wrap gap-3 sm:gap-4 w-full sm:w-auto mt-4 sm:mt-2">
             {current.firstChapterId ? (
               <Link
                 href={`/viewer/${current.firstChapterId}`}
-                className="pointer-events-auto w-full sm:w-auto bg-white text-black text-center px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+                className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-white text-black text-center px-4 sm:px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
               >
                 Start Reading
               </Link>
             ) : (
-              <span className="pointer-events-auto w-full sm:w-auto bg-white/40 text-black/60 text-center px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+              <span className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-white/40 text-black/60 text-center px-4 sm:px-6 py-3 rounded-md shadow-md cursor-not-allowed">
                 No chapters yet
               </span>
             )}
 
             <Link
               href={`/manga/titles/${current.id}`}
-              className="pointer-events-auto w-full sm:w-auto bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
+              className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-black/20 border border-white/40 text-white text-center px-4 sm:px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
               View Manga
             </Link>
