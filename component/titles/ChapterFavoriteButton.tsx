@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { loginHref } from "@/lib/login-redirect";
+import { alertRequestFailed } from "@/component/Dialog";
 
 interface ChapterFavoriteButtonProps {
   chapterId: string;
@@ -28,8 +29,10 @@ export default function ChapterFavoriteButton({
     // optimistic update — flip immediately, roll back if the request fails
     const next = !favorited;
     setFavorited(next);
+    const failedTitle = next ? "Couldn't add to favorites" : "Couldn't remove from favorites";
 
     startTransition(async () => {
+      // the dialogs aren't awaited, so the heart isn't left disabled while one is open
       try {
         const res = await fetch(`/api/chapters/${chapterId}/favorite`, {
           method: "POST",
@@ -44,6 +47,7 @@ export default function ChapterFavoriteButton({
 
         if (!res.ok) {
           setFavorited(!next); // roll back
+          void alertRequestFailed(failedTitle, res);
           return;
         }
 
@@ -51,6 +55,7 @@ export default function ChapterFavoriteButton({
         setFavorited(data.favorited);
       } catch {
         setFavorited(!next); // roll back on network error
+        void alertRequestFailed(failedTitle, null);
       }
     });
   }

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { loginHref } from "@/lib/login-redirect";
+import { alertRequestFailed } from "@/component/Dialog";
 
 interface MangaFavoriteButtonProps {
   mangaId: string;
@@ -34,8 +35,10 @@ export default function MangaFavoriteButton({
 
     const next = !favorited;
     setFavorited(next);
+    const failedTitle = next ? "Couldn't add to favorites" : "Couldn't remove from favorites";
 
     startTransition(async () => {
+      // the dialogs aren't awaited, so the heart isn't left disabled while one is open
       try {
         const res = await fetch(`/api/manga/${mangaId}/favorite`, { method: "POST" });
 
@@ -47,6 +50,7 @@ export default function MangaFavoriteButton({
         }
         if (!res.ok) {
           setFavorited(!next);
+          void alertRequestFailed(failedTitle, res);
           return;
         }
 
@@ -54,6 +58,7 @@ export default function MangaFavoriteButton({
         setFavorited(data.favorited);
       } catch {
         setFavorited(!next);
+        void alertRequestFailed(failedTitle, null);
       }
     });
   }

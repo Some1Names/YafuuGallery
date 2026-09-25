@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { confirmDialog } from "@/component/Dialog";
+import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import Image from "next/image";
 import { X, Send, Heart, Flag, Reply } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
@@ -313,18 +313,19 @@ export default function ChapterCommentPanel({
       mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: optimisticLiked, likeCount: optimisticCount }))
     );
 
-    try {
-      const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" });
-      if (!res.ok) throw new Error();
-      const data: { liked: boolean; likeCount: number } = await res.json();
+    const res = await fetch(`/api/comments/${comment.id}/like`, { method: "POST" }).catch(() => null);
+    const data: { liked: boolean; likeCount: number } | null = res?.ok ? await res.json().catch(() => null) : null;
+    if (data) {
       setComments((prev) =>
         mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: data.liked, likeCount: data.likeCount }))
       );
-    } catch {
-      setComments((prev) =>
-        mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount }))
-      );
+      return;
     }
+    // roll back, and say why
+    setComments((prev) =>
+      mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount }))
+    );
+    await alertRequestFailed(optimisticLiked ? "Couldn't like comment" : "Couldn't unlike comment", res);
   }
 
   // One comment's markup — a thread's top comment or a reply (smaller
