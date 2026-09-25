@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -75,7 +76,13 @@ export default function AdminCommentRow({
   }
 
   async function remove() {
-    if (!confirm("Permanently delete this comment and any replies to it? This can't be undone.")) return;
+    const confirmed = await confirmDialog({
+      title: "Delete this comment?",
+      message: "Any replies to it are deleted too. This can't be undone.",
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" });
     if (res.ok) {
       onDeleted?.();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -112,7 +113,13 @@ export default function AdminChapterRow({
   }
 
   async function remove() {
-    if (!confirm(`Delete chapter "${chapterName}"? This can't be undone.`)) return;
+    const confirmed = await confirmDialog({
+      title: `Delete chapter "${chapterName}"?`,
+      message: "This can't be undone.",
+      confirmLabel: "Delete chapter",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     const res = await fetch(`/api/admin/chapters/${id}`, { method: "DELETE" });
     if (res.ok) router.refresh();
   }

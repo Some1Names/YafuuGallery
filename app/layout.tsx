@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black } from "next/font/google";
 import RouteProgressBar from "@/component/RouteProgressBar";
+import DialogHost from "@/component/Dialog";
 import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
@@ -40,6 +41,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <RouteProgressBar />
         {children}
+        {/* confirmDialog()/alertDialog() render here, on every page */}
+        <DialogHost />
       </body>
     </html>
   );

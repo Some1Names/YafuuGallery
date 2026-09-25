@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
@@ -77,12 +78,13 @@ export default function AdminArcRow({
   }
 
   async function remove() {
-    if (
-      !confirm(
-        `Delete arc "${name}"? Chapters assigned to it will become unassigned, not deleted. This can't be undone.`
-      )
-    )
-      return;
+    const confirmed = await confirmDialog({
+      title: `Delete arc "${name}"?`,
+      message: "Chapters in it become unassigned, not deleted. This can't be undone.",
+      confirmLabel: "Delete arc",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     const res = await fetch(`/api/admin/arcs/${id}`, { method: "DELETE" });
     if (res.ok) router.refresh();
   }

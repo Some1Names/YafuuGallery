@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -183,7 +184,13 @@ export default function AdminMangaRow({
   }
 
   async function remove() {
-    if (!confirm(`Delete "${title}"? This deletes all its arcs and chapters too. This can't be undone.`)) return;
+    const confirmed = await confirmDialog({
+      title: `Delete "${title}"?`,
+      message: "All its arcs and chapters are deleted too. This can't be undone.",
+      confirmLabel: "Delete manga",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     const res = await fetch(`/api/admin/manga/${id}`, { method: "DELETE" });
     if (res.ok) router.refresh();
   }

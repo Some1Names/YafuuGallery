@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import Image from "next/image";
 import { X, Send, Heart, Flag, Reply } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
@@ -280,7 +281,13 @@ export default function ChapterCommentPanel({
   // Confirm first (a report is sent to moderators), then mark it reported
   // straight away; on failure, put the button back and say why.
   async function reportComment(comment: CommentItem) {
-    if (!confirm("Report this comment to the moderators?")) return;
+    const confirmed = await confirmDialog({
+      title: "Report this comment?",
+      message: "The moderators will be asked to take a look at it.",
+      confirmLabel: "Report",
+      tone: "question",
+    });
+    if (!confirmed) return;
     setComments((prev) => mapComment(prev, comment.id, (c) => ({ ...c, reportedByMe: true })));
     try {
       const res = await fetch(`/api/comments/${comment.id}/report`, { method: "POST" });

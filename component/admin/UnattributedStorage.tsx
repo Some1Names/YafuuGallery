@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { formatBytes } from "@/lib/format-bytes";
@@ -53,7 +54,14 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
   }
 
   async function handleDeleteOne(key: string) {
-    if (!confirm(`Delete this object? This can't be undone.\n\n${key}`)) return;
+    const confirmed = await confirmDialog({
+      title: "Delete this object?",
+      message: "This can't be undone.",
+      detail: key,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     setDeletingKeys((prev) => new Set(prev).add(key));
     const ok = await deleteKeys([key]);
     if (!ok) setDeletingKeys((prev) => {
@@ -64,12 +72,13 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
   }
 
   async function handleDeleteAll() {
-    if (
-      !confirm(
-        `Delete all ${objects.length} unattributed objects (${formatBytes(totalBytes)})? This can't be undone.`
-      )
-    )
-      return;
+    const confirmed = await confirmDialog({
+      title: `Delete all ${objects.length} unattributed objects?`,
+      message: `That frees ${formatBytes(totalBytes)}. This can't be undone.`,
+      confirmLabel: "Delete all",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     setIsDeletingAll(true);
     const ok = await deleteKeys(objects.map((o) => o.key));
     if (!ok) setIsDeletingAll(false);

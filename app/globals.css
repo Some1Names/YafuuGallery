@@ -196,6 +196,33 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
+/* Confirm/alert dialog (component/Dialog.tsx): the backdrop fades in and
+   the card pops up slightly. The panel is keyed per request, so a queued
+   second dialog replays the pop. */
+@keyframes app-dialog-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes app-dialog-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+.app-dialog[open]::backdrop {
+  animation: app-dialog-fade 180ms ease-out;
+}
+.app-dialog-panel {
+  animation: app-dialog-pop 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-dialog[open]::backdrop,
+  .app-dialog-panel {
+    animation: none;
+  }
+}
+
 /* Phones: form fields at 16px. iOS Safari zooms the whole page in when a
    field with smaller text is focused (and doesn't zoom back out), which
    every login/signup/search/comment box here triggered at text-sm (14px).

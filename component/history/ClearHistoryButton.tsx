@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
@@ -12,7 +13,13 @@ export default function ClearHistoryButton() {
   const [error, setError] = useState(false);
 
   async function clearAll() {
-    if (!confirm("Clear your whole reading history? Continue Reading and every saved page will be forgotten.")) return;
+    const confirmed = await confirmDialog({
+      title: "Clear reading history?",
+      message: "Continue Reading and every saved page will be forgotten.",
+      confirmLabel: "Clear history",
+      tone: "danger",
+    });
+    if (!confirmed) return;
     setIsPending(true);
     setError(false);
     try {

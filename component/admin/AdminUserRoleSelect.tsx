@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { confirmDialog } from "@/component/Dialog";
 
 type Role = "reader" | "author" | "admin";
 
@@ -17,10 +18,16 @@ export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: 
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function handleChange(newRole: Role) {
+  async function handleChange(newRole: Role) {
     // A role change takes effect immediately (granting or revoking admin
     // access), so confirm it rather than trusting a stray dropdown pick.
-    if (!confirm(`Change ${userLabel} from ${ROLE_LABELS[role]} to ${ROLE_LABELS[newRole]}?`)) return;
+    const confirmed = await confirmDialog({
+      title: "Change role?",
+      message: `${userLabel} goes from ${ROLE_LABELS[role]} to ${ROLE_LABELS[newRole]}. This takes effect immediately.`,
+      confirmLabel: "Change role",
+      tone: "warning",
+    });
+    if (!confirmed) return;
 
     const previous = role;
     setRole(newRole); // optimistic
