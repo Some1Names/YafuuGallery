@@ -12,6 +12,7 @@ interface ContinueReadingCardProps {
   mangaTitle: string;
   // the reader finished the previous chapter and this is the next one
   isNext?: boolean;
+  className?: string;
 }
 
 // Same square-grid visual language as FavoriteChapterCard, but per reading
@@ -25,11 +26,12 @@ export default function ContinueReadingCard({
   coverImageUrl,
   mangaTitle,
   isNext = false,
+  className = "",
 }: ContinueReadingCardProps) {
   return (
     <Link
       href={`/viewer/${chapterId}`}
-      className="group relative block w-full aspect-square rounded-lg overflow-hidden bg-fg"
+      className={`group relative block w-full aspect-square rounded-lg overflow-hidden bg-fg ${className}`}
     >
       {coverImageUrl ? (
         <Image

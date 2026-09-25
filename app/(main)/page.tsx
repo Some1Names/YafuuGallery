@@ -6,6 +6,7 @@ import FeaturedCarousel from "@/component/titles/FeaturedCarousel";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { getContinueReading } from "@/lib/continue-reading";
+import { fullRowCount } from "@/lib/grid-rows";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 import { GENRES } from "@/lib/genres";
@@ -145,6 +146,10 @@ export default async function BrowsePage({
   // small sign-in nudge instead (below), since for them the section isn't
   // "empty," it's unavailable until they have an account to track against.
   const recentProgress = session?.user?.id ? await getContinueReading(session.user.id, 6) : [];
+  // 2 columns on phones, 3 at sm, 6 from md: cards that would leave the last
+  // row part-empty are hidden at that width (all are in Reading history)
+  const phoneShown = fullRowCount(recentProgress.length, 2);
+  const smShown = fullRowCount(recentProgress.length, 3);
 
   return (
     <div className="bg-bg min-h-screen">
@@ -199,7 +204,7 @@ export default async function BrowsePage({
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-                {recentProgress.map((p) => (
+                {recentProgress.map((p, i) => (
                   <ContinueReadingCard
                     key={p.id}
                     chapterId={p.chapterId}
@@ -209,6 +214,7 @@ export default async function BrowsePage({
                     coverImageUrl={p.coverImageUrl}
                     mangaTitle={p.mangaTitle}
                     isNext={p.isNext}
+                    className={`${i >= phoneShown ? "max-sm:hidden" : ""} ${i >= smShown ? "sm:max-md:hidden" : ""}`}
                   />
                 ))}
               </div>

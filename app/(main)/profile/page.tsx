@@ -6,6 +6,7 @@ import ProfileEditForm from "@/component/profile/ProfileEditForm";
 import ContinueReadingCard from "@/component/titles/ContinueReadingCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import { getContinueReading } from "@/lib/continue-reading";
+import { fullRowCount } from "@/lib/grid-rows";
 import { loginHref } from "@/lib/login-redirect";
 
 export default async function ProfilePage() {
@@ -30,6 +31,9 @@ export default async function ProfilePage() {
     ]);
 
   if (!user) redirect(loginHref("/profile"));
+
+  // phones: 2 columns, so 3 cards would leave the third alone on its row
+  const phoneShown = fullRowCount(recentProgress.length, 2);
 
   const stats = [
     { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },
@@ -72,7 +76,8 @@ export default async function ProfilePage() {
         {/* Stats now render inside ProfileEditForm's card, styled to match */}
 
         {/* Recently read — up to 4 chapters, any title. 2x2 on phone,
-            one row of 4 from sm up, so the last item never wraps alone. */}
+            one row of 4 from sm up; phones drop a card that would sit
+            alone on the last row (the rest are in Reading history). */}
         <section>
           <div className="flex items-baseline justify-between gap-4 mb-4">
             <h2 className="text-xl text-fg font-(family-name:--font-display)">Continue reading</h2>
@@ -95,7 +100,7 @@ export default async function ProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-7xl">
-              {recentProgress.map((p) => (
+              {recentProgress.map((p, i) => (
                 <ContinueReadingCard
                   key={p.id}
                   chapterId={p.chapterId}
@@ -105,6 +110,7 @@ export default async function ProfilePage() {
                   coverImageUrl={p.coverImageUrl}
                   mangaTitle={p.mangaTitle}
                   isNext={p.isNext}
+                  className={i >= phoneShown ? "max-sm:hidden" : ""}
                 />
               ))}
             </div>
