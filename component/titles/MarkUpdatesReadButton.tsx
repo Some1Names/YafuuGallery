@@ -28,7 +28,7 @@ export default function MarkUpdatesReadButton() {
 
   return (
     <div className="flex items-center gap-3">
-      {error && <span className="text-xs text-danger">Couldn&apos;t update — try again.</span>}
+      {error && <span className="text-xs text-danger-text">Couldn&apos;t update — try again.</span>}
       <button
         type="button"
         onClick={markRead}

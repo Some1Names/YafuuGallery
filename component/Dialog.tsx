@@ -95,9 +95,8 @@ export async function alertRequestFailed(title: string, res: Response | null): P
 }
 
 const TONES: Record<DialogTone, { icon: LucideIcon; ring: string }> = {
-  // red-400 in dark mode: --color-danger is too dark to read on the dark surface
-  danger: { icon: Trash2, ring: "bg-danger/15 text-red-400 [.light_&]:text-danger" },
-  error: { icon: CircleX, ring: "bg-danger/15 text-red-400 [.light_&]:text-danger" },
+  danger: { icon: Trash2, ring: "bg-danger/15 text-danger-text" },
+  error: { icon: CircleX, ring: "bg-danger/15 text-danger-text" },
   warning: { icon: TriangleAlert, ring: "bg-warning/15 text-warning" },
   question: { icon: CircleHelp, ring: "bg-fg/10 text-fg" },
 };
@@ -199,7 +198,7 @@ export default function DialogHost() {
               onClick={() => settle(true)}
               className={`h-11 flex-1 rounded-md text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-200 ${
                 isConfirm && current.tone === "danger"
-                  ? "bg-danger text-white hover:bg-danger/85 focus-visible:outline-danger"
+                  ? "bg-danger text-white hover:bg-danger/85 focus-visible:outline-danger-text"
                   : "bg-fg text-bg hover:bg-fg-hover focus-visible:outline-fg"
               }`}
             >

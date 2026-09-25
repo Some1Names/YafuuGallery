@@ -125,7 +125,7 @@ export default function SignUpPage() {
                 aria-invalid={!!errors.name}
                 className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
               />
-              {errors.name && <p className="text-xs text-danger mt-1">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-danger-text mt-1">{errors.name.message}</p>}
             </div>
 
             <div>
@@ -140,7 +140,7 @@ export default function SignUpPage() {
                 aria-invalid={!!errors.email}
                 className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
               />
-              {errors.email && <p className="text-xs text-danger mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-xs text-danger-text mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
@@ -168,14 +168,14 @@ export default function SignUpPage() {
               <span
                 className={
                   "text-xs mt-1 block " +
-                  (errors.password ? "text-danger" : "text-fg-muted")
+                  (errors.password ? "text-danger-text" : "text-fg-muted")
                 }
               >
                 {errors.password?.message ?? "Must be at least 8 characters."}
               </span>
             </div>
 
-            {serverError && <p className="text-sm text-danger">{serverError}</p>}
+            {serverError && <p className="text-sm text-danger-text">{serverError}</p>}
 
             <button
               type="submit"

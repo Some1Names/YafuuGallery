@@ -365,7 +365,7 @@ export default function ChapterCommentPanel({
               aria-pressed={c.likedByMe}
               aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
               className={`flex items-center gap-1 text-xs transition-colors duration-200 ${
-                c.likedByMe ? "text-danger" : "text-fg-muted hover:text-fg-secondary"
+                c.likedByMe ? "text-danger-text" : "text-fg-muted hover:text-fg-secondary"
               }`}
             >
               <Heart className={`w-3.5 h-3.5 ${c.likedByMe ? "fill-current" : ""}`} />
@@ -484,7 +484,7 @@ export default function ChapterCommentPanel({
         </div>
 
         <form onSubmit={handleSubmit} className="border-t border-border p-3 shrink-0">
-          {error && <p className="text-xs text-danger mb-2">{error}</p>}
+          {error && <p className="text-xs text-danger-text mb-2">{error}</p>}
           {replyTo && (
             <div className="flex items-center justify-between gap-2 mb-2 text-xs text-fg-secondary">
               <span className="truncate">

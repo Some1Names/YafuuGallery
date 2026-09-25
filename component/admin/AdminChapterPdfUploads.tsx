@@ -99,7 +99,7 @@ export default function AdminChapterPdfUploads({
                 type="button"
                 onClick={() => removeEntry(i)}
                 aria-label={`Remove ${LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label} PDF`}
-                className="ml-auto sm:ml-0 shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger hover:border-danger/50 transition-colors duration-200"
+                className="ml-auto sm:ml-0 shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger-text hover:border-danger-text/50 transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
               </button>

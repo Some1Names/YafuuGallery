@@ -8,6 +8,15 @@ import { ArrowUpRight } from "lucide-react";
 import LocalDate from "@/component/LocalDate";
 import { formatUsername } from "@/lib/format-username";
 
+// date and time — several comments can land on the same day
+const POSTED_AT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+};
+
 interface AdminCommentRowProps {
   commentId: string;
   body: string;
@@ -49,11 +58,16 @@ export default function AdminCommentRow({
   const router = useRouter();
   const [hidden, setHidden] = useState(initialHidden);
   const [isPending, startTransition] = useTransition();
+  // Delete / Dismiss reports in flight — disabled meanwhile, so a double
+  // tap can't send (and fail) the same request twice
+  const [isWorking, setIsWorking] = useState(false);
 
   // Dismissing clears the reports (the comment stays up) — refresh so the
   // dashboard's "Reported" filter/count update too.
   async function dismissReports() {
+    setIsWorking(true);
     const res = await fetch(`/api/admin/comments/${commentId}/reports`, { method: "DELETE" }).catch(() => null);
+    setIsWorking(false);
     if (!res?.ok) return alertRequestFailed("Couldn't dismiss reports", res);
     onReportsDismissed?.();
     router.refresh(); // the tab counts on the page
@@ -77,6 +91,7 @@ export default function AdminCommentRow({
   }
 
   async function remove() {
+    if (isWorking) return;
     const confirmed = await confirmDialog({
       title: "Delete this comment?",
       message: "Any replies to it are deleted too. This can't be undone.",
@@ -84,8 +99,12 @@ export default function AdminCommentRow({
       tone: "danger",
     });
     if (!confirmed) return;
+    setIsWorking(true);
     const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" }).catch(() => null);
-    if (!res?.ok) return alertRequestFailed("Couldn't delete comment", res);
+    if (!res?.ok) {
+      setIsWorking(false);
+      return alertRequestFailed("Couldn't delete comment", res);
+    }
     onDeleted?.();
     router.refresh(); // the tab counts on the page
   }
@@ -93,11 +112,7 @@ export default function AdminCommentRow({
   // Phones: the action buttons go under the comment (side by side they
   // left the text ~70px wide). From sm up they sit on the right as before.
   return (
-    <div
-      className={`border border-border rounded-md p-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 ${
-        hidden ? "opacity-50" : ""
-      }`}
-    >
+    <div className="border border-border rounded-md p-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
       <div className="min-w-0">
         <div className="text-xs text-fg-secondary mb-1">
           {formatUsername(userName, userTag)}
@@ -114,10 +129,10 @@ export default function AdminCommentRow({
             {chapterLabel}
             <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
           </Link>{" "}
-          · <LocalDate date={createdAt} />
-          {hidden && <span className="text-danger"> · hidden</span>}
+          · <LocalDate date={createdAt} options={POSTED_AT} />
+          {hidden && <span className="text-danger-text"> · hidden</span>}
           {reportCount > 0 && (
-            <span className="text-danger">
+            <span className="text-danger-text">
               {" "}
               · reported {reportCount === 1 ? "once" : `${reportCount} times`}
             </span>
@@ -125,14 +140,17 @@ export default function AdminCommentRow({
         </div>
         {/* keep the author's line breaks; long links/strings wrap instead of
             running out of the row */}
-        <p className="text-sm text-fg whitespace-pre-wrap wrap-anywhere">{body}</p>
+        {/* A hidden comment's text is faded (the row's buttons stay at
+            full strength — faded, Unhide looked disabled) */}
+        <p className={"text-sm text-fg whitespace-pre-wrap wrap-anywhere " + (hidden ? "opacity-50" : "")}>{body}</p>
       </div>
       <div className="flex flex-wrap gap-2 sm:shrink-0">
         {reportCount > 0 && (
           <button
             type="button"
             onClick={dismissReports}
-            className="text-xs px-3 py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg transition-colors duration-200"
+            disabled={isWorking}
+            className="text-xs px-3 py-3 sm:py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
           >
             Dismiss reports
           </button>
@@ -141,7 +159,7 @@ export default function AdminCommentRow({
           type="button"
           onClick={toggleHide}
           disabled={isPending}
-          className="text-xs px-3 py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
+          className="text-xs px-3 py-3 sm:py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
         >
           {hidden ? "Unhide" : "Hide"}
         </button>
@@ -149,7 +167,8 @@ export default function AdminCommentRow({
           <button
             type="button"
             onClick={remove}
-            className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
+            disabled={isWorking}
+            className="text-xs px-3 py-3 sm:py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 disabled:opacity-50 transition-colors duration-200"
           >
             Delete
           </button>

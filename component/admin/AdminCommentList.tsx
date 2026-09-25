@@ -32,7 +32,7 @@ export default function AdminCommentList({
   const [search, setSearch] = useState("");
   const [reportedOnly, setReportedOnly] = useState(false);
   const q = useDebounced(search.trim());
-  const { items, hasMore, isLoadingMore, error, loadMore, removeItem, updateItem } = usePagedList<AdminCommentItem>(
+  const { items, hasMore, isLoadingMore, error, loadMore, removeItem, removeWhere, updateItem } = usePagedList<AdminCommentItem>(
     "/api/admin/comments",
     { userId, q: q || undefined, reported: reportedOnly ? "1" : undefined }
   );
@@ -51,7 +51,7 @@ export default function AdminCommentList({
             className={
               "mt-3 text-xs px-3 py-1.5 rounded border transition-colors duration-200 " +
               (reportedOnly
-                ? "border-danger/60 text-danger"
+                ? "border-danger-text/60 text-danger-text"
                 : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
             }
           >
@@ -91,7 +91,8 @@ export default function AdminCommentList({
                 initialHidden={c.hidden}
                 reportCount={c.reportCount}
                 canDelete={canDelete}
-                onDeleted={() => removeItem(c.id)}
+                // deleting a comment deletes its replies too — drop them as well
+                onDeleted={() => removeWhere((x) => x.id === c.id || x.parentId === c.id)}
                 onReportsDismissed={() =>
                   // under "Reported only" it no longer belongs in the list
                   reportedOnly ? removeItem(c.id) : updateItem(c.id, { reportCount: 0 })
@@ -99,7 +100,7 @@ export default function AdminCommentList({
               />
             ))}
           </div>
-          {error && <p className="text-xs text-danger mt-3">Couldn&apos;t load more — please try again.</p>}
+          {error && <p className="text-xs text-danger-text mt-3">Couldn&apos;t load more — please try again.</p>}
           {hasMore && (
             <div className="flex justify-center mt-4">
               <button

@@ -158,7 +158,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
           </div>
           )}
 
-          {error && <p className="text-xs text-danger mt-3">Couldn&apos;t load more — please try again.</p>}
+          {error && <p className="text-xs text-danger-text mt-3">Couldn&apos;t load more — please try again.</p>}
           {hasMore && (
             <div className="flex justify-center mt-4">
               <button

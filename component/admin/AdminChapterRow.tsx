@@ -217,7 +217,7 @@ export default function AdminChapterRow({
             </button>
             <button
               onClick={remove}
-              className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
+              className="text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
             >
               Delete
             </button>
@@ -316,7 +316,7 @@ export default function AdminChapterRow({
             </div>
           </div>
 
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && <p className="text-sm text-danger-text">{error}</p>}
 
           <div className="flex gap-2 self-end">
             <button

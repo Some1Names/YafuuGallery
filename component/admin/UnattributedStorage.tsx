@@ -125,7 +125,7 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
                     type="button"
                     onClick={() => handleDeleteOne(o.key)}
                     disabled={deletingKeys.has(o.key) || isDeletingAll}
-                    className="text-danger hover:bg-danger/10 rounded p-1 disabled:opacity-40 transition-colors duration-200"
+                    className="text-danger-text hover:bg-danger/10 rounded p-1 disabled:opacity-40 transition-colors duration-200"
                     aria-label={`Delete ${o.key}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
             type="button"
             onClick={handleDeleteAll}
             disabled={isDeletingAll}
-            className="self-end text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 disabled:opacity-50 transition-colors duration-200"
+            className="self-end text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 disabled:opacity-50 transition-colors duration-200"
           >
             {isDeletingAll ? "Deleting…" : `Delete all (${formatBytes(totalBytes)})`}
           </button>

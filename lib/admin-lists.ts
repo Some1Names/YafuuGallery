@@ -54,6 +54,9 @@ export interface AdminCommentItem {
   chapterId: string;
   chapterLabel: string;
   replyToName: string | null;
+  // set for replies: the top-level comment of the thread — deleting that
+  // deletes this too, so the list drops both
+  parentId: string | null;
   createdAt: string;
   hidden: boolean;
   reportCount: number;
@@ -98,6 +101,7 @@ export async function loadCommentPage(opts: {
       body: true,
       hidden_at: true,
       created_at: true,
+      parent_id: true,
       _count: { select: { reports: true } },
       user: { select: { id: true, name: true, tag: true } },
       parent: { select: { user: { select: { name: true, tag: true } } } },
@@ -134,6 +138,7 @@ export async function loadCommentPage(opts: {
         displayNumbers.get(c.chapter.manga_id)?.get(c.chapter.id)
       )}`,
       replyToName: c.parent ? formatUsername(c.parent.user.name, c.parent.user.tag) : null,
+      parentId: c.parent_id,
       createdAt: c.created_at.toISOString(),
       hidden: c.hidden_at !== null,
       reportCount: c._count.reports,

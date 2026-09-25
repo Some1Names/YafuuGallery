@@ -33,7 +33,7 @@ export default function AdminUserDeleteButton({
   return (
     <button
       onClick={remove}
-      className="text-xs px-2 py-1 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
+      className="text-xs px-2 py-1 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
     >
       Delete
     </button>

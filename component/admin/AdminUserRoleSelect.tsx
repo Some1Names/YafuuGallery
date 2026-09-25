@@ -61,7 +61,7 @@ export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: 
         <option value="author">Author</option>
         <option value="admin">Admin</option>
       </select>
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger-text mt-1">{error}</p>}
     </div>
   );
 }

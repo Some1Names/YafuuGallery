@@ -32,7 +32,7 @@ export default function ClearHistoryButton() {
       type="button"
       onClick={clearAll}
       disabled={isPending}
-      className="flex items-center gap-1.5 py-2.5 -my-2.5 text-sm text-fg-secondary hover:text-danger disabled:opacity-50 transition-colors duration-200"
+      className="flex items-center gap-1.5 py-2.5 -my-2.5 text-sm text-fg-secondary hover:text-danger-text disabled:opacity-50 transition-colors duration-200"
     >
       <Trash2 className="w-4 h-4" />
       {isPending ? "Clearing…" : "Clear history"}

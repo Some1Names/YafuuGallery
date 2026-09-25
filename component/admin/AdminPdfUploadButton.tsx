@@ -167,7 +167,7 @@ export default function AdminPdfUploadButton({
       />
 
       {warning && <p className="text-xs text-fg-secondary mt-1">{warning}</p>}
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger-text mt-1">{error}</p>}
     </div>
   );
 }

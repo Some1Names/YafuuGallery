@@ -400,7 +400,7 @@ export default function AdminMangaRow({
               </button>
               <button
                 onClick={remove}
-                className="text-xs px-3 py-1.5 border border-danger/50 rounded text-danger hover:bg-danger/10 transition-colors duration-200"
+                className="text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
               >
                 Delete
               </button>

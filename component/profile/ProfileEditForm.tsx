@@ -265,7 +265,7 @@ export default function ProfileEditForm({
                     onClick={cancelNameEdit}
                     disabled={isSaving}
                     aria-label="Cancel name change"
-                    className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-danger disabled:opacity-50 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-danger-text disabled:opacity-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -283,7 +283,7 @@ export default function ProfileEditForm({
               )}
             </div>
 
-            {error && <p className="text-sm text-danger">{error}</p>}
+            {error && <p className="text-sm text-danger-text">{error}</p>}
             {isSaving && <p className="text-xs text-fg-muted whitespace-nowrap">Saving…</p>}
           </div>
 

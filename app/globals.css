@@ -12,6 +12,10 @@
   --color-fg-muted: #6b655e;
   --color-texture: #302e2a;
   --color-danger: #9c1d25;
+  /* Red for TEXT and outlines. --color-danger is only 2.5:1 on the dark
+     background (too dark to read); this lighter red is 7:1. Solid red
+     fills (bg-danger, white text on top) keep --color-danger. */
+  --color-danger-text: #f87171;
   --color-success: #4ade80;
   --color-warning: #c9a648;
   --color-auth-panel-from: #1e1213;
@@ -26,6 +30,8 @@
 
 html.light {
   --color-bg: #eeeae1;
+  /* the darker red already reads well on light backgrounds (6.7:1) */
+  --color-danger-text: #9c1d25;
   --color-surface: #fbfaf6;
   --color-surface-hover: #f1ede3;
   --color-nav: #f7f4ec;
@@ -57,6 +63,7 @@ html.light {
   --color-fg-muted: var(--color-fg-muted);
   --color-texture: var(--color-texture);
   --color-danger: var(--color-danger);
+  --color-danger-text: var(--color-danger-text);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-auth-panel-from: var(--color-auth-panel-from);

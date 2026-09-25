@@ -151,7 +151,7 @@ export default function MangaCreateForm() {
         <MangaGenreFields genres={genres} onGenresChange={setGenres} status={status} onStatusChange={setStatus} />
       </div>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-danger-text">{error}</p>}
 
       <div className="flex gap-2 self-end">
         <button

@@ -73,6 +73,11 @@ export function usePagedList<T extends { id: string }>(
     setState((s) => ({ ...s, items: s.items?.filter((item) => item.id !== id) ?? null }));
   }, []);
 
+  // several at once, e.g. a deleted comment and its replies
+  const removeWhere = useCallback((predicate: (item: T) => boolean) => {
+    setState((s) => ({ ...s, items: s.items?.filter((item) => !predicate(item)) ?? null }));
+  }, []);
+
   const updateItem = useCallback((id: string, patch: Partial<T>) => {
     setState((s) => ({ ...s, items: s.items?.map((item) => (item.id === id ? { ...item, ...patch } : item)) ?? null }));
   }, []);
@@ -84,6 +89,7 @@ export function usePagedList<T extends { id: string }>(
     error: state.error,
     loadMore,
     removeItem,
+    removeWhere,
     updateItem,
   };
 }
