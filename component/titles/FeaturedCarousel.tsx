@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, Info, Pause, Play } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 
 interface FeaturedMangaSlide {
@@ -418,28 +418,40 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             {current.synopsis}
           </p>
 
-          {/* Side by side (stacked full-width on phones they took ~110px of
-              the banner). flex-wrap + flex-auto: each button starts at its
-              own width and they share the row; only when both can't fit (the
-              narrowest ~320px phones) does the second drop to its own line,
-              each then filling the width. */}
-          <div className="flex flex-wrap gap-3 sm:gap-4 w-full sm:w-auto mt-4 sm:mt-2">
+          {/* Phones: app-style controls — a white pill "Start Reading" with a
+              book icon (same icon as the manga page's read button) filling the
+              row, plus a round frosted-glass ⓘ button for the manga page. The
+              pair fits side by side even on a 320px screen (two full-width
+              stacked buttons used to cover ~110px of the banner). From sm up
+              it's the original pair of rectangular buttons, unchanged. */}
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto mt-5 sm:mt-2">
             {current.firstChapterId ? (
               <Link
                 href={`/viewer/${current.firstChapterId}`}
-                className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-white text-black text-center px-4 sm:px-6 py-3 rounded-md shadow-md hover:bg-white/85 transition-colors duration-200"
+                className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center gap-2 whitespace-nowrap h-12 sm:h-auto px-5 sm:px-6 sm:py-3 rounded-full sm:rounded-md bg-white text-black text-[15px] font-semibold sm:text-base sm:font-normal shadow-lg shadow-black/30 sm:shadow-md active:scale-[0.98] hover:bg-white/85 transition duration-200"
               >
+                <BookOpen className="w-4.5 h-4.5 sm:hidden" aria-hidden="true" />
                 Start Reading
               </Link>
             ) : (
-              <span className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-white/40 text-black/60 text-center px-4 sm:px-6 py-3 rounded-md shadow-md cursor-not-allowed">
+              <span className="pointer-events-auto flex-1 sm:flex-none inline-flex items-center justify-center whitespace-nowrap h-12 sm:h-auto px-5 sm:px-6 sm:py-3 rounded-full sm:rounded-md bg-white/40 text-black/60 text-[15px] font-semibold sm:text-base sm:font-normal shadow-md cursor-not-allowed">
                 No chapters yet
               </span>
             )}
 
+            {/* phones: round glass icon button (label kept for screen readers) */}
             <Link
               href={`/manga/titles/${current.id}`}
-              className="pointer-events-auto flex-auto sm:flex-none whitespace-nowrap bg-black/20 border border-white/40 text-white text-center px-4 sm:px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
+              aria-label={`View ${current.title}`}
+              title="View Manga"
+              className="sm:hidden pointer-events-auto shrink-0 w-12 h-12 inline-flex items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md shadow-lg shadow-black/30 active:scale-95 hover:bg-white/25 transition duration-200"
+            >
+              <Info className="w-5 h-5" aria-hidden="true" />
+            </Link>
+            {/* sm and up: the original text button */}
+            <Link
+              href={`/manga/titles/${current.id}`}
+              className="hidden sm:inline-block pointer-events-auto whitespace-nowrap bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
               View Manga
             </Link>
