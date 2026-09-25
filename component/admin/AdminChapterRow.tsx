@@ -4,7 +4,7 @@ import { useState } from "react";
 import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Eye, Heart, MessageCircle, HardDrive } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import RemoveFromHistoryButton from "./RemoveFromHistoryButton";
 import { formatChapterBadge } from "@/lib/chapter-number";

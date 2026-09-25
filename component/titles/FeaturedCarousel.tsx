@@ -94,6 +94,23 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
   // rules of hooks.
   const current = manga[activeIndex];
 
+  // Banners that have finished downloading. Until the current one has, a
+  // silver shimmer shows under the (still transparent) banner layers —
+  // watched with a detached Image() since the layers are CSS backgrounds,
+  // which have no load event of their own.
+  const [loadedBanners, setLoadedBanners] = useState<ReadonlySet<string>>(() => new Set());
+  useEffect(() => {
+    const url = current?.bannerImageUrl;
+    if (!url) return;
+    const img = new window.Image();
+    img.onload = img.onerror = () => setLoadedBanners((prev) => (prev.has(url) ? prev : new Set(prev).add(url)));
+    img.src = url;
+    return () => {
+      img.onload = img.onerror = null;
+    };
+  }, [current?.bannerImageUrl]);
+  const isBannerLoading = Boolean(current?.bannerImageUrl) && !loadedBanners.has(current.bannerImageUrl!);
+
   // The background banner does a full-width slide: the incoming (top)
   // layer travels in from the direction-appropriate edge to center while
   // the outgoing (bottom) layer — the previous slide, held in place until
@@ -265,6 +282,10 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHasKeyboardFocus(false);
       }}
     >
+      {/* Under everything: the loading shimmer, until the current banner
+          has downloaded (the layers above are transparent till then) */}
+      {isBannerLoading && <div aria-hidden="true" className="shimmer absolute inset-0" />}
+
       {/* Bottom layer: the outgoing slide, sliding the rest of the way off
           the opposite edge as the top layer slides in over it — see the
           bottomLayer/transitionsEnabled effect above for why this needs its

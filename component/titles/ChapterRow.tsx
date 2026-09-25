@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Heart, MessageCircle } from "lucide-react";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";

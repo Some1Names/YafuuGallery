@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import NextImage from "next/image";
+import NextImage from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { processImageForUpload } from "@/lib/image-processing";
 

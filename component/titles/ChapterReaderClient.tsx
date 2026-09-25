@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { ReaderPageSkeleton } from "@/component/Skeletons";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -1044,7 +1045,7 @@ export default function ChapterReaderClient({
           key={pdfUrl}
           file={docFile}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={<div className="text-center text-[#b6b0a2] py-20">Loading chapter…</div>}
+          loading={<ReaderPageSkeleton />}
           error={<div className="text-center text-[#b6b0a2] py-20">Couldn&apos;t load this chapter.</div>}
         >
           {mode === "vertical" ? (

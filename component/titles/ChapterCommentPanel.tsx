@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { CommentSkeletons } from "@/component/Skeletons";
 import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { X, Send, Heart, Flag, Reply } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
 import { formatUsername } from "@/lib/format-username";
@@ -434,7 +435,7 @@ export default function ChapterCommentPanel({
 
         <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
           {comments === null ? (
-            <p className="text-sm text-fg-muted text-center py-8">Loading comments…</p>
+            <CommentSkeletons />
           ) : comments.length === 0 ? (
             <p className="text-sm text-fg-muted text-center py-8">
               No comments yet — be the first to say something.

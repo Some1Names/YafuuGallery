@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import { MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { ReaderPageSkeleton } from "@/component/Skeletons";
 
 // The reader is client-only. react-pdf pulls in pdfjs-dist, whose canvas
 // module runs `new DOMMatrix()` the moment it's evaluated — and DOMMatrix
@@ -13,8 +14,8 @@ import dynamic from "next/dynamic";
 const ChapterReaderClient = dynamic(() => import("./ChapterReaderClient"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#b6b0a2] flex items-center justify-center text-sm">
-      Loading chapter…
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <ReaderPageSkeleton />
     </div>
   ),
 });

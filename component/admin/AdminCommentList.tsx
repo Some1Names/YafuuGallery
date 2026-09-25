@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ListRowSkeletons } from "@/component/Skeletons";
 import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
 import { useDebounced, usePagedList } from "./usePagedList";
@@ -61,7 +62,7 @@ export default function AdminCommentList({
       )}
 
       {items === null ? (
-        <p className="text-sm text-fg-muted mt-4">Loading comments…</p>
+        <ListRowSkeletons label="Loading comments…" />
       ) : items.length === 0 ? (
         <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
           <p className="text-fg-secondary text-sm">

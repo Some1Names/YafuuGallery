@@ -18,6 +18,10 @@
   --color-danger-text: #f87171;
   --color-success: #4ade80;
   --color-warning: #c9a648;
+  /* Loading shimmer (.shimmer): a cool silver band sweeping over a base a
+     shade lighter than the surface */
+  --color-shimmer-base: #1f1e22;
+  --color-shimmer-shine: rgba(214, 220, 232, 0.2);
   --color-auth-panel-from: #1e1213;
   --color-auth-panel-via: #121113;
   --color-google-border: #2a2a2a;
@@ -30,6 +34,8 @@
 
 html.light {
   --color-bg: #eeeae1;
+  --color-shimmer-base: #e7e2d7;
+  --color-shimmer-shine: rgba(255, 255, 255, 0.8);
   /* the darker red already reads well on light backgrounds (6.7:1) */
   --color-danger-text: #9c1d25;
   --color-surface: #fbfaf6;
@@ -122,24 +128,66 @@ html.light .site-wordmark {
    style. Deliberately NOT done via react-pdf's canvasBackground prop: that
    also changes the paper color pdf.js paints the page itself with. Once
    drawn, the opaque canvas covers the placeholder entirely.
-   A slow pulse marks it as "still loading" — only while the canvas is
-   still hidden, so finished pages don't keep repainting behind their
-   canvas for nothing (browsers without :has() just get the static
+   A silver shimmer (same sweep as .shimmer below) marks it as "still
+   loading" — only while the canvas is still hidden, so finished pages
+   don't keep animating behind their canvas for nothing (browsers without :has() just get the static
    placeholder). */
 .reader-page {
   background-color: #161616 !important;
 }
-.reader-page:has(> canvas[style*="visibility: hidden"]) {
-  animation: reader-page-pulse 1.6s ease-in-out infinite;
+.reader-page:has(> canvas[style*="visibility: hidden"])::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(214, 220, 232, 0.11) 50%, transparent 70%);
+  animation: shimmer-sweep 1.8s ease-in-out infinite;
+  pointer-events: none;
 }
-@keyframes reader-page-pulse {
-  50% {
-    background-color: #1f1e1f;
+
+/* Loading shimmer — the "shining silver" placeholder for anything still
+   loading: images (component/ShimmerImage.tsx), skeleton rows, the reader's
+   undrawn pages above. A soft silver band sweeps across a base color; the
+   band moves with transform on a pseudo-element, so it's composited, not
+   repainted every frame. Needs a positioned element (the class sets it). */
+/* In the components layer so utilities on the same element win — e.g.
+   `shimmer absolute inset-0` must end up absolute, not the relative below */
+@layer components {
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-shimmer-base);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, var(--color-shimmer-shine) 50%, transparent 70%);
+    animation: shimmer-sweep 1.8s ease-in-out infinite;
+  }
+  /* The reader is always dark (fixed colors, whatever the site theme), so
+     its placeholders use fixed dark shimmer colors too */
+  .shimmer.shimmer-dark {
+    background-color: #161616;
+  }
+  .shimmer.shimmer-dark::after {
+    background: linear-gradient(100deg, transparent 30%, rgba(214, 220, 232, 0.11) 50%, transparent 70%);
+  }
+}
+
+@keyframes shimmer-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .reader-page {
+  /* no sweep — the base color alone still reads as "loading" */
+  .shimmer::after,
+  .reader-page::after {
     animation: none;
+    opacity: 0;
   }
 }
 

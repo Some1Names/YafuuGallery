@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import NextImage from "next/image";
+import NextImage from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Check, X, Pencil, ArrowUpRight, Camera } from "lucide-react";
 import { processImageForUpload } from "@/lib/image-processing";
 import LocalDate from "@/component/LocalDate";

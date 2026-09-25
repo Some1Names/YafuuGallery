@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Clock } from "lucide-react";
 import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 import NoImagePlaceholder from "./NoImagePlaceholder";

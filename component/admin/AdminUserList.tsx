@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState, useSyncExternalStore } from "react";
+import { ListRowSkeletons } from "@/component/Skeletons";
 import AdminUserRoleSelect from "./AdminUserRoleSelect";
 import AdminUserDeleteButton from "./AdminUserDeleteButton";
 import AdminCommentList from "./AdminCommentList";
@@ -80,7 +81,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
       <AdminSearchInput value={search} onChange={setSearch} placeholder="Search by name, name#tag or email…" />
 
       {items === null ? (
-        <p className="text-sm text-fg-muted mt-4">Loading users…</p>
+        <ListRowSkeletons label="Loading users…" />
       ) : items.length === 0 ? (
         <div className="border border-border rounded-md bg-surface/60 py-6 px-4 mt-4 text-center text-sm text-fg-secondary">
           {error ? "Couldn't load users — please try again." : q ? <>No users match &quot;{q}&quot;.</> : "No users yet."}
