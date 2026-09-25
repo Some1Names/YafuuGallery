@@ -166,6 +166,65 @@ export default function AdminDashboard({
     { id: "comments", label: "Comments", count: comments.length },
   ];
 
+  // Per-user controls, shared by the phone cards and the table rows.
+  const userLabel = (u: UserItem) => (u.name ? formatUsername(u.name, u.tag) : u.email);
+  const commentsOf = (u: UserItem) => comments.filter((c) => c.userId === u.id);
+
+  // No dropdown for yourself — changing your own role would drop your
+  // admin access instantly (the API refuses it too).
+  function roleControl(u: UserItem) {
+    if (u.id === currentUserId) {
+      return (
+        <span className="text-sm text-fg-secondary whitespace-nowrap">
+          {u.role === "admin" ? "Admin" : u.role === "author" ? "Author" : "Reader"} (you)
+        </span>
+      );
+    }
+    return <AdminUserRoleSelect userId={u.id} currentRole={u.role} userLabel={userLabel(u)} />;
+  }
+
+  function commentsButton(u: UserItem) {
+    const count = commentsOf(u).length;
+    const isExpanded = expandedUserId === u.id;
+    return (
+      <button
+        type="button"
+        onClick={() => toggleUserComments(u.id)}
+        disabled={count === 0}
+        aria-expanded={isExpanded}
+        className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
+      >
+        {count} {count === 1 ? "comment" : "comments"} {count > 0 && (isExpanded ? "− Close" : "· View")}
+      </button>
+    );
+  }
+
+  function deleteControl(u: UserItem) {
+    return u.id === currentUserId ? null : <AdminUserDeleteButton userId={u.id} userLabel={userLabel(u)} />;
+  }
+
+  function userCommentList(u: UserItem) {
+    return (
+      <div className="flex flex-col gap-2">
+        {commentsOf(u).map((c) => (
+          <AdminCommentRow
+            key={c.id}
+            commentId={c.id}
+            body={c.body}
+            userName={c.userName}
+            userTag={c.userTag}
+            chapterLabel={c.chapterLabel}
+            chapterId={c.chapterId}
+            replyToName={c.replyToName}
+            createdAt={c.createdAt}
+            initialHidden={c.hidden}
+            reportCount={c.reportCount}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Tabs — client-side only, same as the manga detail page's
@@ -280,32 +339,58 @@ export default function AdminDashboard({
         <section>
           <AdminSearchInput value={userSearch} onChange={setUserSearch} placeholder="Search by name or email…" />
 
-          <div className="border border-border rounded-md overflow-hidden mt-4">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-surface text-fg-secondary text-xs">
-                    <th className="text-left px-4 py-2">Name</th>
-                    <th className="text-left px-4 py-2">Email</th>
-                    <th className="text-left px-4 py-2">Joined</th>
-                    <th className="text-left px-4 py-2">Role</th>
-                    <th className="text-left px-4 py-2">Comments</th>
-                    <th className="text-left px-4 py-2"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-6 text-center text-sm text-fg-secondary">
-                        No users match &quot;{userSearch}&quot;.
-                      </td>
-                    </tr>
-                  )}
-                  {filteredUsers.map((u) => {
-                    const userComments = comments.filter((c) => c.userId === u.id);
-                    const isExpanded = expandedUserId === u.id;
+          {filteredUsers.length === 0 && (
+            <div className="border border-border rounded-md bg-surface/60 py-6 px-4 mt-4 text-center text-sm text-fg-secondary">
+              No users match &quot;{userSearch}&quot;.
+            </div>
+          )}
 
-                    return (
+          {/* Phones: one card per user. The 6-column table only fit by
+              scrolling sideways there. Same controls as the table rows
+              below (shared helpers), just stacked. */}
+          {filteredUsers.length > 0 && (
+            <ul className="sm:hidden mt-4 flex flex-col gap-3">
+              {filteredUsers.map((u) => (
+                <li key={u.id} className="border border-border rounded-md bg-surface/60 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-fg font-medium truncate">
+                        {u.name ? formatUsername(u.name, u.tag) : "—"}
+                      </div>
+                      <div className="text-sm text-fg-secondary truncate">{u.email}</div>
+                      <div className="text-xs text-fg-muted mt-0.5">
+                        Joined <LocalDate date={u.created_at} />
+                      </div>
+                    </div>
+                    <div className="shrink-0">{roleControl(u)}</div>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-border">
+                    {commentsButton(u)}
+                    {deleteControl(u)}
+                  </div>
+                  {expandedUserId === u.id && <div className="mt-3">{userCommentList(u)}</div>}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* sm and up: the table */}
+          {filteredUsers.length > 0 && (
+            <div className="hidden sm:block border border-border rounded-md overflow-hidden mt-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-surface text-fg-secondary text-xs">
+                      <th className="text-left px-4 py-2">Name</th>
+                      <th className="text-left px-4 py-2">Email</th>
+                      <th className="text-left px-4 py-2">Joined</th>
+                      <th className="text-left px-4 py-2">Role</th>
+                      <th className="text-left px-4 py-2">Comments</th>
+                      <th className="text-left px-4 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u) => (
                       <Fragment key={u.id}>
                         <tr className="border-t border-border hover:bg-surface/40 transition-colors duration-200">
                           <td className="px-4 py-2 text-fg whitespace-nowrap">
@@ -315,72 +400,25 @@ export default function AdminDashboard({
                           <td className="px-4 py-2 text-fg-secondary whitespace-nowrap">
                             <LocalDate date={u.created_at} />
                           </td>
-                          <td className="px-4 py-2">
-                            {/* No dropdown on your own row — changing your
-                                own role would drop your admin access
-                                instantly (the API refuses it too). */}
-                            {u.id === currentUserId ? (
-                              <span className="text-sm text-fg-secondary whitespace-nowrap">
-                                {u.role === "admin" ? "Admin" : u.role === "author" ? "Author" : "Reader"} (you)
-                              </span>
-                            ) : (
-                              <AdminUserRoleSelect
-                                userId={u.id}
-                                currentRole={u.role}
-                                userLabel={u.name ? formatUsername(u.name, u.tag) : u.email}
-                              />
-                            )}
-                          </td>
-                          <td className="px-4 py-2">
-                            <button
-                              type="button"
-                              onClick={() => toggleUserComments(u.id)}
-                              disabled={userComments.length === 0}
-                              className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
-                            >
-                              {userComments.length} {isExpanded ? "− Close" : "· View"}
-                            </button>
-                          </td>
-                          <td className="px-4 py-2">
-                            {u.id !== currentUserId && (
-                              <AdminUserDeleteButton
-                                userId={u.id}
-                                userLabel={u.name ? formatUsername(u.name, u.tag) : u.email}
-                              />
-                            )}
-                          </td>
+                          <td className="px-4 py-2">{roleControl(u)}</td>
+                          <td className="px-4 py-2">{commentsButton(u)}</td>
+                          <td className="px-4 py-2">{deleteControl(u)}</td>
                         </tr>
 
-                        {isExpanded && (
+                        {expandedUserId === u.id && (
                           <tr className="border-t border-border bg-bg/40">
                             <td colSpan={6} className="p-3">
-                              <div className="flex flex-col gap-2">
-                                {userComments.map((c) => (
-                                  <AdminCommentRow
-                                    key={c.id}
-                                    commentId={c.id}
-                                    body={c.body}
-                                    userName={c.userName}
-                                    userTag={c.userTag}
-                                    chapterLabel={c.chapterLabel}
-                                    chapterId={c.chapterId}
-                                    replyToName={c.replyToName}
-                                    createdAt={c.createdAt}
-                                    initialHidden={c.hidden}
-                                    reportCount={c.reportCount}
-                                  />
-                                ))}
-                              </div>
+                              {userCommentList(u)}
                             </td>
                           </tr>
                         )}
                       </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </section>
       )}
 
