@@ -6,6 +6,7 @@ import AdminCommentRow from "./AdminCommentRow";
 import AdminSearchInput from "./AdminSearchInput";
 import { useDebounced, usePagedList } from "./usePagedList";
 import type { AdminCommentItem } from "@/lib/admin-lists";
+import { useTranslations } from "next-intl";
 
 interface AdminCommentListProps {
   // Only this user's comments (the Users tab's per-user view) — no search
@@ -27,9 +28,11 @@ export default function AdminCommentList({
   userId,
   canDelete = true,
   reportedTotal,
-  searchPlaceholder = "Search by user, manga, or text…",
-  emptyText = "No comments yet.",
+  searchPlaceholder,
+  emptyText,
 }: AdminCommentListProps) {
+  const t = useTranslations("AdminComments");
+  const tCommon = useTranslations("Common");
   const [search, setSearch] = useState("");
   const [reportedOnly, setReportedOnly] = useState(false);
   const q = useDebounced(search.trim());
@@ -43,7 +46,7 @@ export default function AdminCommentList({
     <div>
       {showControls && (
         <>
-          <AdminSearchInput value={search} onChange={setSearch} placeholder={searchPlaceholder} />
+          <AdminSearchInput value={search} onChange={setSearch} placeholder={searchPlaceholder ?? t("searchDefault")} />
           {/* Moderation shortcut: just the comments readers have reported. */}
           <button
             type="button"
@@ -56,23 +59,23 @@ export default function AdminCommentList({
                 : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
             }
           >
-            Reported only{reportedTotal !== undefined && ` (${reportedTotal})`}
+            {reportedTotal !== undefined ? t("reportedOnlyCount", { count: reportedTotal }) : t("reportedOnly")}
           </button>
         </>
       )}
 
       {items === null ? (
-        <ListRowSkeletons label="Loading comments…" />
+        <ListRowSkeletons label={t("loading")} />
       ) : items.length === 0 ? (
         <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
           <p className="text-fg-secondary text-sm">
             {error
-              ? "Couldn't load comments — please try again."
+              ? t("loadFailed")
               : q
-                ? <>No comments match &quot;{q}&quot;{reportedOnly && " among reported ones"}.</>
+                ? t(reportedOnly ? "noMatchReported" : "noMatch", { query: q })
                 : reportedOnly
-                  ? "No reported comments."
-                  : emptyText}
+                  ? t("noReported")
+                  : (emptyText ?? t("emptyDefault"))}
           </p>
         </div>
       ) : (
@@ -101,7 +104,7 @@ export default function AdminCommentList({
               />
             ))}
           </div>
-          {error && <p className="text-xs text-danger-text mt-3">Couldn&apos;t load more — please try again.</p>}
+          {error && <p className="text-xs text-danger-text mt-3">{t("loadMoreFailed")}</p>}
           {hasMore && (
             <div className="flex justify-center mt-4">
               <button
@@ -110,7 +113,7 @@ export default function AdminCommentList({
                 disabled={isLoadingMore}
                 className="text-sm px-4 py-2 border border-border rounded-md text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-50 transition-colors duration-200"
               >
-                {isLoadingMore ? "Loading…" : "Show more"}
+                {isLoadingMore ? tCommon("loading") : tCommon("showMore")}
               </button>
             </div>
           )}

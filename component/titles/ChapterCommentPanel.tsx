@@ -7,6 +7,8 @@ import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { X, Send, Heart, Flag, Reply } from "lucide-react";
 import { timeAgo } from "@/lib/time-ago";
 import { formatUsername } from "@/lib/format-username";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 interface CommentUser {
   id: string;
@@ -94,6 +96,8 @@ export default function ChapterCommentPanel({
   onCommentPosted,
   onCommentsSeen,
 }: ChapterCommentPanelProps) {
+  const t = useTranslations("Comments");
+  const locale = useLocale() as Locale;
   const [comments, setComments] = useState<ThreadItem[] | null>(null);
   // Whether the API has older comments beyond what's loaded — it serves
   // the newest page first, older pages on demand ("Show older comments").
@@ -195,7 +199,7 @@ export default function ChapterCommentPanel({
       setComments((prev) => [...data.comments, ...(prev ?? [])]);
       setHasOlder(data.hasMore);
     } catch {
-      setError("Couldn't load older comments — please try again.");
+      setError(t("loadOlderFailed"));
     } finally {
       setIsLoadingOlder(false);
     }
@@ -217,7 +221,7 @@ export default function ChapterCommentPanel({
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Failed to post comment.");
+        setError(data?.error ?? t("postFailed"));
         return;
       }
 
@@ -240,7 +244,7 @@ export default function ChapterCommentPanel({
       onCommentPosted?.();
       onCommentsSeenRef.current?.(created.created_at);
     } catch {
-      setError("Network error — please try again.");
+      setError(t("network"));
     } finally {
       setIsSubmitting(false);
     }
@@ -283,9 +287,9 @@ export default function ChapterCommentPanel({
   // straight away; on failure, put the button back and say why.
   async function reportComment(comment: CommentItem) {
     const confirmed = await confirmDialog({
-      title: "Report this comment?",
-      message: "The moderators will be asked to take a look at it.",
-      confirmLabel: "Report",
+      title: t("reportTitle"),
+      message: t("reportMessage"),
+      confirmLabel: t("report"),
       tone: "question",
     });
     if (!confirmed) return;
@@ -294,11 +298,11 @@ export default function ChapterCommentPanel({
       const res = await fetch(`/api/comments/${comment.id}/report`, { method: "POST" });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? "Couldn't report this comment.");
+        throw new Error(data?.error ?? t("reportFailed"));
       }
     } catch (err) {
       setComments((prev) => mapComment(prev, comment.id, (c) => ({ ...c, reportedByMe: false })));
-      setError(err instanceof Error ? err.message : "Couldn't report this comment.");
+      setError(err instanceof Error ? err.message : t("reportFailed"));
     }
   }
 
@@ -326,7 +330,7 @@ export default function ChapterCommentPanel({
     setComments((prev) =>
       mapComment(prev, comment.id, (c) => ({ ...c, likedByMe: comment.likedByMe, likeCount: comment.likeCount }))
     );
-    await alertRequestFailed(optimisticLiked ? "Couldn't like comment" : "Couldn't unlike comment", res);
+    await alertRequestFailed(optimisticLiked ? t("likeFailed") : t("unlikeFailed"), res);
   }
 
   // One comment's markup — a thread's top comment or a reply (smaller
@@ -337,7 +341,7 @@ export default function ChapterCommentPanel({
       return (
         <div key={c.id} id={`comment-${c.id}`} className="flex gap-2.5">
           <span className={`${avatarSize} rounded-full bg-bg border border-border shrink-0`} />
-          <p className="text-sm text-fg-muted italic self-center">This comment was hidden by a moderator.</p>
+          <p className="text-sm text-fg-muted italic self-center">{t("hidden")}</p>
         </div>
       );
     }
@@ -348,7 +352,7 @@ export default function ChapterCommentPanel({
           className={`relative ${avatarSize} rounded-full overflow-hidden bg-bg border border-border flex items-center justify-center shrink-0`}
         >
           {c.user.image ? (
-            <Image src={c.user.image} alt={c.user.name ?? "User"} fill sizes="32px" className="object-cover" />
+            <Image src={c.user.image} alt={c.user.name ?? t("user")} fill sizes="32px" className="object-cover" />
           ) : (
             <span className="text-xs text-fg">{(c.user.name ?? "?").charAt(0).toUpperCase()}</span>
           )}
@@ -356,7 +360,7 @@ export default function ChapterCommentPanel({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="text-sm text-fg font-medium truncate">{author}</span>
-            <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at))}</span>
+            <span className="text-xs text-fg-muted shrink-0">{timeAgo(new Date(c.created_at), INTL_LOCALE[locale])}</span>
           </div>
           <p className="text-sm text-fg-secondary whitespace-pre-wrap break-words mt-0.5">{c.body}</p>
           <div className="flex items-center gap-4 mt-1">
@@ -364,7 +368,7 @@ export default function ChapterCommentPanel({
               type="button"
               onClick={() => toggleLike(c)}
               aria-pressed={c.likedByMe}
-              aria-label={c.likedByMe ? "Unlike this comment" : "Like this comment"}
+              aria-label={c.likedByMe ? t("unlike") : t("like")}
               className={`flex items-center gap-1 text-xs transition-colors duration-200 ${
                 c.likedByMe ? "text-danger-text" : "text-fg-muted hover:text-fg-secondary"
               }`}
@@ -375,11 +379,11 @@ export default function ChapterCommentPanel({
             <button
               type="button"
               onClick={() => startReply(thread, c)}
-              aria-label={`Reply to ${author}`}
+              aria-label={t("replyTo", { name: author })}
               className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
             >
               <Reply className="w-3.5 h-3.5" />
-              Reply
+              {t("reply")}
             </button>
             {/* Report — only on other people's comments. Stays as a quiet
                 "Reported" once sent (one per reader). */}
@@ -387,17 +391,17 @@ export default function ChapterCommentPanel({
               (c.reportedByMe ? (
                 <span className="flex items-center gap-1 text-xs text-fg-muted">
                   <Flag className="w-3.5 h-3.5" />
-                  Reported
+                  {t("reported")}
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => reportComment(c)}
-                  aria-label={`Report comment by ${author}`}
+                  aria-label={t("reportBy", { name: author })}
                   className="flex items-center gap-1 text-xs text-fg-muted hover:text-fg-secondary transition-colors duration-200"
                 >
                   <Flag className="w-3.5 h-3.5" />
-                  Report
+                  {t("report")}
                 </button>
               ))}
           </div>
@@ -422,11 +426,11 @@ export default function ChapterCommentPanel({
         }`}
       >
         <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
-          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide">Comments</h2>
+          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide">{t("title")}</h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close comments"
+            aria-label={t("close")}
             className="p-1.5 text-fg-secondary hover:text-fg transition-colors duration-200"
           >
             <X className="w-5 h-5" />
@@ -438,7 +442,7 @@ export default function ChapterCommentPanel({
             <CommentSkeletons />
           ) : comments.length === 0 ? (
             <p className="text-sm text-fg-muted text-center py-8">
-              No comments yet — be the first to say something.
+              {t("empty")}
             </p>
           ) : (
             <>
@@ -449,7 +453,7 @@ export default function ChapterCommentPanel({
                 disabled={isLoadingOlder}
                 className="self-center text-xs text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
               >
-                {isLoadingOlder ? "Loading…" : "Show older comments"}
+                {isLoadingOlder ? t("loadingOlder") : t("showOlder")}
               </button>
             )}
             {comments.map((thread) => {
@@ -471,7 +475,7 @@ export default function ChapterCommentPanel({
                           onClick={() => setExpandedThreads((prev) => new Set(prev).add(thread.id))}
                           className="self-start text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
                         >
-                          Show {hiddenCount} earlier {hiddenCount === 1 ? "reply" : "replies"}
+                          {t("showEarlierReplies", { count: hiddenCount })}
                         </button>
                       )}
                       {shownReplies.map((reply) => renderComment(reply, thread, true))}
@@ -489,12 +493,15 @@ export default function ChapterCommentPanel({
           {replyTo && (
             <div className="flex items-center justify-between gap-2 mb-2 text-xs text-fg-secondary">
               <span className="truncate">
-                Replying to <span className="text-fg font-medium">{replyTo.name}</span>
+                {t.rich("replyingTo", {
+                  name: replyTo.name,
+                  b: (chunks) => <span className="text-fg font-medium">{chunks}</span>,
+                })}
               </span>
               <button
                 type="button"
                 onClick={cancelReply}
-                aria-label="Cancel reply"
+                aria-label={t("cancelReply")}
                 className="shrink-0 p-1 text-fg-muted hover:text-fg transition-colors duration-200"
               >
                 <X className="w-3.5 h-3.5" />
@@ -509,8 +516,8 @@ export default function ChapterCommentPanel({
               onKeyDown={handleTextareaKeyDown}
               placeholder={
                 replyTo
-                  ? `Reply to ${replyTo.name}…`
-                  : "Add a comment… (Enter to send, Shift+Enter for a new line)"
+                  ? t("replyPlaceholder", { name: replyTo.name })
+                  : t("placeholder")
               }
               rows={3}
               maxLength={MAX_BODY_LENGTH}
@@ -519,7 +526,7 @@ export default function ChapterCommentPanel({
             <button
               type="submit"
               disabled={!draft.trim() || isSubmitting}
-              aria-label={replyTo ? "Post reply" : "Post comment"}
+              aria-label={replyTo ? t("postReply") : t("post")}
               className="shrink-0 p-2.5 bg-fg text-bg rounded-md hover:bg-fg/85 disabled:opacity-40 transition-colors duration-200"
             >
               <Send className="w-4 h-4" />

@@ -8,6 +8,8 @@ import { Check, X, Pencil, ArrowUpRight, Camera } from "lucide-react";
 import { processImageForUpload } from "@/lib/image-processing";
 import LocalDate from "@/component/LocalDate";
 import { displayNameSchema, MAX_DISPLAY_NAME_LENGTH } from "@/lib/signup-schema";
+import { useTranslations } from "next-intl";
+import { useValidationMessage } from "@/component/useAuthErrorMessage";
 
 interface ProfileEditFormProps {
   initialName: string;
@@ -28,6 +30,9 @@ export default function ProfileEditForm({
   createdAt,
   stats,
 }: ProfileEditFormProps) {
+  const t = useTranslations("ProfileForm");
+  // schema/API errors arrive as Validation keys (lib/signup-schema.ts)
+  const validationMessage = useValidationMessage();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -56,14 +61,14 @@ export default function ProfileEditForm({
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Failed to save.");
+        setError(data?.error ? validationMessage(data.error) : t("saveFailed"));
         return false;
       }
 
       router.refresh();
       return true;
     } catch {
-      setError("Network error — please try again.");
+      setError(t("networkError"));
       return false;
     } finally {
       setIsSaving(false);
@@ -84,7 +89,7 @@ export default function ProfileEditForm({
     try {
       processed = await processImageForUpload(file, { aspectRatio: 1 });
     } catch {
-      setError("Couldn't read that image — please try a different file.");
+      setError(t("imageUnreadable"));
       setIsUploading(false);
       e.target.value = "";
       return;
@@ -97,13 +102,13 @@ export default function ProfileEditForm({
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Upload failed");
+        setError(data.error ?? t("uploadFailed"));
         return;
       }
       // Only show the new avatar once it's actually saved to the profile.
       if (await saveProfile({ image: data.url })) setImage(data.url);
     } catch {
-      setError("Upload failed — please try again.");
+      setError(t("uploadFailedRetry"));
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -122,7 +127,7 @@ export default function ProfileEditForm({
     // Same rule as signup and the server (lib/signup-schema.ts).
     const parsed = displayNameSchema.safeParse(name);
     if (!parsed.success) {
-      setError(parsed.error.issues[0].message);
+      setError(validationMessage(parsed.error.issues[0].message));
       return;
     }
 
@@ -159,7 +164,7 @@ export default function ProfileEditForm({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          aria-label={isUploading ? "Uploading profile picture" : "Change profile picture"}
+          aria-label={isUploading ? t("uploadingPicture") : t("changePicture")}
           // Password-manager/form-filler extensions tag interactive elements
           // with a `fdprocessedid` attribute before React hydrates, which
           // React would otherwise flag as a hydration mismatch even though
@@ -177,7 +182,7 @@ export default function ProfileEditForm({
             // content size — a large upload was blowing the column out to
             // its native resolution. fill's own absolute positioning
             // removes it from that sizing pass entirely.
-            <NextImage src={image} alt="Avatar" fill sizes="112px" className="object-cover" />
+            <NextImage src={image} alt={t("avatar")} fill sizes="112px" className="object-cover" />
           ) : (
             <span className="w-full h-full flex items-center justify-center text-4xl text-fg-secondary font-(family-name:--font-display)">
               {name.charAt(0).toUpperCase() || "?"}
@@ -194,7 +199,7 @@ export default function ProfileEditForm({
               (isUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100")
             }
           >
-            {isUploading ? "Uploading…" : "Change"}
+            {isUploading ? t("uploading") : t("change")}
           </span>
 
           {/* Always-visible camera badge — touch screens have no hover, so
@@ -224,7 +229,7 @@ export default function ProfileEditForm({
             blur/Enter instead of a separate Save button */}
         <div>
           <label htmlFor="name" className="block text-xs text-fg-secondary mb-1">
-            Display name
+            {t("displayName")}
           </label>
 
           {/* items-baseline: the error / "Saving…" text sits on the same text
@@ -255,7 +260,7 @@ export default function ProfileEditForm({
                     type="button"
                     onClick={confirmNameEdit}
                     disabled={isSaving}
-                    aria-label="Confirm name change"
+                    aria-label={t("confirmName")}
                     className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-success disabled:opacity-50 transition-colors"
                   >
                     <Check className="w-4 h-4" />
@@ -264,7 +269,7 @@ export default function ProfileEditForm({
                     type="button"
                     onClick={cancelNameEdit}
                     disabled={isSaving}
-                    aria-label="Cancel name change"
+                    aria-label={t("cancelName")}
                     className="w-10 h-10 flex items-center justify-center text-fg-muted hover:text-danger-text disabled:opacity-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
@@ -274,7 +279,7 @@ export default function ProfileEditForm({
                 <button
                   type="button"
                   onClick={startEditingName}
-                  aria-label="Edit display name"
+                  aria-label={t("editName")}
                   suppressHydrationWarning
                   className="absolute -right-3 bottom-0 w-10 h-10 flex items-center justify-center text-fg-muted hover:text-fg transition-colors"
                 >
@@ -284,14 +289,14 @@ export default function ProfileEditForm({
             </div>
 
             {error && <p className="text-sm text-danger-text">{error}</p>}
-            {isSaving && <p className="text-xs text-fg-muted whitespace-nowrap">Saving…</p>}
+            {isSaving && <p className="text-xs text-fg-muted whitespace-nowrap">{t("saving")}</p>}
           </div>
 
           {/* Fixed for the life of the account (see User.tag in the
               schema) — shown here, not editable, so people understand
               their full identity elsewhere (comments, admin) is
               name#tag, not just the name they can freely change above. */}
-          {tag && <p className="text-xs text-fg-muted mt-2">Your tag is #{tag} — shown as {name}#{tag}, and never changes.</p>}
+          {tag && <p className="text-xs text-fg-muted mt-2">{t("tagNote", { tag, name })}</p>}
         </div>
 
         {/* Email / member-since, with a role badge and the manage-manga
@@ -302,12 +307,14 @@ export default function ProfileEditForm({
           <div>
             {role !== "reader" && (
               <span className="inline-flex mb-2 px-2 py-0.5 rounded-full border border-fg/25 text-xs font-medium text-fg">
-                {role === "admin" ? "Admin" : "Author"}
+                {role === "admin" ? t("roleAdmin") : t("roleAuthor")}
               </span>
             )}
             <p className="text-sm text-fg-secondary">{email}</p>
             <p className="text-xs text-fg-muted mt-1">
-              Member since <LocalDate date={createdAt} options={{ month: "long", year: "numeric" }} />
+              {t.rich("memberSince", {
+                date: () => <LocalDate date={createdAt} options={{ month: "long", year: "numeric" }} />,
+              })}
             </p>
           </div>
 
@@ -316,7 +323,7 @@ export default function ProfileEditForm({
               href={role === "admin" ? "/admin" : "/manage"}
               className="self-start shrink-0 flex items-center h-9 px-4 rounded-md border border-fg/25 text-sm font-medium text-fg hover:border-fg/60 transition-colors duration-200"
             >
-              {role === "admin" ? "Admin panel" : "Manage manga"}
+              {role === "admin" ? t("adminPanel") : t("manageManga")}
             </Link>
           )}
         </div>

@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 import { setTheme, subscribeToTheme, getCurrentTheme, type Theme } from "@/lib/theme";
+import { useTranslations } from "next-intl";
 
 function getServerSnapshot(): Theme {
   return "dark";
@@ -17,6 +18,7 @@ interface ThemeToggleProps {
 }
 
 export default function ThemeToggle({ variant = "icon" }: ThemeToggleProps) {
+  const t = useTranslations("Theme");
   const theme = useSyncExternalStore(subscribeToTheme, getCurrentTheme, getServerSnapshot);
 
   function handleToggle() {
@@ -24,7 +26,7 @@ export default function ThemeToggle({ variant = "icon" }: ThemeToggleProps) {
   }
 
   const Icon = theme === "dark" ? Moon : Sun;
-  const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+  const label = theme === "dark" ? t("toLight") : t("toDark");
 
   if (variant === "menuitem") {
     // A fixed "Light mode" label with an on/off switch, rather than a
@@ -43,7 +45,7 @@ export default function ThemeToggle({ variant = "icon" }: ThemeToggleProps) {
         className="flex items-center gap-3 px-4 py-2.5 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
       >
         <Sun className="w-4 h-4 shrink-0" />
-        <span className="whitespace-nowrap">Light mode</span>
+        <span className="whitespace-nowrap">{t("lightMode")}</span>
         <span
           aria-hidden="true"
           className={`ml-auto relative w-8 h-4.5 shrink-0 rounded-full transition-colors duration-200 ${

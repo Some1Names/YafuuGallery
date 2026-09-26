@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { recordSearch } from "@/lib/recent-searches";
 import { DEFAULT_SORT, searchHref, type SearchFilters } from "@/lib/search-filters";
+import { useTranslations } from "next-intl";
 
 interface SearchInputProps {
   // The query the page was rendered for (?q=), already trimmed.
@@ -26,6 +27,7 @@ const MIN_AUTO_SEARCH_CHARS = 2;
 // entries. Enter searches immediately and is what counts as a "committed"
 // search for recent-search history (keystrokes don't).
 export default function SearchInput({ initialQuery, filters }: SearchInputProps) {
+  const t = useTranslations("Search");
   const router = useRouter();
   const [value, setValue] = useState(initialQuery);
   const [isPending, startTransition] = useTransition();
@@ -94,7 +96,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
       {filters.sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={filters.sort} />}
       <div className="relative max-w-xl">
         <label htmlFor="search-input" className="sr-only">
-          Search manga
+          {t("inputLabel")}
         </label>
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-muted" aria-hidden="true" />
         <input
@@ -104,7 +106,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
           name="q"
           value={value}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder="Title, author or chapter"
+          placeholder={t("placeholder")}
           autoComplete="off"
           className="w-full bg-surface border border-border rounded-md pl-10 pr-10 py-2.5 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-fg-secondary transition-colors duration-200"
         />
@@ -114,7 +116,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
           <button
             type="button"
             onClick={handleClear}
-            aria-label="Clear search"
+            aria-label={t("clear")}
             // p-3: a 40px tap area; right-0.5 keeps the icon where it was
             className="absolute right-0.5 top-1/2 -translate-y-1/2 p-3 text-fg-muted hover:text-fg transition-colors duration-200"
           >

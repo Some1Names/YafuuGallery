@@ -5,17 +5,21 @@ import RemoveFromHistoryButton from "./RemoveFromHistoryButton";
 import { formatChapterBadge } from "@/lib/chapter-number";
 import { timeAgo } from "@/lib/time-ago";
 import type { ReadingHistoryItem } from "@/lib/reading-history";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
-function progressLabel(item: ReadingHistoryItem): string {
-  if (item.completed) return "Finished";
-  if (item.lastPage > 1) return `Stopped on page ${item.lastPage}`;
-  return "Opened";
+function progressLabel(item: ReadingHistoryItem, t: ReturnType<typeof useTranslations<"History">>): string {
+  if (item.completed) return t("finished");
+  if (item.lastPage > 1) return t("stoppedOnPage", { page: item.lastPage });
+  return t("opened");
 }
 
 // One /history entry. Same row look as Favorites → Updates. The remove
 // button is a sibling positioned over the row's right edge, not inside the
 // link (a button inside an <a> is invalid HTML — see MangaCard).
 export default function HistoryRow({ item }: { item: ReadingHistoryItem }) {
+  const t = useTranslations("History");
+  const locale = useLocale() as Locale;
   const badge = formatChapterBadge(item.chapterIsEx, item.displayNumber);
   return (
     <div className="relative">
@@ -41,9 +45,9 @@ export default function HistoryRow({ item }: { item: ReadingHistoryItem }) {
             </span>
           </div>
           <div className="mt-0.5 text-xs text-fg-muted">
-            <span className={item.completed ? "text-fg-secondary" : undefined}>{progressLabel(item)}</span>
+            <span className={item.completed ? "text-fg-secondary" : undefined}>{progressLabel(item, t)}</span>
             {" · "}
-            {timeAgo(item.readAt)}
+            {timeAgo(item.readAt, INTL_LOCALE[locale])}
           </div>
         </div>
       </Link>

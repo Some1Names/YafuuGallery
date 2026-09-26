@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
+import { useTranslations } from "next-intl";
 
 interface ContinueReadingCardProps {
   chapterId: string;
@@ -28,6 +29,7 @@ export default function ContinueReadingCard({
   isNext = false,
   className = "",
 }: ContinueReadingCardProps) {
+  const t = useTranslations("Card");
   return (
     <Link
       href={`/viewer/${chapterId}`}
@@ -49,7 +51,7 @@ export default function ContinueReadingCard({
       {/* Fixed colors, not theme tokens — it sits on cover art. */}
       {isNext && (
         <div className="absolute top-2 left-2 px-2 py-0.5 rounded-sm bg-neutral-900/80 backdrop-blur-sm text-white text-xs font-semibold">
-          Up next
+          {t("upNext")}
         </div>
       )}
 

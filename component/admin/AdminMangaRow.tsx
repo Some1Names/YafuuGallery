@@ -18,6 +18,7 @@ import { knownGenres, type GenreSlug, type MangaStatusValue } from "@/lib/genres
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import SynopsisField from "@/component/manga/SynopsisField";
 import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
+import { useTranslations } from "next-intl";
 
 interface ChapterItem {
   id: string;
@@ -96,6 +97,8 @@ export default function AdminMangaRow({
   isFeatured = false,
   storageBytes,
 }: AdminMangaRowProps) {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [editTitle, setEditTitle] = useState(title);
   const [editSynopsis, setEditSynopsis] = useState(synopsis);
@@ -114,7 +117,7 @@ export default function AdminMangaRow({
       body: JSON.stringify({ is_featured: !isFeatured }),
     }).catch(() => null);
     setIsTogglingFeatured(false);
-    if (!res?.ok) return alertRequestFailed(isFeatured ? "Couldn't unfeature manga" : "Couldn't feature manga", res);
+    if (!res?.ok) return alertRequestFailed(isFeatured ? t("unfeatureFailed") : t("featureFailed"), res);
     router.refresh();
   }
 
@@ -188,14 +191,14 @@ export default function AdminMangaRow({
 
   async function remove() {
     const confirmed = await confirmDialog({
-      title: `Delete "${title}"?`,
-      message: "All its arcs and chapters are deleted too. This can't be undone.",
-      confirmLabel: "Delete manga",
+      title: t("deleteManga.title", { title }),
+      message: t("deleteManga.message"),
+      confirmLabel: t("deleteManga.confirm"),
       tone: "danger",
     });
     if (!confirmed) return;
     const res = await fetch(`/api/admin/manga/${id}`, { method: "DELETE" }).catch(() => null);
-    if (!res?.ok) return alertRequestFailed("Couldn't delete manga", res);
+    if (!res?.ok) return alertRequestFailed(t("deleteManga.failed"), res);
     router.refresh();
   }
 
@@ -208,20 +211,20 @@ export default function AdminMangaRow({
         }}
         className="border border-border rounded-md p-4 sm:p-8 md:p-12 bg-surface flex flex-col gap-4"
       >
-        <h3 className="text-lg text-fg font-(family-name:--font-display)">Edit Manga Title</h3>
+        <h3 className="text-lg text-fg font-(family-name:--font-display)">{t("editMangaHeading")}</h3>
 
         {/* Same layout as the create form — one shared grid, 3fr:16fr
             columns, label/field rows col-span the full row on mobile */}
         <div className="grid grid-cols-2 sm:grid-cols-[3fr_16fr] gap-x-7 gap-y-4">
           <AdminImageUploadButton
-            label="Cover"
+            label={t("cover")}
             value={editCoverImageUrl}
             onChange={setEditCoverImageUrl}
             boxClassName="w-full aspect-2/3"
             aspectRatio={2 / 3}
           />
           <AdminImageUploadButton
-            label="Banner"
+            label={t("banner")}
             // phones: full width, above the cover (see MangaCreateForm)
             className="order-first col-span-2 sm:order-none sm:col-span-1"
             value={editBannerImageUrl}
@@ -231,7 +234,7 @@ export default function AdminMangaRow({
           />
 
           <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-            Manga Title
+            {t("mangaTitle")}
           </label>
           <input
             value={editTitle}
@@ -242,7 +245,7 @@ export default function AdminMangaRow({
           />
 
           <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-            Synopsis
+            {t("synopsis")}
           </label>
           <SynopsisField value={editSynopsis} onChange={setEditSynopsis} />
 
@@ -260,14 +263,14 @@ export default function AdminMangaRow({
             onClick={onToggleEdit}
             className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
           >
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="submit"
             disabled={isSaving}
             className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
           >
-            {isSaving ? "Saving…" : "Save"}
+            {isSaving ? t("saving") : tCommon("save")}
           </button>
         </div>
       </form>
@@ -293,7 +296,7 @@ export default function AdminMangaRow({
               : "text-fg-secondary hover:text-fg"
           }`}
         >
-          Arc
+          {t("arcTab")}
           <span className="text-xs text-fg-muted">{arcs.length}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -311,7 +314,7 @@ export default function AdminMangaRow({
               : "text-fg-secondary hover:text-fg"
           }`}
         >
-          Chapters
+          {t("chaptersTab")}
           <span className="text-xs text-fg-muted">{chapters.length}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
@@ -378,7 +381,7 @@ export default function AdminMangaRow({
                 <button
                   onClick={toggleFeatured}
                   disabled={isTogglingFeatured}
-                  title={isFeatured ? "Remove from home page carousel" : "Add to home page carousel"}
+                  title={isFeatured ? t("featureRemove") : t("featureAdd")}
                   className={`flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded transition-colors duration-200 disabled:opacity-50 ${
                     isFeatured
                       ? "border-fg/50 text-fg bg-fg/10 hover:bg-fg/15"
@@ -386,20 +389,20 @@ export default function AdminMangaRow({
                   }`}
                 >
                   <Star className={`w-3.5 h-3.5 ${isFeatured ? "fill-current" : ""}`} />
-                  Featured
+                  {t("featured")}
                 </button>
               )}
               <button
                 onClick={onToggleEdit}
                 className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
               >
-                Edit
+                {tCommon("edit")}
               </button>
               <button
                 onClick={remove}
                 className="text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
               >
-                Delete
+                {tCommon("delete")}
               </button>
             </div>
           </div>

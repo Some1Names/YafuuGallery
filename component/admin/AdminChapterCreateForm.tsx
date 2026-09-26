@@ -7,6 +7,7 @@ import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminCha
 import { MIN_PUBLISHED_DATE, todayLocalISODate } from "@/lib/dates";
 import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
 import { MAX_CHAPTER_NAME_LENGTH } from "@/lib/content-limits";
+import { useTranslations } from "next-intl";
 
 interface AdminChapterCreateFormProps {
   mangaId: string;
@@ -27,6 +28,8 @@ interface AdminChapterCreateFormProps {
 // flag. Collapsed to a single button by default, same open/close pattern
 // as AdminArcCreateForm/MangaCreateForm.
 export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOpen, onOpenChange }: AdminChapterCreateFormProps) {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [translations, setTranslations] = useState<ChapterTranslationDraft[]>([
@@ -93,7 +96,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Failed to create chapter.");
+        setError(data?.error ?? t("chapter.failedCreate"));
         return;
       }
 
@@ -101,7 +104,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
       onOpenChange(false);
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(t("networkError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -114,7 +117,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
         onClick={() => onOpenChange(true)}
         className="self-start px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 transition-colors duration-200"
       >
-        + Create Chapter
+        {t("chapter.create")}
       </button>
     );
   }
@@ -126,7 +129,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
     >
       <div className="flex flex-col sm:flex-row gap-4">
         <AdminImageUploadButton
-          label="Cover"
+          label={t("cover")}
           value={coverImageUrl}
           onChange={setCoverImageUrl}
           boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
@@ -137,7 +140,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-xs text-fg-secondary mb-1.5">
-                Chapter Title
+                {t("chapter.title")}
               </label>
               <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
                 <select
@@ -152,7 +155,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
                   value={chapterName}
                   maxLength={MAX_CHAPTER_NAME_LENGTH}
                   onChange={(e) => setChapterName(e.target.value)}
-                  placeholder="Chapter title"
+                  placeholder={t("chapter.titlePlaceholder")}
                   required
                   className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none"
                 />
@@ -161,14 +164,14 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
             <div className="sm:w-48">
               <label className="block text-xs text-fg-secondary mb-1.5">
-                Arc
+                {t("chapter.arc")}
               </label>
               <select
                 value={arcId}
                 onChange={(e) => setArcId(e.target.value)}
                 className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
               >
-                <option value="">No arc</option>
+                <option value="">{t("chapter.noArc")}</option>
                 {arcs.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.arc_name}
@@ -181,7 +184,7 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:w-40">
               <label className="block text-xs text-fg-secondary mb-1.5">
-                Published Date
+                {t("chapter.publishedDate")}
               </label>
               <input
                 type="date"
@@ -211,10 +214,10 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
 
       <MissingFieldsHint
         missing={[
-          !coverImageUrl && "cover",
-          !chapterName.trim() && "title",
-          !publishedDate && "date",
-          !translations.some((t) => t.url !== null) && "PDF",
+          !coverImageUrl && t("missing.cover"),
+          !chapterName.trim() && t("missing.title"),
+          !publishedDate && t("missing.date"),
+          !translations.some((tr) => tr.url !== null) && t("missing.pdf"),
         ]}
       />
 
@@ -224,14 +227,14 @@ export default function AdminChapterCreateForm({ mangaId, arcs, totalCount, isOp
           onClick={handleCancel}
           className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
         >
-          Cancel
+          {tCommon("cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !canSubmit}
           className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
-          {isSubmitting ? "Creating…" : "+ Create Chapter"}
+          {isSubmitting ? t("creating") : t("chapter.create")}
         </button>
       </div>
     </form>

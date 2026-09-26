@@ -11,6 +11,7 @@ import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 import { GENRES } from "@/lib/genres";
 import { searchHref } from "@/lib/search-filters";
+import { getTranslations } from "next-intl/server";
 
 const LATEST_PAGE_SIZE = 10;
 // One row of the 5-column grid. The Popular row only shows once the
@@ -34,7 +35,7 @@ type CardManga = {
   chapters: { id: string; chapter_number: number; chapter_is_ex: boolean; chapter_name: string }[];
 };
 
-function renderCard(manga: CardManga) {
+function renderCard(manga: CardManga, unknownAuthor: string) {
   const latest = manga.chapters.slice().sort((a, b) => b.chapter_number - a.chapter_number)[0];
   const displayNumbers = getChapterDisplayNumbers(manga.chapters);
   return (
@@ -42,7 +43,7 @@ function renderCard(manga: CardManga) {
       key={manga.id}
       id={manga.id}
       title={manga.manga_title}
-      author={manga.author.name ?? "Unknown"}
+      author={manga.author.name ?? unknownAuthor}
       coverImageUrl={manga.cover_image_url}
       latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
       latestChapterIsEx={latest?.chapter_is_ex ?? false}
@@ -93,6 +94,8 @@ export default async function BrowsePage({
   searchParams: Promise<{ page?: string | string[] }>;
 }) {
   const pageCount = parsePageCount((await searchParams).page);
+  const t = await getTranslations("Home");
+  const tGenre = await getTranslations("Genres");
   const latestLimit = pageCount * LATEST_PAGE_SIZE;
 
   // session doesn't depend on the manga queries (or vice versa), so all
@@ -211,9 +214,9 @@ export default async function BrowsePage({
                 (and 17px tall to tap). */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-border rounded-md bg-surface/60 p-4 sm:p-5">
               <div>
-                <p className="text-fg font-medium">Keep your place in every story</p>
+                <p className="text-fg font-medium">{t("signupTitle")}</p>
                 <p className="mt-0.5 text-sm text-fg-secondary">
-                  Save favorites, see new chapters, and pick up where you left off.
+                  {t("signupBody")}
                 </p>
               </div>
               <div className="flex gap-2 sm:shrink-0">
@@ -221,13 +224,13 @@ export default async function BrowsePage({
                   href="/signup"
                   className="flex-1 sm:flex-none flex items-center justify-center h-10 px-4 rounded-md bg-fg text-bg text-sm font-semibold whitespace-nowrap hover:bg-fg-hover transition-colors duration-200"
                 >
-                  Create account
+                  {t("createAccount")}
                 </Link>
                 <Link
                   href="/login"
                   className="flex-1 sm:flex-none flex items-center justify-center h-10 px-4 rounded-md border border-fg/25 text-fg text-sm font-medium whitespace-nowrap hover:border-fg/60 transition-colors duration-200"
                 >
-                  Sign in
+                  {t("signIn")}
                 </Link>
               </div>
             </div>
@@ -238,9 +241,9 @@ export default async function BrowsePage({
           <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
             <div className="max-w-350 mx-auto">
               <SectionHeader
-                eyebrow="PICK UP WHERE YOU LEFT OFF"
-                title="Continue Reading"
-                link={{ href: "/history", label: "History" }}
+                eyebrow={t("continueEyebrow")}
+                title={t("continueTitle")}
+                link={{ href: "/history", label: t("historyLink") }}
               />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
@@ -267,12 +270,12 @@ export default async function BrowsePage({
         <section className="px-6 md:px-8 pt-8 sm:pt-10 md:pt-12">
           <div className="max-w-350 mx-auto">
             <SectionHeader
-              eyebrow="MOST READ"
-              title="Popular"
-              link={{ href: searchHref({ sort: "views" }), label: "See all" }}
+              eyebrow={t("popularEyebrow")}
+              title={t("popularTitle")}
+              link={{ href: searchHref({ sort: "views" }), label: t("seeAll") }}
             />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-              {popularManga.map(renderCard)}
+              {popularManga.map((m) => renderCard(m, t("unknownAuthor")))}
             </div>
           </div>
         </section>
@@ -283,18 +286,18 @@ export default async function BrowsePage({
         <div className="max-w-350 mx-auto">
 
           <SectionHeader
-            eyebrow="RECENTLY UPDATED"
-            title="Latest Manga"
-            link={mangaList.length > 0 ? { href: "/search", label: "Browse all" } : null}
+            eyebrow={t("latestEyebrow")}
+            title={t("latestTitle")}
+            link={mangaList.length > 0 ? { href: "/search", label: t("browseAll") } : null}
           />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-            {mangaList.map(renderCard)}
+            {mangaList.map((m) => renderCard(m, t("unknownAuthor")))}
           </div>
 
           {mangaList.length === 0 && (
             <p className="text-fg-secondary text-center mt-12">
-              No manga published yet.
+              {t("noneYet")}
             </p>
           )}
 
@@ -313,9 +316,9 @@ export default async function BrowsePage({
         <section className="px-6 md:px-8 pt-12 sm:pt-16 pb-16 sm:pb-20 md:pb-28">
           <div className="max-w-350 mx-auto">
             <SectionHeader
-              eyebrow="EXPLORE"
-              title="Browse by Genre"
-              link={{ href: "/search", label: "All genres" }}
+              eyebrow={t("genresEyebrow")}
+              title={t("genresTitle")}
+              link={{ href: "/search", label: t("allGenres") }}
               className="mb-5 sm:mb-6"
             />
             <div className="-mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto [scrollbar-width:none]">
@@ -326,7 +329,7 @@ export default async function BrowsePage({
                       href={searchHref({ genre: g.slug })}
                       className="inline-flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-full border border-border bg-surface text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
                     >
-                      {g.label}
+                      {tGenre(g.slug)}
                       <span className="text-xs text-fg-muted">{genreCounts.get(g.slug)}</span>
                     </Link>
                   </li>

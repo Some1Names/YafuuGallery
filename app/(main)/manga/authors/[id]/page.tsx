@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import MangaCard from "@/component/MangaCard";
 import MangaBackground from "@/component/titles/MangaBackground";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { getTranslations } from "next-intl/server";
 
 // An author's public page: who they are and everything they've published.
 // Only exists for accounts with at least one manga — a reader-only account
@@ -40,9 +41,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const author = await getAuthor(id);
   if (!author) return {};
-  const name = author.name ?? "Unknown";
+  const t = await getTranslations("Author");
+  const name = author.name ?? t("unknown");
   const titles = author.manga.map((m) => m.manga_title);
-  const description = `Manga by ${name} on YafuuGallery: ${titles.slice(0, 5).join(", ")}${titles.length > 5 ? "…" : ""}.`;
+  const description = t("description", { name, titles: titles.slice(0, 5).join(", ") + (titles.length > 5 ? "…" : "") });
   return {
     title: name,
     description,
@@ -55,12 +57,13 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
   const author = await getAuthor(id);
   if (!author) notFound();
 
-  const name = author.name ?? "Unknown";
+  const t = await getTranslations("Author");
+  const name = author.name ?? t("unknown");
   const stats = [
-    { label: "Manga", value: author.manga.length },
-    { label: "Chapters", value: author.manga.reduce((sum, m) => sum + m.chapters.length, 0) },
-    { label: "Views", value: author.manga.reduce((sum, m) => sum + m.view_count, 0) },
-    { label: "Favorites", value: author.manga.reduce((sum, m) => sum + m._count.bookmarks, 0) },
+    { label: t("stats.manga"), value: author.manga.length },
+    { label: t("stats.chapters"), value: author.manga.reduce((sum, m) => sum + m.chapters.length, 0) },
+    { label: t("stats.views"), value: author.manga.reduce((sum, m) => sum + m.view_count, 0) },
+    { label: t("stats.favorites"), value: author.manga.reduce((sum, m) => sum + m._count.bookmarks, 0) },
   ];
 
   return (
@@ -81,7 +84,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-widest text-fg-secondary sm:text-white/70">Author</p>
+            <p className="text-xs uppercase tracking-widest text-fg-secondary sm:text-white/70">{t("eyebrow")}</p>
             <h1 className="text-3xl sm:text-4xl text-fg sm:text-white font-(family-name:--font-display) wrap-anywhere">
               {name}
               {/* the tag tells apart two authors with the same name;
@@ -107,7 +110,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
         </div>
 
         <h2 className="text-xl text-fg mb-5 font-(family-name:--font-display)">
-          Manga by {name}
+          {t("mangaBy", { name })}
           <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
             {author.manga.length}
           </span>

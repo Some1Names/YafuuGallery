@@ -5,6 +5,8 @@ import MangaFavoriteButton from "./titles/MangaFavoriteButton";
 import NoImagePlaceholder from "./NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
 import { isOlderThan, timeAgo } from "@/lib/time-ago";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 interface MangaCardProps {
   id: string;
@@ -40,6 +42,8 @@ export default function MangaCard({
   isFavorited,
   newChapterCount = 0,
 }: MangaCardProps) {
+  const t = useTranslations("Card");
+  const locale = useLocale() as Locale;
   // A server component, rendered once per request — reading the clock
   // here (as timeAgo below does too) can't cause a re-render mismatch.
   const isStale = isOlderThan(updatedAt, WEEK_MS);
@@ -82,12 +86,12 @@ export default function MangaCard({
             }
           >
             <Clock className="w-3.5 h-3.5" strokeWidth={2.5} />
-            {timeAgo(updatedAt)}
+            {timeAgo(updatedAt, INTL_LOCALE[locale])}
           </div>
   
           {newChapterCount > 0 && (
             <div className="absolute bottom-2 left-2 px-2 py-1 rounded-sm bg-red-600 text-white text-xs font-bold tracking-wide shadow-md">
-              {newChapterCount} NEW
+              {t("newCount", { count: newChapterCount })}
             </div>
           )}
 
@@ -115,7 +119,7 @@ export default function MangaCard({
           <div className="text-gray-500 text-base">
             {latestChapterName !== null
               ? formatChapterBadge(latestChapterIsEx, latestChapterDisplayNumber ?? undefined)
-              : "No chapters yet"}
+              : t("noChapters")}
           </div>
         </div>
       </Link>

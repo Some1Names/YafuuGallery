@@ -10,8 +10,12 @@ import ClearHistoryButton from "@/component/history/ClearHistoryButton";
 import { getReadingHistory } from "@/lib/reading-history";
 import { loginHref } from "@/lib/login-redirect";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Reading history" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("HistoryPage");
+  return { title: t("title") };
+}
 
 const HISTORY_PAGE_SIZE = 20;
 
@@ -24,6 +28,7 @@ export default async function HistoryPage({
   searchParams: Promise<{ page?: string | string[] }>;
 }) {
   const session = await auth();
+  const t = await getTranslations("HistoryPage");
   if (!session?.user?.id) redirect(loginHref("/history"));
   const userId = session.user.id;
 
@@ -43,25 +48,27 @@ export default async function HistoryPage({
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Reading history</h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">Every chapter you&apos;ve opened, newest first.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">{t("title")}</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         {items.length === 0 ? (
           <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
             <p className="text-fg-secondary text-sm">
-              Nothing here yet —{" "}
-              <Link href="/search" className="text-fg underline underline-offset-2 hover:no-underline">
-                find something to read
-              </Link>
-              .
+              {t.rich("empty", {
+                link: (chunks) => (
+                  <Link href="/search" className="text-fg underline underline-offset-2 hover:no-underline">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           </div>
         ) : (
           <div className="max-w-3xl">
             <div className="flex items-center justify-between gap-4 mb-4">
               <p className="text-sm text-fg-secondary">
-                {total} {total === 1 ? "chapter" : "chapters"}
+                {t("count", { count: total })}
               </p>
               <ClearHistoryButton />
             </div>

@@ -8,6 +8,8 @@ import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass, H
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
 import ThemeToggle from "@/component/ThemeToggle";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/component/LanguageSwitcher";
 
 interface NavbarProps {
   user?: {
@@ -20,12 +22,12 @@ interface NavbarProps {
 }
 
 const navItems = [
-  { href: "/", label: "Home", icon: Home },
+  { href: "/", labelKey: "home", icon: Home },
   // /search with no query is the browse-all listing (genre/status/sort);
   // the search icon on the right goes to the same page, ready to type.
-  { href: "/search", label: "Browse", icon: Compass },
-  { href: "/favorites", label: "Favorites", icon: Heart },
-];
+  { href: "/search", labelKey: "browse", icon: Compass },
+  { href: "/favorites", labelKey: "favorites", icon: Heart },
+] as const;
 
 // Dropdown rows match the bar's plain style: no hover/active background
 // boxes, just text brightening on hover, and the current page marked by
@@ -41,11 +43,13 @@ function menuItemClass(isActive = false) {
 // Red "something new" dot beside the Favorites link. The count itself is
 // spelled out for screen readers only.
 function NewDot({ count, className = "" }: { count: number; className?: string }) {
+  const t = useTranslations("Nav");
   return (
     <>
       <span aria-hidden="true" className={"w-2 h-2 rounded-full bg-red-600 " + className} />
       <span className="sr-only">
-        {` (${count} new ${count === 1 ? "chapter" : "chapters"})`}
+        {" "}
+        {t("newChapters", { count })}
       </span>
     </>
   );
@@ -56,6 +60,7 @@ function ActiveBar() {
 }
 
 export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
+  const t = useTranslations("Nav");
   const hasNew = newChapterCount > 0;
   // With something new, Favorites opens straight on the Updates tab.
   const hrefFor = (href: string) => (href === "/favorites" && hasNew ? "/favorites?tab=updates" : href);
@@ -199,7 +204,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     (isActive ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
                   }
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                   {item.href === "/favorites" && hasNew && <NewDot count={newChapterCount} />}
                   {/* -bottom-0.5 overlaps the nav's border-b-2 exactly */}
                   {isActive && (
@@ -215,7 +220,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
         <div className="hidden md:flex items-center gap-2">
           <Link
             href="/search"
-            aria-label="Search"
+            aria-label={t("search")}
             className={
               "w-9 h-9 flex items-center justify-center transition-colors duration-200 " +
               (pathname === "/search" ? "text-fg" : "text-fg-secondary hover:text-fg")
@@ -224,6 +229,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
             <Search className="w-4 h-4" />
           </Link>
 
+          <LanguageSwitcher />
           <ThemeToggle />
 
           {user ? (
@@ -242,12 +248,12 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
               >
                 <span className="relative w-7 h-7 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
                   {user.image ? (
-                    <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
+                    <Image src={user.image} alt={user.name ?? t("profile")} fill sizes="32px" className="object-cover" />
                   ) : (
                     <span className="text-xs">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
                 </span>
-                {user.name ? formatUsername(user.name, user.tag) : "Profile"}
+                {user.name ? formatUsername(user.name, user.tag) : t("profile")}
                 <svg
                   width="12"
                   height="12"
@@ -271,7 +277,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     className={menuItemClass(pathname === "/profile")}
                   >
                     {pathname === "/profile" && <ActiveBar />}
-                    Profile
+                    {t("profile")}
                   </Link>
                   <Link
                     href="/history"
@@ -279,7 +285,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     className={menuItemClass(pathname === "/history")}
                   >
                     {pathname === "/history" && <ActiveBar />}
-                    Reading history
+                    {t("history")}
                   </Link>
                   <div className="my-1.5 border-t border-border" />
                   <button
@@ -287,7 +293,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     onClick={handleSignOut}
                     className={menuItemClass()}
                   >
-                    Sign out
+                    {t("signOut")}
                   </button>
                 </div>
               )}
@@ -298,13 +304,13 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                 href="/login"
                 className="flex items-center h-9 px-3 ml-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
               >
-                Sign in
+                {t("signIn")}
               </Link>
               <Link
                 href="/signup"
                 className="flex items-center h-9 px-4 rounded-md bg-fg text-bg text-sm font-medium hover:bg-fg-hover transition-colors duration-200"
               >
-                Sign up
+                {t("signUp")}
               </Link>
             </>
           )}
@@ -315,7 +321,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
         <div className="flex items-center gap-2 md:hidden">
           <Link
             href="/search"
-            aria-label="Search"
+            aria-label={t("search")}
             className="w-8 h-8 rounded-full flex items-center justify-center text-fg-secondary hover:text-fg transition-colors duration-200"
           >
             <Search className="w-4 h-4" />
@@ -327,7 +333,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
               type="button"
               onClick={() => setIsMenuOpen((v) => !v)}
               aria-expanded={isMenuOpen}
-              aria-label={hasNew ? `Menu (${newChapterCount} new ${newChapterCount === 1 ? "chapter" : "chapters"})` : "Menu"}
+              aria-label={hasNew ? t("menuWithNew", { count: newChapterCount }) : t("menu")}
               className="group relative flex items-center gap-1"
             >
               {/* Favorites lives inside this menu on phones, so the dot
@@ -342,7 +348,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
               {user ? (
                 <span className="relative w-8 h-8 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
                   {user.image ? (
-                    <Image src={user.image} alt={user.name ?? "Profile"} fill sizes="32px" className="object-cover" />
+                    <Image src={user.image} alt={user.name ?? t("profile")} fill sizes="32px" className="object-cover" />
                   ) : (
                     <span className="text-xs text-fg">{(user.name ?? "?").charAt(0).toUpperCase()}</span>
                   )}
@@ -359,6 +365,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
               className="absolute right-0 top-full mt-2 w-48 py-1.5 flex flex-col bg-surface border border-border rounded-md shadow-lg overflow-hidden"
             >
               <ThemeToggle variant="menuitem" />
+              <LanguageSwitcher variant="menuitem" />
 
               <div className="my-1.5 border-t border-border" />
 
@@ -374,7 +381,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                   >
                     {isActive && <ActiveBar />}
                     <Icon className="w-4 h-4" />
-                    {item.label}
+                    {t(item.labelKey)}
                     {item.href === "/favorites" && hasNew && <NewDot count={newChapterCount} className="ml-auto" />}
                   </Link>
                 );
@@ -391,7 +398,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                   >
                     {pathname === "/profile" && <ActiveBar />}
                     <User className="w-4 h-4" />
-                    {user.name ? formatUsername(user.name, user.tag) : "Profile"}
+                    {user.name ? formatUsername(user.name, user.tag) : t("profile")}
                   </Link>
                   <Link
                     href="/history"
@@ -400,7 +407,7 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                   >
                     {pathname === "/history" && <ActiveBar />}
                     <History className="w-4 h-4" />
-                    Reading history
+                    {t("history")}
                   </Link>
                   <button
                     type="button"
@@ -408,21 +415,21 @@ export default function Navbar({ user, newChapterCount = 0 }: NavbarProps) {
                     className={menuItemClass()}
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign out
+                    {t("signOut")}
                   </button>
                 </>
               ) : (
                 <>
                   <Link href="/login" className={menuItemClass()}>
                     <LogIn className="w-4 h-4" />
-                    Sign in
+                    {t("signIn")}
                   </Link>
                   <Link
                     href="/signup"
                     className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-fg hover:text-fg-hover transition-colors duration-200"
                   >
                     <UserPlus className="w-4 h-4" />
-                    Sign up
+                    {t("signUp")}
                   </Link>
                 </>
               )}

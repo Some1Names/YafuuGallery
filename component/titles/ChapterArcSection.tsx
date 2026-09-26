@@ -6,6 +6,7 @@ import ChapterList from "./ChapterList";
 import ArcList from "./ArcList";
 import { getChapterDisplayNumbers } from "@/lib/chapter-number";
 import type { ArcItem, ChapterItem } from "./types";
+import { useTranslations } from "next-intl";
 
 interface ChapterArcSectionProps {
   arcs: ArcItem[];
@@ -25,6 +26,7 @@ export default function ChapterArcSection({
   favoritedChapterIds,
   showChapterLanguages = false,
 }: ChapterArcSectionProps) {
+  const t = useTranslations("Manga");
   const [activeView, setActiveView] = useState<"chapters" | "arcs">("chapters");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filteredArcId, setFilteredArcId] = useState<string | null>(null);
@@ -59,8 +61,8 @@ export default function ChapterArcSection({
   }
 
   const tabs = [
-    { id: "chapters" as const, label: "Chapters", count: allChapterCount },
-    { id: "arcs" as const, label: "Arcs", count: arcs.length },
+    { id: "chapters" as const, label: t("chapters"), count: allChapterCount },
+    { id: "arcs" as const, label: t("arcs"), count: arcs.length },
   ];
 
   return (
@@ -98,14 +100,14 @@ export default function ChapterArcSection({
           <button
             type="button"
             onClick={() => setSortOrder((o) => (o === "asc" ? "desc" : "asc"))}
-            aria-label={sortOrder === "asc" ? "Sorted oldest first" : "Sorted newest first"}
+            aria-label={sortOrder === "asc" ? t("oldestFirst") : t("newestFirst")}
             className="flex items-center gap-1.5 pb-3 text-xs text-fg-secondary hover:text-fg whitespace-nowrap transition-colors duration-200"
           >
             <ArrowDownUp className="w-3.5 h-3.5" />
             {/* just "Oldest"/"Newest" on phones — the full label wrapped
                 onto two lines beside the tabs at 320px */}
-            {sortOrder === "asc" ? "Oldest" : "Newest"}
-            <span className="hidden sm:inline">first</span>
+            <span className="sm:hidden">{sortOrder === "asc" ? t("oldest") : t("newest")}</span>
+            <span className="hidden sm:inline">{sortOrder === "asc" ? t("oldestFirst") : t("newestFirst")}</span>
           </button>
         )}
       </div>
@@ -116,14 +118,14 @@ export default function ChapterArcSection({
           onClick={() => setFilteredArcId(null)}
           className="inline-flex items-center gap-2 text-xs text-fg-secondary hover:text-fg mb-4 transition-colors duration-200"
         >
-          ← All chapters
+          ← {t("allChapters")}
           <span className="text-fg">({filteredArc.arc_name})</span>
         </button>
       )}
 
       {activeView === "chapters" ? (
         chapters.length === 0 && filteredArc ? (
-          <p className="text-sm text-fg-secondary">No chapters in this arc yet.</p>
+          <p className="text-sm text-fg-secondary">{t("noChaptersInArc")}</p>
         ) : (
           <ChapterList
             chapters={chapters}

@@ -6,6 +6,7 @@ import AdminMangaRow from "@/component/admin/AdminMangaRow";
 import AdminSearchInput from "@/component/admin/AdminSearchInput";
 import AdminCommentList from "@/component/admin/AdminCommentList";
 import type { ChapterTranslationDraft } from "@/component/admin/AdminChapterPdfUploads";
+import { useTranslations } from "next-intl";
 
 interface ChapterItem {
   id: string;
@@ -71,6 +72,7 @@ export default function ManageMangaDashboard({
   reportedCount,
   authorName,
 }: ManageMangaDashboardProps) {
+  const t = useTranslations("Dashboard");
   const [activeTab, setActiveTab] = useState<Tab>("manga");
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
@@ -85,15 +87,15 @@ export default function ManageMangaDashboard({
   // At-a-glance totals across all of this author's manga (the rows below
   // only show them per manga).
   const stats = [
-    { label: "Manga", value: mangaList.length },
-    { label: "Chapters", value: mangaList.reduce((sum, m) => sum + m.chapterCount, 0) },
-    { label: "Total views", value: mangaList.reduce((sum, m) => sum + m.viewCount, 0) },
-    { label: "Favorites", value: mangaList.reduce((sum, m) => sum + m.favoriteCount, 0) },
+    { label: t("stats.manga"), value: mangaList.length },
+    { label: t("stats.chapters"), value: mangaList.reduce((sum, m) => sum + m.chapterCount, 0) },
+    { label: t("stats.totalViews"), value: mangaList.reduce((sum, m) => sum + m.viewCount, 0) },
+    { label: t("stats.favorites"), value: mangaList.reduce((sum, m) => sum + m.favoriteCount, 0) },
   ];
 
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: "manga", label: "Manga", count: mangaList.length },
-    { id: "comments", label: "Comments", count: commentCount },
+    { id: "manga", label: t("tabs.manga"), count: mangaList.length },
+    { id: "comments", label: t("tabs.comments"), count: commentCount },
   ];
 
   // A manga's title-edit form and its Arc/Chapters panel are mutually
@@ -161,8 +163,8 @@ export default function ManageMangaDashboard({
           <AdminCommentList
             canDelete={false}
             reportedTotal={reportedCount}
-            searchPlaceholder="Search by reader, manga, or text…"
-            emptyText="No comments on your manga yet."
+            searchPlaceholder={t("commentsSearch")}
+            emptyText={t("commentsEmpty")}
           />
         </section>
       )}
@@ -173,15 +175,15 @@ export default function ManageMangaDashboard({
 
           {mangaList.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center">
-              <p className="text-fg-secondary text-sm">No manga yet — create one above.</p>
+              <p className="text-fg-secondary text-sm">{t("noManga")}</p>
             </div>
           ) : (
             <>
-              <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder="Search by title…" />
+              <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder={t("searchTitle")} />
 
               {filteredMangaList.length === 0 ? (
                 <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">
-                  <p className="text-fg-secondary text-sm">No manga match &quot;{mangaSearch}&quot;.</p>
+                  <p className="text-fg-secondary text-sm">{t("noMatch", { query: mangaSearch })}</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 mt-4">

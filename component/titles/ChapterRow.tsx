@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LANGUAGE_LABELS } from "@/lib/language";
 import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Heart, MessageCircle } from "lucide-react";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
@@ -7,6 +6,8 @@ import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
 import { formatPublishedDate } from "@/lib/dates";
 import type { ChapterItem } from "./types";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 interface ChapterRowProps {
   chapter: ChapterItem;
@@ -17,7 +18,9 @@ interface ChapterRowProps {
 }
 
 export default function ChapterRow({ chapter, displayNumber, isFavorited = false, showLanguages = false }: ChapterRowProps) {
-  const publishedLabel = formatPublishedDate(chapter.published_date);
+  const locale = useLocale() as Locale;
+  const tLanguage = useTranslations("LanguageName");
+  const publishedLabel = formatPublishedDate(chapter.published_date, INTL_LOCALE[locale]);
 
   const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
 
@@ -92,7 +95,7 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
                   className="px-1 rounded-sm border border-fg/20 text-[10px] leading-4 font-semibold uppercase text-fg-secondary"
                 >
                   <span aria-hidden="true">{l}</span>
-                  <span className="sr-only">{LANGUAGE_LABELS[l]}</span>
+                  <span className="sr-only">{tLanguage(l)}</span>
                 </span>
               ))}
             </span>

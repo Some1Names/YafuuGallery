@@ -1,0 +1,677 @@
+{
+  "Meta": {
+    "description": "Read original manga and translations, explore stories, and follow every chapter."
+  },
+  "Language": {
+    "switchTo": "Switch to {language}"
+  },
+  "Nav": {
+    "home": "Home",
+    "browse": "Browse",
+    "favorites": "Favorites",
+    "search": "Search",
+    "profile": "Profile",
+    "history": "Reading history",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "menu": "Menu",
+    "menuWithNew": "Menu ({count, plural, one {# new chapter} other {# new chapters}})",
+    "newChapters": "({count, plural, one {# new chapter} other {# new chapters}})"
+  },
+  "Theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme",
+    "lightMode": "Light mode"
+  },
+  "Footer": {
+    "tagline": "Original manga and translations, read your way.",
+    "browse": "Browse",
+    "about": "About",
+    "home": "Home",
+    "favorites": "Favorites",
+    "search": "Search",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "contact": "Contact on Instagram"
+  },
+  "Common": {
+    "noImage": "No image",
+    "showMore": "Show more",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "home": "YafuuGallery home"
+  },
+  "Dialog": {
+    "confirm": "Confirm",
+    "ok": "OK",
+    "errors": {
+      "offline": "Couldn't reach the server. Check your connection and try again.",
+      "notSignedIn": "You're not signed in. Sign in and try again.",
+      "noPermission": "You don't have permission to do that. You may have been signed out — try signing in again.",
+      "serverError": "Something went wrong on the server. Please try again."
+    }
+  },
+  "Skeleton": {
+    "comments": "Loading comments…",
+    "chapter": "Loading chapter…"
+  },
+  "Card": {
+    "newCount": "{count, number} NEW",
+    "noChapters": "No chapters yet",
+    "upNext": "Up next",
+    "new": "New"
+  },
+  "History": {
+    "finished": "Finished",
+    "stoppedOnPage": "Stopped on page {page}",
+    "opened": "Opened",
+    "remove": "Remove {label} from history",
+    "removeShort": "Remove from history",
+    "removeFailed": "Couldn't remove from history",
+    "clear": "Clear history",
+    "clearing": "Clearing…",
+    "clearTitle": "Clear reading history?",
+    "clearMessage": "Continue Reading and every saved page will be forgotten.",
+    "clearFailed": "Couldn't clear history"
+  },
+  "Updates": {
+    "markAllRead": "Mark all as read",
+    "marking": "Marking…",
+    "failed": "Couldn't update — try again."
+  },
+  "Favorite": {
+    "add": "Add to favorites",
+    "remove": "Remove from favorites",
+    "favorite": "Favorite",
+    "favorited": "Favorited",
+    "addFailed": "Couldn't add to favorites",
+    "removeFailed": "Couldn't remove from favorites"
+  },
+  "Genres": {
+    "action": "Action",
+    "adventure": "Adventure",
+    "comedy": "Comedy",
+    "drama": "Drama",
+    "fantasy": "Fantasy",
+    "historical": "Historical",
+    "horror": "Horror",
+    "mystery": "Mystery",
+    "psychological": "Psychological",
+    "romance": "Romance",
+    "school-life": "School Life",
+    "sci-fi": "Sci-Fi",
+    "slice-of-life": "Slice of Life",
+    "sports": "Sports",
+    "supernatural": "Supernatural",
+    "thriller": "Thriller"
+  },
+  "Status": {
+    "ongoing": "Ongoing",
+    "completed": "Completed",
+    "all": "All"
+  },
+  "LanguageName": {
+    "th": "Thai",
+    "en": "English",
+    "ja": "Japanese"
+  },
+  "Manga": {
+    "statusAndGenres": "Status and genres",
+    "availableIn": "Available in <strong>{languages}</strong>",
+    "noChaptersYet": "No chapters yet",
+    "startReading": "Start reading",
+    "continue": "Continue {badge}",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "chapters": "Chapters",
+    "arcs": "Arcs",
+    "oldest": "Oldest",
+    "newest": "Newest",
+    "oldestFirst": "Oldest first",
+    "newestFirst": "Newest first",
+    "allChapters": "All chapters",
+    "noChaptersInArc": "No chapters in this arc yet.",
+    "noArcs": "No arcs yet.",
+    "chapterCount": "{count, plural, one {# chapter} other {# chapters}}"
+  },
+  "EndNav": {
+    "label": "Chapters",
+    "next": "Next",
+    "previous": "Previous",
+    "nextChapter": "Next chapter: {badge} {name}",
+    "previousChapter": "Previous chapter: {badge} {name}",
+    "allCaughtUp": "All caught up",
+    "youreAllCaughtUp": "You're all caught up"
+  },
+  "Author": {
+    "eyebrow": "Author",
+    "unknown": "Unknown",
+    "mangaBy": "Manga by {name}",
+    "description": "Manga by {name} on YafuuGallery: {titles}",
+    "stats": {
+      "manga": "Manga",
+      "chapters": "Chapters",
+      "views": "Views",
+      "favorites": "Favorites"
+    }
+  },
+  "Viewer": {
+    "description": "Read {badge} — {chapter} of {manga} on YafuuGallery."
+  },
+  "Search": {
+    "title": "Search",
+    "subtitle": "Find manga by title, author, or chapter name.",
+    "metaQuery": "“{query}” – Search",
+    "metaGenre": "{genre} manga",
+    "inputLabel": "Search manga",
+    "placeholder": "Title, author or chapter",
+    "clear": "Clear search",
+    "recent": "Recent searches",
+    "clearRecent": "Clear",
+    "allGenres": "All genres",
+    "statusLabel": "Status",
+    "sortBy": "Sort by:",
+    "clearFilters": "Clear filters",
+    "matches": "Matches",
+    "andMore": " and {count, number} more",
+    "noResults": "No manga found for “{query}”.",
+    "noResultsFiltered": "No manga found for “{query}” with these filters.",
+    "noMatchFilters": "No manga match these filters.",
+    "noneYet": "No manga published yet.",
+    "resultsFor": "{count, plural, one {# result} other {# results}} for <q>“{query}”</q>",
+    "allManga": "All manga",
+    "unknownAuthor": "Unknown",
+    "genreNav": "Genre"
+  },
+  "Sort": {
+    "updated": {
+      "label": "Recently updated",
+      "short": "Updated"
+    },
+    "new": {
+      "label": "Newest",
+      "short": "Newest"
+    },
+    "views": {
+      "label": "Most viewed",
+      "short": "Popular"
+    },
+    "title": {
+      "label": "Title A–Z",
+      "short": "A–Z"
+    }
+  },
+  "Home": {
+    "signupTitle": "Keep your place in every story",
+    "signupBody": "Save favorites, see new chapters, and pick up where you left off.",
+    "createAccount": "Create account",
+    "signIn": "Sign in",
+    "continueEyebrow": "PICK UP WHERE YOU LEFT OFF",
+    "continueTitle": "Continue Reading",
+    "historyLink": "History",
+    "popularEyebrow": "MOST READ",
+    "popularTitle": "Popular",
+    "seeAll": "See all",
+    "latestEyebrow": "RECENTLY UPDATED",
+    "latestTitle": "Latest Manga",
+    "browseAll": "Browse all",
+    "noneYet": "No manga published yet.",
+    "genresEyebrow": "EXPLORE",
+    "genresTitle": "Browse by Genre",
+    "allGenres": "All genres",
+    "unknownAuthor": "Unknown"
+  },
+  "Carousel": {
+    "featured": "FEATURED MANGA",
+    "startReading": "Start Reading",
+    "noChapters": "No chapters yet",
+    "viewManga": "View Manga",
+    "view": "View {title}",
+    "previous": "Previous featured manga",
+    "next": "Next featured manga",
+    "play": "Play slideshow",
+    "pause": "Pause slideshow",
+    "show": "Show {title}"
+  },
+  "Favorites": {
+    "title": "Favorites",
+    "subtitle": "Manga and chapters you've bookmarked, all in one place.",
+    "tabs": {
+      "manga": "Manga",
+      "chapters": "Chapters",
+      "updates": "Updates"
+    },
+    "newSuffix": " new",
+    "updatesEmpty": "Favorite a manga and its new chapters will show up here.",
+    "updatesNoChapters": "Your favorite manga don't have any chapters yet.",
+    "newSinceLong": "{count, plural, one {# new chapter} other {# new chapters}} <long>since you last caught up</long>",
+    "allCaughtUp": "You're all caught up.",
+    "mangaEmpty": "No favorite manga yet. Tap “Favorite” on any manga page to save it here.",
+    "chaptersEmpty": "No favorite chapters yet. Tap the heart on any chapter to save it here.",
+    "unknownAuthor": "Unknown"
+  },
+  "HistoryPage": {
+    "title": "Reading history",
+    "subtitle": "Every chapter you've opened, newest first.",
+    "empty": "Nothing here yet — <link>find something to read</link>.",
+    "count": "{count, plural, one {# chapter} other {# chapters}}"
+  },
+  "Profile": {
+    "title": "Profile",
+    "subtitle": "Manage your account and see your activity.",
+    "stats": {
+      "mangaFavorited": "Manga favorited",
+      "chaptersFavorited": "Chapters favorited",
+      "chaptersFinished": "Chapters finished",
+      "comments": "Comments"
+    },
+    "continueReading": "Continue reading",
+    "historyShort": "History",
+    "historyLong": "Reading history",
+    "noHistory": "No reading history yet — open a chapter to start tracking progress."
+  },
+  "Validation": {
+    "nameTooShort": "Username must be at least 3 characters",
+    "nameTooLong": "Username must be at most {max} characters",
+    "nameInvalidChars": "Only letters, numbers, and underscores are allowed",
+    "emailInvalid": "Enter a valid email",
+    "passwordTooShort": "Must be at least 8 characters",
+    "confirmRequired": "Type your password again",
+    "passwordMismatch": "Passwords don't match"
+  },
+  "ProfileForm": {
+    "changePicture": "Change profile picture",
+    "uploadingPicture": "Uploading profile picture",
+    "avatar": "Avatar",
+    "change": "Change",
+    "uploading": "Uploading…",
+    "displayName": "Display name",
+    "confirmName": "Confirm name change",
+    "cancelName": "Cancel name change",
+    "editName": "Edit display name",
+    "saving": "Saving…",
+    "tagNote": "Your tag is #{tag} — shown as {name}#{tag}, and never changes.",
+    "roleAdmin": "Admin",
+    "roleAuthor": "Author",
+    "memberSince": "Member since <date></date>",
+    "adminPanel": "Admin panel",
+    "manageManga": "Manage manga",
+    "saveFailed": "Failed to save.",
+    "networkError": "Network error — please try again.",
+    "imageUnreadable": "Couldn't read that image — please try a different file.",
+    "uploadFailed": "Upload failed",
+    "uploadFailedRetry": "Upload failed — please try again."
+  },
+  "Auth": {
+    "meta": {
+      "login": "Log in",
+      "signup": "Sign up",
+      "forgot": "Forgot password",
+      "reset": "Reset password"
+    },
+    "google": "Continue with Google",
+    "or": "OR",
+    "email": "Email",
+    "emailPlaceholder": "e.g. you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "show": "Show",
+    "hide": "Hide",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "network": "Network error — please try again.",
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "login": {
+      "title": "Log In",
+      "subtitle": "Welcome back — sign in to keep reading.",
+      "forgot": "Forgot password?",
+      "submitting": "Signing in…",
+      "submit": "Log In",
+      "noAccount": "Don't have an account?",
+      "verifyFirst": "Please verify your email first — we've just sent a new verification link to {email}.",
+      "invalid": "Invalid email or password."
+    },
+    "signup": {
+      "title": "Sign Up",
+      "subtitle": "Create an account to start reading.",
+      "username": "Username",
+      "usernamePlaceholder": "e.g. uefa123",
+      "passwordHint": "Must be at least 8 characters.",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Type your password again",
+      "submitting": "Creating account…",
+      "submit": "Sign Up",
+      "agree": "By signing up, you agree to our <terms>Terms of use</terms> and <privacy>Privacy policy</privacy>.",
+      "haveAccount": "Already have an account?",
+      "checkEmailTitle": "Check your email",
+      "checkEmailBody": "We sent a verification link to <b>{email}</b>. Open it to finish creating your account — it signs you straight in.",
+      "checkEmailRetry": "Didn't get it? Check your spam folder, or <login>try logging in</login> to have a new link sent."
+    },
+    "forgot": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email and we'll send you a link to reset your password.",
+      "sent": "If an account exists for <b>{email}</b>, a reset link has been sent.",
+      "submitting": "Sending…",
+      "submit": "Send Reset Link",
+      "remembered": "Remembered your password?"
+    },
+    "reset": {
+      "title": "Reset Password",
+      "subtitle": "Choose a new password for your account.",
+      "invalidLink": "This reset link is invalid or has expired. Request a new one from the <link>forgot password</link> page.",
+      "newPassword": "New Password",
+      "newPlaceholder": "Enter a new password",
+      "confirm": "Confirm Password",
+      "confirmPlaceholder": "Re-enter the new password",
+      "mismatch": "Passwords don't match.",
+      "submitting": "Resetting…",
+      "submit": "Reset Password"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "USER_ALREADY_EXISTS": "An account with this email already exists.",
+      "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "An account with this email already exists.",
+      "INVALID_EMAIL": "Enter a valid email",
+      "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
+      "PASSWORD_TOO_SHORT": "Password is too short.",
+      "PASSWORD_TOO_LONG": "Password is too long.",
+      "INVALID_TOKEN": "This reset link is invalid or has expired."
+    }
+  },
+  "Comments": {
+    "title": "Comments",
+    "close": "Close comments",
+    "empty": "No comments yet — be the first to say something.",
+    "loadingOlder": "Loading…",
+    "showOlder": "Show older comments",
+    "showEarlierReplies": "{count, plural, one {Show # earlier reply} other {Show # earlier replies}}",
+    "replyingTo": "Replying to <b>{name}</b>",
+    "cancelReply": "Cancel reply",
+    "replyPlaceholder": "Reply to {name}…",
+    "placeholder": "Add a comment… (Enter to send, Shift+Enter for a new line)",
+    "postReply": "Post reply",
+    "post": "Post comment",
+    "hidden": "This comment was hidden by a moderator.",
+    "user": "User",
+    "like": "Like this comment",
+    "unlike": "Unlike this comment",
+    "likeFailed": "Couldn't like comment",
+    "unlikeFailed": "Couldn't unlike comment",
+    "reply": "Reply",
+    "replyTo": "Reply to {name}",
+    "report": "Report",
+    "reported": "Reported",
+    "reportBy": "Report comment by {name}",
+    "reportTitle": "Report this comment?",
+    "reportMessage": "The moderators will be asked to take a look at it.",
+    "reportFailed": "Couldn't report this comment.",
+    "loadOlderFailed": "Couldn't load older comments — please try again.",
+    "postFailed": "Failed to post comment.",
+    "network": "Network error — please try again."
+  },
+  "Reader": {
+    "chapterLabel": "Chapter {number}: {name}",
+    "backToManga": "Back to manga title",
+    "chooseChapter": "Chapter {badge} — choose chapter",
+    "comments": "Comments",
+    "commentsNew": "Comments, {count, number} new",
+    "changeLanguage": "Change language",
+    "language": "Language",
+    "toHorizontal": "Switch to horizontal reading",
+    "toVertical": "Switch to vertical reading",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "verticalMode": "Vertical reading mode",
+    "horizontalMode": "Horizontal reading mode",
+    "notUploaded": "This chapter's file hasn't been uploaded yet.",
+    "loadFailed": "Couldn't load this chapter.",
+    "nextChapter": "Next chapter",
+    "nextPage": "Next page",
+    "previousChapter": "Previous chapter",
+    "previousPage": "Previous page",
+    "endOf": "End of {badge} {name}",
+    "backTo": "Back to {title}"
+  },
+  "StatusScreen": {
+    "errorTitle": "Something broke",
+    "errorMessage": "This page failed to load. Try again, or head back home.",
+    "reference": "Reference: {digest}",
+    "tryAgain": "Try again",
+    "backHome": "Back to home",
+    "notFoundTitle": "Page not found",
+    "notFoundMessage": "This page doesn't exist, or the link is broken."
+  },
+  "Legal": {
+    "lastUpdated": "Last updated {date}",
+    "contact": "{handle} on Instagram",
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "What YafuuGallery collects, why, who helps us run the site, and your rights."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "description": "The rules for using YafuuGallery: accounts, comments, the manga on the site, and takedown requests."
+    }
+  },
+  "AdminPage": {
+    "title": "Admin",
+    "subtitle": "Manage manga, chapters, users, and comment moderation.",
+    "stats": {
+      "users": "Users",
+      "manga": "Manga",
+      "chapters": "Chapters"
+    }
+  },
+  "ManagePage": {
+    "title": "Manage manga",
+    "heading": "Manage Manga",
+    "subtitle": "Create and manage your own manga, arcs, and chapters.",
+    "you": "You"
+  },
+  "Dashboard": {
+    "tabs": {
+      "manga": "Manga",
+      "users": "Users",
+      "comments": "Comments"
+    },
+    "stats": {
+      "manga": "Manga",
+      "chapters": "Chapters",
+      "totalViews": "Total views",
+      "favorites": "Favorites"
+    },
+    "noManga": "No manga yet — create one above.",
+    "searchTitleOrAuthor": "Search by title or author…",
+    "searchTitle": "Search by title…",
+    "noMatch": "No manga match “{query}”.",
+    "commentsSearch": "Search by reader, manga, or text…",
+    "commentsEmpty": "No comments on your manga yet."
+  },
+  "Storage": {
+    "used": "<b>{used} GB</b> of {total} GB used",
+    "objects": "{count, plural, one {# object} other {# objects}} · R2 storage",
+    "over": "Over the free tier's 10 GB — R2 usage is now billed.",
+    "unattributed": "<b>{size}</b> unattributed across {count, plural, one {# object} other {# objects}}",
+    "explain": "Files no manga, chapter, arc, or user is linked to — leftovers from re-uploads or edits that were cancelled after picking a file. Files uploaded in the last 24 hours aren't listed, since they may still be mid-save. Each file is checked again before it's deleted.",
+    "deleteOne": "Delete {key}",
+    "deleteAll": "Delete all ({size})",
+    "deleting": "Deleting…",
+    "deleteOneTitle": "Delete this object?",
+    "cantUndo": "This can't be undone.",
+    "delete": "Delete",
+    "deleteAllTitle": "Delete all {count, number} unattributed objects?",
+    "deleteAllMessage": "That frees {size}. This can't be undone.",
+    "deleteAllConfirm": "Delete all",
+    "deleteFailedOne": "Couldn't delete object",
+    "deleteFailedMany": "Couldn't delete objects",
+    "skipped": "{count, plural, one {# file was} other {# files were}} skipped — now in use again, so not deleted."
+  },
+  "Admin": {
+    "cover": "Cover",
+    "banner": "Banner",
+    "createManga": "+ Create Manga",
+    "addMangaHeading": "Add New Manga Title",
+    "editMangaHeading": "Edit Manga Title",
+    "mangaTitle": "Manga Title",
+    "mangaTitlePlaceholder": "Manga title",
+    "synopsis": "Synopsis",
+    "status": "Status",
+    "genres": "Genres",
+    "creating": "Creating…",
+    "saving": "Saving…",
+    "close": "Close",
+    "view": "View",
+    "prev": "Prev",
+    "next": "Next",
+    "page": "Page {current} of {total}",
+    "networkError": "Network error — please try again.",
+    "failedSave": "Failed to save.",
+    "failedCreateManga": "Failed to create manga.",
+    "stillNeeded": "Still needed: <b>{items}</b>",
+    "missing": {
+      "cover": "cover",
+      "banner": "banner",
+      "title": "title",
+      "synopsis": "synopsis",
+      "name": "name",
+      "date": "date",
+      "pdf": "PDF"
+    },
+    "arcTab": "Arc",
+    "chaptersTab": "Chapters",
+    "featured": "Featured",
+    "featureAdd": "Add to home page carousel",
+    "featureRemove": "Remove from home page carousel",
+    "featureFailed": "Couldn't feature manga",
+    "unfeatureFailed": "Couldn't unfeature manga",
+    "deleteManga": {
+      "title": "Delete “{title}”?",
+      "message": "All its arcs and chapters are deleted too. This can't be undone.",
+      "confirm": "Delete manga",
+      "failed": "Couldn't delete manga"
+    },
+    "arc": {
+      "create": "+ Create Arc",
+      "title": "Arc Title",
+      "namePlaceholder": "Arc name",
+      "failedCreate": "Failed to create arc.",
+      "none": "No arcs yet — create one above.",
+      "search": "Search arcs by number or title…",
+      "noMatch": "No arcs match “{query}”.",
+      "reorderFailed": "Couldn't reorder arcs",
+      "deleteTitle": "Delete arc “{name}”?",
+      "deleteMessage": "Chapters in it become unassigned, not deleted. This can't be undone.",
+      "deleteConfirm": "Delete arc",
+      "deleteFailed": "Couldn't delete arc"
+    },
+    "chapter": {
+      "create": "+ Create Chapter",
+      "title": "Chapter Title",
+      "titlePlaceholder": "Chapter title",
+      "arc": "Arc",
+      "noArc": "No arc",
+      "publishedDate": "Published Date",
+      "failedCreate": "Failed to create chapter.",
+      "none": "No chapters yet — create one above.",
+      "search": "Search chapters by number, title, or arc…",
+      "noMatch": "No chapters match “{query}”.",
+      "reorderFailed": "Couldn't reorder chapters",
+      "deleteTitle": "Delete chapter “{name}”?",
+      "deleteMessage": "This can't be undone.",
+      "deleteConfirm": "Delete chapter",
+      "deleteFailed": "Couldn't delete chapter",
+      "pdfs": "{count, plural, one {Chapter PDF} other {Chapter PDFs}}",
+      "pdfLanguage": "PDF language",
+      "removePdf": "Remove {language} PDF",
+      "addLanguage": "Add another language"
+    },
+    "upload": {
+      "uploadImage": "Upload {label} image",
+      "changeImage": "Change {label} image",
+      "uploadingImage": "Uploading {label} image",
+      "uploading": "Uploading…",
+      "change": "Change",
+      "cantReadImage": "Couldn't read that image — please try a different file.",
+      "failed": "Upload failed",
+      "failedRetry": "Upload failed — please try again.",
+      "onlyPdf": "Only PDF files are allowed.",
+      "tooLarge": "File too large ({size}) — the limit is 200MB.",
+      "bigWarning": "This file is {size} — 50MB or under is recommended for faster loading.",
+      "prepareFailed": "Failed to prepare upload.",
+      "pdfName": "{language} PDF",
+      "ariaUploading": "Uploading {name}, {progress}%",
+      "ariaReplace": "Replace {name} ({file})",
+      "ariaUpload": "Upload {name}",
+      "uploadedFallback": "uploaded",
+      "progress": "Uploading… {progress}%",
+      "pdfUploaded": "PDF uploaded",
+      "noPdf": "No PDF uploaded",
+      "replace": "Replace",
+      "upload": "Upload"
+    }
+  },
+  "AdminComments": {
+    "searchDefault": "Search by user, manga, or text…",
+    "emptyDefault": "No comments yet.",
+    "reportedOnly": "Reported only",
+    "reportedOnlyCount": "Reported only ({count, number})",
+    "loading": "Loading comments…",
+    "loadFailed": "Couldn't load comments — please try again.",
+    "loadMoreFailed": "Couldn't load more — please try again.",
+    "noMatch": "No comments match “{query}”.",
+    "noMatchReported": "No comments match “{query}” among reported ones.",
+    "noReported": "No reported comments.",
+    "replyTo": "↳ reply to {name}",
+    "openChapter": "Open this chapter in a new tab",
+    "hiddenTag": "hidden",
+    "reported": "{count, plural, one {reported once} other {reported # times}}",
+    "dismissReports": "Dismiss reports",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "dismissFailed": "Couldn't dismiss reports",
+    "hideFailed": "Couldn't hide comment",
+    "unhideFailed": "Couldn't unhide comment",
+    "deleteTitle": "Delete this comment?",
+    "deleteMessage": "Any replies to it are deleted too. This can't be undone.",
+    "deleteFailed": "Couldn't delete comment"
+  },
+  "AdminUsers": {
+    "search": "Search by name, name#tag or email…",
+    "loading": "Loading users…",
+    "loadFailed": "Couldn't load users — please try again.",
+    "noMatch": "No users match “{query}”.",
+    "none": "No users yet.",
+    "roles": {
+      "reader": "Reader",
+      "author": "Author",
+      "admin": "Admin"
+    },
+    "you": "{role} (you)",
+    "joinedOn": "Joined",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "joined": "Joined",
+      "role": "Role",
+      "comments": "Comments"
+    },
+    "commentCount": "{count, plural, one {# comment} other {# comments}}",
+    "viewComments": "· View",
+    "closeComments": "− Close",
+    "changeRoleTitle": "Change role?",
+    "changeRoleMessage": "{user} goes from {from} to {to}. This takes effect immediately.",
+    "changeRoleConfirm": "Change role",
+    "changeRoleFailed": "Couldn't change role.",
+    "roleFor": "Role for {user}",
+    "deleteTitle": "Delete {user}?",
+    "deleteMessage": "Their comments (and any replies to them), favorites and reading history will be deleted too. This can't be undone.",
+    "deleteConfirm": "Delete user",
+    "deleteFailed": "Couldn't delete user",
+    "loadMoreFailed": "Couldn't load more — please try again."
+  }
+}

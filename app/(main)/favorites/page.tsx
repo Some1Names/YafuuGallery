@@ -13,8 +13,12 @@ import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import FavoriteUpdateRow from "@/component/titles/FavoriteUpdateRow";
 import MarkUpdatesReadButton from "@/component/titles/MarkUpdatesReadButton";
 import ShowMoreLink from "@/component/ShowMoreLink";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Favorites" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Favorites");
+  return { title: t("title") };
+}
 
 type Tab = "manga" | "chapters" | "updates";
 
@@ -115,10 +119,11 @@ export default async function FavoritesPage({
   // bar sitting on the row's bottom rule.
   // Updates counts NEW chapters (in red when there are any), not every
   // chapter in the feed — it's the tab's "you have something to read".
+  const t = await getTranslations("Favorites");
   const tabs: { id: Tab; label: string; count: number; alert?: boolean }[] = [
-    { id: "manga", label: "Manga", count: bookmarkedManga.length },
-    { id: "chapters", label: "Chapters", count: favoritedChapters.length },
-    { id: "updates", label: "Updates", count: newTotal, alert: newTotal > 0 },
+    { id: "manga", label: t("tabs.manga"), count: bookmarkedManga.length },
+    { id: "chapters", label: t("tabs.chapters"), count: favoritedChapters.length },
+    { id: "updates", label: t("tabs.updates"), count: newTotal, alert: newTotal > 0 },
   ];
 
   return (
@@ -130,11 +135,9 @@ export default async function FavoritesPage({
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">
-            Favorites
+            {t("title")}
           </h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">
-            Manga and chapters you&apos;ve bookmarked, all in one place.
-          </p>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         {/* Tabs */}
@@ -163,7 +166,7 @@ export default async function FavoritesPage({
                   }
                 >
                   {tab.count}
-                  {tab.alert && <span className="sr-only"> new</span>}
+                  {tab.alert && <span className="sr-only">{t("newSuffix")}</span>}
                 </span>
                 {isActive && <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />}
               </Link>
@@ -176,12 +179,12 @@ export default async function FavoritesPage({
           bookmarkedManga.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
-                Favorite a manga and its new chapters will show up here.
+                {t("updatesEmpty")}
               </p>
             </div>
           ) : updates.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
-              <p className="text-fg-secondary text-sm">Your favorite manga don&apos;t have any chapters yet.</p>
+              <p className="text-fg-secondary text-sm">{t("updatesNoChapters")}</p>
             </div>
           ) : (
             <>
@@ -191,12 +194,12 @@ export default async function FavoritesPage({
                     onto two lines. */}
                 <p className="min-w-0 text-sm text-fg-secondary">
                   {newTotal > 0 ? (
-                    <>
-                      {newTotal} new {newTotal === 1 ? "chapter" : "chapters"}
-                      <span className="hidden sm:inline"> since you last caught up</span>
-                    </>
+                    t.rich("newSinceLong", {
+                      count: newTotal,
+                      long: (chunks) => <span className="hidden sm:inline">{chunks}</span>,
+                    })
                   ) : (
-                    "You're all caught up."
+                    t("allCaughtUp")
                   )}
                 </p>
                 {newTotal > 0 && <MarkUpdatesReadButton />}
@@ -215,7 +218,7 @@ export default async function FavoritesPage({
           bookmarkedManga.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
-                No favorite manga yet. Tap &quot;Favorite&quot; on any manga page to save it here.
+                {t("mangaEmpty")}
               </p>
             </div>
           ) : (
@@ -228,7 +231,7 @@ export default async function FavoritesPage({
                     key={manga.id}
                     id={manga.id}
                     title={manga.manga_title}
-                    author={manga.author.name ?? "Unknown"}
+                    author={manga.author.name ?? t("unknownAuthor")}
                     coverImageUrl={manga.cover_image_url}
                     latestChapterDisplayNumber={latest ? (displayNumbers.get(latest.id) ?? null) : null}
                     latestChapterIsEx={latest?.chapter_is_ex ?? false}
@@ -244,7 +247,7 @@ export default async function FavoritesPage({
         ) : favoritedChapters.length === 0 ? (
           <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
             <p className="text-fg-secondary text-sm">
-              No favorite chapters yet. Tap the heart on any chapter to save it here.
+              {t("chaptersEmpty")}
             </p>
           </div>
         ) : (

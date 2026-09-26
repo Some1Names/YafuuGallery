@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
+import { useTranslations } from "next-intl";
 
 export default function AdminUserDeleteButton({
   userId,
@@ -14,18 +15,19 @@ export default function AdminUserDeleteButton({
   onDeleted?: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("AdminUsers");
+  const tCommon = useTranslations("Common");
 
   async function remove() {
     const confirmed = await confirmDialog({
-      title: `Delete ${userLabel}?`,
-      message:
-        "Their comments (and any replies to them), favorites and reading history will be deleted too. This can't be undone.",
-      confirmLabel: "Delete user",
+      title: t("deleteTitle", { user: userLabel }),
+      message: t("deleteMessage"),
+      confirmLabel: t("deleteConfirm"),
       tone: "danger",
     });
     if (!confirmed) return;
     const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" }).catch(() => null);
-    if (!res?.ok) return alertRequestFailed("Couldn't delete user", res);
+    if (!res?.ok) return alertRequestFailed(t("deleteFailed"), res);
     onDeleted?.();
     router.refresh(); // the tab counts on the page
   }
@@ -35,7 +37,7 @@ export default function AdminUserDeleteButton({
       onClick={remove}
       className="text-xs px-2 py-1 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
     >
-      Delete
+      {tCommon("delete")}
     </button>
   );
 }

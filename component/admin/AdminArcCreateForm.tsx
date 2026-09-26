@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
 import { MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";
+import { useTranslations } from "next-intl";
 
 interface AdminArcCreateFormProps {
   mangaId: string;
@@ -29,6 +30,9 @@ export default function AdminArcCreateForm({
   isOpen,
   onOpenChange,
 }: AdminArcCreateFormProps) {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
+  const tStatus = useTranslations("Status");
   const router = useRouter();
   const [arcImageUrl, setArcImageUrl] = useState<string | null>(null);
   const [arcName, setArcName] = useState("");
@@ -76,7 +80,7 @@ export default function AdminArcCreateForm({
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Failed to create arc.");
+        setError(data?.error ?? t("arc.failedCreate"));
         return;
       }
 
@@ -84,7 +88,7 @@ export default function AdminArcCreateForm({
       onOpenChange(false);
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(t("networkError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +101,7 @@ export default function AdminArcCreateForm({
         onClick={() => onOpenChange(true)}
         className="self-start px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 transition-colors duration-200"
       >
-        + Create Arc
+        {t("arc.create")}
       </button>
     );
   }
@@ -109,7 +113,7 @@ export default function AdminArcCreateForm({
     >
       <div className="flex flex-col sm:flex-row gap-4">
         <AdminImageUploadButton
-          label="Cover"
+          label={t("cover")}
           value={arcImageUrl}
           onChange={setArcImageUrl}
           boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
@@ -119,7 +123,7 @@ export default function AdminArcCreateForm({
         <div className="flex-1 flex flex-col gap-4">
           <div>
             <label className="block text-xs text-fg-secondary mb-1.5">
-              Arc Title
+              {t("arc.title")}
             </label>
             <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
               <select
@@ -134,7 +138,7 @@ export default function AdminArcCreateForm({
                 value={arcName}
                 maxLength={MAX_ARC_NAME_LENGTH}
                 onChange={(e) => setArcName(e.target.value)}
-                placeholder="Arc name"
+                placeholder={t("arc.namePlaceholder")}
                 required
                 className="flex-1 min-w-0 bg-transparent px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none"
               />
@@ -143,15 +147,15 @@ export default function AdminArcCreateForm({
 
           <div className="sm:w-40">
             <label className="block text-xs text-fg-secondary mb-1.5">
-              Status
+              {t("status")}
             </label>
             <select
               value={arcStatus}
               onChange={(e) => setArcStatus(e.target.value as "ongoing" | "completed")}
               className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
             >
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
+              <option value="ongoing">{tStatus("ongoing")}</option>
+              <option value="completed">{tStatus("completed")}</option>
             </select>
           </div>
         </div>
@@ -159,7 +163,7 @@ export default function AdminArcCreateForm({
 
       {error && <p className="text-sm text-danger-text">{error}</p>}
 
-      <MissingFieldsHint missing={[!arcImageUrl && "cover", !arcName.trim() && "name"]} />
+      <MissingFieldsHint missing={[!arcImageUrl && t("missing.cover"), !arcName.trim() && t("missing.name")]} />
 
       <div className="flex gap-2 self-end">
         <button
@@ -167,14 +171,14 @@ export default function AdminArcCreateForm({
           onClick={handleCancel}
           className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
         >
-          Cancel
+          {tCommon("cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !canSubmit}
           className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
-          {isSubmitting ? "Creating…" : "+ Create Arc"}
+          {isSubmitting ? t("creating") : t("arc.create")}
         </button>
       </div>
     </form>

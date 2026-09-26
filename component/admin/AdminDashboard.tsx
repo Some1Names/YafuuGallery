@@ -7,6 +7,7 @@ import AdminSearchInput from "./AdminSearchInput";
 import AdminUserList from "./AdminUserList";
 import AdminCommentList from "./AdminCommentList";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
+import { useTranslations } from "next-intl";
 
 interface MangaItem {
   id: string;
@@ -73,6 +74,7 @@ export default function AdminDashboard({
   reportedCount,
   currentUserId,
 }: AdminDashboardProps) {
+  const t = useTranslations("Dashboard");
   const [activeTab, setActiveTab] = useState<Tab>("manga");
   const [expandedMangaId, setExpandedMangaId] = useState<string | null>(null);
   const [editingMangaId, setEditingMangaId] = useState<string | null>(null);
@@ -109,9 +111,9 @@ export default function AdminDashboard({
   }
 
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: "manga", label: "Manga", count: mangaList.length },
-    { id: "users", label: "Users", count: userCount },
-    { id: "comments", label: "Comments", count: commentCount },
+    { id: "manga", label: t("tabs.manga"), count: mangaList.length },
+    { id: "users", label: t("tabs.users"), count: userCount },
+    { id: "comments", label: t("tabs.comments"), count: commentCount },
   ];
 
   return (
@@ -156,11 +158,11 @@ export default function AdminDashboard({
 
           {mangaList.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center">
-              <p className="text-fg-secondary text-sm">No manga yet — create one above.</p>
+              <p className="text-fg-secondary text-sm">{t("noManga")}</p>
             </div>
           ) : (
             <>
-              <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder="Search by title or author…" />
+              <AdminSearchInput value={mangaSearch} onChange={setMangaSearch} placeholder={t("searchTitleOrAuthor")} />
 
               {filteredMangaList.length === 0 ? (
                 <div className="border border-border rounded-md bg-surface/60 py-12 px-6 text-center mt-4">

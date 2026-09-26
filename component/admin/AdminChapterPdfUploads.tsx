@@ -3,6 +3,7 @@
 import { X, Plus } from "lucide-react";
 import { LANGUAGE_OPTIONS, type Language } from "@/lib/language";
 import AdminPdfUploadButton from "./AdminPdfUploadButton";
+import { useTranslations } from "next-intl";
 
 export interface ChapterTranslationDraft {
   language: Language;
@@ -35,6 +36,8 @@ export default function AdminChapterPdfUploads({
   generateCoverIfMissing,
   onCoverGenerated,
 }: AdminChapterPdfUploadsProps) {
+  const tChapter = useTranslations("Admin.chapter");
+  const tLang = useTranslations("LanguageName");
   const usedLanguages = new Set(value.map((t) => t.language));
   const unusedLanguages = LANGUAGE_OPTIONS.filter((opt) => !usedLanguages.has(opt.value));
 
@@ -54,7 +57,7 @@ export default function AdminChapterPdfUploads({
   return (
     <div>
       <label className="block text-xs text-fg-secondary mb-1.5">
-        Chapter PDF{value.length > 1 ? "s" : ""}
+        {tChapter("pdfs", { count: value.length })}
       </label>
 
       <div className="flex flex-col gap-2">
@@ -74,12 +77,12 @@ export default function AdminChapterPdfUploads({
               <select
                 value={t.language}
                 onChange={(e) => updateEntry(i, { language: e.target.value as Language })}
-                aria-label="PDF language"
+                aria-label={tChapter("pdfLanguage")}
                 className="shrink-0 bg-bg border border-border rounded px-2 py-2.5 text-xs text-fg-secondary focus:outline-none focus:border-fg-secondary transition-colors duration-200"
               >
                 {rowOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {tLang(opt.value)}
                   </option>
                 ))}
               </select>
@@ -92,14 +95,14 @@ export default function AdminChapterPdfUploads({
                   onChange={(url, fileName) => updateEntry(i, { url, fileName })}
                   generateCoverIfMissing={generateCoverIfMissing}
                   onCoverGenerated={onCoverGenerated}
-                  languageLabel={LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label}
+                  languageLabel={tLang(t.language)}
                 />
               </div>
 
               <button
                 type="button"
                 onClick={() => removeEntry(i)}
-                aria-label={`Remove ${LANGUAGE_OPTIONS.find((opt) => opt.value === t.language)?.label} PDF`}
+                aria-label={tChapter("removePdf", { language: tLang(t.language) })}
                 className="ml-auto sm:ml-0 shrink-0 self-start p-2.5 border border-border rounded text-fg-muted hover:text-danger-text hover:border-danger-text/50 transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
@@ -116,7 +119,7 @@ export default function AdminChapterPdfUploads({
           className="flex items-center gap-1.5 mt-2 text-xs text-fg-secondary hover:text-fg transition-colors duration-200"
         >
           <Plus className="w-3.5 h-3.5" />
-          Add another language
+          {tChapter("addLanguage")}
         </button>
       )}
     </div>

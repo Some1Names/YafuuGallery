@@ -1,6 +1,8 @@
 // Shared by MangaCard's "updated X ago" badge and the chapter comment
 // panel's per-comment timestamps.
-export function timeAgo(date: Date): string {
+// `locale` is an Intl tag ("en-US", "th-TH" — see INTL_LOCALE in
+// i18n/locales.ts): Thai gets "3 ชั่วโมงที่แล้ว" rather than "3 hours ago".
+export function timeAgo(date: Date, locale = "en-US"): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
   const units: [number, Intl.RelativeTimeFormatUnit][] = [
     [60, "second"],
@@ -12,7 +14,7 @@ export function timeAgo(date: Date): string {
     [Number.POSITIVE_INFINITY, "year"],
   ];
 
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
   let value = seconds;
   let unit: Intl.RelativeTimeFormatUnit = "second";
 

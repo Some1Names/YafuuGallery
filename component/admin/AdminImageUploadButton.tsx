@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import NextImage from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { processImageForUpload } from "@/lib/image-processing";
+import { useTranslations } from "next-intl";
 
 interface AdminImageUploadButtonProps {
   label: string;
@@ -34,6 +35,8 @@ export default function AdminImageUploadButton({
   aspectRatio,
   className,
 }: AdminImageUploadButtonProps) {
+  const t = useTranslations("Admin.upload");
+  const tCommon = useTranslations("Common");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +56,7 @@ export default function AdminImageUploadButton({
     try {
       processed = await processImageForUpload(file, { aspectRatio });
     } catch {
-      setError("Couldn't read that image — please try a different file.");
+      setError(t("cantReadImage"));
       setIsUploading(false);
       e.target.value = "";
       return;
@@ -66,12 +69,12 @@ export default function AdminImageUploadButton({
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Upload failed");
+        setError(data.error ?? t("failed"));
         return;
       }
       onChange(data.url);
     } catch {
-      setError("Upload failed");
+      setError(t("failed"));
     } finally {
       setIsUploading(false);
       e.target.value = ""; // lets the same file be re-selected later
@@ -92,14 +95,14 @@ export default function AdminImageUploadButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isUploading}
-        aria-label={`${isUploading ? "Uploading" : value ? "Change" : "Upload"} ${label.toLowerCase()} image`}
+        aria-label={t(isUploading ? "uploadingImage" : value ? "changeImage" : "uploadImage", { label: label.toLowerCase() })}
         aria-busy={isUploading}
         className={`group relative block ${boxClassName} overflow-hidden rounded border border-border bg-bg`}
       >
         {value ? (
           <NextImage src={value} alt="" fill sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
         ) : (
-          <NoImagePlaceholder label="No image" />
+          <NoImagePlaceholder label={tCommon("noImage")} />
         )}
 
         {/* "Change" on hover; "Uploading…" always while it runs — it used
@@ -112,7 +115,7 @@ export default function AdminImageUploadButton({
             (isUploading ? "opacity-100" : "opacity-0 group-hover:opacity-100")
           }
         >
-          {isUploading ? "Uploading…" : "Change"}
+          {isUploading ? t("uploading") : t("change")}
         </span>
       </button>
 

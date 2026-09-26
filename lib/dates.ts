@@ -5,8 +5,9 @@
 // every date one day early west of UTC (UTC midnight is still the previous
 // evening there), and let the server and browser render different text for
 // the same date (a hydration mismatch).
-export function formatPublishedDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
+// `locale` is an Intl tag ("en-US", "th-TH"; Thai shows Buddhist-era years).
+export function formatPublishedDate(date: Date, locale = "en-US"): string {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

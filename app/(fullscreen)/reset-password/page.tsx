@@ -5,6 +5,8 @@ import { AuthMobileLogo, AuthSidePanel } from "@/component/AuthBrand";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { useTranslations } from "next-intl";
+import { useAuthErrorMessage } from "@/component/useAuthErrorMessage";
 
 // Better Auth's own /reset-password/:token callback validates the emailed
 // token, then redirects here with either `?token=...` (valid) or
@@ -12,6 +14,8 @@ import { authClient } from "@/lib/auth-client";
 // the email link itself. useSearchParams needs a Suspense boundary, hence
 // the wrapper below.
 function ResetPasswordForm() {
+  const t = useTranslations("Auth");
+  const authErrorMessage = useAuthErrorMessage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -28,7 +32,7 @@ function ResetPasswordForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords don't match.");
+      setError(t("reset.mismatch"));
       return;
     }
 
@@ -41,13 +45,13 @@ function ResetPasswordForm() {
       });
 
       if (resetError) {
-        setError(resetError.message ?? "Something went wrong. Please try again.");
+        setError(authErrorMessage(resetError));
         return;
       }
 
       router.push("/login");
     } catch {
-      setError("Network error — please try again.");
+      setError(t("network"));
     } finally {
       setIsSubmitting(false);
     }
@@ -57,11 +61,13 @@ function ResetPasswordForm() {
     return (
       <div className="rounded-md border border-border bg-surface p-4">
         <p className="text-sm text-fg">
-          This reset link is invalid or has expired. Request a new one from the{" "}
-          <Link href="/forgot-password" className="font-medium hover:underline">
-            forgot password
-          </Link>{" "}
-          page.
+          {t.rich("reset.invalidLink", {
+            link: (chunks) => (
+              <Link href="/forgot-password" className="font-medium hover:underline">
+                {chunks}
+              </Link>
+            ),
+          })}
         </p>
       </div>
     );
@@ -71,7 +77,7 @@ function ResetPasswordForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="password" className="block text-sm text-fg-secondary mb-1.5">
-          New Password
+          {t("reset.newPassword")}
         </label>
         <div className="relative">
           <input
@@ -81,24 +87,24 @@ function ResetPasswordForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            placeholder="Enter a new password"
+            placeholder={t("reset.newPlaceholder")}
             className="w-full rounded-md border border-border bg-surface px-3 py-2 pr-14 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-9 px-2 text-xs text-fg-secondary hover:text-fg"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           >
-            {showPassword ? "Hide" : "Show"}
+            {showPassword ? t("hide") : t("show")}
           </button>
         </div>
-        <span className="text-xs text-fg-muted mt-1 block">Must be at least 8 characters.</span>
+        <span className="text-xs text-fg-muted mt-1 block">{t("signup.passwordHint")}</span>
       </div>
 
       <div>
         <label htmlFor="confirmPassword" className="block text-sm text-fg-secondary mb-1.5">
-          Confirm Password
+          {t("reset.confirm")}
         </label>
         <input
           id="confirmPassword"
@@ -106,7 +112,7 @@ function ResetPasswordForm() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          placeholder="Re-enter the new password"
+          placeholder={t("reset.confirmPlaceholder")}
           className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-muted focus:outline-none focus:border-danger transition-colors"
         />
       </div>
@@ -118,13 +124,14 @@ function ResetPasswordForm() {
         disabled={isSubmitting}
         className="w-full rounded-md bg-fg text-bg text-sm font-semibold py-2.5 hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
       >
-        {isSubmitting ? "Resetting…" : "Reset Password"}
+        {isSubmitting ? t("reset.submitting") : t("reset.submit")}
       </button>
     </form>
   );
 }
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("Auth");
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-bg">
       {/* Left panel (large screens) */}
@@ -135,8 +142,8 @@ export default function ResetPasswordPage() {
         <AuthMobileLogo />
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h1 className="text-2xl text-fg font-(family-name:--font-display)">Reset Password</h1>
-            <p className="mt-1 text-sm text-fg-secondary">Choose a new password for your account.</p>
+            <h1 className="text-2xl text-fg font-(family-name:--font-display)">{t("reset.title")}</h1>
+            <p className="mt-1 text-sm text-fg-secondary">{t("reset.subtitle")}</p>
           </div>
 
           <Suspense fallback={null}>

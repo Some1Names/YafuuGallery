@@ -5,12 +5,16 @@ import { z } from "zod";
 // chosen at signup can't be switched to later either.
 export const MAX_DISPLAY_NAME_LENGTH = 20;
 
+// Error messages here are KEYS into messages/*.json → Validation (e.g.
+// "nameTooShort"), not display text: the same rules run in the signup and
+// profile forms and on the server (which returns the key), and each screen
+// shows it in the reader's language — see validationMessage().
 export const displayNameSchema = z
   .string()
   .trim()
-  .min(3, "Username must be at least 3 characters")
-  .max(MAX_DISPLAY_NAME_LENGTH, `Username must be at most ${MAX_DISPLAY_NAME_LENGTH} characters`)
-  .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores are allowed");
+  .min(3, "nameTooShort")
+  .max(MAX_DISPLAY_NAME_LENGTH, "nameTooLong")
+  .regex(/^[a-zA-Z0-9_]+$/, "nameInvalidChars");
 
 // confirmPassword is typed twice on purpose: until the site can email any
 // address (see lib/auth.ts), "forgot password" can't reach most people, so
@@ -18,12 +22,12 @@ export const displayNameSchema = z
 export const signupSchema = z
   .object({
     name: displayNameSchema,
-    email: z.string().trim().email("Enter a valid email"),
-    password: z.string().min(8, "Must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Type your password again"),
+    email: z.string().trim().email("emailInvalid"),
+    password: z.string().min(8, "passwordTooShort"),
+    confirmPassword: z.string().min(1, "confirmRequired"),
   })
   .refine((v) => v.password === v.confirmPassword, {
-    message: "Passwords don't match",
+    message: "passwordMismatch",
     path: ["confirmPassword"],
   });
 

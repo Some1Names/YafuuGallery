@@ -4,12 +4,16 @@ import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { formatChapterBadge } from "@/lib/chapter-number";
 import { timeAgo } from "@/lib/time-ago";
 import type { FavoriteUpdateItem } from "@/lib/favorite-updates";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 // One line of the Favorites → Updates feed: the manga's cover, which
 // manga, which chapter, and when it went up. Unread new chapters get the
 // same red as MangaCard's fresh-update badge, plus a "New" label (color
 // alone isn't enough to tell them apart).
 export default function FavoriteUpdateRow({ item }: { item: FavoriteUpdateItem }) {
+  const t = useTranslations("Card");
+  const locale = useLocale() as Locale;
   return (
     <Link
       href={`/viewer/${item.chapterId}`}
@@ -42,10 +46,10 @@ export default function FavoriteUpdateRow({ item }: { item: FavoriteUpdateItem }
       <div className="shrink-0 flex flex-col items-end gap-1">
         {item.isNew && (
           <span className="px-1.5 py-0.5 rounded-sm bg-red-600 text-white text-[10px] font-bold tracking-wider uppercase">
-            New
+            {t("new")}
           </span>
         )}
-        <span className="text-xs text-fg-muted whitespace-nowrap">{timeAgo(item.uploadedAt)}</span>
+        <span className="text-xs text-fg-muted whitespace-nowrap">{timeAgo(item.uploadedAt, INTL_LOCALE[locale])}</span>
       </div>
     </Link>
   );

@@ -10,6 +10,7 @@ import LocalDate from "@/component/LocalDate";
 import { useDebounced, usePagedList } from "./usePagedList";
 import { formatUsername } from "@/lib/format-username";
 import type { AdminUserItem } from "@/lib/admin-lists";
+import { useTranslations } from "next-intl";
 
 // Tailwind's sm breakpoint. Only one layout is rendered (not both with one
 // hidden by CSS), so an opened user's comments — fetched on open — load once.
@@ -25,6 +26,8 @@ function subscribeWide(onChange: () => void) {
 // Phones get one card per user; from sm up, a table. Both use the same
 // per-user controls below.
 export default function AdminUserList({ currentUserId }: { currentUserId: string }) {
+  const t = useTranslations("AdminUsers");
+  const tCommon = useTranslations("Common");
   const [search, setSearch] = useState("");
   const q = useDebounced(search.trim());
   const { items, hasMore, isLoadingMore, error, loadMore, removeItem } = usePagedList<AdminUserItem>(
@@ -44,7 +47,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
     if (u.id === currentUserId) {
       return (
         <span className="text-sm text-fg-secondary whitespace-nowrap">
-          {u.role === "admin" ? "Admin" : u.role === "author" ? "Author" : "Reader"} (you)
+          {t("you", { role: t(`roles.${u.role}`) })}
         </span>
       );
     }
@@ -61,8 +64,8 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
         aria-expanded={isExpanded}
         className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
       >
-        {u.commentCount} {u.commentCount === 1 ? "comment" : "comments"}{" "}
-        {u.commentCount > 0 && (isExpanded ? "− Close" : "· View")}
+        {t("commentCount", { count: u.commentCount })}{" "}
+        {u.commentCount > 0 && (isExpanded ? t("closeComments") : t("viewComments"))}
       </button>
     );
   }
@@ -78,13 +81,13 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
 
   return (
     <section>
-      <AdminSearchInput value={search} onChange={setSearch} placeholder="Search by name, name#tag or email…" />
+      <AdminSearchInput value={search} onChange={setSearch} placeholder={t("search")} />
 
       {items === null ? (
-        <ListRowSkeletons label="Loading users…" />
+        <ListRowSkeletons label={t("loading")} />
       ) : items.length === 0 ? (
         <div className="border border-border rounded-md bg-surface/60 py-6 px-4 mt-4 text-center text-sm text-fg-secondary">
-          {error ? "Couldn't load users — please try again." : q ? <>No users match &quot;{q}&quot;.</> : "No users yet."}
+          {error ? t("loadFailed") : q ? t("noMatch", { query: q }) : t("none")}
         </div>
       ) : (
         <>
@@ -99,7 +102,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
                     <div className="text-fg font-medium truncate">{u.name ? formatUsername(u.name, u.tag) : "—"}</div>
                     <div className="text-sm text-fg-secondary truncate">{u.email}</div>
                     <div className="text-xs text-fg-muted mt-0.5">
-                      Joined <LocalDate date={u.createdAt} />
+                      {t("joinedOn")} <LocalDate date={u.createdAt} />
                     </div>
                   </div>
                   <div className="shrink-0">{roleControl(u)}</div>
@@ -121,11 +124,11 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-surface text-fg-secondary text-xs">
-                    <th className="text-left px-4 py-2">Name</th>
-                    <th className="text-left px-4 py-2">Email</th>
-                    <th className="text-left px-4 py-2">Joined</th>
-                    <th className="text-left px-4 py-2">Role</th>
-                    <th className="text-left px-4 py-2">Comments</th>
+                    <th className="text-left px-4 py-2">{t("columns.name")}</th>
+                    <th className="text-left px-4 py-2">{t("columns.email")}</th>
+                    <th className="text-left px-4 py-2">{t("columns.joined")}</th>
+                    <th className="text-left px-4 py-2">{t("columns.role")}</th>
+                    <th className="text-left px-4 py-2">{t("columns.comments")}</th>
                     <th className="text-left px-4 py-2"></th>
                   </tr>
                 </thead>
@@ -159,7 +162,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
           </div>
           )}
 
-          {error && <p className="text-xs text-danger-text mt-3">Couldn&apos;t load more — please try again.</p>}
+          {error && <p className="text-xs text-danger-text mt-3">{t("loadMoreFailed")}</p>}
           {hasMore && (
             <div className="flex justify-center mt-4">
               <button
@@ -168,7 +171,7 @@ export default function AdminUserList({ currentUserId }: { currentUserId: string
                 disabled={isLoadingMore}
                 className="text-sm px-4 py-2 border border-border rounded-md text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-50 transition-colors duration-200"
               >
-                {isLoadingMore ? "Loading…" : "Show more"}
+                {isLoadingMore ? tCommon("loading") : tCommon("showMore")}
               </button>
             </div>
           )}

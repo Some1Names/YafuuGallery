@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import LocalDate from "@/component/LocalDate";
 import { formatUsername } from "@/lib/format-username";
+import { useTranslations } from "next-intl";
 
 // date and time — several comments can land on the same day
 const POSTED_AT: Intl.DateTimeFormatOptions = {
@@ -55,6 +56,8 @@ export default function AdminCommentRow({
   onDeleted,
   onReportsDismissed,
 }: AdminCommentRowProps) {
+  const t = useTranslations("AdminComments");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [hidden, setHidden] = useState(initialHidden);
   const [isPending, startTransition] = useTransition();
@@ -68,7 +71,7 @@ export default function AdminCommentRow({
     setIsWorking(true);
     const res = await fetch(`/api/admin/comments/${commentId}/reports`, { method: "DELETE" }).catch(() => null);
     setIsWorking(false);
-    if (!res?.ok) return alertRequestFailed("Couldn't dismiss reports", res);
+    if (!res?.ok) return alertRequestFailed(t("dismissFailed"), res);
     onReportsDismissed?.();
     router.refresh(); // the tab counts on the page
   }
@@ -82,7 +85,7 @@ export default function AdminCommentRow({
       if (!res?.ok) {
         setHidden(previous);
         // not awaited, so the button isn't left pending while it's open
-        void alertRequestFailed(previous ? "Couldn't unhide comment" : "Couldn't hide comment", res);
+        void alertRequestFailed(previous ? t("unhideFailed") : t("hideFailed"), res);
         return;
       }
       const data = await res.json();
@@ -93,9 +96,9 @@ export default function AdminCommentRow({
   async function remove() {
     if (isWorking) return;
     const confirmed = await confirmDialog({
-      title: "Delete this comment?",
-      message: "Any replies to it are deleted too. This can't be undone.",
-      confirmLabel: "Delete",
+      title: t("deleteTitle"),
+      message: t("deleteMessage"),
+      confirmLabel: tCommon("delete"),
       tone: "danger",
     });
     if (!confirmed) return;
@@ -103,7 +106,7 @@ export default function AdminCommentRow({
     const res = await fetch(`/api/admin/comments/${commentId}`, { method: "DELETE" }).catch(() => null);
     if (!res?.ok) {
       setIsWorking(false);
-      return alertRequestFailed("Couldn't delete comment", res);
+      return alertRequestFailed(t("deleteFailed"), res);
     }
     onDeleted?.();
     router.refresh(); // the tab counts on the page
@@ -116,25 +119,25 @@ export default function AdminCommentRow({
       <div className="min-w-0">
         <div className="text-xs text-fg-secondary mb-1">
           {formatUsername(userName, userTag)}
-          {replyToName && <span className="text-fg-muted"> ↳ reply to {replyToName}</span>} ·{" "}
+          {replyToName && <span className="text-fg-muted"> {t("replyTo", { name: replyToName })}</span>} ·{" "}
           {/* opens the chapter in a new tab so the moderation list (and its
               search/filter) is still here to come back to */}
           <Link
             href={`/viewer/${chapterId}`}
             target="_blank"
             rel="noopener"
-            title="Open this chapter in a new tab"
+            title={t("openChapter")}
             className="inline-flex items-center gap-0.5 text-fg-secondary underline underline-offset-2 decoration-fg/25 hover:text-fg hover:decoration-fg/60 transition-colors duration-200"
           >
             {chapterLabel}
             <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
           </Link>{" "}
           · <LocalDate date={createdAt} options={POSTED_AT} />
-          {hidden && <span className="text-danger-text"> · hidden</span>}
+          {hidden && <span className="text-danger-text"> · {t("hiddenTag")}</span>}
           {reportCount > 0 && (
             <span className="text-danger-text">
               {" "}
-              · reported {reportCount === 1 ? "once" : `${reportCount} times`}
+              · {t("reported", { count: reportCount })}
             </span>
           )}
         </div>
@@ -152,7 +155,7 @@ export default function AdminCommentRow({
             disabled={isWorking}
             className="text-xs px-3 py-3 sm:py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
           >
-            Dismiss reports
+            {t("dismissReports")}
           </button>
         )}
         <button
@@ -161,7 +164,7 @@ export default function AdminCommentRow({
           disabled={isPending}
           className="text-xs px-3 py-3 sm:py-1.5 border border-border rounded hover:border-fg-secondary text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
         >
-          {hidden ? "Unhide" : "Hide"}
+          {hidden ? t("unhide") : t("hide")}
         </button>
         {canDelete && (
           <button
@@ -170,7 +173,7 @@ export default function AdminCommentRow({
             disabled={isWorking}
             className="text-xs px-3 py-3 sm:py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 disabled:opacity-50 transition-colors duration-200"
           >
-            Delete
+            {tCommon("delete")}
           </button>
         )}
       </div>

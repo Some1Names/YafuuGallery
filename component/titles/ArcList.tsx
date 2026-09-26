@@ -1,5 +1,6 @@
 import ArcRow from "./ArcRow";
 import type { ArcItem } from "./types";
+import { useTranslations } from "next-intl";
 
 interface ArcListProps {
   arcs: ArcItem[];
@@ -7,8 +8,9 @@ interface ArcListProps {
 }
 
 export default function ArcList({ arcs, onSelectArc }: ArcListProps) {
+  const t = useTranslations("Manga");
   if (arcs.length === 0) {
-    return <p className="text-sm text-fg-secondary">No arcs yet.</p>;
+    return <p className="text-sm text-fg-secondary">{t("noArcs")}</p>;
   }
 
   return (

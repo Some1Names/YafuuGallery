@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export interface ChapterLink {
   href: string;
@@ -24,30 +25,31 @@ export default function ChapterEndNav({
   next?: ChapterLink;
   variant: "cards" | "bar";
 }) {
+  const t = useTranslations("EndNav");
   if (variant === "bar") {
     return (
       <nav
-        aria-label="Chapters"
+        aria-label={t("label")}
         className="fixed left-1/2 -translate-x-1/2 bottom-14 sm:bottom-6 z-30 flex items-center gap-2 p-1.5 rounded-full bg-[#0a0a0a]/85 backdrop-blur-sm border border-[#ece6d8]/15 shadow-lg"
       >
         {next ? (
           <Link
             href={next.href}
-            aria-label={`Next chapter: ${next.badge} ${next.name}`}
+            aria-label={t("nextChapter", { badge: next.badge, name: next.name })}
             className="flex items-center gap-1.5 h-10 px-4 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold whitespace-nowrap hover:bg-[#f6f1f2] transition-colors duration-200"
           >
-            <span aria-hidden="true">‹</span> Next <span className="font-normal">{next.badge}</span>
+            <span aria-hidden="true">‹</span> {t("next")} <span className="font-normal">{next.badge}</span>
           </Link>
         ) : (
-          <span className="flex items-center h-10 px-4 text-sm text-[#b6b0a2] whitespace-nowrap">All caught up</span>
+          <span className="flex items-center h-10 px-4 text-sm text-[#b6b0a2] whitespace-nowrap">{t("allCaughtUp")}</span>
         )}
         {prev && (
           <Link
             href={prev.href}
-            aria-label={`Previous chapter: ${prev.badge} ${prev.name}`}
+            aria-label={t("previousChapter", { badge: prev.badge, name: prev.name })}
             className="flex items-center gap-1.5 h-10 px-4 rounded-full border border-[#ece6d8]/25 text-[#ece6d8] text-sm whitespace-nowrap hover:border-[#ece6d8]/60 transition-colors duration-200"
           >
-            Previous <span className="text-[#b6b0a2]">{prev.badge}</span> <span aria-hidden="true">›</span>
+            {t("previous")} <span className="text-[#b6b0a2]">{prev.badge}</span> <span aria-hidden="true">›</span>
           </Link>
         )}
       </nav>
@@ -59,14 +61,14 @@ export default function ChapterEndNav({
     // one-shot): stacked and centred — a lone card or "all caught up" in
     // one column of the two looked off to one side.
     <nav
-      aria-label="Chapters"
+      aria-label={t("label")}
       className={
         prev && next
           ? "grid grid-cols-2 gap-3 w-full max-w-md"
           : "flex flex-col items-center gap-3 w-full max-w-md text-center"
       }
     >
-      {!next && <p className="text-base text-[#ece6d8]">You&apos;re all caught up</p>}
+      {!next && <p className="text-base text-[#ece6d8]">{t("youreAllCaughtUp")}</p>}
       {prev && (
         <Link
           href={prev.href}
@@ -76,7 +78,7 @@ export default function ChapterEndNav({
           }
         >
           <span className="text-xs text-[#b6b0a2]">
-            <span aria-hidden="true">←</span> Previous
+            <span aria-hidden="true">←</span> {t("previous")}
           </span>
           <span className="text-sm text-[#ece6d8] line-clamp-2 wrap-break-word">
             {prev.badge} {prev.name}
@@ -92,7 +94,7 @@ export default function ChapterEndNav({
           }
         >
           <span className="text-xs font-semibold">
-            Next <span aria-hidden="true">→</span>
+            {t("next")} <span aria-hidden="true">→</span>
           </span>
           <span className="text-sm line-clamp-2 wrap-break-word">
             {next.badge} {next.name}

@@ -1,6 +1,7 @@
 import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import type { ArcItem } from "./types";
+import { useTranslations } from "next-intl";
 
 interface ArcRowProps {
   arc: ArcItem;
@@ -8,6 +9,7 @@ interface ArcRowProps {
 }
 
 export default function ArcRow({ arc, onSelect }: ArcRowProps) {
+  const t = useTranslations("Manga");
   return (
     <button
       type="button"
@@ -43,7 +45,7 @@ export default function ArcRow({ arc, onSelect }: ArcRowProps) {
           <span className="text-xs text-fg-secondary uppercase shrink-0">{arc.arc_status}</span>
         </div>
         <div className="text-sm mt-1 text-fg/90 truncate">
-          {arc.chapters.length} {arc.chapters.length === 1 ? "chapter" : "chapters"}
+          {t("chapterCount", { count: arc.chapters.length })}
         </div>
       </div>
     </button>

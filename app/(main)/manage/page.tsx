@@ -4,11 +4,16 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import MangaBackground from "@/component/titles/MangaBackground";
 import ManageMangaDashboard from "@/component/manage/ManageMangaDashboard";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Manage manga" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ManagePage");
+  return { title: t("title") };
+}
 
 export default async function ManageMangaPage() {
   const session = await auth();
+  const t = await getTranslations("ManagePage");
 
   if (session?.user?.role !== "author" && session?.user?.role !== "admin") {
     redirect("/");
@@ -110,8 +115,8 @@ export default async function ManageMangaPage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Manage Manga</h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">Create and manage your own manga, arcs, and chapters.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">{t("heading")}</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         <ManageMangaDashboard
@@ -120,7 +125,7 @@ export default async function ManageMangaPage() {
           arcs={arcs}
           commentCount={commentCount}
           reportedCount={reportedCount}
-          authorName={session.user.name ?? session.user.email ?? "You"}
+          authorName={session.user.name ?? session.user.email ?? t("you")}
         />
       </div>
     </div>

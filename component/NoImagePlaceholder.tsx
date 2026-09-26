@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 interface NoImagePlaceholderProps {
   // Only pass this where the empty state is something to act on (the
   // upload control) — everywhere else (cards, list thumbnails) it's pure
@@ -13,12 +14,13 @@ interface NoImagePlaceholderProps {
 // manga panels are filled with before the final art goes in. Reads as
 // "unfinished panel," not "broken image."
 export default function NoImagePlaceholder({ label, className = "" }: NoImagePlaceholderProps) {
+  const t = useTranslations("Common");
   return (
     <div
       // Visible text already carries the meaning where there is one — the
       // aria-label/role is only needed for the purely-visual, textless
       // instances, where a screen reader would otherwise get nothing.
-      {...(!label && { role: "img", "aria-label": "No image" })}
+      {...(!label && { role: "img", "aria-label": t("noImage") })}
       className={`w-full h-full flex items-center justify-center bg-surface ${className}`}
       style={{
         backgroundImage: "radial-gradient(circle, var(--color-texture) 1px, transparent 1.5px)",

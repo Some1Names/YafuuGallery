@@ -2,10 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { confirmDialog } from "@/component/Dialog";
+import { useTranslations } from "next-intl";
 
 type Role = "reader" | "author" | "admin";
-
-const ROLE_LABELS: Record<Role, string> = { reader: "Reader", author: "Author", admin: "Admin" };
 
 interface AdminUserRoleSelectProps {
   userId: string;
@@ -14,6 +13,7 @@ interface AdminUserRoleSelectProps {
 }
 
 export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: AdminUserRoleSelectProps) {
+  const t = useTranslations("AdminUsers");
   const [role, setRole] = useState<Role>(currentRole);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -22,9 +22,9 @@ export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: 
     // A role change takes effect immediately (granting or revoking admin
     // access), so confirm it rather than trusting a stray dropdown pick.
     const confirmed = await confirmDialog({
-      title: "Change role?",
-      message: `${userLabel} goes from ${ROLE_LABELS[role]} to ${ROLE_LABELS[newRole]}. This takes effect immediately.`,
-      confirmLabel: "Change role",
+      title: t("changeRoleTitle"),
+      message: t("changeRoleMessage", { user: userLabel, from: t(`roles.${role}`), to: t(`roles.${newRole}`) }),
+      confirmLabel: t("changeRoleConfirm"),
       tone: "warning",
     });
     if (!confirmed) return;
@@ -43,7 +43,7 @@ export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: 
       if (!res.ok) {
         setRole(previous); // roll back, and say why instead of silently flipping back
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Couldn't change role.");
+        setError(data?.error ?? t("changeRoleFailed"));
       }
     });
   }
@@ -54,12 +54,12 @@ export default function AdminUserRoleSelect({ userId, currentRole, userLabel }: 
         value={role}
         disabled={isPending}
         onChange={(e) => handleChange(e.target.value as Role)}
-        aria-label={`Role for ${userLabel}`}
+        aria-label={t("roleFor", { user: userLabel })}
         className="bg-surface border border-border rounded px-2 py-1 text-sm text-fg disabled:opacity-50"
       >
-        <option value="reader">Reader</option>
-        <option value="author">Author</option>
-        <option value="admin">Admin</option>
+        <option value="reader">{t("roles.reader")}</option>
+        <option value="author">{t("roles.author")}</option>
+        <option value="admin">{t("roles.admin")}</option>
       </select>
       {error && <p className="text-xs text-danger-text mt-1">{error}</p>}
     </div>

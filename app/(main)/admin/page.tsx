@@ -8,11 +8,16 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import AdminDashboard from "@/component/admin/AdminDashboard";
 import StorageUsageBar from "@/component/admin/StorageUsageBar";
 import UnattributedStorage from "@/component/admin/UnattributedStorage";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Admin" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("AdminPage");
+  return { title: t("title") };
+}
 
 export default async function AdminPage() {
   const session = await auth();
+  const t = await getTranslations("AdminPage");
 
   if (session?.user?.role !== "admin") {
     redirect("/");
@@ -88,9 +93,9 @@ export default async function AdminPage() {
   const objectSizes = new Map(storedObjects.map((o) => [o.key, o.size]));
 
   const stats = [
-    { label: "Users", value: userCount },
-    { label: "Manga", value: mangaCount },
-    { label: "Chapters", value: chapterCount },
+    { label: t("stats.users"), value: userCount },
+    { label: t("stats.manga"), value: mangaCount },
+    { label: t("stats.chapters"), value: chapterCount },
   ];
 
   // R2 objects aren't tagged with the manga/chapter they belong to — the
@@ -175,8 +180,8 @@ export default async function AdminPage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Admin</h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">Manage manga, chapters, users, and comment moderation.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">{t("title")}</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         {/* Stats — always visible above the tabs, regardless of which

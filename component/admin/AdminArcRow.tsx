@@ -7,6 +7,7 @@ import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import AdminImageUploadButton from "./AdminImageUploadButton";
 import { MAX_ARC_NAME_LENGTH } from "@/lib/content-limits";
+import { useTranslations } from "next-intl";
 
 interface AdminArcRowProps {
   id: string;
@@ -43,6 +44,9 @@ export default function AdminArcRow({
   onToggleEdit,
   dragHandle,
 }: AdminArcRowProps) {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
+  const tStatus = useTranslations("Status");
   const router = useRouter();
   const [editImageUrl, setEditImageUrl] = useState(imageUrl);
   const [editName, setEditName] = useState(name);
@@ -74,20 +78,20 @@ export default function AdminArcRow({
       router.refresh();
     } else {
       const data = await res.json().catch(() => null);
-      setError(data?.error ?? "Failed to save.");
+      setError(data?.error ?? t("failedSave"));
     }
   }
 
   async function remove() {
     const confirmed = await confirmDialog({
-      title: `Delete arc "${name}"?`,
-      message: "Chapters in it become unassigned, not deleted. This can't be undone.",
-      confirmLabel: "Delete arc",
+      title: t("arc.deleteTitle", { name }),
+      message: t("arc.deleteMessage"),
+      confirmLabel: t("arc.deleteConfirm"),
       tone: "danger",
     });
     if (!confirmed) return;
     const res = await fetch(`/api/admin/arcs/${id}`, { method: "DELETE" }).catch(() => null);
-    if (!res?.ok) return alertRequestFailed("Couldn't delete arc", res);
+    if (!res?.ok) return alertRequestFailed(t("arc.deleteFailed"), res);
     router.refresh();
   }
 
@@ -143,7 +147,7 @@ export default function AdminArcRow({
             <p className="text-base text-fg font-medium truncate">
               {isEx ? "ex" : `#${String(displayNumber).padStart(3, "0")}`} — {name}
             </p>
-            <p className="text-sm text-fg-secondary mt-0.5 capitalize truncate">{status}</p>
+            <p className="text-sm text-fg-secondary mt-0.5 truncate">{tStatus(status)}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 shrink-0">
@@ -151,13 +155,13 @@ export default function AdminArcRow({
               onClick={onToggleEdit}
               className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
-              {isEditing ? "Close" : "Edit"}
+              {isEditing ? t("close") : tCommon("edit")}
             </button>
             <button
               onClick={remove}
               className="text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
             >
-              Delete
+              {tCommon("delete")}
             </button>
           </div>
         </div>
@@ -173,7 +177,7 @@ export default function AdminArcRow({
         >
           <div className="flex flex-col sm:flex-row gap-4">
             <AdminImageUploadButton
-              label="Cover"
+              label={t("cover")}
               value={editImageUrl}
               onChange={setEditImageUrl}
               boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
@@ -183,7 +187,7 @@ export default function AdminArcRow({
             <div className="flex-1 flex flex-col gap-4">
               <div>
                 <label className="block text-xs text-fg-secondary mb-1.5">
-                  Arc Title
+                  {t("arc.title")}
                 </label>
                 <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
                   <select
@@ -206,15 +210,15 @@ export default function AdminArcRow({
 
               <div className="sm:w-40">
                 <label className="block text-xs text-fg-secondary mb-1.5">
-                  Status
+                  {t("status")}
                 </label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as "ongoing" | "completed")}
                   className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
                 >
-                  <option value="ongoing">Ongoing</option>
-                  <option value="completed">Completed</option>
+                  <option value="ongoing">{tStatus("ongoing")}</option>
+                  <option value="completed">{tStatus("completed")}</option>
                 </select>
               </div>
             </div>
@@ -228,14 +232,14 @@ export default function AdminArcRow({
               onClick={cancelEdit}
               className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
             >
-              {isSaving ? "Saving…" : "Save"}
+              {isSaving ? t("saving") : tCommon("save")}
             </button>
           </div>
         </form>

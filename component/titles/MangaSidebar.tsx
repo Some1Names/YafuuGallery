@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { LANGUAGE_LABELS, type Language } from "@/lib/language";
+import type { Language } from "@/lib/language";
 import { BookOpen, Languages } from "lucide-react";
 import MangaFavoriteButton from "@/component/titles/MangaFavoriteButton";
 import MangaSynopsis from "@/component/titles/MangaSynopsis";
-import { genreLabel, knownGenres, type MangaStatusValue } from "@/lib/genres";
+import { knownGenres, type MangaStatusValue } from "@/lib/genres";
+import { useTranslations } from "next-intl";
 
 interface MangaSidebarProps {
   mangaId: string;
@@ -33,6 +34,10 @@ export default function MangaSidebar({
   isFavorited,
   readAction,
 }: MangaSidebarProps) {
+  const t = useTranslations("Manga");
+  const tStatus = useTranslations("Status");
+  const tGenre = useTranslations("Genres");
+  const tLanguage = useTranslations("LanguageName");
   const shownGenres = knownGenres(genres);
 
   return (
@@ -50,14 +55,14 @@ export default function MangaSidebar({
       {/* Status, then genres — each genre opens /search filtered to it.
           The ::before stretches each genre's tap area to ~40px tall
           without making the pill itself any bigger. */}
-      <ul className="flex flex-wrap items-center gap-2 mt-4" aria-label="Status and genres">
+      <ul className="flex flex-wrap items-center gap-2 mt-4" aria-label={t("statusAndGenres")}>
         <li
           className={
             "text-xs font-semibold px-2.5 py-1 rounded-full " +
             (status === "completed" ? "bg-fg text-bg" : "border border-fg/40 text-fg")
           }
         >
-          {status === "completed" ? "Completed" : "Ongoing"}
+          {tStatus(status)}
         </li>
         {shownGenres.map((slug) => (
           <li key={slug}>
@@ -65,7 +70,7 @@ export default function MangaSidebar({
               href={`/search?genre=${slug}`}
               className="relative block text-xs px-2.5 py-1 rounded-full before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] border border-border text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
-              {genreLabel(slug)}
+              {tGenre(slug)}
             </Link>
           </li>
         ))}
@@ -75,7 +80,10 @@ export default function MangaSidebar({
         <p className="flex items-center gap-1.5 mt-3 text-sm text-fg-secondary">
           <Languages className="w-4 h-4 shrink-0 text-fg-muted" aria-hidden="true" />
           <span>
-            Available in <span className="text-fg">{languages.map((l) => LANGUAGE_LABELS[l]).join(" · ")}</span>
+            {t.rich("availableIn", {
+              languages: languages.map((l) => tLanguage(l)).join(" · "),
+              strong: (chunks) => <span className="text-fg">{chunks}</span>,
+            })}
           </span>
         </p>
       )}
@@ -94,7 +102,7 @@ export default function MangaSidebar({
           </Link>
         ) : (
           <span className="flex-1 flex items-center justify-center h-11 px-4 rounded-md border border-fg/15 text-fg-muted text-sm">
-            No chapters yet
+            {t("noChaptersYet")}
           </span>
         )}
         <MangaFavoriteButton mangaId={mangaId} initialFavorited={isFavorited} />

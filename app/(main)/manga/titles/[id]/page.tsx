@@ -10,6 +10,7 @@ import ChapterArcSection from "@/component/titles/ChapterArcSection";
 import MangaSidebar from "@/component/titles/MangaSidebar";
 import type { ChapterItem } from "@/component/titles/types";
 import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
+import { getTranslations } from "next-intl/server";
 
 // Meta descriptions get cut off by search engines/link previews well before
 // a full synopsis ends — trim to a plain, unbroken sentence length instead.
@@ -151,6 +152,7 @@ export default async function MangaDetailPage({
         notFound();
     }
 
+    const t = await getTranslations("Manga");
     const favoritedChapterIds = favoritedChapters.map((f) => f.chapter_id);
 
     // total_chapters/total_view-style: favorite/comment counts aren't
@@ -216,10 +218,10 @@ export default async function MangaDetailPage({
     const readAction = resumeChapter
         ? {
             href: `/viewer/${resumeChapter.id}`,
-            label: `Continue ${formatChapterBadge(resumeChapter.chapter_is_ex, displayNumbers.get(resumeChapter.id))}`,
+            label: t("continue", { badge: formatChapterBadge(resumeChapter.chapter_is_ex, displayNumbers.get(resumeChapter.id)) }),
         }
         : firstChapter
-            ? { href: `/viewer/${firstChapter.id}`, label: "Start reading" }
+            ? { href: `/viewer/${firstChapter.id}`, label: t("startReading") }
             : null;
 
     return (

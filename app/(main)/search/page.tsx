@@ -12,8 +12,8 @@ import { parsePageCount, splitExtraRow } from "@/lib/pagination";
 import ShowMoreLink from "@/component/ShowMoreLink";
 import SearchFilterBar from "@/component/search/SearchFilterBar";
 import SortDropdown from "@/component/search/SortDropdown";
-import { genreLabel } from "@/lib/genres";
 import { parseSearchFilters, searchHref, type SortValue } from "@/lib/search-filters";
+import { getTranslations } from "next-intl/server";
 
 const RESULTS_PAGE_SIZE = 20;
 
@@ -34,9 +34,11 @@ export async function generateMetadata({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const { q, genre } = parseSearchFilters(await searchParams);
-  if (q) return { title: `“${q}” – Search` };
-  if (genre) return { title: `${genreLabel(genre)} manga` };
-  return { title: "Search" };
+  const t = await getTranslations("Search");
+  const tGenre = await getTranslations("Genres");
+  if (q) return { title: t("metaQuery", { query: q }) };
+  if (genre) return { title: t("metaGenre", { genre: tGenre(genre) }) };
+  return { title: t("title") };
 }
 
 export default async function SearchPage({
@@ -46,6 +48,8 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const filters = parseSearchFilters(params);
+  const t = await getTranslations("Search");
+  const tGenre = await getTranslations("Genres");
   const { q: query, genre, status, sort } = filters;
   const filtersOnly = { genre, status, sort };
   const page = params.page;
@@ -98,7 +102,7 @@ export default async function SearchPage({
   const clearFiltersHref = searchHref({ q: query, sort });
   const clearFiltersLink = (
     <Link href={clearFiltersHref} scroll={false} className="text-fg underline underline-offset-2 hover:no-underline">
-      Clear filters
+      {t("clearFilters")}
     </Link>
   );
 
@@ -118,7 +122,7 @@ export default async function SearchPage({
         // chapters are ordered by chapter_number asc, so the last is latest
         const latest = manga.chapters[manga.chapters.length - 1];
         const displayNumbers = getChapterDisplayNumbers(manga.chapters);
-        const authorName = manga.author.name ?? "Unknown";
+        const authorName = manga.author.name ?? t("unknownAuthor");
 
         // A manga can match on a chapter name alone, and then nothing on
         // its card says why it showed up (the card shows its LATEST
@@ -149,12 +153,12 @@ export default async function SearchPage({
                 href={`/viewer/${firstMatch.id}`}
                 className="mt-1.5 text-sm text-fg-secondary hover:text-fg line-clamp-2 wrap-break-word transition-colors duration-200"
               >
-                Matches{" "}
+                {t("matches")}{" "}
                 <span className="text-fg">
                   {formatChapterBadge(firstMatch.chapter_is_ex, displayNumbers.get(firstMatch.id))}{" "}
                   {firstMatch.chapter_name}
                 </span>
-                {chapterMatches.length > 1 && ` and ${chapterMatches.length - 1} more`}
+                {chapterMatches.length > 1 && t("andMore", { count: chapterMatches.length - 1 })}
               </Link>
             )}
           </div>
@@ -174,9 +178,9 @@ export default async function SearchPage({
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">
-            Search
+            {t("title")}
           </h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">Find manga by title, author, or chapter name.</p>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         <SearchInput initialQuery={query} filters={filtersOnly} />
@@ -188,15 +192,23 @@ export default async function SearchPage({
         {isSearching ? (
           totalCount === 0 ? (
             <p className="text-fg-secondary text-center mt-12 text-sm">
-              No manga found for &quot;{query}&quot;{isFiltered && <> with these filters. {clearFiltersLink}</>}
-              {!isFiltered && "."}
+              {isFiltered ? (
+                <>
+                  {t("noResultsFiltered", { query })} {clearFiltersLink}
+                </>
+              ) : (
+                t("noResults", { query })
+              )}
             </p>
           ) : (
             <>
               <div className="flex items-center justify-between gap-3 mb-5">
                 <p className="min-w-0 text-sm text-fg-secondary wrap-anywhere">
-                  {totalCount} {totalCount === 1 ? "result" : "results"} for{" "}
-                  <span className="text-fg">&ldquo;{query}&rdquo;</span>
+                  {t.rich("resultsFor", {
+                    count: totalCount,
+                    query,
+                    q: (chunks) => <span className="text-fg">{chunks}</span>,
+                  })}
                 </p>
                 {phoneSort}
               </div>
@@ -205,13 +217,19 @@ export default async function SearchPage({
           )
         ) : totalCount === 0 ? (
           <p className="text-fg-secondary text-center mt-12 text-sm">
-            {isFiltered ? <>No manga match these filters. {clearFiltersLink}</> : "No manga published yet."}
+            {isFiltered ? (
+              <>
+                {t("noMatchFilters")} {clearFiltersLink}
+              </>
+            ) : (
+              t("noneYet")
+            )}
           </p>
         ) : (
           <>
             <div className="flex items-center justify-between gap-3 mb-5">
               <h2 className="min-w-0 text-xl text-fg font-(family-name:--font-display)">
-                {genre ? genreLabel(genre) : "All manga"}
+                {genre ? tGenre(genre) : t("allManga")}
                 <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
                   {totalCount}
                 </span>

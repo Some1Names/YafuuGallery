@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { CircleHelp, CircleX, Trash2, TriangleAlert, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Site-styled replacements for the browser's confirm() and alert():
 //
@@ -12,11 +13,16 @@ import { CircleHelp, CircleX, Trash2, TriangleAlert, type LucideIcon } from "luc
 // root layout) shows them one at a time in a native <dialog>, which gives
 // focus trapping, Esc and an inert page behind it for free.
 
+export type DialogMessageKey = "offline" | "notSignedIn" | "noPermission" | "serverError";
+
 export type DialogTone = "danger" | "warning" | "question" | "error";
 
 export interface DialogOptions {
   title: string;
   message?: string;
+  // a standard message by key (Dialog.errors.* in messages/), for callers
+  // outside React that can't translate themselves — alertRequestFailed
+  messageKey?: DialogMessageKey;
   // monospace block under the message, e.g. a storage key
   detail?: string;
   confirmLabel?: string;
@@ -82,16 +88,16 @@ export async function alertDialog(options: DialogOptions): Promise<void> {
 // (offline, server down) it says to check the connection.
 export async function alertRequestFailed(title: string, res: Response | null): Promise<void> {
   const data = res ? await res.json().catch(() => null) : null;
-  const message = !res
-    ? "Couldn't reach the server. Check your connection and try again."
+  const messageKey: DialogMessageKey | null = !res
+    ? "offline"
     : res.status === 401
-      ? "You're not signed in. Sign in and try again."
+      ? "notSignedIn"
       : res.status === 403
-        ? "You don't have permission to do that. You may have been signed out — try signing in again."
+        ? "noPermission"
         : typeof data?.error === "string"
-          ? data.error
-          : "Something went wrong on the server. Please try again.";
-  await alertDialog({ title, message });
+          ? null
+          : "serverError";
+  await alertDialog(messageKey ? { title, messageKey } : { title, message: data.error });
 }
 
 const TONES: Record<DialogTone, { icon: LucideIcon; ring: string }> = {
@@ -102,6 +108,8 @@ const TONES: Record<DialogTone, { icon: LucideIcon; ring: string }> = {
 };
 
 export default function DialogHost() {
+  const t = useTranslations("Dialog");
+  const tCommon = useTranslations("Common");
   const current = useSyncExternalStore(subscribe, getCurrent, getServerCurrent);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const focusRef = useRef<HTMLButtonElement>(null);
@@ -146,7 +154,7 @@ export default function DialogHost() {
       // Lenis (smooth scroll) would otherwise keep scrolling the page behind
       data-lenis-prevent
       aria-labelledby="app-dialog-title"
-      aria-describedby={current?.message ? "app-dialog-message" : undefined}
+      aria-describedby={current?.message || current?.messageKey ? "app-dialog-message" : undefined}
       onCancel={(e) => {
         // Esc: close through the queue, not the browser, so the promise settles
         e.preventDefault();
@@ -170,9 +178,9 @@ export default function DialogHost() {
           <h2 id="app-dialog-title" className="text-xl text-fg font-(family-name:--font-display) wrap-anywhere">
             {current.title}
           </h2>
-          {current.message && (
+          {(current.message || current.messageKey) && (
             <p id="app-dialog-message" className="mt-2 text-sm text-fg-secondary whitespace-pre-line wrap-anywhere">
-              {current.message}
+              {current.message ?? (current.messageKey && t(`errors.${current.messageKey}`))}
             </p>
           )}
           {current.detail && (
@@ -189,7 +197,7 @@ export default function DialogHost() {
                 onClick={() => settle(false)}
                 className="h-11 flex-1 rounded-md border border-fg/20 text-sm font-medium text-fg hover:border-fg/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg transition-colors duration-200"
               >
-                {current.cancelLabel ?? "Cancel"}
+                {current.cancelLabel ?? tCommon("cancel")}
               </button>
             )}
             <button
@@ -202,7 +210,7 @@ export default function DialogHost() {
                   : "bg-fg text-bg hover:bg-fg-hover focus-visible:outline-fg"
               }`}
             >
-              {current.confirmLabel ?? (isConfirm ? "Confirm" : "OK")}
+              {current.confirmLabel ?? (isConfirm ? t("confirm") : t("ok"))}
             </button>
           </div>
         </div>

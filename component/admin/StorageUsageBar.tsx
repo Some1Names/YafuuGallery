@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 interface StorageUsageBarProps {
   bytesUsed: number;
   objectCount: number;
@@ -15,6 +16,7 @@ function formatGB(bytes: number): string {
 }
 
 export default function StorageUsageBar({ bytesUsed, objectCount }: StorageUsageBarProps) {
+  const t = useTranslations("Storage");
   const percent = (bytesUsed / FREE_TIER_BYTES) * 100;
   const barWidth = Math.min(percent, 100);
   const isOver = percent > 100;
@@ -24,11 +26,16 @@ export default function StorageUsageBar({ bytesUsed, objectCount }: StorageUsage
     <div className="border border-border rounded-md p-4 bg-surface/60 mb-10">
       <div className="flex items-baseline justify-between gap-4 mb-2">
         <div className="text-sm text-fg">
-          <span className="font-(family-name:--font-display) text-base">{formatGB(bytesUsed)} GB</span>{" "}
-          <span className="text-fg-secondary">of {formatGB(FREE_TIER_BYTES)} GB used</span>
+          <span className="text-fg-secondary">
+            {t.rich("used", {
+              used: formatGB(bytesUsed),
+              total: formatGB(FREE_TIER_BYTES),
+              b: (chunks) => <span className="font-(family-name:--font-display) text-base text-fg">{chunks}</span>,
+            })}
+          </span>
         </div>
         <div className="text-xs text-fg-muted whitespace-nowrap">
-          {objectCount.toLocaleString()} objects · R2 storage
+          {t("objects", { count: objectCount })}
         </div>
       </div>
 
@@ -44,7 +51,7 @@ export default function StorageUsageBar({ bytesUsed, objectCount }: StorageUsage
 
       {isOver && (
         <p className="text-xs text-danger-text mt-2">
-          Over the free tier&apos;s 10 GB — R2 usage is now billed.
+          {t("over")}
         </p>
       )}
     </div>

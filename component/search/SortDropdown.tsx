@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpDown, Check, ChevronDown } from "lucide-react";
 import { SORTS, searchHref, type SearchFilters } from "@/lib/search-filters";
+import { useTranslations } from "next-intl";
 
 // /search's sort picker: a button showing the current order, opening a
 // small menu of links (same look as the navbar's dropdowns). Each option is
@@ -11,6 +12,8 @@ import { SORTS, searchHref, type SearchFilters } from "@/lib/search-filters";
 // A disclosure (button + list of links), not an ARIA menu — closes on an
 // outside click, Escape (focus back to the button) or picking an option.
 export default function SortDropdown({ filters }: { filters: SearchFilters }) {
+  const t = useTranslations("Search");
+  const tSort = useTranslations("Sort");
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -52,9 +55,9 @@ export default function SortDropdown({ filters }: { filters: SearchFilters }) {
       >
         <ArrowUpDown className="w-3.5 h-3.5" aria-hidden="true" />
         <span>
-          <span className="sr-only">Sort by: </span>
-          <span className="sm:hidden">{current.short}</span>
-          <span className="hidden sm:inline">{current.label}</span>
+          <span className="sr-only">{t("sortBy")} </span>
+          <span className="sm:hidden">{tSort(`${current.value}.short`)}</span>
+          <span className="hidden sm:inline">{tSort(`${current.value}.label`)}</span>
         </span>
         <ChevronDown
           className={"w-3.5 h-3.5 transition-transform duration-200 " + (isOpen ? "rotate-180" : "")}
@@ -81,7 +84,7 @@ export default function SortDropdown({ filters }: { filters: SearchFilters }) {
                     (isOn ? "text-fg font-medium" : "text-fg-secondary hover:text-fg")
                   }
                 >
-                  {s.label}
+                  {tSort(`${s.value}.label`)}
                   {isOn && <Check className="w-4 h-4" aria-hidden="true" />}
                 </Link>
               </li>

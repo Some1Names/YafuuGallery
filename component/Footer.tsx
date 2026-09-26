@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { CONTACT_URL } from "@/component/LegalPage";
+import { useTranslations } from "next-intl";
 
 const browseLinks = [
-  { href: "/", label: "Home" },
-  { href: "/favorites", label: "Favorites" },
-  { href: "/search", label: "Search" },
-];
+  { href: "/", labelKey: "home" },
+  { href: "/favorites", labelKey: "favorites" },
+  { href: "/search", labelKey: "search" },
+] as const;
 
 const aboutLinks = [
-  { href: "/privacy", label: "Privacy policy" },
-  { href: "/terms", label: "Terms of use" },
-];
+  { href: "/privacy", labelKey: "privacy" },
+  { href: "/terms", labelKey: "terms" },
+] as const;
 
 export default function Footer() {
+  const t = useTranslations("Footer");
   const year = new Date().getFullYear();
 
   return (
@@ -26,12 +28,12 @@ export default function Footer() {
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true" />
           </div>
-          <p className="text-sm text-fg-secondary mt-3 max-w-60">Original manga and translations, read your way.</p>
+          <p className="text-sm text-fg-secondary mt-3 max-w-60">{t("tagline")}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-8 sm:contents">
           <div>
-            <span className="text-xs text-fg-muted">Browse</span>
+            <span className="text-xs text-fg-muted">{t("browse")}</span>
             <ul className="mt-3 flex flex-col gap-2.5">
               {browseLinks.map((link) => (
                 <li key={link.href}>
@@ -39,7 +41,7 @@ export default function Footer() {
                     href={link.href}
                     className="inline-block py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -47,7 +49,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <span className="text-xs text-fg-muted">About</span>
+            <span className="text-xs text-fg-muted">{t("about")}</span>
             <ul className="mt-3 flex flex-col gap-2.5">
               {aboutLinks.map((link) => (
                 <li key={link.href}>
@@ -55,7 +57,7 @@ export default function Footer() {
                     href={link.href}
                     className="inline-block py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -68,7 +70,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
                 >
-                  Contact on Instagram
+                  {t("contact")}
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </li>

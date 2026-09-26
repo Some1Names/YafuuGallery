@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { GENRES, MANGA_STATUSES, type GenreSlug, type MangaStatusValue } from "@/lib/genres";
+import { useTranslations } from "next-intl";
 
 interface MangaGenreFieldsProps {
   genres: GenreSlug[];
@@ -24,6 +25,9 @@ function chipClass(isOn: boolean) {
 // Plain toggle buttons (aria-pressed) rather than checkboxes styled as
 // chips — same pattern as the dashboards' "Reported only" filter.
 export default function MangaGenreFields({ genres, onGenresChange, status, onStatusChange }: MangaGenreFieldsProps) {
+  const t = useTranslations("Admin");
+  const tStatus = useTranslations("Status");
+  const tGenres = useTranslations("Genres");
   // the create form and an edit form can be open at the same time
   const id = useId();
 
@@ -38,7 +42,7 @@ export default function MangaGenreFields({ genres, onGenresChange, status, onSta
   return (
     <>
       <span id={`${id}-status`} className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-        Status
+        {t("status")}
       </span>
       <div role="group" aria-labelledby={`${id}-status`} className="col-span-2 sm:col-span-1 flex flex-wrap gap-2">
         {MANGA_STATUSES.map((s) => (
@@ -49,13 +53,13 @@ export default function MangaGenreFields({ genres, onGenresChange, status, onSta
             onClick={() => onStatusChange(s.value)}
             className={chipClass(status === s.value)}
           >
-            {s.label}
+            {tStatus(s.value)}
           </button>
         ))}
       </div>
 
       <span id={`${id}-genres`} className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-        Genres
+        {t("genres")}
       </span>
       <div role="group" aria-labelledby={`${id}-genres`} className="col-span-2 sm:col-span-1 flex flex-wrap gap-2">
         {GENRES.map((g) => {
@@ -68,7 +72,7 @@ export default function MangaGenreFields({ genres, onGenresChange, status, onSta
               onClick={() => toggleGenre(g.slug)}
               className={chipClass(isOn)}
             >
-              {g.label}
+              {tGenres(g.slug)}
             </button>
           );
         })}

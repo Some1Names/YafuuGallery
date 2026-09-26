@@ -78,6 +78,11 @@ html.light {
 }
 
 body {
+  /* Latin face first, then its Thai partner (app/layout.tsx loads all four
+     on <body>, so these resolve here). Thai text falls through glyph by
+     glyph. */
+  --font-body: var(--font-inter), var(--font-thai);
+  --font-display: var(--font-archivo), var(--font-thai-display);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
 

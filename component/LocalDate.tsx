@@ -1,6 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useLocale } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 const noopSubscribe = () => () => {};
 
@@ -21,11 +23,12 @@ export default function LocalDate({
   date: Date | string;
   options?: Intl.DateTimeFormatOptions;
 }) {
+  const locale = useLocale() as Locale;
   const inBrowser = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const d = typeof date === "string" ? new Date(date) : date;
   return (
     <time dateTime={d.toISOString()}>
-      {d.toLocaleDateString("en-US", inBrowser ? options : { ...options, timeZone: "UTC" })}
+      {d.toLocaleDateString(INTL_LOCALE[locale], inBrowser ? options : { ...options, timeZone: "UTC" })}
     </time>
   );
 }

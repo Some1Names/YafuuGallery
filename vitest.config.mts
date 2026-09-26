@@ -9,7 +9,7 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
   },
   test: {
-    include: ["lib/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "i18n/**/*.test.ts"],
     environment: "node",
     // lib/storage.ts reads these once at import to build/recognise public
     // URLs — a fixed fake value keeps the tests independent of .env.

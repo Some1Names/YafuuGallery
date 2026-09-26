@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Favorites → Updates: clears every "New" label at once without opening
 // each chapter (see /api/favorites/updates/seen). router.refresh() also
 // re-renders the navbar, so its Favorites dot goes away too.
 export default function MarkUpdatesReadButton() {
+  const t = useTranslations("Updates");
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState(false);
@@ -28,7 +30,7 @@ export default function MarkUpdatesReadButton() {
 
   return (
     <div className="flex items-center gap-3">
-      {error && <span className="text-xs text-danger-text">Couldn&apos;t update — try again.</span>}
+      {error && <span className="text-xs text-danger-text">{t("failed")}</span>}
       <button
         type="button"
         onClick={markRead}
@@ -36,7 +38,7 @@ export default function MarkUpdatesReadButton() {
         className="shrink-0 whitespace-nowrap flex items-center gap-1.5 text-sm text-fg-secondary hover:text-fg disabled:opacity-50 transition-colors duration-200"
       >
         <CheckCheck className="w-4 h-4" />
-        {isPending ? "Marking…" : "Mark all as read"}
+        {isPending ? t("marking") : t("markAllRead")}
       </button>
     </div>
   );

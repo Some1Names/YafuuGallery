@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { FileText, CheckCircle2 } from "lucide-react";
 import { renderPdfFirstPageToFile } from "@/lib/pdf-thumbnail";
 import { processImageForUpload } from "@/lib/image-processing";
+import { useTranslations } from "next-intl";
 
 interface AdminPdfUploadButtonProps {
   mangaId: string;
@@ -49,6 +50,7 @@ export default function AdminPdfUploadButton({
   onCoverGenerated,
   languageLabel,
 }: AdminPdfUploadButtonProps) {
+  const t = useTranslations("Admin.upload");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -64,17 +66,17 @@ export default function AdminPdfUploadButton({
     setWarning(null);
 
     if (file.type !== "application/pdf") {
-      setError("Only PDF files are allowed.");
+      setError(t("onlyPdf"));
       return;
     }
 
     if (file.size > HARD_LIMIT_BYTES) {
-      setError(`File too large (${formatMB(file.size)}) — the limit is 200MB.`);
+      setError(t("tooLarge", { size: formatMB(file.size) }));
       return;
     }
 
     if (file.size > RECOMMENDED_BYTES) {
-      setWarning(`This file is ${formatMB(file.size)} — 50MB or under is recommended for faster loading.`);
+      setWarning(t("bigWarning", { size: formatMB(file.size) }));
     }
 
     setIsUploading(true);
@@ -89,7 +91,7 @@ export default function AdminPdfUploadButton({
 
       if (!presignRes.ok) {
         const data = await presignRes.json().catch(() => null);
-        setError(data?.error ?? "Failed to prepare upload.");
+        setError(data?.error ?? t("prepareFailed"));
         return;
       }
 
@@ -126,13 +128,13 @@ export default function AdminPdfUploadButton({
         })().catch(() => {});
       }
     } catch {
-      setError("Upload failed — please try again.");
+      setError(t("failedRetry"));
     } finally {
       setIsUploading(false);
     }
   }
 
-  const pdfName = languageLabel ? `${languageLabel} PDF` : "PDF";
+  const pdfName = languageLabel ? t("pdfName", { language: languageLabel }) : "PDF";
 
   return (
     <div>
@@ -142,10 +144,10 @@ export default function AdminPdfUploadButton({
         disabled={isUploading}
         aria-label={
           isUploading
-            ? `Uploading ${pdfName}, ${progress}%`
+            ? t("ariaUploading", { name: pdfName, progress })
             : value
-              ? `Replace ${pdfName} (${fileName ?? "uploaded"})`
-              : `Upload ${pdfName}`
+              ? t("ariaReplace", { name: pdfName, file: fileName ?? t("uploadedFallback") })
+              : t("ariaUpload", { name: pdfName })
         }
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-border bg-bg text-left hover:border-fg-secondary transition-colors duration-200 disabled:opacity-60"
       >
@@ -156,10 +158,10 @@ export default function AdminPdfUploadButton({
         )}
 
         <span className="min-w-0 flex-1 text-sm text-fg truncate">
-          {isUploading ? `Uploading… ${progress}%` : value ? (fileName ?? "PDF uploaded") : "No PDF uploaded"}
+          {isUploading ? t("progress", { progress }) : value ? (fileName ?? t("pdfUploaded")) : t("noPdf")}
         </span>
 
-        <span className="text-xs text-fg-secondary shrink-0">{value ? "Replace" : "Upload"}</span>
+        <span className="text-xs text-fg-secondary shrink-0">{value ? t("replace") : t("upload")}</span>
       </button>
 
       {isUploading && (

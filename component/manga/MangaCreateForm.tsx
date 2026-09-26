@@ -8,12 +8,15 @@ import type { GenreSlug, MangaStatusValue } from "@/lib/genres";
 import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
 import SynopsisField from "@/component/manga/SynopsisField";
 import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
+import { useTranslations } from "next-intl";
 
 // Shared by /admin and /manage — creating a manga always attributes it to
 // the signed-in account. There's no "choose an author" picker: a manga's
 // author is whoever created it, not a separately assignable field, so the
 // server infers author_id from the session regardless of role.
 export default function MangaCreateForm() {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -67,7 +70,7 @@ export default function MangaCreateForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Failed to create manga.");
+        setError(data?.error ?? t("failedCreateManga"));
         return;
       }
 
@@ -75,7 +78,7 @@ export default function MangaCreateForm() {
       setIsOpen(false);
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(t("networkError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -88,14 +91,14 @@ export default function MangaCreateForm() {
         onClick={() => setIsOpen(true)}
         className="mb-6 px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 transition-colors duration-200"
       >
-        + Create Manga
+        {t("createManga")}
       </button>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="border border-border rounded-md p-4 sm:p-8 md:p-12 bg-surface flex flex-col gap-4 mb-6">
-      <h3 className="text-lg text-fg font-(family-name:--font-display)">Add New Manga Title</h3>
+      <h3 className="text-lg text-fg font-(family-name:--font-display)">{t("addMangaHeading")}</h3>
 
       {/* One shared grid for the whole body instead of two separate grids
           with matching-by-hand column templates/gaps — change gap-x/the
@@ -111,14 +114,14 @@ export default function MangaCreateForm() {
           since there's only one column there anyway. */}
       <div className="grid grid-cols-2 sm:grid-cols-[3fr_16fr] gap-x-7 gap-y-4">
         <AdminImageUploadButton
-          label="Cover"
+          label={t("cover")}
           value={coverImageUrl}
           onChange={setCoverImageUrl}
           boxClassName="w-full aspect-2/3"
           aspectRatio={2 / 3}
         />
         <AdminImageUploadButton
-          label="Banner"
+          label={t("banner")}
           // phones: full width, above the cover — sharing a 2-column row
           // with the cover left the 32:9 banner a ~140x40px sliver
           className="order-first col-span-2 sm:order-none sm:col-span-1"
@@ -129,21 +132,21 @@ export default function MangaCreateForm() {
         />
 
         <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-          Manga Title
+          {t("mangaTitle")}
         </label>
         <input
           value={title}
           maxLength={MAX_MANGA_TITLE_LENGTH}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Manga title"
+          placeholder={t("mangaTitlePlaceholder")}
           required
           className="col-span-2 sm:col-span-1 w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg placeholder:text-fg-muted"
         />
 
         <label className="col-span-2 sm:col-span-1 text-xs text-fg-secondary sm:pt-2">
-          Synopsis
+          {t("synopsis")}
         </label>
-        <SynopsisField value={synopsis} onChange={setSynopsis} placeholder="Synopsis" />
+        <SynopsisField value={synopsis} onChange={setSynopsis} placeholder={t("synopsis")} />
 
         <MangaGenreFields genres={genres} onGenresChange={setGenres} status={status} onStatusChange={setStatus} />
       </div>
@@ -151,7 +154,12 @@ export default function MangaCreateForm() {
       {error && <p className="text-sm text-danger-text">{error}</p>}
 
       <MissingFieldsHint
-        missing={[!coverImageUrl && "cover", !bannerImageUrl && "banner", !title.trim() && "title", !synopsis.trim() && "synopsis"]}
+        missing={[
+          !coverImageUrl && t("missing.cover"),
+          !bannerImageUrl && t("missing.banner"),
+          !title.trim() && t("missing.title"),
+          !synopsis.trim() && t("missing.synopsis"),
+        ]}
       />
 
       <div className="flex gap-2 self-end">
@@ -160,14 +168,14 @@ export default function MangaCreateForm() {
           onClick={handleCancel}
           className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
         >
-          Cancel
+          {tCommon("cancel")}
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !canSubmit}
           className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
         >
-          {isSubmitting ? "Creating…" : "+ Create Manga"}
+          {isSubmitting ? t("creating") : t("createManga")}
         </button>
       </div>
     </form>

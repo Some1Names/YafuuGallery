@@ -9,11 +9,16 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import { getContinueReading } from "@/lib/continue-reading";
 import { fullRowCount } from "@/lib/grid-rows";
 import { loginHref } from "@/lib/login-redirect";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = { title: "Profile" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Profile");
+  return { title: t("title") };
+}
 
 export default async function ProfilePage() {
   const session = await auth();
+  const t = await getTranslations("Profile");
   if (!session?.user?.id) {
     redirect(loginHref("/profile"));
   }
@@ -39,12 +44,12 @@ export default async function ProfilePage() {
   const phoneShown = fullRowCount(recentProgress.length, 2);
 
   const stats = [
-    { label: "Manga favorited", value: bookmarkCount, href: "/favorites?tab=manga" },
-    { label: "Chapters favorited", value: chapterFavoriteCount, href: "/favorites?tab=chapters" },
+    { label: t("stats.mangaFavorited"), value: bookmarkCount, href: "/favorites?tab=manga" },
+    { label: t("stats.chaptersFavorited"), value: chapterFavoriteCount, href: "/favorites?tab=chapters" },
     // read through to the last page (ReadingProgress.completed, set by
     // the reader) — not just opened
-    { label: "Chapters finished", value: chaptersReadCount },
-    { label: "Comments", value: commentCount },
+    { label: t("stats.chaptersFinished"), value: chaptersReadCount },
+    { label: t("stats.comments"), value: commentCount },
   ];
 
   return (
@@ -57,8 +62,8 @@ export default async function ProfilePage() {
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">Profile</h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">Manage your account and see your activity.</p>
+          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">{t("title")}</h1>
+          <p className="text-sm text-fg-secondary sm:text-white/70">{t("subtitle")}</p>
         </div>
 
         {/* Identity + edit form — no padding here so the avatar can bleed
@@ -83,22 +88,22 @@ export default async function ProfilePage() {
             alone on the last row (the rest are in Reading history). */}
         <section>
           <div className="flex items-baseline justify-between gap-4 mb-4">
-            <h2 className="text-xl text-fg font-(family-name:--font-display)">Continue reading</h2>
+            <h2 className="text-xl text-fg font-(family-name:--font-display)">{t("continueReading")}</h2>
             {recentProgress.length > 0 && (
               <Link
                 href="/history"
                 className="shrink-0 py-2 -my-2 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
               >
                 {/* short on phones so the heading beside it stays on one line */}
-                <span className="sm:hidden">History</span>
-                <span className="hidden sm:inline">Reading history</span> <span aria-hidden="true">→</span>
+                <span className="sm:hidden">{t("historyShort")}</span>
+                <span className="hidden sm:inline">{t("historyLong")}</span> <span aria-hidden="true">→</span>
               </Link>
             )}
           </div>
           {recentProgress.length === 0 ? (
             <div className="border border-border rounded-md bg-surface/60 py-16 px-6 text-center">
               <p className="text-fg-secondary text-sm">
-                No reading history yet — open a chapter to start tracking progress.
+                {t("noHistory")}
               </p>
             </div>
           ) : (

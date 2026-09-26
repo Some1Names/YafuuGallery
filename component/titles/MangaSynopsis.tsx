@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 // The manga's synopsis. On phones it's cut to four lines with a More/Less
 // toggle — in full it pushed the chapter list a screen or more down. From
 // sm up it sits in the side column, so it's always shown whole there.
 export default function MangaSynopsis({ text }: { text: string }) {
+  const t = useTranslations("Manga");
   const [isExpanded, setIsExpanded] = useState(false);
   // whether the four-line clamp is actually hiding anything (short
   // synopses, and every synopsis from sm up, get no button)
@@ -43,7 +45,7 @@ export default function MangaSynopsis({ text }: { text: string }) {
           aria-controls="manga-synopsis"
           className="sm:hidden mt-1 py-2 text-sm font-medium text-fg-secondary hover:text-fg transition-colors duration-200"
         >
-          {isExpanded ? "Show less" : "Show more"}
+          {isExpanded ? t("showLess") : t("showMore")}
         </button>
       )}
     </div>

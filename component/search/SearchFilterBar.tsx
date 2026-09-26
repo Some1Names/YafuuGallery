@@ -3,6 +3,7 @@ import { GENRES, MANGA_STATUSES } from "@/lib/genres";
 import ActiveChipScroller from "@/component/search/ActiveChipScroller";
 import SortDropdown from "@/component/search/SortDropdown";
 import { searchHref, type SearchFilters } from "@/lib/search-filters";
+import { useTranslations } from "next-intl";
 
 interface SearchFilterBarProps {
   filters: SearchFilters;
@@ -32,6 +33,9 @@ function segmentClass(isOn: boolean) {
 // the list starts again from the top. scroll={false} keeps the bar where
 // it is instead of jumping to the top of the page on every tap.
 export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
+  const t = useTranslations("Search");
+  const tGenre = useTranslations("Genres");
+  const tStatus = useTranslations("Status");
   return (
     <div className="mb-6 sm:mb-8 flex flex-col gap-4">
       {/* One scrolling row on phones (bleeds to the screen edges so the
@@ -48,7 +52,7 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
               aria-current={filters.genre === null ? "true" : undefined}
               className={chipClass(filters.genre === null)}
             >
-              All genres
+              {t("allGenres")}
             </Link>
           </li>
           {GENRES.map((g) => {
@@ -62,7 +66,7 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
                   aria-current={isOn ? "true" : undefined}
                   className={chipClass(isOn)}
                 >
-                  {g.label}
+                  {tGenre(g.slug)}
                 </Link>
               </li>
             );
@@ -75,20 +79,20 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
           beside the results heading instead (search/page.tsx). */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <nav
-          aria-label="Status"
+          aria-label={t("statusLabel")}
           className="flex items-center h-9 p-0.5 rounded-full border border-border bg-surface"
         >
           {[{ value: null, label: "All" }, ...MANGA_STATUSES].map((s) => {
             const isOn = filters.status === s.value;
             return (
               <Link
-                key={s.label}
+                key={s.value ?? "all"}
                 href={searchHref({ ...filters, status: s.value })}
                 scroll={false}
                 aria-current={isOn ? "true" : undefined}
                 className={segmentClass(isOn)}
               >
-                {s.label}
+                {tStatus(s.value ?? "all")}
               </Link>
             );
           })}

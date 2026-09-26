@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 // On phones the genre chips are one sideways-scrolling row, so a genre
 // picked from further along (or arrived at from a manga page's genre
@@ -17,6 +18,7 @@ export default function ActiveChipScroller({
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLElement>(null);
+  const t = useTranslations("Search");
 
   useEffect(() => {
     const row = ref.current;
@@ -29,7 +31,7 @@ export default function ActiveChipScroller({
   }, [activeKey]);
 
   return (
-    <nav ref={ref} aria-label="Genre" className={className}>
+    <nav ref={ref} aria-label={t("genreNav")} className={className}>
       {children}
     </nav>
   );

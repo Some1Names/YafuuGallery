@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { loginHref } from "@/lib/login-redirect";
 import { alertRequestFailed } from "@/component/Dialog";
+import { useTranslations } from "next-intl";
 
 interface ChapterFavoriteButtonProps {
   chapterId: string;
@@ -15,6 +16,7 @@ export default function ChapterFavoriteButton({
   chapterId,
   initialFavorited,
 }: ChapterFavoriteButtonProps) {
+  const t = useTranslations("Favorite");
   const router = useRouter();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [isPending, startTransition] = useTransition();
@@ -29,7 +31,7 @@ export default function ChapterFavoriteButton({
     // optimistic update — flip immediately, roll back if the request fails
     const next = !favorited;
     setFavorited(next);
-    const failedTitle = next ? "Couldn't add to favorites" : "Couldn't remove from favorites";
+    const failedTitle = next ? t("addFailed") : t("removeFailed");
 
     startTransition(async () => {
       // the dialogs aren't awaited, so the heart isn't left disabled while one is open
@@ -66,7 +68,7 @@ export default function ChapterFavoriteButton({
       onClick={toggle}
       disabled={isPending}
       aria-pressed={favorited}
-      aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+      aria-label={favorited ? t("remove") : t("add")}
       className={
         // 40x40 hit area around the 16px heart; the negative margin keeps
         // it taking the heart's own space in the row it sits in

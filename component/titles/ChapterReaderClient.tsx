@@ -11,10 +11,11 @@ import { Columns2, Rows2, ChevronDown, Languages, MessageCircle } from "lucide-r
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
-import { LANGUAGE_LABELS, type Language } from "@/lib/language";
+import type { Language } from "@/lib/language";
 import { loginHref } from "@/lib/login-redirect";
 import { configurePdfWorker } from "@/lib/pdf-worker";
 import ChapterCommentPanel from "./ChapterCommentPanel";
+import { useTranslations } from "next-intl";
 
 configurePdfWorker(pdfjs);
 
@@ -144,6 +145,9 @@ export default function ChapterReaderClient({
   resumePage,
   nextChapterTranslations,
 }: ChapterReaderProps) {
+  // tReader, not t: the language list below already maps over translations as `t`
+  const tReader = useTranslations("Reader");
+  const tLanguage = useTranslations("LanguageName");
   const router = useRouter();
   const displayNumbers = useMemo(() => getChapterDisplayNumbers(chapters), [chapters]);
   const currentChapter = chapters.find((c) => c.id === currentChapterId);
@@ -156,7 +160,7 @@ export default function ChapterReaderClient({
   const nextChapter = chapters[currentChapterIdx + 1];
   const prevChapter = chapters[currentChapterIdx - 1];
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
-  const chapterLabel = `Chapter ${currentIsEx ? "ex" : (currentDisplayNumber ?? 0)}: ${chapterName}`;
+  const chapterLabel = tReader("chapterLabel", { number: currentIsEx ? "ex" : (currentDisplayNumber ?? 0), name: chapterName });
   const [mode, setMode] = useState<ReadingMode>(readSavedMode);
 
   // Which language is currently showing. Falls back to the chapter's first
@@ -843,7 +847,7 @@ export default function ChapterReaderClient({
             {/* 40x40 hit area — the bare "‹" alone was 9px wide */}
             <Link
               href={`/manga/titles/${mangaId}`}
-              aria-label="Back to manga title"
+              aria-label={tReader("backToManga")}
               className="-ml-2.5 w-10 h-10 inline-flex items-center justify-center text-2xl text-[#ece6d8] hover:text-[#b6b0a2] transition-colors duration-200 shrink-0"
             >
               <span aria-hidden="true">‹</span>
@@ -860,7 +864,7 @@ export default function ChapterReaderClient({
                 type="button"
                 onClick={() => setIsChapterMenuOpen((v) => !v)}
                 aria-expanded={isChapterMenuOpen}
-                aria-label={`Chapter ${formatChapterBadge(currentIsEx, currentDisplayNumber)} — choose chapter`}
+                aria-label={tReader("chooseChapter", { badge: formatChapterBadge(currentIsEx, currentDisplayNumber) })}
                 className="flex gap-1.5 px-2.5 py-1.5 border border-[#050505] rounded text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200"
               >
                 <span className="text-sm font-bold">
@@ -916,8 +920,8 @@ export default function ChapterReaderClient({
             <button
               type="button"
               onClick={handleCommentButtonClick}
-              aria-label={unreadCount > 0 ? `Comments, ${unreadCount} new` : "Comments"}
-              title="Comments"
+              aria-label={unreadCount > 0 ? tReader("commentsNew", { count: unreadCount }) : tReader("comments")}
+              title={tReader("comments")}
               className="relative inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
             >
               <MessageCircle className="w-4 h-4" />
@@ -945,8 +949,8 @@ export default function ChapterReaderClient({
                   type="button"
                   onClick={() => setIsLanguageMenuOpen((v) => !v)}
                   aria-expanded={isLanguageMenuOpen}
-                  aria-label="Change language"
-                  title="Language"
+                  aria-label={tReader("changeLanguage")}
+                  title={tReader("language")}
                   className="inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
                 >
                   <Languages className="w-4 h-4" />
@@ -972,7 +976,7 @@ export default function ChapterReaderClient({
                           t.language === activeLanguage ? "bg-[#232224] text-[#ece6d8]" : "text-[#b6b0a2]"
                         }`}
                       >
-                        {LANGUAGE_LABELS[t.language]}
+                        {tLanguage(t.language)}
                       </button>
                     ))}
                   </div>
@@ -985,8 +989,8 @@ export default function ChapterReaderClient({
             <button
               type="button"
               onClick={() => switchMode(mode === "vertical" ? "horizontal" : "vertical")}
-              aria-label={mode === "vertical" ? "Switch to horizontal reading" : "Switch to vertical reading"}
-              title={mode === "vertical" ? "Horizontal" : "Vertical"}
+              aria-label={mode === "vertical" ? tReader("toHorizontal") : tReader("toVertical")}
+              title={mode === "vertical" ? tReader("horizontal") : tReader("vertical")}
               className="sm:hidden inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
             >
               {mode === "vertical" ? <Columns2 className="w-4 h-4" /> : <Rows2 className="w-4 h-4" />}
@@ -996,8 +1000,8 @@ export default function ChapterReaderClient({
                 type="button"
                 onClick={() => switchMode("vertical")}
                 aria-pressed={mode === "vertical"}
-                aria-label="Vertical reading mode"
-                title="Vertical"
+                aria-label={tReader("verticalMode")}
+                title={tReader("vertical")}
                 className={`px-3 py-2 transition-colors ${
                   mode === "vertical"
                     ? "bg-[#ece6d8] text-[#0a0a0a]"
@@ -1010,8 +1014,8 @@ export default function ChapterReaderClient({
                 type="button"
                 onClick={() => switchMode("horizontal")}
                 aria-pressed={mode === "horizontal"}
-                aria-label="Horizontal reading mode"
-                title="Horizontal"
+                aria-label={tReader("horizontalMode")}
+                title={tReader("horizontal")}
                 className={`px-3 py-2 transition-colors border-l border-[#050505] ${
                   mode === "horizontal"
                     ? "bg-[#ece6d8] text-[#0a0a0a]"
@@ -1054,7 +1058,7 @@ export default function ChapterReaderClient({
       >
         {!pdfUrl ? (
           <div className="text-center text-[#b6b0a2] py-20">
-            This chapter&apos;s file hasn&apos;t been uploaded yet.
+            {tReader("notUploaded")}
           </div>
         ) : (
         <Document
@@ -1062,7 +1066,7 @@ export default function ChapterReaderClient({
           file={docFile}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<ReaderPageSkeleton />}
-          error={<div className="text-center text-[#b6b0a2] py-20">Couldn&apos;t load this chapter.</div>}
+          error={<div className="text-center text-[#b6b0a2] py-20">{tReader("loadFailed")}</div>}
         >
           {mode === "vertical" ? (
             <div className="flex flex-col items-center">
@@ -1170,7 +1174,7 @@ export default function ChapterReaderClient({
                   type="button"
                   onClick={goNext}
                   disabled={isLastSpread && !nextChapter}
-                  aria-label={isLastSpread ? "Next chapter" : "Next page"}
+                  aria-label={isLastSpread ? tReader("nextChapter") : tReader("nextPage")}
                   className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
@@ -1182,7 +1186,7 @@ export default function ChapterReaderClient({
                   type="button"
                   onClick={goPrev}
                   disabled={isFirstSpread && !prevChapter}
-                  aria-label={isFirstSpread ? "Previous chapter" : "Previous page"}
+                  aria-label={isFirstSpread ? tReader("previousChapter") : tReader("previousPage")}
                   className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
@@ -1202,14 +1206,14 @@ export default function ChapterReaderClient({
         {mode === "vertical" && (numPages > 0 || !pdfUrl) && (
           <div className="mt-10 mb-6 flex flex-col items-center gap-4 text-center">
             <p className="text-sm text-[#b6b0a2]">
-              End of {formatChapterBadge(currentIsEx, currentDisplayNumber)} {chapterName}
+              {tReader("endOf", { badge: formatChapterBadge(currentIsEx, currentDisplayNumber), name: chapterName })}
             </p>
             <ChapterEndNav variant="cards" prev={prevChapterLink} next={nextChapterLink} />
             <Link
               href={`/manga/titles/${mangaId}`}
               className="inline-block py-1.5 -my-1.5 text-sm text-[#b6b0a2] hover:text-[#ece6d8] underline underline-offset-2 transition-colors duration-200"
             >
-              Back to {mangaTitle}
+              {tReader("backTo", { title: mangaTitle })}
             </Link>
           </div>
         )}

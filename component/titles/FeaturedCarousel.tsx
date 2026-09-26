@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { BookOpen, ChevronLeft, ChevronRight, Info, Pause, Play } from "lucide-react";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
+import { useTranslations } from "next-intl";
 
 interface FeaturedMangaSlide {
   id: string;
@@ -42,6 +43,7 @@ function getPrefersReducedMotion() {
 // reorder lists: it's the one API that actually works for both mouse and
 // touch input.
 export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
+  const t = useTranslations("Carousel");
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffsetX, setDragOffsetX] = useState(0);
   // Which edge arrow is showing — whichever one the mouse is nearer to,
@@ -358,7 +360,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           <button
             type="button"
             onClick={() => goTo(activeIndex - 1)}
-            aria-label="Previous featured manga"
+            aria-label={t("previous")}
             className={`hidden sm:flex absolute inset-y-0 left-0 z-10 w-24 md:w-32 items-center justify-start pl-4 md:pl-6 text-white/70 hover:text-white hover:bg-linear-to-r hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none ${
               hoverSide === "left" ? "opacity-100" : "opacity-0"
             }`}
@@ -368,7 +370,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
           <button
             type="button"
             onClick={() => goTo(activeIndex + 1)}
-            aria-label="Next featured manga"
+            aria-label={t("next")}
             className={`hidden sm:flex absolute inset-y-0 right-0 z-10 w-24 md:w-32 items-center justify-end pr-4 md:pr-6 text-white/70 hover:text-white hover:bg-linear-to-l hover:from-black/40 hover:to-transparent transition-all duration-300 motion-reduce:transition-none ${
               hoverSide === "right" ? "opacity-100" : "opacity-0"
             }`}
@@ -408,7 +410,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
               between the title and the synopsis. Keep these in sync if
               the label or title text sizes change. */}
           <div className="flex flex-col justify-end gap-2 items-start min-h-26 sm:min-h-27 md:min-h-31">
-            <p className="text-white/70 text-xs sm:text-sm">FEATURED MANGA</p>
+            <p className="text-white/70 text-xs sm:text-sm">{t("featured")}</p>
             <h1
               className="text-4xl md:text-5xl text-white max-w-xl min-w-0 line-clamp-2 wrap-anywhere font-(family-name:--font-display)"
               // min-w-0 is load-bearing for break-words to actually do
@@ -453,19 +455,19 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 className="pointer-events-auto shrink-0 inline-flex items-center justify-center gap-2 whitespace-nowrap h-11 sm:h-auto px-6 sm:py-3 rounded-full sm:rounded-md bg-white text-black text-[15px] font-semibold sm:text-base sm:font-normal shadow-lg shadow-black/30 sm:shadow-md active:scale-[0.98] hover:bg-white/85 transition duration-200"
               >
                 <BookOpen className="w-4.5 h-4.5 sm:hidden" aria-hidden="true" />
-                Start Reading
+                {t("startReading")}
               </Link>
             ) : (
               <span className="pointer-events-auto shrink-0 inline-flex items-center justify-center whitespace-nowrap h-11 sm:h-auto px-6 sm:py-3 rounded-full sm:rounded-md bg-white/40 text-black/60 text-[15px] font-semibold sm:text-base sm:font-normal shadow-md cursor-not-allowed">
-                No chapters yet
+                {t("noChapters")}
               </span>
             )}
 
             {/* phones: round glass icon button (label kept for screen readers) */}
             <Link
               href={`/manga/titles/${current.id}`}
-              aria-label={`View ${current.title}`}
-              title="View Manga"
+              aria-label={t("view", { title: current.title })}
+              title={t("viewManga")}
               className="sm:hidden pointer-events-auto shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md shadow-lg shadow-black/30 active:scale-95 hover:bg-white/25 transition duration-200"
             >
               <Info className="w-5 h-5" aria-hidden="true" />
@@ -475,7 +477,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
               href={`/manga/titles/${current.id}`}
               className="hidden sm:inline-block pointer-events-auto whitespace-nowrap bg-black/20 border border-white/40 text-white text-center px-6 py-3 rounded-md backdrop-blur-sm hover:bg-black/35 transition-colors duration-200"
             >
-              View Manga
+              {t("viewManga")}
             </Link>
           </div>
         </div>
@@ -485,7 +487,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
             <button
               type="button"
               onClick={() => setIsUserPaused(!isPausedByChoice)}
-              aria-label={isPausedByChoice ? "Play slideshow" : "Pause slideshow"}
+              aria-label={isPausedByChoice ? t("play") : t("pause")}
               className="pointer-events-auto -ml-3.5 -mr-1 -my-2 w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
             >
               {isPausedByChoice ? (
@@ -505,7 +507,7 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
                 key={m.id}
                 type="button"
                 onClick={() => goTo(i)}
-                aria-label={`Show ${m.title}`}
+                aria-label={t("show", { title: m.title })}
                 aria-current={i === activeIndex}
                 className="group pointer-events-auto flex items-center h-10 -my-2 px-2 -mx-1"
               >

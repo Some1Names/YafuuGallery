@@ -12,6 +12,8 @@ import AdminChapterPdfUploads, { type ChapterTranslationDraft } from "./AdminCha
 import { formatBytes } from "@/lib/format-bytes";
 import { MIN_PUBLISHED_DATE, formatPublishedDate, todayLocalISODate } from "@/lib/dates";
 import { MAX_CHAPTER_NAME_LENGTH } from "@/lib/content-limits";
+import { useLocale, useTranslations } from "next-intl";
+import { INTL_LOCALE, type Locale } from "@/i18n/locales";
 
 interface AdminChapterRowProps {
   id: string;
@@ -64,6 +66,9 @@ export default function AdminChapterRow({
   onToggleEdit,
   dragHandle,
 }: AdminChapterRowProps) {
+  const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const [editCoverImageUrl, setEditCoverImageUrl] = useState(coverImageUrl);
   // A chapter with no PDFs yet still starts with one blank upload slot
@@ -109,20 +114,20 @@ export default function AdminChapterRow({
       router.refresh();
     } else {
       const data = await res.json().catch(() => null);
-      setError(data?.error ?? "Failed to save.");
+      setError(data?.error ?? t("failedSave"));
     }
   }
 
   async function remove() {
     const confirmed = await confirmDialog({
-      title: `Delete chapter "${chapterName}"?`,
-      message: "This can't be undone.",
-      confirmLabel: "Delete chapter",
+      title: t("chapter.deleteTitle", { name: chapterName }),
+      message: t("chapter.deleteMessage"),
+      confirmLabel: t("chapter.deleteConfirm"),
       tone: "danger",
     });
     if (!confirmed) return;
     const res = await fetch(`/api/admin/chapters/${id}`, { method: "DELETE" }).catch(() => null);
-    if (!res?.ok) return alertRequestFailed("Couldn't delete chapter", res);
+    if (!res?.ok) return alertRequestFailed(t("chapter.deleteFailed"), res);
     router.refresh();
   }
 
@@ -179,7 +184,7 @@ export default function AdminChapterRow({
             </p>
             <p className="text-sm text-fg-secondary mt-0.5 truncate">
               {arcName ? `${arcName} · ` : ""}
-              {formatPublishedDate(publishedDate)}
+              {formatPublishedDate(publishedDate, INTL_LOCALE[locale])}
             </p>
             <div className="flex items-center gap-3 mt-1 text-xs text-fg-muted">
               <span className="flex items-center gap-1">
@@ -207,20 +212,20 @@ export default function AdminChapterRow({
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
               >
                 <Eye className="w-3.5 h-3.5" />
-                View
+                {t("view")}
               </Link>
             )}
             <button
               onClick={onToggleEdit}
               className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
-              {isEditing ? "Close" : "Edit"}
+              {isEditing ? t("close") : tCommon("edit")}
             </button>
             <button
               onClick={remove}
               className="text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 transition-colors duration-200"
             >
-              Delete
+              {tCommon("delete")}
             </button>
           </div>
         </div>
@@ -237,7 +242,7 @@ export default function AdminChapterRow({
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="shrink-0 flex flex-col gap-2">
               <AdminImageUploadButton
-                label="Cover"
+                label={t("cover")}
                 value={editCoverImageUrl}
                 onChange={setEditCoverImageUrl}
                 boxClassName="w-40 sm:w-54 h-24 sm:h-30 shrink-0"
@@ -249,7 +254,7 @@ export default function AdminChapterRow({
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <label className="block text-xs text-fg-secondary mb-1.5">
-                    Chapter Title
+                    {t("chapter.title")}
                   </label>
                   <div className="flex items-stretch bg-bg border border-border rounded overflow-hidden focus-within:border-fg-secondary transition-colors duration-200">
                     <select
@@ -272,14 +277,14 @@ export default function AdminChapterRow({
 
                 <div className="sm:w-48">
                   <label className="block text-xs text-fg-secondary mb-1.5">
-                    Arc
+                    {t("chapter.arc")}
                   </label>
                   <select
                     value={editArcId}
                     onChange={(e) => setEditArcId(e.target.value)}
                     className="w-full bg-bg border border-border rounded px-3 py-2 text-sm text-fg"
                   >
-                    <option value="">No arc</option>
+                    <option value="">{t("chapter.noArc")}</option>
                     {arcs.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.arc_name}
@@ -292,7 +297,7 @@ export default function AdminChapterRow({
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="sm:w-40">
                   <label className="block text-xs text-fg-secondary mb-1.5">
-                    Published Date
+                    {t("chapter.publishedDate")}
                   </label>
                   <input
                     type="date"
@@ -326,14 +331,14 @@ export default function AdminChapterRow({
               onClick={cancelEdit}
               className="px-4 py-2 border border-border rounded-md text-sm text-fg-secondary hover:text-fg hover:border-fg-secondary transition-colors duration-200"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
               disabled={isSaving}
               className="px-4 py-2 bg-fg text-bg text-sm font-semibold rounded-md hover:bg-fg/85 disabled:opacity-50 transition-colors duration-200"
             >
-              {isSaving ? "Saving…" : "Save"}
+              {isSaving ? t("saving") : tCommon("save")}
             </button>
           </div>
         </form>

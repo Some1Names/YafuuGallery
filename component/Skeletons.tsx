@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 // Loading placeholders with the silver shimmer (.shimmer, globals.css) —
 // shapes of what's coming instead of a "Loading…" line. Each group is a
 // role="status" region with the words kept for screen readers.
@@ -8,9 +9,10 @@ function Bar({ className }: { className: string }) {
 
 // Reader comment panel: avatar + name + two lines of text, per comment.
 export function CommentSkeletons({ count = 3 }: { count?: number }) {
+  const t = useTranslations("Skeleton");
   return (
     <div role="status" className="flex flex-col gap-5">
-      <span className="sr-only">Loading comments…</span>
+      <span className="sr-only">{t("comments")}</span>
       {Array.from({ length: count }, (_, i) => (
         <div key={i} aria-hidden="true" className="flex gap-2.5">
           <span className="shimmer w-8 h-8 rounded-full shrink-0" />
@@ -43,9 +45,10 @@ export function ListRowSkeletons({ label, count = 3 }: { label: string; count?: 
 // Reader: a page-shaped placeholder while the chapter file loads (fixed
 // dark colors — the reader is always dark).
 export function ReaderPageSkeleton() {
+  const t = useTranslations("Skeleton");
   return (
     <div role="status" className="w-full flex justify-center px-0 sm:px-4 py-6">
-      <span className="sr-only">Loading chapter…</span>
+      <span className="sr-only">{t("chapter")}</span>
       <div aria-hidden="true" className="shimmer shimmer-dark w-full max-w-3xl aspect-[5/7]" />
     </div>
   );

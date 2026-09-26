@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+// Interface language (en/th) per request — see i18n/request.ts
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 // Every manga cover/banner/avatar is served from Cloudflare R2 at whatever
 // host R2_PUBLIC_URL points to (the R2.dev public bucket URL by default,
@@ -61,4 +65,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

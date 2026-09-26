@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { loginHref } from "@/lib/login-redirect";
 import { alertRequestFailed } from "@/component/Dialog";
+import { useTranslations } from "next-intl";
 
 interface MangaFavoriteButtonProps {
   mangaId: string;
@@ -22,6 +23,7 @@ export default function MangaFavoriteButton({
   initialFavorited,
   variant = "button",
 }: MangaFavoriteButtonProps) {
+  const t = useTranslations("Favorite");
   const router = useRouter();
   const [favorited, setFavorited] = useState(initialFavorited);
   const [isPending, startTransition] = useTransition();
@@ -35,7 +37,7 @@ export default function MangaFavoriteButton({
 
     const next = !favorited;
     setFavorited(next);
-    const failedTitle = next ? "Couldn't add to favorites" : "Couldn't remove from favorites";
+    const failedTitle = next ? t("addFailed") : t("removeFailed");
 
     startTransition(async () => {
       // the dialogs aren't awaited, so the heart isn't left disabled while one is open
@@ -70,7 +72,7 @@ export default function MangaFavoriteButton({
         onClick={toggle}
         disabled={isPending}
         aria-pressed={favorited}
-        aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+        aria-label={favorited ? t("remove") : t("add")}
         // fills the round backdrop it sits in (MangaCard), so the whole
         // 32px circle is the tap target — not just the 16px heart
         className={
@@ -98,7 +100,7 @@ export default function MangaFavoriteButton({
       <Heart
         className={"w-4 h-4 transition-colors duration-200 " + (favorited ? "fill-red-500 text-red-500" : "")}
       />
-      {favorited ? "Favorited" : "Favorite"}
+      {favorited ? t("favorited") : t("favorite")}
     </button>
   );
 }

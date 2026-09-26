@@ -1,0 +1,677 @@
+{
+  "Meta": {
+    "description": "อ่านมังงะออริจินัลและงานแปล ค้นหาเรื่องใหม่ และติดตามทุกตอน"
+  },
+  "Language": {
+    "switchTo": "เปลี่ยนเป็น {language}"
+  },
+  "Nav": {
+    "home": "หน้าแรก",
+    "browse": "สำรวจ",
+    "favorites": "รายการโปรด",
+    "search": "ค้นหา",
+    "profile": "โปรไฟล์",
+    "history": "ประวัติการอ่าน",
+    "signIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "signOut": "ออกจากระบบ",
+    "menu": "เมนู",
+    "menuWithNew": "เมนู (มีตอนใหม่ {count, number} ตอน)",
+    "newChapters": "(ตอนใหม่ {count, number} ตอน)"
+  },
+  "Theme": {
+    "toLight": "เปลี่ยนเป็นธีมสว่าง",
+    "toDark": "เปลี่ยนเป็นธีมมืด",
+    "lightMode": "โหมดสว่าง"
+  },
+  "Footer": {
+    "tagline": "มังงะออริจินัลและงานแปล อ่านได้ในแบบของคุณ",
+    "browse": "สำรวจ",
+    "about": "เกี่ยวกับ",
+    "home": "หน้าแรก",
+    "favorites": "รายการโปรด",
+    "search": "ค้นหา",
+    "privacy": "นโยบายความเป็นส่วนตัว",
+    "terms": "ข้อกำหนดการใช้งาน",
+    "contact": "ติดต่อทาง Instagram"
+  },
+  "Common": {
+    "noImage": "ไม่มีรูปภาพ",
+    "showMore": "แสดงเพิ่มเติม",
+    "loading": "กำลังโหลด…",
+    "cancel": "ยกเลิก",
+    "save": "บันทึก",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "home": "หน้าแรก YafuuGallery"
+  },
+  "Dialog": {
+    "confirm": "ยืนยัน",
+    "ok": "ตกลง",
+    "errors": {
+      "offline": "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
+      "notSignedIn": "คุณยังไม่ได้เข้าสู่ระบบ เข้าสู่ระบบแล้วลองอีกครั้ง",
+      "noPermission": "คุณไม่มีสิทธิ์ทำรายการนี้ อาจเป็นเพราะหลุดจากระบบ ลองเข้าสู่ระบบอีกครั้ง",
+      "serverError": "เซิร์ฟเวอร์เกิดข้อผิดพลาด โปรดลองอีกครั้ง"
+    }
+  },
+  "Skeleton": {
+    "comments": "กำลังโหลดความคิดเห็น…",
+    "chapter": "กำลังโหลดตอน…"
+  },
+  "Card": {
+    "newCount": "ใหม่ {count, number}",
+    "noChapters": "ยังไม่มีตอน",
+    "upNext": "ตอนถัดไป",
+    "new": "ใหม่"
+  },
+  "History": {
+    "finished": "อ่านจบแล้ว",
+    "stoppedOnPage": "อ่านถึงหน้า {page}",
+    "opened": "เปิดอ่านแล้ว",
+    "remove": "ลบ {label} ออกจากประวัติ",
+    "removeShort": "ลบออกจากประวัติ",
+    "removeFailed": "ลบออกจากประวัติไม่สำเร็จ",
+    "clear": "ล้างประวัติ",
+    "clearing": "กำลังล้าง…",
+    "clearTitle": "ล้างประวัติการอ่านทั้งหมด?",
+    "clearMessage": "รายการอ่านต่อและหน้าที่บันทึกไว้ทั้งหมดจะถูกลบ",
+    "clearFailed": "ล้างประวัติไม่สำเร็จ"
+  },
+  "Updates": {
+    "markAllRead": "ทำเครื่องหมายว่าอ่านแล้วทั้งหมด",
+    "marking": "กำลังทำเครื่องหมาย…",
+    "failed": "อัปเดตไม่สำเร็จ — ลองอีกครั้ง"
+  },
+  "Favorite": {
+    "add": "เพิ่มในรายการโปรด",
+    "remove": "ลบออกจากรายการโปรด",
+    "favorite": "รายการโปรด",
+    "favorited": "อยู่ในรายการโปรด",
+    "addFailed": "เพิ่มในรายการโปรดไม่สำเร็จ",
+    "removeFailed": "ลบออกจากรายการโปรดไม่สำเร็จ"
+  },
+  "Genres": {
+    "action": "แอ็กชัน",
+    "adventure": "ผจญภัย",
+    "comedy": "ตลก",
+    "drama": "ดราม่า",
+    "fantasy": "แฟนตาซี",
+    "historical": "ย้อนยุค",
+    "horror": "สยองขวัญ",
+    "mystery": "ลึกลับ",
+    "psychological": "จิตวิทยา",
+    "romance": "โรแมนติก",
+    "school-life": "ชีวิตในโรงเรียน",
+    "sci-fi": "ไซไฟ",
+    "slice-of-life": "ชีวิตประจำวัน",
+    "sports": "กีฬา",
+    "supernatural": "เหนือธรรมชาติ",
+    "thriller": "ระทึกขวัญ"
+  },
+  "Status": {
+    "ongoing": "ยังไม่จบ",
+    "completed": "จบแล้ว",
+    "all": "ทั้งหมด"
+  },
+  "LanguageName": {
+    "th": "ไทย",
+    "en": "อังกฤษ",
+    "ja": "ญี่ปุ่น"
+  },
+  "Manga": {
+    "statusAndGenres": "สถานะและแนว",
+    "availableIn": "มีภาษา <strong>{languages}</strong>",
+    "noChaptersYet": "ยังไม่มีตอน",
+    "startReading": "เริ่มอ่าน",
+    "continue": "อ่านต่อ {badge}",
+    "showMore": "แสดงเพิ่มเติม",
+    "showLess": "แสดงน้อยลง",
+    "chapters": "ตอน",
+    "arcs": "ภาค",
+    "oldest": "เก่าสุด",
+    "newest": "ใหม่สุด",
+    "oldestFirst": "เก่าสุดก่อน",
+    "newestFirst": "ใหม่สุดก่อน",
+    "allChapters": "ทุกตอน",
+    "noChaptersInArc": "ภาคนี้ยังไม่มีตอน",
+    "noArcs": "ยังไม่มีภาค",
+    "chapterCount": "{count, number} ตอน"
+  },
+  "EndNav": {
+    "label": "ตอน",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า",
+    "nextChapter": "ตอนถัดไป: {badge} {name}",
+    "previousChapter": "ตอนก่อนหน้า: {badge} {name}",
+    "allCaughtUp": "อ่านครบแล้ว",
+    "youreAllCaughtUp": "คุณอ่านครบทุกตอนแล้ว"
+  },
+  "Author": {
+    "eyebrow": "ผู้เขียน",
+    "unknown": "ไม่ทราบชื่อ",
+    "mangaBy": "มังงะของ {name}",
+    "description": "มังงะของ {name} บน YafuuGallery: {titles}",
+    "stats": {
+      "manga": "มังงะ",
+      "chapters": "ตอน",
+      "views": "ยอดวิว",
+      "favorites": "รายการโปรด"
+    }
+  },
+  "Viewer": {
+    "description": "อ่าน {badge} — {chapter} ของ {manga} บน YafuuGallery"
+  },
+  "Search": {
+    "title": "ค้นหา",
+    "subtitle": "ค้นหามังงะจากชื่อเรื่อง ผู้เขียน หรือชื่อตอน",
+    "metaQuery": "“{query}” – ค้นหา",
+    "metaGenre": "มังงะแนว{genre}",
+    "inputLabel": "ค้นหามังงะ",
+    "placeholder": "ชื่อเรื่อง ผู้เขียน หรือชื่อตอน",
+    "clear": "ล้างคำค้นหา",
+    "recent": "ค้นหาล่าสุด",
+    "clearRecent": "ล้าง",
+    "allGenres": "ทุกแนว",
+    "statusLabel": "สถานะ",
+    "sortBy": "เรียงตาม:",
+    "clearFilters": "ล้างตัวกรอง",
+    "matches": "ตรงกับ",
+    "andMore": " และอีก {count, number} ตอน",
+    "noResults": "ไม่พบมังงะสำหรับ “{query}”",
+    "noResultsFiltered": "ไม่พบมังงะสำหรับ “{query}” ตามตัวกรองนี้",
+    "noMatchFilters": "ไม่มีมังงะที่ตรงกับตัวกรองนี้",
+    "noneYet": "ยังไม่มีมังงะ",
+    "resultsFor": "พบ {count, number} เรื่องสำหรับ <q>“{query}”</q>",
+    "allManga": "มังงะทั้งหมด",
+    "unknownAuthor": "ไม่ทราบชื่อ",
+    "genreNav": "หมวดหมู่"
+  },
+  "Sort": {
+    "updated": {
+      "label": "อัปเดตล่าสุด",
+      "short": "อัปเดต"
+    },
+    "new": {
+      "label": "ใหม่ล่าสุด",
+      "short": "ใหม่"
+    },
+    "views": {
+      "label": "ยอดวิวสูงสุด",
+      "short": "ยอดนิยม"
+    },
+    "title": {
+      "label": "เรียงตามชื่อเรื่อง",
+      "short": "ชื่อ"
+    }
+  },
+  "Home": {
+    "signupTitle": "อ่านต่อได้ทุกเรื่องจากตรงที่ค้างไว้",
+    "signupBody": "บันทึกรายการโปรด ดูตอนใหม่ และอ่านต่อจากตรงที่ค้างไว้",
+    "createAccount": "สมัครสมาชิก",
+    "signIn": "เข้าสู่ระบบ",
+    "continueEyebrow": "อ่านต่อจากที่ค้างไว้",
+    "continueTitle": "อ่านต่อ",
+    "historyLink": "ประวัติ",
+    "popularEyebrow": "อ่านมากที่สุด",
+    "popularTitle": "ยอดนิยม",
+    "seeAll": "ดูทั้งหมด",
+    "latestEyebrow": "อัปเดตล่าสุด",
+    "latestTitle": "มังงะล่าสุด",
+    "browseAll": "ดูทั้งหมด",
+    "noneYet": "ยังไม่มีมังงะ",
+    "genresEyebrow": "สำรวจ",
+    "genresTitle": "เลือกตามแนว",
+    "allGenres": "ทุกแนว",
+    "unknownAuthor": "ไม่ทราบชื่อ"
+  },
+  "Carousel": {
+    "featured": "มังงะแนะนำ",
+    "startReading": "เริ่มอ่าน",
+    "noChapters": "ยังไม่มีตอน",
+    "viewManga": "ดูมังงะ",
+    "view": "ดู {title}",
+    "previous": "มังงะแนะนำก่อนหน้า",
+    "next": "มังงะแนะนำถัดไป",
+    "play": "เล่นสไลด์",
+    "pause": "หยุดสไลด์",
+    "show": "แสดง {title}"
+  },
+  "Favorites": {
+    "title": "รายการโปรด",
+    "subtitle": "มังงะและตอนที่คุณบันทึกไว้ รวมไว้ในที่เดียว",
+    "tabs": {
+      "manga": "มังงะ",
+      "chapters": "ตอน",
+      "updates": "อัปเดต"
+    },
+    "newSuffix": " ใหม่",
+    "updatesEmpty": "กดรายการโปรดที่มังงะเรื่องไหนก็ได้ แล้วตอนใหม่จะมาแสดงที่นี่",
+    "updatesNoChapters": "มังงะในรายการโปรดของคุณยังไม่มีตอน",
+    "newSinceLong": "ตอนใหม่ {count, number} ตอน <long>ตั้งแต่ที่คุณอ่านครั้งล่าสุด</long>",
+    "allCaughtUp": "คุณอ่านครบทุกตอนแล้ว",
+    "mangaEmpty": "ยังไม่มีมังงะในรายการโปรด กด “รายการโปรด” ในหน้ามังงะเพื่อบันทึกไว้ที่นี่",
+    "chaptersEmpty": "ยังไม่มีตอนในรายการโปรด กดรูปหัวใจที่ตอนไหนก็ได้เพื่อบันทึกไว้ที่นี่",
+    "unknownAuthor": "ไม่ทราบชื่อ"
+  },
+  "HistoryPage": {
+    "title": "ประวัติการอ่าน",
+    "subtitle": "ทุกตอนที่คุณเปิดอ่าน เรียงจากล่าสุด",
+    "empty": "ยังไม่มีประวัติ — <link>หาเรื่องอ่านกันเลย</link>",
+    "count": "{count, number} ตอน"
+  },
+  "Profile": {
+    "title": "โปรไฟล์",
+    "subtitle": "จัดการบัญชีและดูกิจกรรมของคุณ",
+    "stats": {
+      "mangaFavorited": "มังงะที่ชอบ",
+      "chaptersFavorited": "ตอนที่ชอบ",
+      "chaptersFinished": "ตอนที่อ่านจบ",
+      "comments": "ความคิดเห็น"
+    },
+    "continueReading": "อ่านต่อ",
+    "historyShort": "ประวัติ",
+    "historyLong": "ประวัติการอ่าน",
+    "noHistory": "ยังไม่มีประวัติการอ่าน — เปิดอ่านสักตอนเพื่อเริ่มบันทึก"
+  },
+  "Validation": {
+    "nameTooShort": "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร",
+    "nameTooLong": "ชื่อผู้ใช้ต้องไม่เกิน {max} ตัวอักษร",
+    "nameInvalidChars": "ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ ตัวเลข และขีดล่าง (_)",
+    "emailInvalid": "กรอกอีเมลให้ถูกต้อง",
+    "passwordTooShort": "ต้องมีอย่างน้อย 8 ตัวอักษร",
+    "confirmRequired": "พิมพ์รหัสผ่านอีกครั้ง",
+    "passwordMismatch": "รหัสผ่านไม่ตรงกัน"
+  },
+  "ProfileForm": {
+    "changePicture": "เปลี่ยนรูปโปรไฟล์",
+    "uploadingPicture": "กำลังอัปโหลดรูปโปรไฟล์",
+    "avatar": "รูปโปรไฟล์",
+    "change": "เปลี่ยน",
+    "uploading": "กำลังอัปโหลด…",
+    "displayName": "ชื่อที่แสดง",
+    "confirmName": "ยืนยันการเปลี่ยนชื่อ",
+    "cancelName": "ยกเลิกการเปลี่ยนชื่อ",
+    "editName": "แก้ไขชื่อที่แสดง",
+    "saving": "กำลังบันทึก…",
+    "tagNote": "แท็กของคุณคือ #{tag} — แสดงเป็น {name}#{tag} และจะไม่เปลี่ยน",
+    "roleAdmin": "ผู้ดูแลระบบ",
+    "roleAuthor": "ผู้เขียน",
+    "memberSince": "เป็นสมาชิกตั้งแต่ <date></date>",
+    "adminPanel": "แผงผู้ดูแลระบบ",
+    "manageManga": "จัดการมังงะ",
+    "saveFailed": "บันทึกไม่สำเร็จ",
+    "networkError": "เชื่อมต่อไม่ได้ — โปรดลองอีกครั้ง",
+    "imageUnreadable": "อ่านรูปนี้ไม่ได้ — ลองใช้ไฟล์อื่น",
+    "uploadFailed": "อัปโหลดไม่สำเร็จ",
+    "uploadFailedRetry": "อัปโหลดไม่สำเร็จ — โปรดลองอีกครั้ง"
+  },
+  "Auth": {
+    "meta": {
+      "login": "เข้าสู่ระบบ",
+      "signup": "สมัครสมาชิก",
+      "forgot": "ลืมรหัสผ่าน",
+      "reset": "ตั้งรหัสผ่านใหม่"
+    },
+    "google": "ดำเนินการต่อด้วย Google",
+    "or": "หรือ",
+    "email": "อีเมล",
+    "emailPlaceholder": "เช่น you@example.com",
+    "password": "รหัสผ่าน",
+    "passwordPlaceholder": "กรอกรหัสผ่าน",
+    "show": "แสดง",
+    "hide": "ซ่อน",
+    "showPassword": "แสดงรหัสผ่าน",
+    "hidePassword": "ซ่อนรหัสผ่าน",
+    "network": "เชื่อมต่อไม่ได้ — โปรดลองอีกครั้ง",
+    "logIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "login": {
+      "title": "เข้าสู่ระบบ",
+      "subtitle": "ยินดีต้อนรับกลับ — เข้าสู่ระบบเพื่ออ่านต่อ",
+      "forgot": "ลืมรหัสผ่าน?",
+      "submitting": "กำลังเข้าสู่ระบบ…",
+      "submit": "เข้าสู่ระบบ",
+      "noAccount": "ยังไม่มีบัญชี?",
+      "verifyFirst": "โปรดยืนยันอีเมลก่อน — เราเพิ่งส่งลิงก์ยืนยันใหม่ไปที่ {email}",
+      "invalid": "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+    },
+    "signup": {
+      "title": "สมัครสมาชิก",
+      "subtitle": "สร้างบัญชีเพื่อเริ่มอ่าน",
+      "username": "ชื่อผู้ใช้",
+      "usernamePlaceholder": "เช่น uefa123",
+      "passwordHint": "ต้องมีอย่างน้อย 8 ตัวอักษร",
+      "confirmPassword": "ยืนยันรหัสผ่าน",
+      "confirmPlaceholder": "พิมพ์รหัสผ่านอีกครั้ง",
+      "submitting": "กำลังสร้างบัญชี…",
+      "submit": "สมัครสมาชิก",
+      "agree": "เมื่อสมัครสมาชิก ถือว่าคุณยอมรับ<terms>ข้อกำหนดการใช้งาน</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>",
+      "haveAccount": "มีบัญชีอยู่แล้ว?",
+      "checkEmailTitle": "ตรวจสอบอีเมลของคุณ",
+      "checkEmailBody": "เราส่งลิงก์ยืนยันไปที่ <b>{email}</b> แล้ว เปิดลิงก์เพื่อสร้างบัญชีให้เสร็จ แล้วระบบจะพาคุณเข้าสู่ระบบทันที",
+      "checkEmailRetry": "ไม่ได้รับอีเมล? ลองดูในโฟลเดอร์สแปม หรือ<login>ลองเข้าสู่ระบบ</login>เพื่อให้ระบบส่งลิงก์ใหม่"
+    },
+    "forgot": {
+      "title": "ลืมรหัสผ่าน",
+      "subtitle": "กรอกอีเมลของคุณ แล้วเราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปให้",
+      "sent": "หากมีบัญชีที่ใช้ <b>{email}</b> เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว",
+      "submitting": "กำลังส่ง…",
+      "submit": "ส่งลิงก์ตั้งรหัสผ่านใหม่",
+      "remembered": "นึกรหัสผ่านออกแล้ว?"
+    },
+    "reset": {
+      "title": "ตั้งรหัสผ่านใหม่",
+      "subtitle": "เลือกรหัสผ่านใหม่สำหรับบัญชีของคุณ",
+      "invalidLink": "ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว ขอลิงก์ใหม่ได้ที่หน้า<link>ลืมรหัสผ่าน</link>",
+      "newPassword": "รหัสผ่านใหม่",
+      "newPlaceholder": "กรอกรหัสผ่านใหม่",
+      "confirm": "ยืนยันรหัสผ่าน",
+      "confirmPlaceholder": "กรอกรหัสผ่านใหม่อีกครั้ง",
+      "mismatch": "รหัสผ่านไม่ตรงกัน",
+      "submitting": "กำลังตั้งรหัสผ่าน…",
+      "submit": "ตั้งรหัสผ่านใหม่"
+    },
+    "errors": {
+      "generic": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง",
+      "USER_ALREADY_EXISTS": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว",
+      "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว",
+      "INVALID_EMAIL": "กรอกอีเมลให้ถูกต้อง",
+      "INVALID_EMAIL_OR_PASSWORD": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      "PASSWORD_TOO_SHORT": "รหัสผ่านสั้นเกินไป",
+      "PASSWORD_TOO_LONG": "รหัสผ่านยาวเกินไป",
+      "INVALID_TOKEN": "ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว"
+    }
+  },
+  "Comments": {
+    "title": "ความคิดเห็น",
+    "close": "ปิดความคิดเห็น",
+    "empty": "ยังไม่มีความคิดเห็น — มาเป็นคนแรกที่แสดงความคิดเห็นกัน",
+    "loadingOlder": "กำลังโหลด…",
+    "showOlder": "แสดงความคิดเห็นก่อนหน้า",
+    "showEarlierReplies": "แสดงการตอบกลับก่อนหน้าอีก {count, number} รายการ",
+    "replyingTo": "กำลังตอบกลับ <b>{name}</b>",
+    "cancelReply": "ยกเลิกการตอบกลับ",
+    "replyPlaceholder": "ตอบกลับ {name}…",
+    "placeholder": "แสดงความคิดเห็น… (Enter เพื่อส่ง, Shift+Enter เพื่อขึ้นบรรทัดใหม่)",
+    "postReply": "ส่งการตอบกลับ",
+    "post": "ส่งความคิดเห็น",
+    "hidden": "ความคิดเห็นนี้ถูกซ่อนโดยผู้ดูแล",
+    "user": "ผู้ใช้",
+    "like": "ถูกใจความคิดเห็นนี้",
+    "unlike": "เลิกถูกใจความคิดเห็นนี้",
+    "likeFailed": "ถูกใจไม่สำเร็จ",
+    "unlikeFailed": "เลิกถูกใจไม่สำเร็จ",
+    "reply": "ตอบกลับ",
+    "replyTo": "ตอบกลับ {name}",
+    "report": "รายงาน",
+    "reported": "รายงานแล้ว",
+    "reportBy": "รายงานความคิดเห็นของ {name}",
+    "reportTitle": "รายงานความคิดเห็นนี้?",
+    "reportMessage": "ผู้ดูแลจะเข้ามาตรวจสอบความคิดเห็นนี้",
+    "reportFailed": "รายงานความคิดเห็นไม่สำเร็จ",
+    "loadOlderFailed": "โหลดความคิดเห็นก่อนหน้าไม่สำเร็จ — โปรดลองอีกครั้ง",
+    "postFailed": "ส่งความคิดเห็นไม่สำเร็จ",
+    "network": "เชื่อมต่อไม่ได้ — โปรดลองอีกครั้ง"
+  },
+  "Reader": {
+    "chapterLabel": "ตอนที่ {number}: {name}",
+    "backToManga": "กลับไปหน้ามังงะ",
+    "chooseChapter": "ตอน {badge} — เลือกตอน",
+    "comments": "ความคิดเห็น",
+    "commentsNew": "ความคิดเห็น ใหม่ {count, number} รายการ",
+    "changeLanguage": "เปลี่ยนภาษา",
+    "language": "ภาษา",
+    "toHorizontal": "เปลี่ยนเป็นอ่านแนวนอน",
+    "toVertical": "เปลี่ยนเป็นอ่านแนวตั้ง",
+    "horizontal": "แนวนอน",
+    "vertical": "แนวตั้ง",
+    "verticalMode": "โหมดอ่านแนวตั้ง",
+    "horizontalMode": "โหมดอ่านแนวนอน",
+    "notUploaded": "ตอนนี้ยังไม่ได้อัปโหลดไฟล์",
+    "loadFailed": "โหลดตอนนี้ไม่สำเร็จ",
+    "nextChapter": "ตอนถัดไป",
+    "nextPage": "หน้าถัดไป",
+    "previousChapter": "ตอนก่อนหน้า",
+    "previousPage": "หน้าก่อนหน้า",
+    "endOf": "จบ {badge} {name}",
+    "backTo": "กลับไปที่ {title}"
+  },
+  "StatusScreen": {
+    "errorTitle": "เกิดข้อผิดพลาด",
+    "errorMessage": "โหลดหน้านี้ไม่สำเร็จ ลองอีกครั้ง หรือกลับไปหน้าแรก",
+    "reference": "รหัสอ้างอิง: {digest}",
+    "tryAgain": "ลองอีกครั้ง",
+    "backHome": "กลับหน้าแรก",
+    "notFoundTitle": "ไม่พบหน้านี้",
+    "notFoundMessage": "หน้านี้ไม่มีอยู่ หรือลิงก์อาจเสีย"
+  },
+  "Legal": {
+    "lastUpdated": "อัปเดตล่าสุด {date}",
+    "contact": "{handle} ทาง Instagram",
+    "privacy": {
+      "title": "นโยบายความเป็นส่วนตัว",
+      "description": "YafuuGallery เก็บข้อมูลอะไร เพื่ออะไร ใครช่วยเราดูแลเว็บไซต์ และสิทธิของคุณ"
+    },
+    "terms": {
+      "title": "ข้อกำหนดการใช้งาน",
+      "description": "กฎการใช้งาน YafuuGallery: บัญชี ความคิดเห็น มังงะบนเว็บไซต์ และการขอให้นำผลงานออก"
+    }
+  },
+  "AdminPage": {
+    "title": "ผู้ดูแลระบบ",
+    "subtitle": "จัดการมังงะ ตอน ผู้ใช้ และตรวจสอบความคิดเห็น",
+    "stats": {
+      "users": "ผู้ใช้",
+      "manga": "มังงะ",
+      "chapters": "ตอน"
+    }
+  },
+  "ManagePage": {
+    "title": "จัดการมังงะ",
+    "heading": "จัดการมังงะ",
+    "subtitle": "สร้างและจัดการมังงะ ภาค และตอนของคุณเอง",
+    "you": "คุณ"
+  },
+  "Dashboard": {
+    "tabs": {
+      "manga": "มังงะ",
+      "users": "ผู้ใช้",
+      "comments": "ความคิดเห็น"
+    },
+    "stats": {
+      "manga": "มังงะ",
+      "chapters": "ตอน",
+      "totalViews": "ยอดวิวรวม",
+      "favorites": "รายการโปรด"
+    },
+    "noManga": "ยังไม่มีมังงะ — สร้างเรื่องแรกได้ด้านบน",
+    "searchTitleOrAuthor": "ค้นหาจากชื่อเรื่องหรือผู้เขียน…",
+    "searchTitle": "ค้นหาจากชื่อเรื่อง…",
+    "noMatch": "ไม่มีมังงะที่ตรงกับ “{query}”",
+    "commentsSearch": "ค้นหาจากผู้อ่าน มังงะ หรือข้อความ…",
+    "commentsEmpty": "ยังไม่มีความคิดเห็นในมังงะของคุณ"
+  },
+  "Storage": {
+    "used": "ใช้ไป <b>{used} GB</b> จาก {total} GB",
+    "objects": "{count, number} ไฟล์ · พื้นที่ R2",
+    "over": "เกินโควตาฟรี 10 GB แล้ว — ตอนนี้การใช้งาน R2 มีค่าใช้จ่าย",
+    "unattributed": "<b>{size}</b> ไม่มีเจ้าของ จาก {count, number} ไฟล์",
+    "explain": "ไฟล์ที่ไม่มีมังงะ ตอน ภาค หรือผู้ใช้คนไหนใช้อยู่ — เศษที่เหลือจากการอัปโหลดซ้ำหรือการแก้ไขที่ยกเลิกหลังเลือกไฟล์แล้ว ไฟล์ที่อัปโหลดภายใน 24 ชั่วโมงล่าสุดจะไม่แสดง เพราะอาจยังบันทึกไม่เสร็จ ทุกไฟล์จะถูกตรวจซ้ำอีกครั้งก่อนลบ",
+    "deleteOne": "ลบ {key}",
+    "deleteAll": "ลบทั้งหมด ({size})",
+    "deleting": "กำลังลบ…",
+    "deleteOneTitle": "ลบไฟล์นี้?",
+    "cantUndo": "ไม่สามารถย้อนกลับได้",
+    "delete": "ลบ",
+    "deleteAllTitle": "ลบไฟล์ที่ไม่มีเจ้าของทั้งหมด {count, number} ไฟล์?",
+    "deleteAllMessage": "จะได้พื้นที่คืน {size} และไม่สามารถย้อนกลับได้",
+    "deleteAllConfirm": "ลบทั้งหมด",
+    "deleteFailedOne": "ลบไฟล์ไม่สำเร็จ",
+    "deleteFailedMany": "ลบไฟล์ไม่สำเร็จ",
+    "skipped": "ข้าม {count, number} ไฟล์ — กลับมาถูกใช้งานแล้ว จึงไม่ได้ลบ"
+  },
+  "Admin": {
+    "cover": "ปก",
+    "banner": "แบนเนอร์",
+    "createManga": "+ สร้างมังงะ",
+    "addMangaHeading": "เพิ่มมังงะเรื่องใหม่",
+    "editMangaHeading": "แก้ไขมังงะ",
+    "mangaTitle": "ชื่อเรื่อง",
+    "mangaTitlePlaceholder": "ชื่อมังงะ",
+    "synopsis": "เรื่องย่อ",
+    "status": "สถานะ",
+    "genres": "หมวดหมู่",
+    "creating": "กำลังสร้าง…",
+    "saving": "กำลังบันทึก…",
+    "close": "ปิด",
+    "view": "ดู",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "page": "หน้า {current} จาก {total}",
+    "networkError": "เครือข่ายขัดข้อง — โปรดลองอีกครั้ง",
+    "failedSave": "บันทึกไม่สำเร็จ",
+    "failedCreateManga": "สร้างมังงะไม่สำเร็จ",
+    "stillNeeded": "ยังขาด: <b>{items}</b>",
+    "missing": {
+      "cover": "ปก",
+      "banner": "แบนเนอร์",
+      "title": "ชื่อเรื่อง",
+      "synopsis": "เรื่องย่อ",
+      "name": "ชื่อ",
+      "date": "วันที่",
+      "pdf": "PDF"
+    },
+    "arcTab": "ภาค",
+    "chaptersTab": "ตอน",
+    "featured": "แนะนำ",
+    "featureAdd": "เพิ่มในสไลด์หน้าแรก",
+    "featureRemove": "นำออกจากสไลด์หน้าแรก",
+    "featureFailed": "ตั้งเป็นมังงะแนะนำไม่สำเร็จ",
+    "unfeatureFailed": "ยกเลิกมังงะแนะนำไม่สำเร็จ",
+    "deleteManga": {
+      "title": "ลบ “{title}”?",
+      "message": "ภาคและตอนทั้งหมดของเรื่องนี้จะถูกลบด้วย และไม่สามารถย้อนกลับได้",
+      "confirm": "ลบมังงะ",
+      "failed": "ลบมังงะไม่สำเร็จ"
+    },
+    "arc": {
+      "create": "+ สร้างภาค",
+      "title": "ชื่อภาค",
+      "namePlaceholder": "ชื่อภาค",
+      "failedCreate": "สร้างภาคไม่สำเร็จ",
+      "none": "ยังไม่มีภาค — สร้างภาคแรกได้ด้านบน",
+      "search": "ค้นหาภาคจากหมายเลขหรือชื่อ…",
+      "noMatch": "ไม่มีภาคที่ตรงกับ “{query}”",
+      "reorderFailed": "จัดลำดับภาคไม่สำเร็จ",
+      "deleteTitle": "ลบภาค “{name}”?",
+      "deleteMessage": "ตอนในภาคนี้จะไม่ถูกลบ แต่จะไม่อยู่ในภาคใด และไม่สามารถย้อนกลับได้",
+      "deleteConfirm": "ลบภาค",
+      "deleteFailed": "ลบภาคไม่สำเร็จ"
+    },
+    "chapter": {
+      "create": "+ สร้างตอน",
+      "title": "ชื่อตอน",
+      "titlePlaceholder": "ชื่อตอน",
+      "arc": "ภาค",
+      "noArc": "ไม่มีภาค",
+      "publishedDate": "วันที่เผยแพร่",
+      "failedCreate": "สร้างตอนไม่สำเร็จ",
+      "none": "ยังไม่มีตอน — สร้างตอนแรกได้ด้านบน",
+      "search": "ค้นหาตอนจากหมายเลข ชื่อ หรือภาค…",
+      "noMatch": "ไม่มีตอนที่ตรงกับ “{query}”",
+      "reorderFailed": "จัดลำดับตอนไม่สำเร็จ",
+      "deleteTitle": "ลบตอน “{name}”?",
+      "deleteMessage": "ไม่สามารถย้อนกลับได้",
+      "deleteConfirm": "ลบตอน",
+      "deleteFailed": "ลบตอนไม่สำเร็จ",
+      "pdfs": "ไฟล์ PDF ของตอน",
+      "pdfLanguage": "ภาษาของ PDF",
+      "removePdf": "นำ PDF ภาษา{language}ออก",
+      "addLanguage": "เพิ่มภาษาอื่น"
+    },
+    "upload": {
+      "uploadImage": "อัปโหลดรูป{label}",
+      "changeImage": "เปลี่ยนรูป{label}",
+      "uploadingImage": "กำลังอัปโหลดรูป{label}",
+      "uploading": "กำลังอัปโหลด…",
+      "change": "เปลี่ยน",
+      "cantReadImage": "อ่านรูปนี้ไม่ได้ — โปรดลองไฟล์อื่น",
+      "failed": "อัปโหลดไม่สำเร็จ",
+      "failedRetry": "อัปโหลดไม่สำเร็จ — โปรดลองอีกครั้ง",
+      "onlyPdf": "อัปโหลดได้เฉพาะไฟล์ PDF",
+      "tooLarge": "ไฟล์ใหญ่เกินไป ({size}) — จำกัดที่ 200MB",
+      "bigWarning": "ไฟล์นี้มีขนาด {size} — แนะนำไม่เกิน 50MB เพื่อให้โหลดเร็วขึ้น",
+      "prepareFailed": "เตรียมการอัปโหลดไม่สำเร็จ",
+      "pdfName": "PDF ภาษา{language}",
+      "ariaUploading": "กำลังอัปโหลด {name} {progress}%",
+      "ariaReplace": "แทนที่ {name} ({file})",
+      "ariaUpload": "อัปโหลด {name}",
+      "uploadedFallback": "อัปโหลดแล้ว",
+      "progress": "กำลังอัปโหลด… {progress}%",
+      "pdfUploaded": "อัปโหลด PDF แล้ว",
+      "noPdf": "ยังไม่ได้อัปโหลด PDF",
+      "replace": "แทนที่",
+      "upload": "อัปโหลด"
+    }
+  },
+  "AdminComments": {
+    "searchDefault": "ค้นหาจากผู้ใช้ มังงะ หรือข้อความ…",
+    "emptyDefault": "ยังไม่มีความคิดเห็น",
+    "reportedOnly": "เฉพาะที่ถูกรายงาน",
+    "reportedOnlyCount": "เฉพาะที่ถูกรายงาน ({count, number})",
+    "loading": "กำลังโหลดความคิดเห็น…",
+    "loadFailed": "โหลดความคิดเห็นไม่สำเร็จ — โปรดลองอีกครั้ง",
+    "loadMoreFailed": "โหลดเพิ่มไม่สำเร็จ — โปรดลองอีกครั้ง",
+    "noMatch": "ไม่มีความคิดเห็นที่ตรงกับ “{query}”",
+    "noMatchReported": "ไม่มีความคิดเห็นที่ถูกรายงานที่ตรงกับ “{query}”",
+    "noReported": "ไม่มีความคิดเห็นที่ถูกรายงาน",
+    "replyTo": "↳ ตอบกลับ {name}",
+    "openChapter": "เปิดตอนนี้ในแท็บใหม่",
+    "hiddenTag": "ซ่อนอยู่",
+    "reported": "ถูกรายงาน {count, number} ครั้ง",
+    "dismissReports": "ยกเลิกรายงาน",
+    "hide": "ซ่อน",
+    "unhide": "เลิกซ่อน",
+    "dismissFailed": "ยกเลิกรายงานไม่สำเร็จ",
+    "hideFailed": "ซ่อนความคิดเห็นไม่สำเร็จ",
+    "unhideFailed": "เลิกซ่อนความคิดเห็นไม่สำเร็จ",
+    "deleteTitle": "ลบความคิดเห็นนี้?",
+    "deleteMessage": "คำตอบกลับทั้งหมดจะถูกลบด้วย และไม่สามารถย้อนกลับได้",
+    "deleteFailed": "ลบความคิดเห็นไม่สำเร็จ"
+  },
+  "AdminUsers": {
+    "search": "ค้นหาจากชื่อ ชื่อ#แท็ก หรืออีเมล…",
+    "loading": "กำลังโหลดผู้ใช้…",
+    "loadFailed": "โหลดผู้ใช้ไม่สำเร็จ — โปรดลองอีกครั้ง",
+    "noMatch": "ไม่มีผู้ใช้ที่ตรงกับ “{query}”",
+    "none": "ยังไม่มีผู้ใช้",
+    "roles": {
+      "reader": "ผู้อ่าน",
+      "author": "ผู้เขียน",
+      "admin": "ผู้ดูแล"
+    },
+    "you": "{role} (คุณ)",
+    "joinedOn": "สมัครเมื่อ",
+    "columns": {
+      "name": "ชื่อ",
+      "email": "อีเมล",
+      "joined": "วันที่สมัคร",
+      "role": "บทบาท",
+      "comments": "ความคิดเห็น"
+    },
+    "commentCount": "{count, number} ความคิดเห็น",
+    "viewComments": "· ดู",
+    "closeComments": "− ปิด",
+    "changeRoleTitle": "เปลี่ยนบทบาท?",
+    "changeRoleMessage": "{user} จะเปลี่ยนจาก{from}เป็น{to} มีผลทันที",
+    "changeRoleConfirm": "เปลี่ยนบทบาท",
+    "changeRoleFailed": "เปลี่ยนบทบาทไม่สำเร็จ",
+    "roleFor": "บทบาทของ {user}",
+    "deleteTitle": "ลบ {user}?",
+    "deleteMessage": "ความคิดเห็น (รวมถึงคำตอบกลับ) รายการโปรด และประวัติการอ่านของผู้ใช้นี้จะถูกลบด้วย และไม่สามารถย้อนกลับได้",
+    "deleteConfirm": "ลบผู้ใช้",
+    "deleteFailed": "ลบผู้ใช้ไม่สำเร็จ",
+    "loadMoreFailed": "โหลดเพิ่มไม่สำเร็จ — โปรดลองอีกครั้ง"
+  }
+}

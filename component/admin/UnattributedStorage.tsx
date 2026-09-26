@@ -5,6 +5,7 @@ import { alertRequestFailed, confirmDialog } from "@/component/Dialog";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { formatBytes } from "@/lib/format-bytes";
+import { useTranslations } from "next-intl";
 
 interface OrphanedObject {
   key: string;
@@ -21,6 +22,7 @@ interface UnattributedStorageProps {
 // reference these keys again, so deleting them is safe; they're just
 // never surfaced anywhere but here.
 export default function UnattributedStorage({ objects }: UnattributedStorageProps) {
+  const t = useTranslations("Storage");
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [deletingKeys, setDeletingKeys] = useState<Set<string>>(new Set());
@@ -42,14 +44,12 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
       body: JSON.stringify({ keys }),
     }).catch(() => null);
     if (!res?.ok) {
-      await alertRequestFailed(keys.length === 1 ? "Couldn't delete object" : "Couldn't delete objects", res);
+      await alertRequestFailed(keys.length === 1 ? t("deleteFailedOne") : t("deleteFailedMany"), res);
       return false;
     }
     const data: { skippedCount?: number } = await res.json().catch(() => ({}));
     if (data.skippedCount) {
-      setNotice(
-        `${data.skippedCount} file${data.skippedCount === 1 ? " was" : "s were"} skipped — now in use again, so not deleted.`
-      );
+      setNotice(t("skipped", { count: data.skippedCount }));
     }
     router.refresh();
     return true;
@@ -57,10 +57,10 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
 
   async function handleDeleteOne(key: string) {
     const confirmed = await confirmDialog({
-      title: "Delete this object?",
-      message: "This can't be undone.",
+      title: t("deleteOneTitle"),
+      message: t("cantUndo"),
       detail: key,
-      confirmLabel: "Delete",
+      confirmLabel: t("delete"),
       tone: "danger",
     });
     if (!confirmed) return;
@@ -75,9 +75,9 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
 
   async function handleDeleteAll() {
     const confirmed = await confirmDialog({
-      title: `Delete all ${objects.length} unattributed objects?`,
-      message: `That frees ${formatBytes(totalBytes)}. This can't be undone.`,
-      confirmLabel: "Delete all",
+      title: t("deleteAllTitle", { count: objects.length }),
+      message: t("deleteAllMessage", { size: formatBytes(totalBytes) }),
+      confirmLabel: t("deleteAllConfirm"),
       tone: "danger",
     });
     if (!confirmed) return;
@@ -94,9 +94,12 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
         className="w-full flex items-center justify-between gap-4 p-4 text-left"
       >
         <div className="text-sm text-fg">
-          <span className="font-(family-name:--font-display) text-base">{formatBytes(totalBytes)}</span>{" "}
           <span className="text-fg-secondary">
-            unattributed across {objects.length} object{objects.length === 1 ? "" : "s"}
+            {t.rich("unattributed", {
+              size: formatBytes(totalBytes),
+              count: objects.length,
+              b: (chunks) => <span className="font-(family-name:--font-display) text-base text-fg">{chunks}</span>,
+            })}
           </span>
         </div>
         <ChevronDown className={`w-4 h-4 text-fg-muted transition-transform duration-200 shrink-0 ${isExpanded ? "rotate-180" : ""}`} />
@@ -105,10 +108,7 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
       {isExpanded && (
         <div className="border-t border-border p-4 flex flex-col gap-3">
           <p className="text-xs text-fg-muted">
-            Files no manga, chapter, arc, or user is linked to — leftovers from re-uploads or edits
-            that were cancelled after picking a file. Files uploaded in the last 24 hours aren&apos;t
-            listed, since they may still be mid-save. Each file is checked again before it&apos;s
-            deleted.
+            {t("explain")}
           </p>
           {notice && <p className="text-xs text-fg-secondary">{notice}</p>}
 
@@ -126,7 +126,7 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
                     onClick={() => handleDeleteOne(o.key)}
                     disabled={deletingKeys.has(o.key) || isDeletingAll}
                     className="text-danger-text hover:bg-danger/10 rounded p-1 disabled:opacity-40 transition-colors duration-200"
-                    aria-label={`Delete ${o.key}`}
+                    aria-label={t("deleteOne", { key: o.key })}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -141,7 +141,7 @@ export default function UnattributedStorage({ objects }: UnattributedStorageProp
             disabled={isDeletingAll}
             className="self-end text-xs px-3 py-1.5 border border-danger-text/50 rounded text-danger-text hover:bg-danger/10 disabled:opacity-50 transition-colors duration-200"
           >
-            {isDeletingAll ? "Deleting…" : `Delete all (${formatBytes(totalBytes)})`}
+            {isDeletingAll ? t("deleting") : t("deleteAll", { size: formatBytes(totalBytes) })}
           </button>
         </div>
       )}

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import ChapterReader from "@/component/titles/ChapterReader";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,8 @@ export async function generateMetadata({
   const displayNumber = getChapterDisplayNumbers(chapter.manga.chapters).get(id);
   const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
   const title = `${badge} ${chapter.chapter_name}`;
-  const description = `Read ${badge} — ${chapter.chapter_name} of ${chapter.manga.manga_title} on YafuuGallery.`;
+  const t = await getTranslations("Viewer");
+  const description = t("description", { badge, chapter: chapter.chapter_name, manga: chapter.manga.manga_title });
 
   return {
     title,

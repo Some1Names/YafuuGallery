@@ -7,6 +7,7 @@ import { GripVertical } from "lucide-react";
 import AdminChapterRow from "./AdminChapterRow";
 import AdminSearchInput from "./AdminSearchInput";
 import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
+import { useTranslations } from "next-intl";
 
 interface ChapterItem {
   id: string;
@@ -91,6 +92,7 @@ export default function AdminChapterList({
   editingChapterId,
   onToggleEdit,
 }: AdminChapterListProps) {
+  const t = useTranslations("Admin");
   const router = useRouter();
   const [ordered, setOrdered] = useState(() =>
     chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber)
@@ -179,7 +181,7 @@ export default function AdminChapterList({
 
     // Snap back to the last known-good server order on failure, and say so.
     setOrdered(chapters.slice().sort((a, b) => a.chapterNumber - b.chapterNumber));
-    void alertRequestFailed("Couldn't reorder chapters", res);
+    void alertRequestFailed(t("chapter.reorderFailed"), res);
     return false;
   }
 
@@ -276,7 +278,7 @@ export default function AdminChapterList({
           ))}
         </div>
         <p className="absolute inset-0 flex items-center justify-center text-xs text-fg-muted">
-          No chapters yet — create one above.
+          {t("chapter.none")}
         </p>
       </div>
     );
@@ -296,11 +298,11 @@ export default function AdminChapterList({
   return (
     <div className="flex flex-col gap-3">
       {totalCount > PAGE_SIZE || isSearching ? (
-        <AdminSearchInput value={search} onChange={setSearch} placeholder="Search chapters by number, title, or arc…" />
+        <AdminSearchInput value={search} onChange={setSearch} placeholder={t("chapter.search")} />
       ) : null}
 
       {isSearching && filtered.length === 0 && (
-        <p className="text-xs text-fg-muted text-center py-6">No chapters match &quot;{search}&quot;.</p>
+        <p className="text-xs text-fg-muted text-center py-6">{t("chapter.noMatch", { query: search })}</p>
       )}
 
       {pageItems.map((c, localIndex) => {
@@ -409,10 +411,10 @@ export default function AdminChapterList({
             disabled={currentPage === 0}
             className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
           >
-            Prev
+            {t("prev")}
           </button>
           <span className="text-xs text-fg-muted">
-            Page {currentPage + 1} of {totalPages}
+            {t("page", { current: currentPage + 1, total: totalPages })}
           </span>
           <button
             type="button"
@@ -420,7 +422,7 @@ export default function AdminChapterList({
             disabled={currentPage === totalPages - 1}
             className="text-xs px-3 py-1.5 border border-border rounded text-fg-secondary hover:text-fg hover:border-fg-secondary disabled:opacity-40 disabled:hover:text-fg-secondary disabled:hover:border-border transition-colors duration-200"
           >
-            Next
+            {t("next")}
           </button>
         </div>
       )}
