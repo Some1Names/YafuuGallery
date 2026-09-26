@@ -4,7 +4,8 @@
   },
   "Language": {
     "switchTo": "Switch to {language}",
-    "label": "Language"
+    "label": "Language",
+    "switching": "Changing language…"
   },
   "Nav": {
     "home": "Home",

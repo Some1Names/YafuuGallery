@@ -4,7 +4,8 @@
   },
   "Language": {
     "switchTo": "เปลี่ยนเป็น {language}",
-    "label": "ภาษา"
+    "label": "ภาษา",
+    "switching": "กำลังเปลี่ยนภาษา…"
   },
   "Nav": {
     "home": "หน้าแรก",

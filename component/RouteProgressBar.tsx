@@ -19,6 +19,18 @@ import { useEffect, useRef, useState } from "react";
 // and would require useSearchParams() here. Since this mounts once in the
 // root layout, wrapping that in the Suspense boundary useSearchParams()
 // needs would opt the entire app out of static rendering.
+const START_EVENT = "routeprogress:start";
+const DONE_EVENT = "routeprogress:done";
+
+// For in-page work that re-renders the route without a link click — e.g.
+// LanguageSwitcher's router.refresh(). Call done when it has finished.
+export function startRouteProgress() {
+  window.dispatchEvent(new Event(START_EVENT));
+}
+export function finishRouteProgress() {
+  window.dispatchEvent(new Event(DONE_EVENT));
+}
+
 export default function RouteProgressBar() {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -96,10 +108,14 @@ export default function RouteProgressBar() {
     // preventDefault it.
     document.addEventListener("click", onClick, true);
     window.addEventListener("popstate", finish);
+    window.addEventListener(START_EVENT, start);
+    window.addEventListener(DONE_EVENT, finish);
 
     return () => {
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("popstate", finish);
+      window.removeEventListener(START_EVENT, start);
+      window.removeEventListener(DONE_EVENT, finish);
       window.history.pushState = originalPush;
       window.history.replaceState = originalReplace;
       if (growTimerRef.current) clearInterval(growTimerRef.current);
