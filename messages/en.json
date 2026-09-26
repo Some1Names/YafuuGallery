@@ -3,7 +3,8 @@
     "description": "Read original manga and translations, explore stories, and follow every chapter."
   },
   "Language": {
-    "switchTo": "Switch to {language}"
+    "switchTo": "Switch to {language}",
+    "label": "Language"
   },
   "Nav": {
     "home": "Home",
