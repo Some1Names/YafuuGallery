@@ -86,6 +86,26 @@ body {
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
 
+/* Pointer cursor on everything clickable. Tailwind v4's preflight leaves
+   buttons on the default arrow (links get the pointer from the browser
+   already). Disabled controls keep the arrow. In the base layer so a cursor
+   utility on the element still wins — cursor-grab on the drag handles,
+   cursor-wait on a busy button, cursor-default on the reader's click
+   zones at a chapter's ends. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  label:has(> input[type="checkbox"]:not(:disabled)),
+  label:has(> input[type="radio"]:not(:disabled)),
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
+}
+
 /* Slim, rounded black-and-white scrollbars (ink on paper, inverted per
    theme) instead of the OS default gray. Chrome/Edge/Safari use the ::-webkit-scrollbar rules;
    Firefox only understands the standard scrollbar-color/-width, which are
