@@ -438,11 +438,7 @@
     "previousChapter": "Previous chapter",
     "previousPage": "Previous page",
     "endOf": "End of {badge} {name}",
-    "backTo": "Back to {title}",
-    "directionManga": "Manga",
-    "directionComic": "Comic",
-    "directionMangaLabel": "Manga style, right to left — switch to comic style (left to right)",
-    "directionComicLabel": "Comic style, left to right — switch to manga style (right to left)"
+    "backTo": "Back to {title}"
   },
   "StatusScreen": {
     "errorTitle": "Something broke",
@@ -620,6 +616,12 @@
       "noPdf": "No PDF uploaded",
       "replace": "Replace",
       "upload": "Upload"
+    },
+    "direction": {
+      "label": "Reading direction",
+      "rtl": "Manga · right to left",
+      "ltr": "Comic · left to right",
+      "hint": "Which way pages turn in the page-by-page reader."
     }
   },
   "AdminComments": {

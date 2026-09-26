@@ -3,21 +3,13 @@
 import { useId } from "react";
 import { GENRES, MANGA_STATUSES, type GenreSlug, type MangaStatusValue } from "@/lib/genres";
 import { useTranslations } from "next-intl";
+import { chipClass } from "@/component/manga/chip-class";
 
 interface MangaGenreFieldsProps {
   genres: GenreSlug[];
   onGenresChange: (next: GenreSlug[]) => void;
   status: MangaStatusValue;
   onStatusChange: (next: MangaStatusValue) => void;
-}
-
-function chipClass(isOn: boolean) {
-  return (
-    "text-xs px-3 py-1.5 rounded-full border transition-colors duration-200 " +
-    (isOn
-      ? "border-fg bg-fg text-bg font-medium"
-      : "border-border text-fg-secondary hover:text-fg hover:border-fg-secondary")
-  );
 }
 
 // Status + genre rows for the manga create/edit forms. Renders as label /

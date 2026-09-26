@@ -9,6 +9,8 @@ import MissingFieldsHint from "@/component/manga/MissingFieldsHint";
 import SynopsisField from "@/component/manga/SynopsisField";
 import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
 import { useTranslations } from "next-intl";
+import ReadingDirectionField from "@/component/manga/ReadingDirectionField";
+import type { ReadingDirectionValue } from "@/lib/reading-direction";
 
 // Shared by /admin and /manage — creating a manga always attributes it to
 // the signed-in account. There's no "choose an author" picker: a manga's
@@ -25,6 +27,7 @@ export default function MangaCreateForm() {
   const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
   const [genres, setGenres] = useState<GenreSlug[]>([]);
   const [status, setStatus] = useState<MangaStatusValue>("ongoing");
+  const [direction, setDirection] = useState<ReadingDirectionValue>("rtl");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +44,7 @@ export default function MangaCreateForm() {
     setBannerImageUrl(null);
     setGenres([]);
     setStatus("ongoing");
+    setDirection("rtl");
     setError(null);
   }
 
@@ -65,6 +69,7 @@ export default function MangaCreateForm() {
           banner_image_url: bannerImageUrl,
           genres,
           manga_status: status,
+          reading_direction: direction,
         }),
       });
 
@@ -149,6 +154,7 @@ export default function MangaCreateForm() {
         <SynopsisField value={synopsis} onChange={setSynopsis} placeholder={t("synopsis")} />
 
         <MangaGenreFields genres={genres} onGenresChange={setGenres} status={status} onStatusChange={setStatus} />
+        <ReadingDirectionField value={direction} onChange={setDirection} />
       </div>
 
       {error && <p className="text-sm text-danger-text">{error}</p>}

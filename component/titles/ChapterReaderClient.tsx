@@ -7,7 +7,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Columns2, Rows2, ChevronDown, Languages, MessageCircle, MoveLeft, MoveRight } from "lucide-react";
+import { Columns2, Rows2, ChevronDown, Languages, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
@@ -16,6 +16,7 @@ import { loginHref } from "@/lib/login-redirect";
 import { configurePdfWorker } from "@/lib/pdf-worker";
 import ChapterCommentPanel from "./ChapterCommentPanel";
 import { useTranslations } from "next-intl";
+import type { ReadingDirectionValue } from "@/lib/reading-direction";
 
 configurePdfWorker(pdfjs);
 
@@ -29,19 +30,6 @@ function readSavedMode(): "vertical" | "horizontal" {
     return localStorage.getItem(READING_MODE_KEY) === "horizontal" ? "horizontal" : "vertical";
   } catch {
     return "vertical";
-  }
-}
-
-// Which way horizontal mode turns pages: manga style (right to left — the
-// default) or comic book style (left to right). Persists like the mode.
-const READING_DIRECTION_KEY = "yfgll_reading_direction";
-type ReadingDirection = "rtl" | "ltr";
-
-function readSavedDirection(): ReadingDirection {
-  try {
-    return localStorage.getItem(READING_DIRECTION_KEY) === "ltr" ? "ltr" : "rtl";
-  } catch {
-    return "rtl";
   }
 }
 
@@ -145,6 +133,9 @@ interface ChapterReaderProps {
   resumePage: number;
   // The next chapter's files, preloaded near the end of this one
   nextChapterTranslations: ChapterTranslation[];
+  // Which way horizontal mode turns pages — set per manga by its author
+  // (/admin, /manage): manga style (rtl) or comic book style (ltr)
+  readingDirection: ReadingDirectionValue;
 }
 
 export default function ChapterReaderClient({
@@ -157,6 +148,7 @@ export default function ChapterReaderClient({
   currentUserId,
   resumePage,
   nextChapterTranslations,
+  readingDirection,
 }: ChapterReaderProps) {
   // tReader, not t: the language list below already maps over translations as `t`
   const tReader = useTranslations("Reader");
@@ -175,8 +167,7 @@ export default function ChapterReaderClient({
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
   const chapterLabel = tReader("chapterLabel", { number: currentIsEx ? "ex" : (currentDisplayNumber ?? 0), name: chapterName });
   const [mode, setMode] = useState<ReadingMode>(readSavedMode);
-  const [direction, setDirection] = useState<ReadingDirection>(readSavedDirection);
-  const isRtl = direction === "rtl";
+  const isRtl = readingDirection === "rtl";
   // Which way a swipe has to go (the sign of the finger's x movement) to
   // turn to the next page. Manga: left to right — the page being read sits
   // on the left in a right-to-left book, so it's flipped over to the right.
@@ -240,6 +231,7 @@ export default function ChapterReaderClient({
   // top edge of the screen — vertical mode always shows it. Opening
   // straight into fullscreen (saved mode) starts it hidden.
   const [topBarVisible, setTopBarVisible] = useState(!isFullscreen);
+  const topBarRef = useRef<HTMLDivElement>(null);
 
   // Comment panel — signed-out visitors never see it open at all (the
   // bubble button sends them to /signup instead), so no signed-out UI
@@ -302,8 +294,15 @@ export default function ChapterReaderClient({
   const chapterMenuRef = useRef<HTMLDivElement>(null);
   const chapterButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Horizontal mode's auto-hiding bar stays down while one of its menus is
+  // open — the list is in use even when the mouse strays off it
+  const barShown = topBarVisible || isChapterMenuOpen || isLanguageMenuOpen;
+
   useEffect(() => {
     if (!isChapterMenuOpen) return;
+    // A long list (max-h-80) opened at #001 however far in the reader was —
+    // start it with the current chapter in view instead.
+    chapterMenuRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest" });
     const onClickOutside = (e: MouseEvent) => {
       if (chapterMenuRef.current && !chapterMenuRef.current.contains(e.target as Node)) {
         setIsChapterMenuOpen(false);
@@ -598,16 +597,6 @@ export default function ChapterReaderClient({
     };
   }, [currentChapterId, flushProgress]);
 
-  function switchDirection() {
-    const next: ReadingDirection = isRtl ? "ltr" : "rtl";
-    setDirection(next);
-    try {
-      localStorage.setItem(READING_DIRECTION_KEY, next);
-    } catch {
-      // storage unavailable (private browsing) — the choice just won't persist
-    }
-  }
-
   function switchMode(next: ReadingMode) {
     if (mode === "vertical" && next === "horizontal") {
       setCurrentPage(findCurrentPageInVerticalView());
@@ -770,8 +759,11 @@ export default function ChapterReaderClient({
   }
   useEffect(() => {
     if (!isFullscreen) return;
+    // Near the top edge, or anywhere over the bar — its chapter and
+    // language dropdowns hang below that edge, and moving down one to pick
+    // a chapter used to hide the bar and the open list along with it.
     const onMove = (e: MouseEvent) => {
-      setTopBarVisible(e.clientY < 96);
+      setTopBarVisible(e.clientY < 96 || !!topBarRef.current?.contains(e.target as Node));
     };
     window.addEventListener("mousemove", onMove);
     return () => window.removeEventListener("mousemove", onMove);
@@ -875,9 +867,10 @@ export default function ChapterReaderClient({
     >
       {/* Top bar — sticky (vertical) vs overlay that auto-hides (horizontal) */}
       <div
+        ref={topBarRef}
         className={`${isFullscreen ? "absolute top-0 left-0 right-0" : "sticky top-0"} z-20 bg-linear-to-b from-[#0a0a0a]/90 to-transparent backdrop-blur-sm border-b-2 transition-transform duration-300 ${
           isFullscreen ? "border-transparent" : "border-[#050505]"
-        } ${isFullscreen && !topBarVisible ? "-translate-y-full" : "translate-y-0"}`}
+        } ${isFullscreen && !barShown ? "-translate-y-full" : "translate-y-0"}`}
       >
         {/* Phones get tighter padding/gaps, a single mode button and the
             page counter moved to the bottom (below) — with everything at
@@ -893,7 +886,10 @@ export default function ChapterReaderClient({
             >
               <span aria-hidden="true">‹</span>
             </Link>
-            <div className="hidden sm:block text-lg uppercase text-[#ece6d8] tracking-wide shrink-0">
+            {/* Truncates (capped at max-w-72) rather than holding its full
+                width — a long title squeezed the chapter label beside the
+                picker down to a sliver ("C.") */}
+            <div className="hidden sm:block min-w-0 max-w-72 truncate text-lg uppercase text-[#ece6d8] tracking-wide">
               {mangaTitle}
             </div>
 
@@ -945,15 +941,11 @@ export default function ChapterReaderClient({
               )}
             </div>
 
-            {/* Horizontal mode's bar also holds the page counter and the
-                direction button — below xl that left this label a one-letter
-                sliver, so it waits for the room there (the chapter
-                selector beside it already says which chapter this is) */}
-            <div
-              className={`${mode === "horizontal" ? "hidden xl:block" : "hidden sm:block"} text-sm text-[#b6b0a2] truncate min-w-0`}
-            >
-              {chapterLabel}
-            </div>
+            {/* Only from xl up: below that there's rarely room left beside
+                the title and picker, and it showed as a one-letter sliver.
+                The picker already says which chapter this is, and its
+                dropdown has every chapter's name. */}
+            <div className="hidden xl:block text-sm text-[#b6b0a2] truncate min-w-0">{chapterLabel}</div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -1033,23 +1025,6 @@ export default function ChapterReaderClient({
               </div>
             )}
 
-            {/* Page-turn direction (horizontal mode only): manga or comic
-                book style. Shows the current one; a click switches. */}
-            {mode === "horizontal" && (
-              <button
-                type="button"
-                onClick={switchDirection}
-                aria-label={isRtl ? tReader("directionMangaLabel") : tReader("directionComicLabel")}
-                title={isRtl ? tReader("directionMangaLabel") : tReader("directionComicLabel")}
-                className="inline-flex items-center gap-1.5 p-2 sm:px-2.5 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
-              >
-                {isRtl ? <MoveLeft className="w-4 h-4" /> : <MoveRight className="w-4 h-4" />}
-                <span className="hidden sm:inline text-sm leading-4">
-                  {isRtl ? tReader("directionManga") : tReader("directionComic")}
-                </span>
-              </button>
-            )}
-
             {/* Mode toggle. Phones: one button that switches to the other
                 mode (showing that mode's icon), to save room in the bar. */}
             <button
@@ -1099,9 +1074,9 @@ export default function ChapterReaderClient({
           (no room for it in the top bar), shown and hidden with the bar. */}
       {mode === "horizontal" && (
         <div
-          aria-hidden={!topBarVisible}
+          aria-hidden={!barShown}
           className={`sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#050505] text-xs text-[#b6b0a2] tabular-nums pointer-events-none transition-opacity duration-300 ${
-            topBarVisible ? "opacity-100" : "opacity-0"
+            barShown ? "opacity-100" : "opacity-0"
           }`}
         >
           {pageCounterText}
@@ -1111,7 +1086,7 @@ export default function ChapterReaderClient({
       {/* Horizontal mode, last page: previous/next chapter float over it
           (paging past the end still goes on to the next chapter too) */}
       {mode === "horizontal" && numPages > 0 && spreads.length > 0 && isLastSpread && (prevChapter || nextChapter) && (
-        <ChapterEndNav variant="bar" direction={direction} prev={prevChapterLink} next={nextChapterLink} />
+        <ChapterEndNav variant="bar" direction={readingDirection} prev={prevChapterLink} next={nextChapterLink} />
       )}
 
       {/* Reader */}

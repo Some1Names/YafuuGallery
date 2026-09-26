@@ -74,6 +74,7 @@ export default async function ViewerPage({
           select: {
             id: true,
             manga_title: true,
+            reading_direction: true,
             chapters: {
               orderBy: { chapter_number: "asc" },
               select: {
@@ -152,6 +153,7 @@ export default async function ViewerPage({
       chapterName={chapter.chapter_name}
       mangaTitle={chapter.manga.manga_title}
       mangaId={chapter.manga.id}
+      readingDirection={chapter.manga.reading_direction}
       chapters={chapter.manga.chapters.map((c) => ({
         id: c.id,
         chapter_number: c.chapter_number,

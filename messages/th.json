@@ -438,11 +438,7 @@
     "previousChapter": "ตอนก่อนหน้า",
     "previousPage": "หน้าก่อนหน้า",
     "endOf": "จบ {badge} {name}",
-    "backTo": "กลับไปที่ {title}",
-    "directionManga": "มังงะ",
-    "directionComic": "คอมิก",
-    "directionMangaLabel": "แบบมังงะ อ่านจากขวาไปซ้าย — เปลี่ยนเป็นแบบคอมิก (ซ้ายไปขวา)",
-    "directionComicLabel": "แบบคอมิก อ่านจากซ้ายไปขวา — เปลี่ยนเป็นแบบมังงะ (ขวาไปซ้าย)"
+    "backTo": "กลับไปที่ {title}"
   },
   "StatusScreen": {
     "errorTitle": "เกิดข้อผิดพลาด",
@@ -620,6 +616,12 @@
       "noPdf": "ยังไม่ได้อัปโหลด PDF",
       "replace": "แทนที่",
       "upload": "อัปโหลด"
+    },
+    "direction": {
+      "label": "ทิศทางการอ่าน",
+      "rtl": "มังงะ · ขวาไปซ้าย",
+      "ltr": "คอมิก · ซ้ายไปขวา",
+      "hint": "ทิศทางการพลิกหน้าในโหมดอ่านทีละหน้า"
     }
   },
   "AdminComments": {

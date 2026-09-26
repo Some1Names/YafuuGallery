@@ -19,6 +19,8 @@ import type { ChapterTranslationDraft } from "./AdminChapterPdfUploads";
 import SynopsisField from "@/component/manga/SynopsisField";
 import { MAX_MANGA_TITLE_LENGTH } from "@/lib/content-limits";
 import { useTranslations } from "next-intl";
+import ReadingDirectionField from "@/component/manga/ReadingDirectionField";
+import type { ReadingDirectionValue } from "@/lib/reading-direction";
 
 interface ChapterItem {
   id: string;
@@ -56,6 +58,7 @@ interface AdminMangaRowProps {
   bannerImageUrl: string | null;
   genres: string[];
   status: MangaStatusValue;
+  readingDirection: ReadingDirectionValue;
   chapters: ChapterItem[];
   arcs: ArcOption[];
   isExpanded: boolean;
@@ -87,6 +90,7 @@ export default function AdminMangaRow({
   bannerImageUrl,
   genres,
   status,
+  readingDirection,
   chapters,
   arcs,
   isExpanded,
@@ -106,6 +110,7 @@ export default function AdminMangaRow({
   const [editBannerImageUrl, setEditBannerImageUrl] = useState(bannerImageUrl);
   const [editGenres, setEditGenres] = useState<GenreSlug[]>(() => knownGenres(genres));
   const [editStatus, setEditStatus] = useState<MangaStatusValue>(status);
+  const [editDirection, setEditDirection] = useState<ReadingDirectionValue>(readingDirection);
   const [isSaving, setIsSaving] = useState(false);
   const [isTogglingFeatured, setIsTogglingFeatured] = useState(false);
 
@@ -180,6 +185,7 @@ export default function AdminMangaRow({
         banner_image_url: editBannerImageUrl,
         genres: editGenres,
         manga_status: editStatus,
+        reading_direction: editDirection,
       }),
     });
     setIsSaving(false);
@@ -255,6 +261,7 @@ export default function AdminMangaRow({
             status={editStatus}
             onStatusChange={setEditStatus}
           />
+          <ReadingDirectionField value={editDirection} onChange={setEditDirection} />
         </div>
 
         <div className="flex gap-2 self-end">

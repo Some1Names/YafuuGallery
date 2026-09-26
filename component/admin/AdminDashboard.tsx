@@ -21,6 +21,7 @@ interface MangaItem {
   bannerImageUrl: string | null;
   genres: string[];
   status: "ongoing" | "completed";
+  readingDirection: "rtl" | "ltr";
   isFeatured: boolean;
   storageBytes: number;
 }
@@ -184,6 +185,7 @@ export default function AdminDashboard({
                       bannerImageUrl={m.bannerImageUrl}
                       genres={m.genres}
                       status={m.status}
+                      readingDirection={m.readingDirection}
                       isAdmin
                       isFeatured={m.isFeatured}
                       storageBytes={m.storageBytes}

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { canCreateManga } from "@/lib/manga-access";
 import { isAllowedUrlWrite } from "@/lib/storage";
 import { isMangaStatus, parseGenres } from "@/lib/genres";
+import { isReadingDirection } from "@/lib/reading-direction";
 
 // POST /api/admin/manga — create
 export async function POST(request: NextRequest) {
@@ -14,7 +15,8 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => null);
-  const { manga_title, manga_synopsis, cover_image_url, banner_image_url, genres, manga_status } = body ?? {};
+  const { manga_title, manga_synopsis, cover_image_url, banner_image_url, genres, manga_status, reading_direction } =
+    body ?? {};
 
   if (!manga_title || !manga_synopsis) {
     return NextResponse.json({ error: "manga_title and manga_synopsis are required" }, { status: 400 });
@@ -47,6 +49,7 @@ export async function POST(request: NextRequest) {
       // unknown genre slugs are dropped, not rejected (see lib/genres.ts)
       genres: parseGenres(genres),
       manga_status: isMangaStatus(manga_status) ? manga_status : "ongoing",
+      reading_direction: isReadingDirection(reading_direction) ? reading_direction : "rtl",
     },
   });
 

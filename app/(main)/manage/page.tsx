@@ -33,6 +33,7 @@ export default async function ManageMangaPage() {
         banner_image_url: true,
         genres: true,
         manga_status: true,
+        reading_direction: true,
         _count: { select: { chapters: true, bookmarks: true } },
       },
     }),
@@ -86,6 +87,7 @@ export default async function ManageMangaPage() {
     bannerImageUrl: m.banner_image_url,
     genres: m.genres,
     status: m.manga_status,
+    readingDirection: m.reading_direction,
   }));
 
   const chapterItems = chapters.map((c) => ({

@@ -44,6 +44,7 @@ interface MangaItem {
   bannerImageUrl: string | null;
   genres: string[];
   status: "ongoing" | "completed";
+  readingDirection: "rtl" | "ltr";
 }
 
 interface ManageMangaDashboardProps {
@@ -201,6 +202,7 @@ export default function ManageMangaDashboard({
                       bannerImageUrl={m.bannerImageUrl}
                       genres={m.genres}
                       status={m.status}
+                      readingDirection={m.readingDirection}
                       chapters={chapters
                         .filter((c) => c.mangaId === m.id)
                         .map((c) => ({

@@ -28,6 +28,14 @@ enum MangaStatus {
   completed
 }
 
+// Which way the reader's horizontal mode turns this manga's pages — part
+// of the work itself (its panels are drawn in that order), so the author
+// sets it, not the reader: rtl = manga style, ltr = comic book style.
+enum ReadingDirection {
+  rtl
+  ltr
+}
+
 enum ArcStatus {
   ongoing
   completed
@@ -145,6 +153,7 @@ model Manga {
   // on that list), picked by the author. Filtered with `has` on /search.
   genres           String[] @default([])
   manga_status     MangaStatus @default(ongoing)
+  reading_direction ReadingDirection @default(rtl)
   // Sum of this manga's chapters' view_count, kept alongside it so /search
   // can sort by "Most viewed" in the database (Prisma can't order by a
   // relation's SUM). Incremented with raw SQL in the viewer — a Prisma
