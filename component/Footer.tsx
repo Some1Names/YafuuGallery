@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { CONTACT_URL } from "@/component/LegalPage";
+import InstagramIcon from "@/component/icons/InstagramIcon";
+import GitHubIcon from "@/component/icons/GitHubIcon";
 import { useTranslations } from "next-intl";
 
 const browseLinks = [
@@ -9,10 +11,42 @@ const browseLinks = [
   { href: "/search", labelKey: "search" },
 ] as const;
 
+const GITHUB_URL = "https://github.com/Some1Names";
+
 const aboutLinks = [
   { href: "/privacy", labelKey: "privacy" },
   { href: "/terms", labelKey: "terms" },
 ] as const;
+
+// A link off the site (new tab): brand icon, label, then ↗ glued to the
+// label's last word with a word joiner (U+2060) — when the label wraps in
+// the narrow phone column, the arrow stays after the text instead of being
+// stranded at the column's edge. The icon lines up with the first line.
+function ExternalLink({
+  href,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-start gap-2 py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
+    >
+      <Icon className="w-4 h-4 shrink-0 mt-0.5" />
+      <span>
+        {children}
+        {"⁠"}
+        <ArrowUpRight className="inline w-3.5 h-3.5 ml-1 align-[-2px]" aria-hidden="true" />
+      </span>
+    </a>
+  );
+}
 
 export default function Footer() {
   const t = useTranslations("Footer");
@@ -64,15 +98,14 @@ export default function Footer() {
               {/* Instagram DMs are the contact channel — questions, account
                   deletion, takedown requests (see /privacy, /terms) */}
               <li>
-                <a
-                  href={CONTACT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 py-1 -my-1 text-sm text-fg-secondary hover:text-fg transition-colors duration-200"
-                >
+                <ExternalLink href={CONTACT_URL} icon={InstagramIcon}>
                   {t("contact")}
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </a>
+                </ExternalLink>
+              </li>
+              <li>
+                <ExternalLink href={GITHUB_URL} icon={GitHubIcon}>
+                  {t("github")}
+                </ExternalLink>
               </li>
             </ul>
           </div>
