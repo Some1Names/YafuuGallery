@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import ChapterEndNav, { type ChapterLink } from "./ChapterEndNav";
 import { ReaderPageSkeleton } from "@/component/Skeletons";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -805,6 +806,15 @@ export default function ChapterReaderClient({
   // content enters from the right instead.
   const peekOffsetPx = -peekDirection * viewportWidth + dragOffsetPx;
 
+  const chapterLink = (c: ChapterSummary | undefined): ChapterLink | undefined =>
+    c && {
+      href: `/viewer/${c.id}`,
+      badge: formatChapterBadge(c.chapter_is_ex, displayNumbers.get(c.id)),
+      name: c.chapter_name,
+    };
+  const prevChapterLink = chapterLink(prevChapter);
+  const nextChapterLink = chapterLink(nextChapter);
+
   const pageCounterText =
     numPages > 0 && currentSpread.length > 0
       ? currentSpread.length === 2
@@ -1028,6 +1038,12 @@ export default function ChapterReaderClient({
         </div>
       )}
 
+      {/* Horizontal mode, last page: previous/next chapter float over it
+          (paging past the end still goes on to the next chapter too) */}
+      {mode === "horizontal" && numPages > 0 && spreads.length > 0 && isLastSpread && (prevChapter || nextChapter) && (
+        <ChapterEndNav variant="bar" prev={prevChapterLink} next={nextChapterLink} />
+      )}
+
       {/* Reader */}
       <div
         className={
@@ -1179,26 +1195,16 @@ export default function ChapterReaderClient({
         </Document>
         )}
 
-        {/* End of chapter (vertical mode) — the scroll used to just stop at
-            the last page, and moving on meant scrolling all the way back
-            up to the chapter selector. Horizontal mode continues into the
+        {/* End of chapter (vertical mode): previous and next chapter — the
+            scroll used to just stop at the last page, and moving on meant
+            scrolling all the way back up to the chapter selector. Horizontal mode continues into the
             next chapter by paging past the last spread instead. */}
         {mode === "vertical" && (numPages > 0 || !pdfUrl) && (
           <div className="mt-10 mb-6 flex flex-col items-center gap-4 text-center">
             <p className="text-sm text-[#b6b0a2]">
               End of {formatChapterBadge(currentIsEx, currentDisplayNumber)} {chapterName}
             </p>
-            {nextChapter ? (
-              <Link
-                href={`/viewer/${nextChapter.id}`}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-md bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold hover:bg-[#f6f1f2] transition-colors duration-200"
-              >
-                Next chapter: {formatChapterBadge(nextChapter.chapter_is_ex, displayNumbers.get(nextChapter.id))}{" "}
-                {nextChapter.chapter_name}
-              </Link>
-            ) : (
-              <p className="text-base text-[#ece6d8]">You&apos;re all caught up.</p>
-            )}
+            <ChapterEndNav variant="cards" prev={prevChapterLink} next={nextChapterLink} />
             <Link
               href={`/manga/titles/${mangaId}`}
               className="inline-block py-1.5 -my-1.5 text-sm text-[#b6b0a2] hover:text-[#ece6d8] underline underline-offset-2 transition-colors duration-200"

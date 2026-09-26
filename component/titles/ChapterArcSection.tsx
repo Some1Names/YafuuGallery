@@ -11,13 +11,20 @@ interface ChapterArcSectionProps {
   arcs: ArcItem[];
   looseChapters: ChapterItem[];
   favoritedChapterIds: string[];
+  // chapters differ in which languages they're in — rows show their codes
+  showChapterLanguages?: boolean;
 }
 
 // Chapters/Arcs toggle, chapter-count + sort, and the list itself, all in
 // one client component driven by local state instead of URL searchParams —
 // every arc/chapter is already fetched up front, so switching view/sort/arc
 // doesn't need a server round trip and shouldn't reload the page to do it.
-export default function ChapterArcSection({ arcs, looseChapters, favoritedChapterIds }: ChapterArcSectionProps) {
+export default function ChapterArcSection({
+  arcs,
+  looseChapters,
+  favoritedChapterIds,
+  showChapterLanguages = false,
+}: ChapterArcSectionProps) {
   const [activeView, setActiveView] = useState<"chapters" | "arcs">("chapters");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [filteredArcId, setFilteredArcId] = useState<string | null>(null);
@@ -118,7 +125,12 @@ export default function ChapterArcSection({ arcs, looseChapters, favoritedChapte
         chapters.length === 0 && filteredArc ? (
           <p className="text-sm text-fg-secondary">No chapters in this arc yet.</p>
         ) : (
-          <ChapterList chapters={chapters} favoritedChapterIds={favoritedChapterIds} displayNumbers={displayNumbers} />
+          <ChapterList
+            chapters={chapters}
+            favoritedChapterIds={favoritedChapterIds}
+            displayNumbers={displayNumbers}
+            showLanguages={showChapterLanguages}
+          />
         )
       ) : (
         <ArcList arcs={arcs} onSelectArc={selectArc} />

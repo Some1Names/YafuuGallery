@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sortLanguages, type Language } from "@/lib/language";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -98,6 +99,7 @@ export default async function MangaDetailPage({
                                 chapter_name: true,
                                 cover_image_url: true,
                                 published_date: true,
+                                translations: { select: { language: true } },
                                 _count: { select: { chapter_bookmarks: true, comments: { where: { hidden_at: null } } } },
                             },
                         },
@@ -113,6 +115,7 @@ export default async function MangaDetailPage({
                         chapter_name: true,
                         cover_image_url: true,
                         published_date: true,
+                        translations: { select: { language: true } },
                         _count: { select: { chapter_bookmarks: true, comments: { where: { hidden_at: null } } } },
                     },
                 },
@@ -164,11 +167,13 @@ export default async function MangaDetailPage({
         chapter_name: string;
         cover_image_url: string | null;
         published_date: Date;
+        translations: { language: Language }[];
         _count: { chapter_bookmarks: number; comments: number };
     }): ChapterItem {
-        const { _count, ...rest } = c;
+        const { _count, translations, ...rest } = c;
         return {
             ...rest,
+            languages: sortLanguages(translations.map((t) => t.language)),
             cover_image_url: rest.cover_image_url ?? fallbackCoverUrl,
             favoriteCount: _count.chapter_bookmarks,
             commentCount: _count.comments,
@@ -200,6 +205,14 @@ export default async function MangaDetailPage({
                 ? (allChapters[lastReadIdx + 1] ?? allChapters[lastReadIdx])
                 : allChapters[lastReadIdx];
     const displayNumbers = getChapterDisplayNumbers(allChapters);
+
+    // Every language any chapter can be read in (shown in the sidebar), and
+    // whether chapters differ in that — only then do the chapter rows get
+    // their own language codes (the same "EN" on every row says nothing).
+    const availableLanguages = sortLanguages(allChapters.flatMap((c) => c.languages));
+    const chaptersDifferInLanguage = allChapters.some(
+        (c) => c.languages.join() !== availableLanguages.join()
+    );
     const readAction = resumeChapter
         ? {
             href: `/viewer/${resumeChapter.id}`,
@@ -237,6 +250,7 @@ export default async function MangaDetailPage({
                             synopsis={manga.manga_synopsis}
                             status={manga.manga_status}
                             genres={manga.genres}
+                            languages={availableLanguages}
                             isFavorited={bookmark !== null}
                             readAction={readAction}
                         />
@@ -246,6 +260,7 @@ export default async function MangaDetailPage({
                         <ChapterArcSection
                             arcs={arcs}
                             looseChapters={looseChapters}
+                            showChapterLanguages={availableLanguages.length > 0 && chaptersDifferInLanguage}
                             favoritedChapterIds={favoritedChapterIds}
                         />
                     </div>

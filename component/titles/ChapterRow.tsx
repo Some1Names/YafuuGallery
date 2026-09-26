@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LANGUAGE_LABELS } from "@/lib/language";
 import Image from "@/component/ShimmerImage"; // next/image + loading shimmer
 import { Heart, MessageCircle } from "lucide-react";
 import ChapterFavoriteButton from "./ChapterFavoriteButton";
@@ -11,9 +12,11 @@ interface ChapterRowProps {
   chapter: ChapterItem;
   displayNumber: number;
   isFavorited?: boolean;
+  // the manga's chapters differ in language — show this one's codes
+  showLanguages?: boolean;
 }
 
-export default function ChapterRow({ chapter, displayNumber, isFavorited = false }: ChapterRowProps) {
+export default function ChapterRow({ chapter, displayNumber, isFavorited = false, showLanguages = false }: ChapterRowProps) {
   const publishedLabel = formatPublishedDate(chapter.published_date);
 
   const badge = formatChapterBadge(chapter.chapter_is_ex, displayNumber);
@@ -81,6 +84,19 @@ export default function ChapterRow({ chapter, displayNumber, isFavorited = false
             <MessageCircle className="w-3.5 h-3.5" />
             {chapter.commentCount.toLocaleString()}
           </span>
+          {showLanguages && chapter.languages.length > 0 && (
+            <span className="flex gap-1">
+              {chapter.languages.map((l) => (
+                <span
+                  key={l}
+                  className="px-1 rounded-sm border border-fg/20 text-[10px] leading-4 font-semibold uppercase text-fg-secondary"
+                >
+                  <span aria-hidden="true">{l}</span>
+                  <span className="sr-only">{LANGUAGE_LABELS[l]}</span>
+                </span>
+              ))}
+            </span>
+          )}
         </div>
       </div>
     </div>

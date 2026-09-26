@@ -1,3 +1,5 @@
+import type { Language } from "@/lib/language";
+
 export interface ChapterItem {
   id: string;
   chapter_number: number;
@@ -7,6 +9,8 @@ export interface ChapterItem {
   published_date: Date;
   favoriteCount: number;
   commentCount: number;
+  // languages this chapter has a file in (reading order of LANGUAGE_OPTIONS)
+  languages: Language[];
 }
 
 export interface ArcItem {

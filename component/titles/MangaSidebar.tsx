@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { LANGUAGE_LABELS, type Language } from "@/lib/language";
+import { BookOpen, Languages } from "lucide-react";
 import MangaFavoriteButton from "@/component/titles/MangaFavoriteButton";
 import MangaSynopsis from "@/component/titles/MangaSynopsis";
 import { genreLabel, knownGenres, type MangaStatusValue } from "@/lib/genres";
@@ -12,6 +13,8 @@ interface MangaSidebarProps {
   synopsis: string;
   status: MangaStatusValue;
   genres: string[];
+  // languages any chapter can be read in — empty while nothing's uploaded
+  languages: Language[];
   isFavorited: boolean;
   // "Start reading" (first chapter) or "Continue #003" (last chapter this
   // reader opened) — null when the manga has no chapters yet.
@@ -26,6 +29,7 @@ export default function MangaSidebar({
   synopsis,
   status,
   genres,
+  languages,
   isFavorited,
   readAction,
 }: MangaSidebarProps) {
@@ -66,6 +70,15 @@ export default function MangaSidebar({
           </li>
         ))}
       </ul>
+
+      {languages.length > 0 && (
+        <p className="flex items-center gap-1.5 mt-3 text-sm text-fg-secondary">
+          <Languages className="w-4 h-4 shrink-0 text-fg-muted" aria-hidden="true" />
+          <span>
+            Available in <span className="text-fg">{languages.map((l) => LANGUAGE_LABELS[l]).join(" · ")}</span>
+          </span>
+        </p>
+      )}
 
       {/* Reading is the primary action — solid ink, full weight. Favorite
           is secondary, so it's an outline beside it rather than a second
