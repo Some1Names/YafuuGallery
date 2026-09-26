@@ -13,45 +13,54 @@ export interface ChapterLink {
 //
 // "cards" — vertical mode, below the last page: two cards side by side,
 //   previous on the left, next (the main action) on the right.
-// "bar"   — horizontal mode, floating over the last page. Manga reads right
-//   to left here (the next page is to the LEFT), so the bar follows that:
-//   next chapter on the left, previous on the right.
+// "bar"   — horizontal mode, floating over the last page. Follows the
+//   reading direction: manga (rtl) runs right to left — the next page is to
+//   the LEFT — so next chapter sits on the left, previous on the right;
+//   comic book style (ltr) is the mirror image.
 export default function ChapterEndNav({
   prev,
   next,
   variant,
+  direction = "rtl",
 }: {
   prev?: ChapterLink;
   next?: ChapterLink;
   variant: "cards" | "bar";
+  direction?: "rtl" | "ltr";
 }) {
   const t = useTranslations("EndNav");
   if (variant === "bar") {
+    const isRtl = direction === "rtl";
+    // the arrow on each button's outer side, pointing where it leads
+    const nextArrow = <span aria-hidden="true">{isRtl ? "‹" : "›"}</span>;
+    const prevArrow = <span aria-hidden="true">{isRtl ? "›" : "‹"}</span>;
+    const nextItem = next ? (
+      <Link
+        href={next.href}
+        aria-label={t("nextChapter", { badge: next.badge, name: next.name })}
+        className="flex items-center gap-1.5 h-10 px-4 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold whitespace-nowrap hover:bg-[#f6f1f2] transition-colors duration-200"
+      >
+        {isRtl && nextArrow} {t("next")} <span className="font-normal">{next.badge}</span> {!isRtl && nextArrow}
+      </Link>
+    ) : (
+      <span className="flex items-center h-10 px-4 text-sm text-[#b6b0a2] whitespace-nowrap">{t("allCaughtUp")}</span>
+    );
+    const prevItem = prev && (
+      <Link
+        href={prev.href}
+        aria-label={t("previousChapter", { badge: prev.badge, name: prev.name })}
+        className="flex items-center gap-1.5 h-10 px-4 rounded-full border border-[#ece6d8]/25 text-[#ece6d8] text-sm whitespace-nowrap hover:border-[#ece6d8]/60 transition-colors duration-200"
+      >
+        {!isRtl && prevArrow} {t("previous")} <span className="text-[#b6b0a2]">{prev.badge}</span> {isRtl && prevArrow}
+      </Link>
+    );
     return (
       <nav
         aria-label={t("label")}
         className="fixed left-1/2 -translate-x-1/2 bottom-14 sm:bottom-6 z-30 flex items-center gap-2 p-1.5 rounded-full bg-[#0a0a0a]/85 backdrop-blur-sm border border-[#ece6d8]/15 shadow-lg"
       >
-        {next ? (
-          <Link
-            href={next.href}
-            aria-label={t("nextChapter", { badge: next.badge, name: next.name })}
-            className="flex items-center gap-1.5 h-10 px-4 rounded-full bg-[#ece6d8] text-[#0a0a0a] text-sm font-semibold whitespace-nowrap hover:bg-[#f6f1f2] transition-colors duration-200"
-          >
-            <span aria-hidden="true">‹</span> {t("next")} <span className="font-normal">{next.badge}</span>
-          </Link>
-        ) : (
-          <span className="flex items-center h-10 px-4 text-sm text-[#b6b0a2] whitespace-nowrap">{t("allCaughtUp")}</span>
-        )}
-        {prev && (
-          <Link
-            href={prev.href}
-            aria-label={t("previousChapter", { badge: prev.badge, name: prev.name })}
-            className="flex items-center gap-1.5 h-10 px-4 rounded-full border border-[#ece6d8]/25 text-[#ece6d8] text-sm whitespace-nowrap hover:border-[#ece6d8]/60 transition-colors duration-200"
-          >
-            {t("previous")} <span className="text-[#b6b0a2]">{prev.badge}</span> <span aria-hidden="true">›</span>
-          </Link>
-        )}
+        {isRtl ? nextItem : prevItem}
+        {isRtl ? prevItem : nextItem}
       </nav>
     );
   }

@@ -7,7 +7,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { Columns2, Rows2, ChevronDown, Languages, MessageCircle } from "lucide-react";
+import { Columns2, Rows2, ChevronDown, Languages, MessageCircle, MoveLeft, MoveRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChapterDisplayNumbers, formatChapterBadge } from "@/lib/chapter-number";
@@ -29,6 +29,19 @@ function readSavedMode(): "vertical" | "horizontal" {
     return localStorage.getItem(READING_MODE_KEY) === "horizontal" ? "horizontal" : "vertical";
   } catch {
     return "vertical";
+  }
+}
+
+// Which way horizontal mode turns pages: manga style (right to left — the
+// default) or comic book style (left to right). Persists like the mode.
+const READING_DIRECTION_KEY = "yfgll_reading_direction";
+type ReadingDirection = "rtl" | "ltr";
+
+function readSavedDirection(): ReadingDirection {
+  try {
+    return localStorage.getItem(READING_DIRECTION_KEY) === "ltr" ? "ltr" : "rtl";
+  } catch {
+    return "rtl";
   }
 }
 
@@ -162,6 +175,13 @@ export default function ChapterReaderClient({
   const currentDisplayNumber = displayNumbers.get(currentChapterId);
   const chapterLabel = tReader("chapterLabel", { number: currentIsEx ? "ex" : (currentDisplayNumber ?? 0), name: chapterName });
   const [mode, setMode] = useState<ReadingMode>(readSavedMode);
+  const [direction, setDirection] = useState<ReadingDirection>(readSavedDirection);
+  const isRtl = direction === "rtl";
+  // Which way a swipe has to go (the sign of the finger's x movement) to
+  // turn to the next page. Manga: left to right — the page being read sits
+  // on the left in a right-to-left book, so it's flipped over to the right.
+  // Comic book: right to left, like any Western book or carousel.
+  const nextDragSign = isRtl ? 1 : -1;
 
   // Which language is currently showing. Falls back to the chapter's first
   // available translation whenever the picked one isn't actually in this
@@ -578,6 +598,16 @@ export default function ChapterReaderClient({
     };
   }, [currentChapterId, flushProgress]);
 
+  function switchDirection() {
+    const next: ReadingDirection = isRtl ? "ltr" : "rtl";
+    setDirection(next);
+    try {
+      localStorage.setItem(READING_DIRECTION_KEY, next);
+    } catch {
+      // storage unavailable (private browsing) — the choice just won't persist
+    }
+  }
+
   function switchMode(next: ReadingMode) {
     if (mode === "vertical" && next === "horizontal") {
       setCurrentPage(findCurrentPageInVerticalView());
@@ -591,14 +621,10 @@ export default function ChapterReaderClient({
   }
 
   // Mobile horizontal mode turns pages by swipe instead of the left/right
-  // tap zones desktop uses (those stay click-based, mouse-only, and are
-  // deliberately NOT flipped to match — this mirrors the physical book
-  // metaphor below, tap zones are a separate, arbitrary UI convention).
-  // RTL: a left-to-right swipe (positive delta) advances forward, a
-  // right-to-left swipe goes back — the opposite of an LTR/Western comic,
-  // matching how a physical RTL book mirrors an LTR one (the page being
-  // read sits on the left, not the right, so advancing flips it
-  // left-to-right). dragOffsetPx tracks the finger 1:1 in real time (via
+  // click zones desktop uses. Which way is "next" follows the reading
+  // direction (nextDragSign above): manga turns forward with a
+  // left-to-right swipe, comic book with a right-to-left one — each the way
+  // a page of that kind of physical book is turned. dragOffsetPx tracks the finger 1:1 in real time (via
   // handleSwipeMove, read in the render below to slide the current — and,
   // while dragging, the adjacent — page) so a swipe visually behaves like
   // turning a physical page instead of just teleporting once the finger
@@ -651,30 +677,28 @@ export default function ChapterReaderClient({
       return;
     }
 
-    if (delta > SWIPE_THRESHOLD_PX) {
-      // Physical RTL books mirror LTR ones: the page being read sits on the
-      // left (not the right), so advancing flips it left-to-right — a
-      // left-to-right (positive-delta) drag is "next" here, the opposite of
-      // an LTR/Western comic's right-to-left "next" swipe.
+    // > 0: moved toward the next page (see nextDragSign)
+    const forward = delta * nextDragSign;
+    if (forward > SWIPE_THRESHOLD_PX) {
       const next = spreads[spreadIdx + 1];
       if (next?.[0] !== undefined) {
-        settleDrag(viewportWidth, () => setCurrentPage(next[0]));
+        settleDrag(nextDragSign * viewportWidth, () => setCurrentPage(next[0]));
       } else if (nextChapter) {
         // Last page of this chapter — continue into the next chapter's
         // first page (matching MangaPlus) instead of looping back to this
         // chapter's own first page. Its pages aren't loaded here, so there's
         // no peek to slide in — just this page sliding away before the
         // navigation lands.
-        settleDrag(viewportWidth, () => router.push(`/viewer/${nextChapter.id}`));
+        settleDrag(nextDragSign * viewportWidth, () => router.push(`/viewer/${nextChapter.id}`));
       } else {
         settleDrag(0);
       }
-    } else if (delta < -SWIPE_THRESHOLD_PX) {
+    } else if (forward < -SWIPE_THRESHOLD_PX) {
       const prev = spreads[spreadIdx - 1];
       if (prev?.[0] !== undefined) {
-        settleDrag(-viewportWidth, () => setCurrentPage(prev[0]));
+        settleDrag(-nextDragSign * viewportWidth, () => setCurrentPage(prev[0]));
       } else if (prevChapter) {
-        settleDrag(-viewportWidth, () => router.push(`/viewer/${prevChapter.id}`));
+        settleDrag(-nextDragSign * viewportWidth, () => router.push(`/viewer/${prevChapter.id}`));
       } else {
         settleDrag(0);
       }
@@ -706,13 +730,14 @@ export default function ChapterReaderClient({
 
   useEffect(() => {
     if (mode !== "horizontal") return;
+    // the arrow pointing the way the pages run: ← is next in manga, → in comics
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goNext();
-      if (e.key === "ArrowRight") goPrev();
+      if (e.key === "ArrowLeft") (isRtl ? goNext : goPrev)();
+      if (e.key === "ArrowRight") (isRtl ? goPrev : goNext)();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [mode, goNext, goPrev]);
+  }, [mode, isRtl, goNext, goPrev]);
 
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? "hidden" : "";
@@ -801,14 +826,30 @@ export default function ChapterReaderClient({
   // Undefined past either end (no peek to show) rather than wrapping or
   // clamping — dragging past the last/first page continues into the next/
   // previous chapter, whose pages aren't loaded here to preview.
-  const peekDirection = dragOffsetPx > 0 ? 1 : dragOffsetPx < 0 ? -1 : 0;
+  const dragSign = Math.sign(dragOffsetPx);
+  // +1: dragging toward the next spread, -1: toward the previous one
+  const peekDirection = dragSign * nextDragSign;
   const peekSpread = peekDirection !== 0 ? spreads[spreadIdx + peekDirection] : undefined;
   const showPeek = peekDirection !== 0 && peekSpread !== undefined;
-  // Negated peekDirection: the "next" peek (direction 1) starts parked at
-  // -viewportWidth (off-screen left) and slides toward 0 as dragOffsetPx
-  // grows positive — the mirror image of an LTR carousel, where advancing
-  // content enters from the right instead.
-  const peekOffsetPx = -peekDirection * viewportWidth + dragOffsetPx;
+  // The peek starts parked one screen-width off on the side the finger is
+  // moving away from and slides in with it — so in manga the next page
+  // enters from the left, in comic book style from the right.
+  const peekOffsetPx = -dragSign * viewportWidth + dragOffsetPx;
+
+  // Desktop: a spread's pages in screen order (manga reads the first on
+  // the right), and which click zone is "next" — the side the pages run to.
+  const spreadOnScreen = isRtl ? [...currentSpread].reverse() : currentSpread;
+  const nextZone = {
+    onClick: goNext,
+    disabled: isLastSpread && !nextChapter,
+    label: isLastSpread ? tReader("nextChapter") : tReader("nextPage"),
+  };
+  const prevZone = {
+    onClick: goPrev,
+    disabled: isFirstSpread && !prevChapter,
+    label: isFirstSpread ? tReader("previousChapter") : tReader("previousPage"),
+  };
+  const [leftZone, rightZone] = isRtl ? [nextZone, prevZone] : [prevZone, nextZone];
 
   const chapterLink = (c: ChapterSummary | undefined): ChapterLink | undefined =>
     c && {
@@ -904,7 +945,15 @@ export default function ChapterReaderClient({
               )}
             </div>
 
-            <div className="hidden sm:block text-sm text-[#b6b0a2] truncate min-w-0">{chapterLabel}</div>
+            {/* Horizontal mode's bar also holds the page counter and the
+                direction button — below xl that left this label a one-letter
+                sliver, so it waits for the room there (the chapter
+                selector beside it already says which chapter this is) */}
+            <div
+              className={`${mode === "horizontal" ? "hidden xl:block" : "hidden sm:block"} text-sm text-[#b6b0a2] truncate min-w-0`}
+            >
+              {chapterLabel}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -984,6 +1033,23 @@ export default function ChapterReaderClient({
               </div>
             )}
 
+            {/* Page-turn direction (horizontal mode only): manga or comic
+                book style. Shows the current one; a click switches. */}
+            {mode === "horizontal" && (
+              <button
+                type="button"
+                onClick={switchDirection}
+                aria-label={isRtl ? tReader("directionMangaLabel") : tReader("directionComicLabel")}
+                title={isRtl ? tReader("directionMangaLabel") : tReader("directionComicLabel")}
+                className="inline-flex items-center gap-1.5 p-2 sm:px-2.5 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60"
+              >
+                {isRtl ? <MoveLeft className="w-4 h-4" /> : <MoveRight className="w-4 h-4" />}
+                <span className="hidden sm:inline text-sm leading-4">
+                  {isRtl ? tReader("directionManga") : tReader("directionComic")}
+                </span>
+              </button>
+            )}
+
             {/* Mode toggle. Phones: one button that switches to the other
                 mode (showing that mode's icon), to save room in the bar. */}
             <button
@@ -1045,7 +1111,7 @@ export default function ChapterReaderClient({
       {/* Horizontal mode, last page: previous/next chapter float over it
           (paging past the end still goes on to the next chapter too) */}
       {mode === "horizontal" && numPages > 0 && spreads.length > 0 && isLastSpread && (prevChapter || nextChapter) && (
-        <ChapterEndNav variant="bar" prev={prevChapterLink} next={nextChapterLink} />
+        <ChapterEndNav variant="bar" direction={direction} prev={prevChapterLink} next={nextChapterLink} />
       )}
 
       {/* Reader */}
@@ -1153,28 +1219,17 @@ export default function ChapterReaderClient({
               </div>
             ) : (
               <div className="relative flex justify-center items-center w-full h-full">
-                {/* RTL: currentSpread[0] is read first → renders on the right.
-                    currentSpread[1] (if present) is read second → renders on the left. */}
-                {currentSpread.length === 2 && (
-                  <Page
-                    pageNumber={currentSpread[1]}
-                    {...pageSizeProps(currentSpread[1])}
-                    {...PAGE_DISPLAY_PROPS}
-                  />
-                )}
-                {currentSpread[0] !== undefined && (
-                  <Page
-                    pageNumber={currentSpread[0]}
-                    {...pageSizeProps(currentSpread[0])}
-                    {...PAGE_DISPLAY_PROPS}
-                  />
-                )}
+                {/* spreadOnScreen: the page read first sits on the right in
+                    manga, on the left in comic book style */}
+                {spreadOnScreen.map((n) => (
+                  <Page key={n} pageNumber={n} {...pageSizeProps(n)} {...PAGE_DISPLAY_PROPS} />
+                ))}
 
                 <button
                   type="button"
-                  onClick={goNext}
-                  disabled={isLastSpread && !nextChapter}
-                  aria-label={isLastSpread ? tReader("nextChapter") : tReader("nextPage")}
+                  onClick={leftZone.onClick}
+                  disabled={leftZone.disabled}
+                  aria-label={leftZone.label}
                   className="group absolute left-0 top-0 h-full w-1/2 flex items-center justify-start pl-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">
@@ -1184,9 +1239,9 @@ export default function ChapterReaderClient({
 
                 <button
                   type="button"
-                  onClick={goPrev}
-                  disabled={isFirstSpread && !prevChapter}
-                  aria-label={isFirstSpread ? tReader("previousChapter") : tReader("previousPage")}
+                  onClick={rightZone.onClick}
+                  disabled={rightZone.disabled}
+                  aria-label={rightZone.label}
                   className="group absolute right-0 top-0 h-full w-1/2 flex items-center justify-end pr-4 disabled:cursor-default cursor-pointer"
                 >
                   <span className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 text-5xl text-[#ece6d8]">

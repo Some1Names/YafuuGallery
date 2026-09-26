@@ -438,7 +438,11 @@
     "previousChapter": "Previous chapter",
     "previousPage": "Previous page",
     "endOf": "End of {badge} {name}",
-    "backTo": "Back to {title}"
+    "backTo": "Back to {title}",
+    "directionManga": "Manga",
+    "directionComic": "Comic",
+    "directionMangaLabel": "Manga style, right to left — switch to comic style (left to right)",
+    "directionComicLabel": "Comic style, left to right — switch to manga style (right to left)"
   },
   "StatusScreen": {
     "errorTitle": "Something broke",
