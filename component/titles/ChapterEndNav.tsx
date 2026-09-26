@@ -55,11 +55,25 @@ export default function ChapterEndNav({
   }
 
   return (
-    <nav aria-label="Chapters" className="grid grid-cols-2 gap-3 w-full max-w-md">
-      {prev ? (
+    // Both: side by side. Only one (first/newest chapter) or none (a
+    // one-shot): stacked and centred — a lone card or "all caught up" in
+    // one column of the two looked off to one side.
+    <nav
+      aria-label="Chapters"
+      className={
+        prev && next
+          ? "grid grid-cols-2 gap-3 w-full max-w-md"
+          : "flex flex-col items-center gap-3 w-full max-w-md text-center"
+      }
+    >
+      {!next && <p className="text-base text-[#ece6d8]">You&apos;re all caught up</p>}
+      {prev && (
         <Link
           href={prev.href}
-          className="flex flex-col items-start gap-0.5 min-w-0 p-3 rounded-md border border-[#ece6d8]/20 text-left hover:border-[#ece6d8]/50 transition-colors duration-200"
+          className={
+            "flex flex-col gap-0.5 min-w-0 p-3 rounded-md border border-[#ece6d8]/20 hover:border-[#ece6d8]/50 transition-colors duration-200 " +
+            (next ? "items-start text-left" : "items-center w-full max-w-60")
+          }
         >
           <span className="text-xs text-[#b6b0a2]">
             <span aria-hidden="true">←</span> Previous
@@ -68,14 +82,14 @@ export default function ChapterEndNav({
             {prev.badge} {prev.name}
           </span>
         </Link>
-      ) : (
-        // keeps "next" in the right-hand column on the first chapter
-        <span aria-hidden="true" />
       )}
-      {next ? (
+      {next && (
         <Link
           href={next.href}
-          className="flex flex-col items-end gap-0.5 min-w-0 p-3 rounded-md bg-[#ece6d8] text-[#0a0a0a] text-right hover:bg-[#f6f1f2] transition-colors duration-200"
+          className={
+            "flex flex-col gap-0.5 min-w-0 p-3 rounded-md bg-[#ece6d8] text-[#0a0a0a] hover:bg-[#f6f1f2] transition-colors duration-200 " +
+            (prev ? "items-end text-right" : "items-center w-full max-w-60")
+          }
         >
           <span className="text-xs font-semibold">
             Next <span aria-hidden="true">→</span>
@@ -84,10 +98,6 @@ export default function ChapterEndNav({
             {next.badge} {next.name}
           </span>
         </Link>
-      ) : (
-        <span className="flex items-center justify-center p-3 rounded-md border border-dashed border-[#ece6d8]/20 text-sm text-[#b6b0a2] text-center">
-          You&apos;re all caught up
-        </span>
       )}
     </nav>
   );
