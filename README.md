@@ -19,6 +19,7 @@ A manga reading website built with **Next.js** — original manga and translatio
 * 🏠 Home page with an admin-curated featured carousel and the latest updates
 * 🔎 Search by title, author or chapter name, with genre and status filters and sorting
 * 🏷️ Genres and ongoing / completed status on every manga
+* 📚 MangaDex zone at `/browse` — search and read MangaDex titles in Thai or English, fetched live (nothing stored), with scanlation group credit
 
 ### Your account
 
@@ -82,11 +83,12 @@ A manga reading website built with **Next.js** — original manga and translatio
 ```text
 .
 ├── app/
-│   ├── (main)/         # Site layout — home, manga, search, favorites, history, profile, manage, admin, privacy, terms
-│   ├── (fullscreen)/   # No site chrome — chapter viewer, login, signup, password reset
-│   └── api/            # Route handlers (admin, auth, chapters, comments, favorites, history, manga, profile, upload)
+│   ├── (main)/         # Site layout — home, manga, search, browse (MangaDex), favorites, history, profile, manage, admin, privacy, terms
+│   ├── (fullscreen)/   # No site chrome — chapter viewer, MangaDex reader (read), login, signup, password reset
+│   └── api/            # Route handlers (admin, auth, chapters, comments, favorites, history, manga, mangadex, profile, upload)
 ├── component/          # React components
 ├── lib/                # Shared code (auth, Prisma client, storage, image processing, dates, …)
+│   └── mangadex/       # Every call to MangaDex, and nothing else calls it
 ├── i18n/               # Language detection and next-intl request config
 ├── messages/           # Interface text — en.json and th.json
 ├── prisma/
@@ -187,6 +189,19 @@ The site runs on Vercel, which deploys every push to `master`.
 * ReadingProgress — resume position and reading history
 
 Timestamps are stored without a time zone. Query them through Prisma: raw `pg` queries read them shifted by the server's offset.
+
+## 📚 MangaDex zone
+
+`/browse`, `/browse/[id]` and `/read/[chapterId]` show manga from [MangaDex](https://mangadex.org), kept apart from the site's own. Nothing is stored: titles, chapter lists and page addresses are fetched from MangaDex's API as each page renders (cached for a few minutes), covers pass through `/api/mangadex/cover/…`, and page images load in the reader's browser straight from MangaDex's image network. No environment variables are needed.
+
+Rules these pages must keep, from MangaDex's terms and this site's own choices:
+
+* No ads or paid access on these pages.
+* Every chapter shows the scanlation group that translated it, and links back to the title on MangaDex.
+* Only titles rated safe or suggestive, in Thai or English.
+* The pages are not indexed (`noindex`, and disallowed in robots.txt) and not in the sitemap.
+
+A network that blocks MangaDex blocks the page images too, since the browser fetches them directly.
 
 ## 🌏 Translations
 
