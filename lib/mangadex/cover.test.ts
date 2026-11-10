@@ -13,9 +13,12 @@ describe("coverUpstreamUrl", () => {
     expect(coverUpstreamUrl(M, F, "512")).toBe(`https://uploads.mangadex.org/covers/${M}/${F}.512.jpg`);
   });
 
-  it("treats any other size as 256", () => {
-    expect(coverUpstreamUrl(M, F, "9999")).toMatch(/\.256\.jpg$/);
-    expect(coverUpstreamUrl(M, F, "512/../x")).toMatch(/\.256\.jpg$/);
+  it("accepts size 256 spelled out", () => {
+    expect(coverUpstreamUrl(M, F, "256")).toMatch(/\.256\.jpg$/);
+  });
+
+  it("rejects any other size, so junk sizes can't fill the CDN cache", () => {
+    for (const size of ["9999", "512/../x", "", "0256"]) expect(coverUpstreamUrl(M, F, size)).toBeNull();
   });
 
   it("rejects a manga id that is not a uuid", () => {

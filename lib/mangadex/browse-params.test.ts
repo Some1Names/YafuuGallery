@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { browseHref, pagesToFetch, parseBrowseParams, toMdLanguage } from "./browse-params";
+import { browseHref, earlierPage, pagesToFetch, parseBrowseParams, toMdLanguage } from "./browse-params";
 
 describe("parseBrowseParams", () => {
   it("defaults lang to the interface locale, page to 1, q to ''", () => {
@@ -71,5 +71,17 @@ describe("toMdLanguage", () => {
     expect(toMdLanguage("en")).toBe("en");
     expect(toMdLanguage("ja")).toBe("en");
     expect(toMdLanguage(undefined)).toBe("en");
+  });
+});
+
+describe("earlierPage", () => {
+  it("is null while every page so far is shown", () => {
+    expect(earlierPage(1)).toBeNull();
+    expect(earlierPage(5)).toBeNull();
+  });
+
+  it("is the page just before the ones shown", () => {
+    expect(earlierPage(6)).toBe(1);
+    expect(earlierPage(8)).toBe(3);
   });
 });

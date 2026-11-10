@@ -49,3 +49,11 @@ export function pagesToFetch(page: number): number[] {
   const from = Math.max(1, page - MAX_PAGES_PER_VISIT + 1);
   return Array.from({ length: page - from + 1 }, (_, i) => from + i);
 }
+
+// Past MAX_PAGES_PER_VISIT pages the grid no longer starts at the first
+// result. The page to link to for what came before, or null when nothing
+// was left out.
+export function earlierPage(page: number): number | null {
+  const from = pagesToFetch(page)[0];
+  return from > 1 ? from - 1 : null;
+}

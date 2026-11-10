@@ -74,6 +74,12 @@ export default async function ReadPage({ params }: Props) {
     return shared && c.groups.length > 0 ? `${label} (${c.groups.join(", ")})` : label;
   };
 
+  // Newest first. The chapter list is cached for a few minutes, so a
+  // chapter uploaded just now can be open without being in it yet — put
+  // it in, or the menu would show some other chapter as selected.
+  const menuChapters = [...readable].reverse();
+  if (!menuChapters.some((c) => c.id === chapterId)) menuChapters.unshift(chapter);
+
   const toLink = (c: MdChapter | null): ChapterLink | undefined =>
     c
       ? {
@@ -99,7 +105,7 @@ export default async function ReadPage({ params }: Props) {
       direction={manga.direction}
       prev={toLink(prev)}
       next={toLink(next)}
-      chapters={[...readable].reverse().map((c) => ({ id: c.id, label: menuLabel(c) }))}
+      chapters={menuChapters.map((c) => ({ id: c.id, label: menuLabel(c) }))}
     />
   );
 }

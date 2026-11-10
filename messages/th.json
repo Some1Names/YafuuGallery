@@ -715,7 +715,8 @@
     "officialSite": "เว็บทางการ",
     "noChapters": "ยังไม่มีตอนในภาษานี้",
     "translatedBy": "แปลโดย {groups}",
-    "by": "โดย {authors}"
+    "by": "โดย {authors}",
+    "earlier": "ดูผลลัพธ์ก่อนหน้า"
   },
   "MdReader": {
     "back": "กลับไปหน้าเรื่อง",

@@ -52,7 +52,9 @@ export function isUuid(value: string): boolean {
 
 // What a reader typed into the search box, made safe to send on.
 export function cleanSearchText(q: string | undefined): string {
-  return (q ?? "").trim().replace(/\s+/g, " ").slice(0, 200);
+  // Array.from counts whole characters: cutting by UTF-16 unit could
+  // leave half an emoji, which encodeURIComponent refuses to encode.
+  return Array.from((q ?? "").trim().replace(/\s+/g, " ")).slice(0, 200).join("").trim();
 }
 
 // revalidate: seconds to keep the response in Next's data cache, so

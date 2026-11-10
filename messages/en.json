@@ -715,7 +715,8 @@
     "officialSite": "Official site",
     "noChapters": "No chapters in this language.",
     "translatedBy": "Translated by {groups}",
-    "by": "By {authors}"
+    "by": "By {authors}",
+    "earlier": "Show earlier results"
   },
   "MdReader": {
     "back": "Back to title",

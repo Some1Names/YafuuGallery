@@ -49,3 +49,26 @@ export const REFRESH_COOLDOWN_MS = 60_000;
 export function canRefresh(lastRefreshAt: number | null, now: number): boolean {
   return lastRefreshAt === null || now - lastRefreshAt >= REFRESH_COOLDOWN_MS;
 }
+
+// What the reader knows when a page image fails or its retry button is
+// pressed.
+export interface RefreshState {
+  refreshRunning: boolean;
+  lastRefreshAt: number | null;
+}
+
+// A page image failed to load:
+//   "wait"    — a fresh set of addresses is already on its way
+//   "refresh" — fetch a fresh set for the whole chapter
+//   "fail"    — one was fetched moments ago; show this page's retry button
+export function onImageError(state: RefreshState, now: number): "wait" | "refresh" | "fail" {
+  if (state.refreshRunning) return "wait";
+  return canRefresh(state.lastRefreshAt, now) ? "refresh" : "fail";
+}
+
+// A page's retry button was pressed:
+//   "refresh" — the addresses may be stale by now; fetch a fresh set
+//   "reload"  — ask for that one image again
+export function onRetry(state: RefreshState, now: number): "refresh" | "reload" {
+  return !state.refreshRunning && canRefresh(state.lastRefreshAt, now) ? "refresh" : "reload";
+}

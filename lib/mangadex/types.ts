@@ -38,8 +38,10 @@ export interface MdManga extends MdMangaSummary {
 
 export interface MdChapter {
   id: string;
-  // "12", "12.5"; null for oneshots
+  // "12", "12.5", sometimes "12a" or "Extra"; null for oneshots
   number: string | null;
+  // only matters for series that restart chapter numbers every volume
+  volume: string | null;
   title: string | null;
   language: MdLanguage;
   // scanlation group names, shown as credit
@@ -98,6 +100,7 @@ export interface RawChapter {
   type: "chapter";
   attributes: {
     chapter: string | null;
+    volume?: string | null;
     title: string | null;
     translatedLanguage: string;
     externalUrl: string | null;

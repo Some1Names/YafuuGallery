@@ -9,8 +9,9 @@ import ChapterEndNav, { type ChapterLink } from "@/component/titles/ChapterEndNa
 import {
   READING_MODE_KEY,
   actionForSide,
-  canRefresh,
   initialMode,
+  onImageError,
+  onRetry,
   preloadTargets,
   shouldPersistMode,
   stepPage,
@@ -221,11 +222,13 @@ export default function MdReader({
 
   const handleImageError = useCallback(
     (index: number) => {
-      if (refreshRunning.current) {
+      const state = { refreshRunning: refreshRunning.current, lastRefreshAt: lastRefreshAt.current };
+      const action = onImageError(state, Date.now());
+      if (action === "wait") {
         waiting.current.add(index);
         return;
       }
-      if (!canRefresh(lastRefreshAt.current, Date.now())) {
+      if (action === "fail") {
         markFailed([index]);
         return;
       }
@@ -259,7 +262,8 @@ export default function MdReader({
   // never loads.
   const retryPage = useCallback(
     (index: number) => {
-      if (!refreshRunning.current && canRefresh(lastRefreshAt.current, Date.now())) {
+      const state = { refreshRunning: refreshRunning.current, lastRefreshAt: lastRefreshAt.current };
+      if (onRetry(state, Date.now()) === "refresh") {
         void refreshUrls();
         return;
       }
@@ -355,6 +359,8 @@ export default function MdReader({
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "SELECT" || target.tagName === "INPUT")) return;
+      // Alt+Left is the browser's Back, and so on — not a page turn
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
       if (e.key === "ArrowLeft") turn(actionForSide("left", direction));
       else if (e.key === "ArrowRight") turn(actionForSide("right", direction));
     };
@@ -378,6 +384,9 @@ export default function MdReader({
   // right).
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    // main button or a touch only — a right-click opens the menu, it
+    // doesn't turn the page
+    if (e.button !== 0) return;
     pointerStart.current = { x: e.clientX, y: e.clientY };
   }
   function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
@@ -407,8 +416,10 @@ export default function MdReader({
 
   return (
     <div ref={pagesRef} className="min-h-screen bg-[#0a0a0a] text-[#ece6d8]">
-      {/* Top bar */}
+      {/* Top bar. Tabbing into it while it's tucked away brings it back,
+          so keyboard focus is never on something off-screen. */}
       <div
+        onFocus={() => setBarVisible(true)}
         className={
           "fixed top-0 inset-x-0 z-20 bg-[#1b1a1c]/95 backdrop-blur border-b border-[#050505] transition-transform duration-300 " +
           (barVisible ? "translate-y-0" : "-translate-y-full")
@@ -523,6 +534,29 @@ export default function MdReader({
               pageImage(shownPage - 1, "max-h-dvh max-w-full w-auto h-auto object-contain", true)
             )}
           </div>
+
+          {/* Page-turn buttons for keyboard and screen-reader users:
+              invisible until focused (everyone else taps the page). On
+              the side the page turns toward, so in manga order "next"
+              is on the left. */}
+          {(["back", "forward"] as const).map((action) => {
+            const onLeft = actionForSide("left", direction) === action;
+            const disabled = action === "back" ? page <= 1 : atEnd;
+            return (
+              <button
+                key={action}
+                type="button"
+                disabled={disabled}
+                onClick={() => turn(action)}
+                className={
+                  "sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-1/2 focus-visible:z-30 focus-visible:px-4 focus-visible:py-3 focus-visible:rounded-md focus-visible:bg-[#ece6d8] focus-visible:text-[#0a0a0a] focus-visible:text-sm focus-visible:font-semibold " +
+                  (onLeft ? "focus-visible:left-3" : "focus-visible:right-3")
+                }
+              >
+                {action === "forward" ? tReader("nextPage") : tReader("previousPage")}
+              </button>
+            );
+          })}
 
           {/* Phones: the counter as a pill at the bottom (no room in the bar) */}
           <div

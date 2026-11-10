@@ -6,7 +6,7 @@ import MangaBackground from "@/component/titles/MangaBackground";
 import ShowMoreLink from "@/component/ShowMoreLink";
 import MdMangaCard from "@/component/mangadex/MdMangaCard";
 import MdLanguageFilter from "@/component/mangadex/MdLanguageFilter";
-import { browseHref, pagesToFetch, parseBrowseParams, toMdLanguage } from "@/lib/mangadex/browse-params";
+import { browseHref, earlierPage, pagesToFetch, parseBrowseParams, toMdLanguage } from "@/lib/mangadex/browse-params";
 import { getLatest, getPopular, searchManga } from "@/lib/mangadex/queries";
 import type { MdMangaSummary } from "@/lib/mangadex/types";
 
@@ -51,6 +51,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
     const items = pages.flatMap((p) => p.items).filter((m) => !seen.has(m.id) && seen.add(m.id));
     const hasMore = pages[pages.length - 1].hasMore;
     const other = lang === "th" ? "en" : lang === "en" ? "th" : null;
+    // deep into the results the grid no longer starts at the first one
+    const earlier = earlierPage(page);
 
     body =
       items.length === 0 ? (
@@ -70,6 +72,16 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
           <p className="mb-5 text-sm text-fg-secondary wrap-anywhere">
             {t.rich("resultsFor", { query: q, q: (chunks) => <span className="text-fg">{chunks}</span> })}
           </p>
+          {earlier !== null && (
+            <p className="mb-5 text-sm">
+              <Link
+                href={browseHref({ q, lang, page: earlier })}
+                className="text-fg underline underline-offset-2 hover:no-underline"
+              >
+                {t("earlier")}
+              </Link>
+            </p>
+          )}
           <Grid items={items} />
           {hasMore && <ShowMoreLink href={browseHref({ q, lang, page: page + 1 })} />}
         </>

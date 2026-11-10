@@ -30,6 +30,7 @@ function rawChapter(attributes: Partial<RawChapter["attributes"]>, relationships
     type: "chapter",
     attributes: {
       chapter: "1",
+      volume: null,
       title: null,
       translatedLanguage: "en",
       externalUrl: null,
@@ -47,6 +48,7 @@ function ch(partial: Partial<MdChapter>): MdChapter {
   return {
     id: `c${seq}`,
     number: "1",
+    volume: null,
     title: null,
     language: "en",
     groups: [],
@@ -143,6 +145,10 @@ describe("toManga", () => {
     expect(manga.longStrip).toBe(false);
   });
 
+  it("reads the author's name from a real manga", () => {
+    expect(toManga(mangaDetail.data, "en").authors.length).toBeGreaterThan(0);
+  });
+
   it("genres are tag names in the genre group only", () => {
     const raw = rawManga({ tags: [tag("Action", "genre"), tag("Monsters", "theme"), tag("Gore", "content")] });
     expect(toManga(raw, "en").genres).toEqual(["Action"]);
@@ -192,6 +198,16 @@ describe("toChapter", () => {
   it("maps number, title, pages and date", () => {
     const chapter = toChapter(rawChapter({ chapter: "12.5", title: "Extra", pages: 7 }));
     expect(chapter).toMatchObject({ number: "12.5", title: "Extra", pages: 7, publishedAt: "2026-01-01T00:00:00+00:00" });
+  });
+
+  it("keeps the volume", () => {
+    expect(toChapter(rawChapter({ volume: "3" }))?.volume).toBe("3");
+    expect(toChapter(rawChapter({ volume: "" }))?.volume).toBeNull();
+  });
+
+  it("has no date when MangaDex sends one that isn't a date", () => {
+    expect(toChapter(rawChapter({ readableAt: "soon", publishAt: undefined }))?.publishedAt).toBe("");
+    expect(toChapter(rawChapter({ readableAt: undefined, publishAt: undefined }))?.publishedAt).toBe("");
   });
 
   it("treats an empty title or number as none", () => {
@@ -255,6 +271,35 @@ describe("sortChapters", () => {
     expect(sortChapters([late, early]).map((c) => c.id)).toEqual([early.id, late.id]);
   });
 
+  it("puts lettered chapters right after their number", () => {
+    expect(numbers([ch({ number: "13" }), ch({ number: "12b" }), ch({ number: "12" }), ch({ number: "12a" })])).toEqual([
+      "12",
+      "12a",
+      "12b",
+      "13",
+    ]);
+  });
+
+  it("puts chapters whose number isn't a number after the numbered ones", () => {
+    expect(numbers([ch({ number: "Extra" }), ch({ number: "2" }), ch({ number: null })])).toEqual(["2", "Extra", null]);
+  });
+
+  it("orders by volume first when numbering restarts every volume", () => {
+    const list = [
+      ch({ volume: "2", number: "1" }),
+      ch({ volume: "1", number: "2" }),
+      ch({ volume: "2", number: "2" }),
+      ch({ volume: "1", number: "1" }),
+    ];
+    expect(sortChapters(list).map((c) => `${c.volume}-${c.number}`)).toEqual(["1-1", "1-2", "2-1", "2-2"]);
+  });
+
+  it("ignores volumes when numbering runs straight through", () => {
+    // one group filled in the volume, another left it blank: same series
+    const list = [ch({ volume: "2", number: "11" }), ch({ volume: null, number: "10" }), ch({ volume: "1", number: "9" })];
+    expect(numbers(list)).toEqual(["9", "10", "11"]);
+  });
+
   it("does not change the list it was given", () => {
     const list = [ch({ number: "2" }), ch({ number: "1" })];
     sortChapters(list);
@@ -291,6 +336,25 @@ describe("adjacentChapters", () => {
   it("has no prev before the first or next after the last", () => {
     expect(adjacentChapters(list, c1.id).prev).toBeNull();
     expect(adjacentChapters(list, c4.id).next).toBeNull();
+  });
+
+  it("treats 12a as its own chapter between 12 and 13", () => {
+    const a = ch({ number: "12" });
+    const b = ch({ number: "12a" });
+    const c = ch({ number: "13" });
+    const sorted = sortChapters([c, a, b]);
+    expect(adjacentChapters(sorted, a.id).next?.id).toBe(b.id);
+    expect(adjacentChapters(sorted, c.id).prev?.id).toBe(b.id);
+  });
+
+  it("walks volume by volume when numbering restarts", () => {
+    const v1c1 = ch({ volume: "1", number: "1" });
+    const v1c2 = ch({ volume: "1", number: "2" });
+    const v2c1 = ch({ volume: "2", number: "1" });
+    const sorted = sortChapters([v2c1, v1c2, v1c1]);
+    expect(adjacentChapters(sorted, v1c1.id).next?.id).toBe(v1c2.id);
+    expect(adjacentChapters(sorted, v1c2.id).next?.id).toBe(v2c1.id);
+    expect(adjacentChapters(sorted, v2c1.id).prev?.id).toBe(v1c2.id);
   });
 
   it("gives nothing for an unknown id", () => {

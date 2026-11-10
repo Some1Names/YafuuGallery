@@ -103,6 +103,12 @@ function safeExternalUrl(value: string | null | undefined): string | null {
   }
 }
 
+// A date string only if it parses — one that doesn't would crash the
+// date formatter on the title page.
+function validDate(value: string | undefined): string | null {
+  return value && !Number.isNaN(Date.parse(value)) ? value : null;
+}
+
 // null: a chapter the zone never shows (taken down, or not Thai/English).
 export function toChapter(raw: RawChapter): MdChapter | null {
   const a = raw.attributes;
@@ -118,10 +124,11 @@ export function toChapter(raw: RawChapter): MdChapter | null {
   return {
     id: raw.id,
     number: a.chapter?.trim() || null,
+    volume: a.volume?.trim() || null,
     title: a.title?.trim() || null,
     language,
     groups,
-    publishedAt: a.readableAt ?? a.publishAt ?? "",
+    publishedAt: validDate(a.readableAt) ?? validDate(a.publishAt) ?? "",
     pages: a.pages ?? 0,
     externalUrl: safeExternalUrl(a.externalUrl),
   };
@@ -133,49 +140,95 @@ export function isReadable(c: MdChapter): boolean {
   return c.pages > 0 && !c.externalUrl;
 }
 
-function chapterValue(c: MdChapter): number | null {
-  if (c.number === null) return null;
-  const n = Number.parseFloat(c.number);
-  return Number.isFinite(n) ? n : null;
+// ----- Reading order -----
+// A chapter "number" from MangaDex is text: usually "12" or "12.5", but
+// also "12a", "Extra", or nothing (oneshots). And a few series restart
+// from chapter 1 in every volume.
+
+// "12a" -> [12, "a"]; "Extra" -> [Infinity, "Extra"]; none -> null.
+function numberParts(number: string | null): [number, string] | null {
+  if (number === null) return null;
+  const match = /^(\d+(?:\.\d+)?)(.*)$/.exec(number);
+  return match ? [Number(match[1]), match[2].trim()] : [Infinity, number];
 }
 
-// Reading order: by chapter number as a number ("9" before "10"),
-// several uploads of one number by date, unnumbered chapters last.
+// True when the same chapter number turns up in two different volumes:
+// the numbering restarts per volume, so the volume is part of where a
+// chapter sits. (When numbering runs straight through, volumes are
+// ignored — groups fill that field in inconsistently, and trusting it
+// would split uploads of one chapter apart.)
+function numberingRestarts(chapters: MdChapter[]): boolean {
+  const volumeOf = new Map<string, string>();
+  for (const c of chapters) {
+    if (c.number === null || c.volume === null) continue;
+    const seen = volumeOf.get(c.number);
+    if (seen === undefined) volumeOf.set(c.number, c.volume);
+    else if (seen !== c.volume) return true;
+  }
+  return false;
+}
+
+const compareNumbers = (a: number, b: number) => (a === b ? 0 : a < b ? -1 : 1);
+
+function volumeValue(volume: string | null): number {
+  const n = volume === null ? NaN : Number.parseFloat(volume);
+  return Number.isFinite(n) ? n : Infinity; // no volume: after the numbered ones
+}
+
+// Which position in the story a chapter holds. Uploads of the same
+// chapter by different groups share one.
+function slotKey(c: MdChapter, restarts: boolean): string {
+  return `${restarts ? (c.volume ?? "") : ""}|${c.number}`;
+}
+
+// Reading order: by chapter number as a number ("9" before "10", "12a"
+// right after "12"), by volume first if numbering restarts per volume,
+// several uploads of one chapter by date, non-numeric and then
+// unnumbered chapters last.
 export function sortChapters(chapters: MdChapter[]): MdChapter[] {
+  const restarts = numberingRestarts(chapters);
+  const byDate = (x: MdChapter, y: MdChapter) => x.publishedAt.localeCompare(y.publishedAt);
+
   return [...chapters].sort((x, y) => {
-    const a = chapterValue(x);
-    const b = chapterValue(y);
-    if (a === null && b === null) return x.publishedAt.localeCompare(y.publishedAt);
-    if (a === null) return 1;
-    if (b === null) return -1;
-    return a - b || x.publishedAt.localeCompare(y.publishedAt);
+    const a = numberParts(x.number);
+    const b = numberParts(y.number);
+    if (a === null || b === null) return a === b ? byDate(x, y) : a === null ? 1 : -1;
+    return (
+      (restarts ? compareNumbers(volumeValue(x.volume), volumeValue(y.volume)) : 0) ||
+      compareNumbers(a[0], b[0]) ||
+      a[1].localeCompare(b[1]) ||
+      byDate(x, y)
+    );
   });
 }
 
 // The chapters before and after `currentId` for the reader's buttons.
-// `sorted` is one language's feed in reading order. The neighbour is the
-// nearest *different* chapter number that can be read here; when several
-// groups uploaded it, the one the reader is already following wins, else
-// the earliest upload.
+// `sorted` is one language's feed as sortChapters returned it. The
+// neighbour is the nearest *different* chapter that can be read here;
+// when several groups uploaded it, the one the reader is already
+// following wins, else the earliest upload.
 export function adjacentChapters(
   sorted: MdChapter[],
   currentId: string,
 ): { prev: MdChapter | null; next: MdChapter | null } {
-  const current = sorted.find((c) => c.id === currentId);
-  const at = current ? chapterValue(current) : null;
-  if (!current || at === null) return { prev: null, next: null };
+  const at = sorted.findIndex((c) => c.id === currentId);
+  const current = sorted[at];
+  if (!current || current.number === null) return { prev: null, next: null };
 
-  const candidates = sorted.filter((c) => isReadable(c) && chapterValue(c) !== null);
+  const restarts = numberingRestarts(sorted);
+  const here = slotKey(current, restarts);
 
   const pick = (direction: 1 | -1): MdChapter | null => {
-    const beyond = candidates.filter((c) => (chapterValue(c)! - at) * direction > 0);
-    if (beyond.length === 0) return null;
-    const nearest = beyond.reduce(
-      (best, c) => ((chapterValue(c)! - best) * direction < 0 ? chapterValue(c)! : best),
-      chapterValue(beyond[0])!,
-    );
-    const uploads = beyond.filter((c) => chapterValue(c) === nearest);
-    return uploads.find((c) => c.groups.some((g) => current.groups.includes(g))) ?? uploads[0];
+    for (let i = at + direction; i >= 0 && i < sorted.length; i += direction) {
+      const c = sorted[i];
+      if (c.number === null || !isReadable(c)) continue;
+      const slot = slotKey(c, restarts);
+      if (slot === here) continue;
+      // every readable upload of that chapter, earliest first
+      const uploads = sorted.filter((u) => u.number !== null && isReadable(u) && slotKey(u, restarts) === slot);
+      return uploads.find((u) => u.groups.some((g) => current.groups.includes(g))) ?? uploads[0];
+    }
+    return null;
   };
 
   return { prev: pick(-1), next: pick(1) };

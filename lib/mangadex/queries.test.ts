@@ -64,6 +64,14 @@ describe("getChapterFeed", () => {
     expect(fetchMock).toHaveBeenCalledTimes(10);
   });
 
+  it("lists a chapter once even if MangaDex repeats it across pages", async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      const offset = Number(new URL(url).searchParams.get("offset"));
+      return json(collection([chapter("same", "1"), chapter(`c${offset}`, "2")], 600));
+    });
+    expect((await getChapterFeed(MANGA_ID, "en")).map((c) => c.id).sort()).toEqual(["c0", "c500", "same"]);
+  });
+
   it("returns chapters in reading order", async () => {
     fetchMock.mockResolvedValue(json(collection([chapter("b", "10"), chapter("a", "9")], 2)));
     expect((await getChapterFeed(MANGA_ID, "en")).map((c) => c.id)).toEqual(["a", "b"]);

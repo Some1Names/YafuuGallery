@@ -3,6 +3,8 @@ import {
   REFRESH_COOLDOWN_MS,
   actionForSide,
   canRefresh,
+  onImageError,
+  onRetry,
   initialMode,
   preloadTargets,
   shouldPersistMode,
@@ -88,5 +90,39 @@ describe("canRefresh", () => {
 
   it("has a cooldown of one minute", () => {
     expect(REFRESH_COOLDOWN_MS).toBe(60_000);
+  });
+});
+
+describe("onImageError", () => {
+  const idle = { refreshRunning: false, lastRefreshAt: null };
+
+  it("fetches fresh addresses on the first failure", () => {
+    expect(onImageError(idle, 5_000)).toBe("refresh");
+  });
+
+  it("queues a failure that arrives while a refresh is running", () => {
+    expect(onImageError({ refreshRunning: true, lastRefreshAt: null }, 5_000)).toBe("wait");
+  });
+
+  it("marks the page failed inside the cooldown", () => {
+    expect(onImageError({ refreshRunning: false, lastRefreshAt: 5_000 }, 5_000 + REFRESH_COOLDOWN_MS - 1)).toBe("fail");
+  });
+
+  it("fetches fresh addresses again after the cooldown", () => {
+    expect(onImageError({ refreshRunning: false, lastRefreshAt: 5_000 }, 5_000 + REFRESH_COOLDOWN_MS)).toBe("refresh");
+  });
+});
+
+describe("onRetry", () => {
+  it("reloads just that page inside the cooldown", () => {
+    expect(onRetry({ refreshRunning: false, lastRefreshAt: 5_000 }, 6_000)).toBe("reload");
+  });
+
+  it("reloads just that page while a refresh is running", () => {
+    expect(onRetry({ refreshRunning: true, lastRefreshAt: null }, 6_000)).toBe("reload");
+  });
+
+  it("fetches fresh addresses once the cooldown has passed", () => {
+    expect(onRetry({ refreshRunning: false, lastRefreshAt: 5_000 }, 5_000 + REFRESH_COOLDOWN_MS)).toBe("refresh");
   });
 });

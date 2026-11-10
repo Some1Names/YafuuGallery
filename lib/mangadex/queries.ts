@@ -107,6 +107,7 @@ export async function getChapterFeed(mangaId: string, language: MdLanguage): Pro
   if (!isUuid(mangaId)) throw new MangaDexError("not_found");
 
   const chapters: MdChapter[] = [];
+  const seen = new Set<string>();
   for (let request = 0; request < FEED_MAX_REQUESTS; request++) {
     const offset = request * FEED_PAGE_SIZE;
     const res = await mdFetch<RawCollection<RawChapter>>(
@@ -122,6 +123,10 @@ export async function getChapterFeed(mangaId: string, language: MdLanguage): Pro
       { revalidate: CACHE.feed },
     );
     for (const raw of res.data ?? []) {
+      // The feed's pages are fetched (and cached) one by one, so a
+      // chapter added in between can shift one onto two pages.
+      if (seen.has(raw.id)) continue;
+      seen.add(raw.id);
       const chapter = toChapter(raw);
       if (chapter) chapters.push(chapter);
     }

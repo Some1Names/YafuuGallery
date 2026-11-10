@@ -36,6 +36,12 @@ describe("cleanSearchText", () => {
     expect(cleanSearchText("x".repeat(500))).toHaveLength(200);
   });
 
+  it("never cuts an emoji in half at the cap", () => {
+    const cleaned = cleanSearchText("x".repeat(199) + "\u{1F600}\u{1F600}");
+    expect(Array.from(cleaned)).toHaveLength(200);
+    expect(() => encodeURIComponent(cleaned)).not.toThrow();
+  });
+
   it("turns undefined into an empty string", () => {
     expect(cleanSearchText(undefined)).toBe("");
   });
