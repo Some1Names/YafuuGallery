@@ -115,9 +115,22 @@ describe("mdFetch", () => {
     expect(await kindOf(mdFetch("/manga"))).toBe("unavailable");
   });
 
-  it("maps a thrown fetch (network or timeout) to unavailable", async () => {
+  it("maps a thrown fetch (network or timeout) to unavailable, after one retry", async () => {
     fetchMock.mockRejectedValue(new TypeError("fetch failed"));
     expect(await kindOf(mdFetch("/manga"))).toBe("unavailable");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("recovers when only the first attempt fails to connect", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+    fetchMock.mockResolvedValueOnce(new Response('{"result":"ok"}', { status: 200 }));
+    expect(await mdFetch("/manga")).toEqual({ result: "ok" });
+  });
+
+  it("does not retry an answer MangaDex actually gave", async () => {
+    respond("", 503);
+    await kindOf(mdFetch("/manga"));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("maps a 200 body with result 'error' to unavailable", async () => {

@@ -65,15 +65,27 @@ export async function mdFetch<T>(
 ): Promise<T> {
   const revalidate = opts.revalidate ?? false;
 
-  let res: Response;
-  try {
-    res = await fetch(buildMdUrl(path, params), {
+  const url = buildMdUrl(path, params);
+  const attempt = () =>
+    fetch(url, {
       headers: { "User-Agent": MD_USER_AGENT, Accept: "application/json" },
       signal: AbortSignal.timeout(TIMEOUT_MS),
       ...(revalidate === false ? { cache: "no-store" as const } : { next: { revalidate } }),
     });
-  } catch (e) {
-    throw new MangaDexError("unavailable", `MangaDex request failed: ${String(e)}`);
+
+  // A request that never got an answer (dropped connection, timeout) is
+  // tried once more — a single lost connection otherwise turns a whole
+  // page into the error screen. An answer MangaDex did give (404, 429,
+  // 5xx) is never retried.
+  let res: Response;
+  try {
+    res = await attempt();
+  } catch {
+    try {
+      res = await attempt();
+    } catch (e) {
+      throw new MangaDexError("unavailable", `MangaDex request failed: ${String(e)}`);
+    }
   }
 
   if (res.status === 404) throw new MangaDexError("not_found");

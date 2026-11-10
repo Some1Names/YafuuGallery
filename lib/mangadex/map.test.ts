@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   adjacentChapters,
   chapterLabel,
+  cleanSynopsis,
   coverPath,
   isReadable,
   pickLocalized,
@@ -305,5 +306,27 @@ describe("chapterLabel", () => {
 
   it("is the title alone when there is no number", () => {
     expect(chapterLabel(ch({ number: null, title: "Special" }), t)).toBe("Special");
+  });
+});
+
+describe("cleanSynopsis", () => {
+  it("drops everything from the first horizontal rule (link lists, notes)", () => {
+    expect(cleanSynopsis("A story.\n\nMore.\n\n---\n**Links:**\n- [x](y)")).toBe("A story.\n\nMore.");
+  });
+
+  it("keeps text with no rule, trimmed", () => {
+    expect(cleanSynopsis("  Just a story.\n")).toBe("Just a story.");
+  });
+
+  it("keeps the whole text when the rule is the first line", () => {
+    expect(cleanSynopsis("---\nOnly this")).toBe("---\nOnly this");
+  });
+
+  it("collapses three or more line breaks to a paragraph break", () => {
+    expect(cleanSynopsis("A\n\n\n\nB")).toBe("A\n\nB");
+  });
+
+  it("turns Windows line endings into plain ones", () => {
+    expect(cleanSynopsis("A\r\n\r\nB")).toBe("A\n\nB");
   });
 });

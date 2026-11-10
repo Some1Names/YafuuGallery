@@ -42,6 +42,16 @@ export function coverPath(mangaId: string, relationships: RawRelationship[], siz
   return `/api/mangadex/cover/${mangaId}/${fileName}?size=${size}`;
 }
 
+// MangaDex synopses are Markdown and usually end with a horizontal rule
+// followed by link lists and uploader notes ("---\n**Links:** ..."). We
+// show the synopsis as plain text, so keep just the story part.
+export function cleanSynopsis(text: string): string {
+  const normalized = text.replace(/\r\n?/g, "\n").trim();
+  const rule = normalized.search(/\n\s*(-{3,}|\*{3,}|_{3,})\s*(\n|$)/);
+  const story = rule > 0 ? normalized.slice(0, rule) : normalized;
+  return story.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 const STATUSES: readonly MdStatus[] = ["ongoing", "completed", "hiatus", "cancelled"];
 
 export function toMangaSummary(raw: RawManga, locale: MdLanguage): MdMangaSummary {
@@ -67,7 +77,7 @@ export function toManga(raw: RawManga, locale: MdLanguage): MdManga {
   return {
     ...toMangaSummary(raw, locale),
     coverUrl: coverPath(raw.id, raw.relationships, 512),
-    synopsis: pickLocalized(a.description, locale),
+    synopsis: cleanSynopsis(pickLocalized(a.description, locale)),
     genres: tags.filter((t) => t.attributes.group === "genre").map((t) => t.attributes.name.en).filter(Boolean),
     authors: [...new Set(authors)],
     longStrip: tags.some((t) => t.attributes.name.en === "Long Strip"),
