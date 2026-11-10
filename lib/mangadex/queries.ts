@@ -149,11 +149,30 @@ export async function getChapter(id: string): Promise<{ chapter: MdChapter; mang
   return { chapter, mangaId };
 }
 
+// How long one chapter's page addresses are reused. They stay valid for
+// several minutes, so a minute is safe — and it means reloads, several
+// readers on one chapter, or someone hammering the pages route cost one
+// MangaDex request a minute per chapter, not one each (the at-home
+// endpoint has the tightest rate limit of the API).
+export const PAGES_CACHE_MS = 60_000;
+const PAGES_CACHE_MAX = 500;
+const pagesCache = new Map<string, { at: number; urls: string[] }>();
+
+// Empties that cache. Tests use it to start clean.
+export function forgetChapterPages(): void {
+  pagesCache.clear();
+}
+
 // The page images of a chapter, as URLs the reader's browser loads
-// straight from MangaDex's image network (data-saver quality). Never
-// cached: the server address in them is only good for a few minutes.
+// straight from MangaDex's image network (data-saver quality). Kept out
+// of Next's data cache (the server address in them is short-lived) and
+// held in memory for PAGES_CACHE_MS only.
 export async function getChapterPages(id: string): Promise<string[]> {
   if (!isUuid(id)) throw new MangaDexError("not_found");
+
+  const cached = pagesCache.get(id);
+  if (cached && Date.now() - cached.at < PAGES_CACHE_MS) return cached.urls;
+
   const res = await mdFetch<RawAtHome>(`/at-home/server/${id}`, undefined, { revalidate: false });
 
   const files = res.chapter?.dataSaver;
@@ -161,5 +180,11 @@ export async function getChapterPages(id: string): Promise<string[]> {
   if (!Array.isArray(files) || files.length === 0 || !hash || !/^https:\/\//.test(res.baseUrl ?? "")) {
     throw new MangaDexError("unavailable", "MangaDex returned no pages for this chapter");
   }
-  return files.map((file) => `${res.baseUrl}/data-saver/${hash}/${encodeURIComponent(file)}`);
+  const urls = files.map((file) => `${res.baseUrl}/data-saver/${hash}/${encodeURIComponent(file)}`);
+
+  // Map keeps insertion order, so the first key is the oldest entry.
+  if (pagesCache.size >= PAGES_CACHE_MAX) pagesCache.delete(pagesCache.keys().next().value as string);
+  pagesCache.delete(id);
+  pagesCache.set(id, { at: Date.now(), urls });
+  return urls;
 }

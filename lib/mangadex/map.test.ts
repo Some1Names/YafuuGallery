@@ -198,6 +198,19 @@ describe("toChapter", () => {
     expect(toChapter(rawChapter({ chapter: "", title: "  " }))).toMatchObject({ number: null, title: null });
   });
 
+  it("keeps an http(s) external link", () => {
+    expect(toChapter(rawChapter({ externalUrl: "https://mangaplus.shueisha.co.jp/viewer/1", pages: 0 }))?.externalUrl).toBe(
+      "https://mangaplus.shueisha.co.jp/viewer/1",
+    );
+  });
+
+  it.each(["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "//evil.example/x", "not a url", " "])(
+    "drops an external link that is not http(s): %j",
+    (externalUrl) => {
+      expect(toChapter(rawChapter({ externalUrl, pages: 0 }))?.externalUrl).toBeNull();
+    },
+  );
+
   it("returns null when the chapter is unavailable", () => {
     expect(toChapter(rawChapter({ isUnavailable: true }))).toBeNull();
   });

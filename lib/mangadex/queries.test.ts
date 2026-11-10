@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getChapter, getChapterFeed, getChapterPages, getManga, searchManga } from "./queries";
+import {
+  PAGES_CACHE_MS,
+  forgetChapterPages,
+  getChapter,
+  getChapterFeed,
+  getChapterPages,
+  getManga,
+  searchManga,
+} from "./queries";
 import { MangaDexError } from "./types";
 
 const MANGA_ID = "a1c7c817-4e59-43b7-9365-09675a149a6f";
@@ -9,9 +17,11 @@ const fetchMock = vi.fn();
 beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
+  forgetChapterPages();
 });
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 const json = (body: unknown) => new Response(JSON.stringify(body), { status: 200 });
@@ -131,6 +141,40 @@ describe("getChapterPages", () => {
     fetchMock.mockResolvedValue(json(atHome(["1.jpg"])));
     await getChapterPages(CHAPTER_ID);
     expect(fetchMock.mock.calls[0][1].cache).toBe("no-store");
+  });
+
+  it("asks MangaDex once for repeat requests inside a minute", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(async () => json(atHome(["1.jpg"])));
+    const first = await getChapterPages(CHAPTER_ID);
+    vi.advanceTimersByTime(PAGES_CACHE_MS - 1);
+    expect(await getChapterPages(CHAPTER_ID)).toEqual(first);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks again once that minute has passed", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementation(async () => json(atHome(["1.jpg"])));
+    await getChapterPages(CHAPTER_ID);
+    vi.advanceTimersByTime(PAGES_CACHE_MS);
+    await getChapterPages(CHAPTER_ID);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(PAGES_CACHE_MS).toBe(60_000);
+  });
+
+  it("keeps each chapter's pages apart", async () => {
+    const other = "0f8f4527-a542-40fa-8e62-ed343a4f36b0";
+    fetchMock.mockImplementationOnce(async () => json(atHome(["a.jpg"])));
+    fetchMock.mockImplementationOnce(async () => json(atHome(["b.jpg"])));
+    expect((await getChapterPages(CHAPTER_ID))[0]).toMatch(/a\.jpg$/);
+    expect((await getChapterPages(other))[0]).toMatch(/b\.jpg$/);
+  });
+
+  it("does not remember a failure", async () => {
+    fetchMock.mockImplementationOnce(async () => json(atHome([])));
+    fetchMock.mockImplementationOnce(async () => json(atHome(["1.jpg"])));
+    expect(await kindOf(getChapterPages(CHAPTER_ID))).toBe("unavailable");
+    expect(await getChapterPages(CHAPTER_ID)).toHaveLength(1);
   });
 
   it("rejects an empty page list as unavailable", async () => {

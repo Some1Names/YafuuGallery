@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { actionForSide, initialMode, preloadTargets, shouldPersistMode, stepPage } from "./reader-state";
+import {
+  REFRESH_COOLDOWN_MS,
+  actionForSide,
+  canRefresh,
+  initialMode,
+  preloadTargets,
+  shouldPersistMode,
+  stepPage,
+} from "./reader-state";
 
 describe("initialMode", () => {
   it("is always vertical for a long strip", () => {
@@ -62,5 +70,23 @@ describe("preloadTargets", () => {
     expect(preloadTargets(9, 10)).toEqual([10]);
     expect(preloadTargets(10, 10)).toEqual([]);
     expect(preloadTargets(11, 10)).toEqual([]);
+  });
+});
+
+describe("canRefresh", () => {
+  it("allows the first refresh", () => {
+    expect(canRefresh(null, 1_000)).toBe(true);
+  });
+
+  it("refuses another one inside the cooldown", () => {
+    expect(canRefresh(1_000, 1_000 + REFRESH_COOLDOWN_MS - 1)).toBe(false);
+  });
+
+  it("allows one again once the cooldown has passed", () => {
+    expect(canRefresh(1_000, 1_000 + REFRESH_COOLDOWN_MS)).toBe(true);
+  });
+
+  it("has a cooldown of one minute", () => {
+    expect(REFRESH_COOLDOWN_MS).toBe(60_000);
   });
 });

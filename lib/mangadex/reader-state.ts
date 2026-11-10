@@ -39,3 +39,13 @@ export function actionForSide(side: "left" | "right", direction: "rtl" | "ltr"):
 export function preloadTargets(current: number, total: number): number[] {
   return [current + 1, current + 2].filter((page) => page <= total);
 }
+
+// Page image addresses expire after a few minutes, so a chapter left
+// open needs a fresh set — possibly several times in one sitting. A
+// fresh set is fetched at most once a minute: often enough to recover,
+// rare enough that a run of failing images can't hammer MangaDex.
+export const REFRESH_COOLDOWN_MS = 60_000;
+
+export function canRefresh(lastRefreshAt: number | null, now: number): boolean {
+  return lastRefreshAt === null || now - lastRefreshAt >= REFRESH_COOLDOWN_MS;
+}

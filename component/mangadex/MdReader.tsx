@@ -9,6 +9,7 @@ import ChapterEndNav, { type ChapterLink } from "@/component/titles/ChapterEndNa
 import {
   READING_MODE_KEY,
   actionForSide,
+  canRefresh,
   initialMode,
   preloadTargets,
   shouldPersistMode,
@@ -61,6 +62,71 @@ function readSavedMode(): string | null {
 const barButtonClass =
   "inline-flex p-2 border border-[#050505] rounded-md text-[#b6b0a2] hover:text-[#ece6d8] hover:border-[#b6b0a2] transition-colors duration-200 bg-[#0a0a0a]/60";
 
+// One page: its image, or — once it has failed for good — a note and a
+// retry button in its place.
+function PageImage({
+  index,
+  url,
+  failed,
+  eager,
+  className,
+  alt,
+  failedText,
+  retryText,
+  onError,
+  onRetry,
+}: {
+  index: number;
+  url: string;
+  failed: boolean;
+  eager: boolean;
+  className: string;
+  alt: string;
+  failedText: string;
+  retryText: string;
+  onError: (index: number) => void;
+  onRetry: (index: number) => void;
+}) {
+  if (failed) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 w-full min-h-80 py-16 text-sm text-[#b6b0a2]">
+        <p>{failedText}</p>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRetry(index);
+          }}
+          // keep the press from reaching the page-turn handler underneath
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
+          className="px-4 py-2 rounded-md border border-[#ece6d8]/25 text-[#ece6d8] hover:border-[#ece6d8]/60 transition-colors duration-200"
+        >
+          {retryText}
+        </button>
+      </div>
+    );
+  }
+  return (
+    // A plain <img>, never next/image: these must go from the reader's
+    // browser straight to MangaDex's image network, not through our
+    // server or Vercel's image optimizer. no-referrer keeps the page
+    // address out of the request.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      data-index={index}
+      src={url}
+      alt={alt}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      referrerPolicy="no-referrer"
+      draggable={false}
+      onError={() => onError(index)}
+      className={className}
+    />
+  );
+}
+
 export default function MdReader({
   chapterId,
   mangaId,
@@ -106,42 +172,70 @@ export default function MdReader({
 
   // ----- Page images that fail -----
   // The image server address inside the URLs is only good for a few
-  // minutes, so a chapter left open comes back to dead links. The first
-  // failure fetches a fresh set for the whole chapter, once. A page that
-  // still fails after that gets its own retry button.
+  // minutes, so a chapter left open comes back to dead links. A failing
+  // image fetches a fresh set for the whole chapter — at most once a
+  // minute (canRefresh), as often as the sitting needs. A page that
+  // fails while no fresh set can be had gets its own retry button.
   const [urls, setUrls] = useState(pageUrls);
   // Bumped when a fresh set of URLs arrives, so every image is created
   // anew and tries again — MangaDex often hands back the very same URLs,
   // and an <img> that already failed wouldn't retry on its own.
   const [generation, setGeneration] = useState(0);
   const [failed, setFailed] = useState<Set<number>>(() => new Set());
-  const refreshRef = useRef<"idle" | "running" | "done">("idle");
+  // Bumped per page by its retry button, for the same reason.
+  const [retries, setRetries] = useState<Record<number, number>>({});
+
+  const refreshRunning = useRef(false);
+  const lastRefreshAt = useRef<number | null>(null);
+  // pages that failed while a refresh was under way — they share its fate
+  const waiting = useRef(new Set<number>());
+
+  const markFailed = useCallback((indexes: Iterable<number>) => {
+    setFailed((old) => {
+      const copy = new Set(old);
+      for (const index of indexes) copy.add(index);
+      return copy;
+    });
+  }, []);
+
+  // Fetch a fresh set of URLs. True if one arrived (every image then
+  // starts over); false leaves things as they were.
+  const refreshUrls = useCallback(async (): Promise<boolean> => {
+    refreshRunning.current = true;
+    try {
+      const res = await fetch(`/api/mangadex/chapter/${chapterId}/pages`);
+      const body: { pages?: unknown } | null = res.ok ? await res.json() : null;
+      const fresh = body?.pages;
+      if (!Array.isArray(fresh) || fresh.length !== total || !fresh.every((u) => typeof u === "string")) return false;
+      setUrls(fresh);
+      setGeneration((g) => g + 1);
+      setFailed(new Set());
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshRunning.current = false;
+      lastRefreshAt.current = Date.now();
+    }
+  }, [chapterId, total]);
 
   const handleImageError = useCallback(
     (index: number) => {
-      if (refreshRef.current === "running") return;
-      if (refreshRef.current === "done") {
-        setFailed((old) => new Set(old).add(index));
+      if (refreshRunning.current) {
+        waiting.current.add(index);
         return;
       }
-      refreshRef.current = "running";
-      fetch(`/api/mangadex/chapter/${chapterId}/pages`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((body: { pages?: unknown } | null) => {
-          const fresh = body?.pages;
-          if (Array.isArray(fresh) && fresh.length === total && fresh.every((u) => typeof u === "string")) {
-            setUrls(fresh);
-            setGeneration((g) => g + 1);
-          } else {
-            setFailed((old) => new Set(old).add(index));
-          }
-        })
-        .catch(() => setFailed((old) => new Set(old).add(index)))
-        .finally(() => {
-          refreshRef.current = "done";
-        });
+      if (!canRefresh(lastRefreshAt.current, Date.now())) {
+        markFailed([index]);
+        return;
+      }
+      waiting.current = new Set([index]);
+      void refreshUrls().then((ok) => {
+        if (!ok) markFailed(waiting.current);
+        waiting.current = new Set();
+      });
     },
-    [chapterId, total],
+    [markFailed, refreshUrls],
   );
 
   // The first pages are in the server-rendered HTML, so they can fail
@@ -156,59 +250,45 @@ export default function MdReader({
     }
   }, [handleImageError]);
 
-  // Per-page retry: create that one image anew so the browser asks for
-  // it again. The URL itself must stay untouched — MangaDex's image
-  // network refuses a URL with a query string added when the request
-  // carries no referrer, so a "?retry=1" cache-buster never loads.
-  const [retries, setRetries] = useState<Record<number, number>>({});
-  function retryPage(index: number) {
-    setRetries((old) => ({ ...old, [index]: (old[index] ?? 0) + 1 }));
-    setFailed((old) => {
-      const copy = new Set(old);
-      copy.delete(index);
-      return copy;
-    });
-  }
+  // A page's own retry button. If a fresh set of URLs is allowed again,
+  // get one — after a long pause the old address is dead, and asking it
+  // again would fail forever. Otherwise create that one image anew so the
+  // browser asks for it again. The URL itself must stay untouched:
+  // MangaDex's image network refuses a URL with a query string added
+  // when the request carries no referrer, so a "?retry=1" cache-buster
+  // never loads.
+  const retryPage = useCallback(
+    (index: number) => {
+      if (!refreshRunning.current && canRefresh(lastRefreshAt.current, Date.now())) {
+        void refreshUrls();
+        return;
+      }
+      setRetries((old) => ({ ...old, [index]: (old[index] ?? 0) + 1 }));
+      setFailed((old) => {
+        const copy = new Set(old);
+        copy.delete(index);
+        return copy;
+      });
+    },
+    [refreshUrls],
+  );
 
-  function pageImage(index: number, className: string, eager: boolean) {
-    if (failed.has(index)) {
-      return (
-        <div className="flex flex-col items-center justify-center gap-3 w-full min-h-80 py-16 text-sm text-[#b6b0a2]">
-          <p>{t("imageFailed")}</p>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              retryPage(index);
-            }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="px-4 py-2 rounded-md border border-[#ece6d8]/25 text-[#ece6d8] hover:border-[#ece6d8]/60 transition-colors duration-200"
-          >
-            {t("retry")}
-          </button>
-        </div>
-      );
-    }
-    return (
-      // A plain <img>, never next/image: these must go from the reader's
-      // browser straight to MangaDex's image network, not through our
-      // server or Vercel's image optimizer. no-referrer keeps the page
-      // address out of the request.
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        key={`${generation}:${retries[index] ?? 0}:${urls[index]}`}
-        data-index={index}
-        src={urls[index]}
-        alt={t("pageAlt", { page: index + 1 })}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-        referrerPolicy="no-referrer"
-        draggable={false}
-        onError={() => handleImageError(index)}
-        className={className}
-      />
-    );
-  }
+  const pageImage = (index: number, className: string, eager: boolean) => (
+    <PageImage
+      // a new key creates the image anew, which is what makes it load again
+      key={`${index}:${generation}:${retries[index] ?? 0}:${urls[index]}`}
+      index={index}
+      url={urls[index]}
+      failed={failed.has(index)}
+      eager={eager}
+      className={className}
+      alt={t("pageAlt", { page: index + 1 })}
+      failedText={t("imageFailed")}
+      retryText={t("retry")}
+      onError={handleImageError}
+      onRetry={retryPage}
+    />
+  );
 
   // ----- Top bar: hides while reading down, returns on the way up -----
   const [barVisible, setBarVisible] = useState(true);

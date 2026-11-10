@@ -89,6 +89,20 @@ export function toManga(raw: RawManga, locale: MdLanguage): MdManga {
   };
 }
 
+// A chapter's link to an official site, only if it really is a web
+// address. It comes from MangaDex (uploader-entered) and ends up in an
+// <a href>, so anything else — javascript:, data:, a bare path — is
+// dropped rather than trusted.
+function safeExternalUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 // null: a chapter the zone never shows (taken down, or not Thai/English).
 export function toChapter(raw: RawChapter): MdChapter | null {
   const a = raw.attributes;
@@ -109,7 +123,7 @@ export function toChapter(raw: RawChapter): MdChapter | null {
     groups,
     publishedAt: a.readableAt ?? a.publishAt ?? "",
     pages: a.pages ?? 0,
-    externalUrl: a.externalUrl || null,
+    externalUrl: safeExternalUrl(a.externalUrl),
   };
 }
 
