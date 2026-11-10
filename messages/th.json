@@ -724,10 +724,6 @@
     "modeHorizontal": "ทีละหน้า",
     "pageOf": "{page} / {total}",
     "pageAlt": "หน้า {page}",
-    "prevChapter": "ตอนก่อนหน้า",
-    "nextChapter": "ตอนถัดไป",
-    "endOfChapter": "จบตอน",
-    "lastChapter": "คุณอ่านถึงตอนล่าสุดแล้ว",
     "imageFailed": "โหลดหน้านี้ไม่สำเร็จ",
     "retry": "ลองใหม่"
   }

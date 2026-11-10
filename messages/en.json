@@ -724,10 +724,6 @@
     "modeHorizontal": "Page by page",
     "pageOf": "{page} / {total}",
     "pageAlt": "Page {page}",
-    "prevChapter": "Previous chapter",
-    "nextChapter": "Next chapter",
-    "endOfChapter": "End of chapter",
-    "lastChapter": "You're up to date.",
     "imageFailed": "This page didn't load.",
     "retry": "Try again"
   }

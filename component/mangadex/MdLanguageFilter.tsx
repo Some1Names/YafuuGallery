@@ -26,7 +26,9 @@ export default function MdLanguageFilter({ q, active }: { q: string; active: Fil
               href={browseHref({ q, lang: value })}
               scroll={false}
               aria-current={active === value ? "true" : undefined}
-              className={chipClass(active === value) + " inline-block"}
+              // bg-surface: these sit over the page's banner image, where a
+              // bare outlined chip is hard to read in the light theme
+              className={chipClass(active === value) + " inline-block" + (active === value ? "" : " bg-surface")}
             >
               {label ?? t("langAll")}
             </Link>

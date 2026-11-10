@@ -161,7 +161,7 @@ export default async function BrowseTitlePage({ params, searchParams }: Props) {
                           href={`/browse/${manga.id}?lang=${l}`}
                           scroll={false}
                           aria-current={l === language ? "true" : undefined}
-                          className={chipClass(l === language) + " inline-block"}
+                          className={chipClass(l === language) + " inline-block" + (l === language ? "" : " bg-surface")}
                         >
                           {LANGUAGE_NAMES[l]}
                         </Link>
