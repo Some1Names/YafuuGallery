@@ -20,6 +20,10 @@ export default function robots(): MetadataRoute.Robots {
         "/signup",
         "/forgot-password",
         "/reset-password",
+        // The MangaDex zone: content fetched live from MangaDex, not
+        // ours to have indexed (its pages also send noindex).
+        "/browse",
+        "/read",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

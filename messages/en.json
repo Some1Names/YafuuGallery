@@ -19,7 +19,8 @@
     "signOut": "Sign out",
     "menu": "Menu",
     "menuWithNew": "Menu ({count, plural, one {# new chapter} other {# new chapters}})",
-    "newChapters": "({count, plural, one {# new chapter} other {# new chapters}})"
+    "newChapters": "({count, plural, one {# new chapter} other {# new chapters}})",
+    "mangadex": "MangaDex"
   },
   "Theme": {
     "toLight": "Switch to light theme",
@@ -682,5 +683,52 @@
     "deleteConfirm": "Delete user",
     "deleteFailed": "Couldn't delete user",
     "loadMoreFailed": "Couldn't load more — please try again."
+  },
+  "Browse": {
+    "title": "Browse MangaDex",
+    "description": "Search and read manga from MangaDex.",
+    "subtitle": "Manga from MangaDex, read here. Translations are the work of the groups credited on each chapter.",
+    "searchLabel": "Search MangaDex",
+    "searchPlaceholder": "Search MangaDex…",
+    "searchButton": "Search",
+    "langLabel": "Chapter language",
+    "langAll": "All",
+    "popular": "Popular",
+    "latest": "Latest updates",
+    "resultsFor": "Results for <q>“{query}”</q>",
+    "empty": "Nothing found.",
+    "emptyTryOther": "Try {language} instead.",
+    "source": "Source: MangaDex",
+    "errorTitle": "MangaDex is not responding",
+    "errorMessage": "The rest of the site is fine. Try again in a moment.",
+    "backToBrowse": "Back to MangaDex",
+    "status": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "hiatus": "On hiatus",
+      "cancelled": "Cancelled"
+    },
+    "chapters": "Chapters",
+    "chapterNumber": "Ch. {n}",
+    "oneshot": "Oneshot",
+    "startReading": "Start reading",
+    "officialSite": "Official site",
+    "noChapters": "No chapters in this language.",
+    "translatedBy": "Translated by {groups}",
+    "by": "By {authors}"
+  },
+  "MdReader": {
+    "back": "Back to title",
+    "chapterMenu": "Chapters",
+    "modeVertical": "Scroll",
+    "modeHorizontal": "Page by page",
+    "pageOf": "{page} / {total}",
+    "pageAlt": "Page {page}",
+    "prevChapter": "Previous chapter",
+    "nextChapter": "Next chapter",
+    "endOfChapter": "End of chapter",
+    "lastChapter": "You're up to date.",
+    "imageFailed": "This page didn't load.",
+    "retry": "Try again"
   }
 }

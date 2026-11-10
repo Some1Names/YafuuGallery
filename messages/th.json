@@ -19,7 +19,8 @@
     "signOut": "ออกจากระบบ",
     "menu": "เมนู",
     "menuWithNew": "เมนู (มีตอนใหม่ {count, number} ตอน)",
-    "newChapters": "(ตอนใหม่ {count, number} ตอน)"
+    "newChapters": "(ตอนใหม่ {count, number} ตอน)",
+    "mangadex": "MangaDex"
   },
   "Theme": {
     "toLight": "เปลี่ยนเป็นธีมสว่าง",
@@ -682,5 +683,52 @@
     "deleteConfirm": "ลบผู้ใช้",
     "deleteFailed": "ลบผู้ใช้ไม่สำเร็จ",
     "loadMoreFailed": "โหลดเพิ่มไม่สำเร็จ — โปรดลองอีกครั้ง"
+  },
+  "Browse": {
+    "title": "สำรวจ MangaDex",
+    "description": "ค้นหาและอ่านมังงะจาก MangaDex",
+    "subtitle": "มังงะจาก MangaDex อ่านได้ที่นี่ งานแปลเป็นผลงานของกลุ่มแปลที่ระบุไว้ในแต่ละตอน",
+    "searchLabel": "ค้นหาใน MangaDex",
+    "searchPlaceholder": "ค้นหาใน MangaDex…",
+    "searchButton": "ค้นหา",
+    "langLabel": "ภาษาของตอน",
+    "langAll": "ทั้งหมด",
+    "popular": "ยอดนิยม",
+    "latest": "อัปเดตล่าสุด",
+    "resultsFor": "ผลการค้นหา <q>“{query}”</q>",
+    "empty": "ไม่พบผลลัพธ์",
+    "emptyTryOther": "ลองค้นหาในภาษา{language}",
+    "source": "ที่มา: MangaDex",
+    "errorTitle": "MangaDex ไม่ตอบสนอง",
+    "errorMessage": "ส่วนอื่นของเว็บยังใช้งานได้ ลองใหม่อีกครั้งในอีกสักครู่",
+    "backToBrowse": "กลับไปหน้า MangaDex",
+    "status": {
+      "ongoing": "ยังไม่จบ",
+      "completed": "จบแล้ว",
+      "hiatus": "พักการเขียน",
+      "cancelled": "ยกเลิก"
+    },
+    "chapters": "ตอนทั้งหมด",
+    "chapterNumber": "ตอนที่ {n}",
+    "oneshot": "ตอนเดียวจบ",
+    "startReading": "เริ่มอ่าน",
+    "officialSite": "เว็บทางการ",
+    "noChapters": "ยังไม่มีตอนในภาษานี้",
+    "translatedBy": "แปลโดย {groups}",
+    "by": "โดย {authors}"
+  },
+  "MdReader": {
+    "back": "กลับไปหน้าเรื่อง",
+    "chapterMenu": "เลือกตอน",
+    "modeVertical": "เลื่อน",
+    "modeHorizontal": "ทีละหน้า",
+    "pageOf": "{page} / {total}",
+    "pageAlt": "หน้า {page}",
+    "prevChapter": "ตอนก่อนหน้า",
+    "nextChapter": "ตอนถัดไป",
+    "endOfChapter": "จบตอน",
+    "lastChapter": "คุณอ่านถึงตอนล่าสุดแล้ว",
+    "imageFailed": "โหลดหน้านี้ไม่สำเร็จ",
+    "retry": "ลองใหม่"
   }
 }
