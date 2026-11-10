@@ -19,7 +19,7 @@ A manga reading website built with **Next.js** — original manga and translatio
 * 🏠 Home page with an admin-curated featured carousel and the latest updates
 * 🔎 Search by title, author or chapter name, with genre and status filters and sorting
 * 🏷️ Genres and ongoing / completed status on every manga
-* 📚 MangaDex titles in the same Browse list as the site's own — search, filter and read them in Thai or English, fetched live (nothing stored), with scanlation group credit
+* 📚 Well-known MangaDex titles in the same Browse list as the site's own — search, filter and read them in Thai or English, fetched live (nothing stored), with scanlation group credit
 
 ### Your account
 
@@ -193,6 +193,12 @@ Timestamps are stored without a time zone. Query them through Prisma: raw `pg` q
 ## 📚 MangaDex zone
 
 Browse (`/search`) lists manga from [MangaDex](https://mangadex.org) in the same grid as the site's own — the site's first, then MangaDex's, each marked with a "MangaDex" tab — under the same search text, genre, status and sort, plus a chapter-language filter that applies to MangaDex only. A MangaDex title opens at `/browse/[id]` and reads at `/read/[chapterId]`. If MangaDex can't be reached, Browse still shows the site's own manga. Nothing is stored: titles, chapter lists and page addresses are fetched from MangaDex's API as each page renders (cached for a few minutes), covers pass through `/api/mangadex/cover/…`, and page images load in the reader's browser straight from MangaDex's image network. No environment variables are needed.
+
+Browse doesn't list all of MangaDex — only the titles in `lib/mangadex/catalogue.json`: for Thai and for English, the 100 most-followed titles that have at least 5 chapters readable here (chapters that only link to an official site don't count, and aren't listed on title pages either). That file is generated; refresh it now and then, check the diff and commit:
+
+```bash
+bun scripts/build-mangadex-catalogue.ts
+```
 
 Rules these pages must keep, from MangaDex's terms and this site's own choices:
 

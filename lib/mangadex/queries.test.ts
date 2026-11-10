@@ -202,7 +202,8 @@ describe("getChapterPages", () => {
 });
 
 describe("listManga", () => {
-  const base = { q: "", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en" } as const;
+  const IDS = ["a1c7c817-4e59-43b7-9365-09675a149a6f", "28c77530-dfa1-4b05-8ec3-998960ba24d4"];
+  const base = { q: "", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en", ids: IDS } as const;
   const paramsOf = (index = 0) => new URL(urls()[index]).searchParams;
   const empty = () => fetchMock.mockImplementation(async () => json(collection([], 0)));
 
@@ -212,6 +213,24 @@ describe("listManga", () => {
     expect(paramsOf().has("title")).toBe(false);
     expect(paramsOf().get("order[latestUploadedChapter]")).toBe("desc");
     expect(paramsOf().get("limit")).toBe("24");
+  });
+
+  it("asks only for the titles in the catalogue", async () => {
+    empty();
+    await listManga(base);
+    expect(paramsOf().getAll("ids[]")).toEqual(IDS);
+  });
+
+  it("returns nothing, without asking MangaDex, when the catalogue is empty", async () => {
+    expect(await listManga({ ...base, ids: [] })).toEqual({ items: [], total: 0, hasMore: false });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("never sends more ids than MangaDex accepts", async () => {
+    empty();
+    const many = Array.from({ length: 150 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`);
+    await listManga({ ...base, ids: many });
+    expect(paramsOf().getAll("ids[]")).toHaveLength(100);
   });
 
   it("maps each sort to MangaDex's order", async () => {
@@ -288,7 +307,7 @@ describe("listManga", () => {
 describe("content rating", () => {
   it("is exactly safe + suggestive on every list and feed request", async () => {
     fetchMock.mockImplementation(async () => json(collection([], 0)));
-    await listManga({ q: "x", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en" });
+    await listManga({ q: "x", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en", ids: [MANGA_ID] });
     await getChapterFeed(MANGA_ID, "th");
     expect(fetchMock).toHaveBeenCalledTimes(2);
     for (const url of urls()) {

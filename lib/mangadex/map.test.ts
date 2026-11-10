@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   adjacentChapters,
+  chapterBadge,
   chapterLabel,
   cleanSynopsis,
   coverPath,
@@ -405,5 +406,26 @@ describe("cleanSynopsis", () => {
 
   it("turns Windows line endings into plain ones", () => {
     expect(cleanSynopsis("A\r\n\r\nB")).toBe("A\n\nB");
+  });
+});
+
+describe("chapterBadge", () => {
+  it("pads whole numbers to three digits, like the site's own chapters", () => {
+    expect(chapterBadge(ch({ number: "1" }), "Oneshot")).toBe("#001");
+    expect(chapterBadge(ch({ number: "12" }), "Oneshot")).toBe("#012");
+    expect(chapterBadge(ch({ number: "1198" }), "Oneshot")).toBe("#1198");
+  });
+
+  it("pads only the whole part of a decimal or lettered number", () => {
+    expect(chapterBadge(ch({ number: "12.5" }), "Oneshot")).toBe("#012.5");
+    expect(chapterBadge(ch({ number: "7a" }), "Oneshot")).toBe("#007a");
+  });
+
+  it("shows a number that isn't a number as it is", () => {
+    expect(chapterBadge(ch({ number: "Extra" }), "Oneshot")).toBe("#Extra");
+  });
+
+  it("is the oneshot word without a number", () => {
+    expect(chapterBadge(ch({ number: null }), "Oneshot")).toBe("Oneshot");
   });
 });

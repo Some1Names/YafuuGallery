@@ -240,3 +240,12 @@ export function chapterLabel(c: MdChapter, t: { chapter: (n: string) => string; 
   if (c.number === null) return c.title ?? t.oneshot;
   return c.title ? `${t.chapter(c.number)} - ${c.title}` : t.chapter(c.number);
 }
+
+// The chapter number as the site's own chapter rows show it: "#012".
+// Whole numbers are padded to three digits ("#012.5", "#007a" pad just
+// the whole part); a "number" that isn't one is shown as it is.
+export function chapterBadge(c: MdChapter, oneshot: string): string {
+  if (c.number === null) return oneshot;
+  const match = /^(\d+)(.*)$/.exec(c.number);
+  return match ? `#${match[1].padStart(3, "0")}${match[2]}` : `#${c.number}`;
+}

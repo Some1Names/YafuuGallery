@@ -696,14 +696,11 @@
       "hiatus": "พักการเขียน",
       "cancelled": "ยกเลิก"
     },
-    "chapters": "ตอนทั้งหมด",
     "chapterNumber": "ตอนที่ {n}",
     "oneshot": "ตอนเดียวจบ",
     "startReading": "เริ่มอ่าน",
-    "officialSite": "เว็บทางการ",
     "noChapters": "ยังไม่มีตอนในภาษานี้",
     "translatedBy": "แปลโดย {groups}",
-    "by": "โดย {authors}",
     "earlier": "ดูผลลัพธ์ก่อนหน้า",
     "badge": "MangaDex",
     "unavailable": "โหลดรายการจาก MangaDex ไม่ได้ในขณะนี้"

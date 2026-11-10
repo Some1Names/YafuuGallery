@@ -696,14 +696,11 @@
       "hiatus": "On hiatus",
       "cancelled": "Cancelled"
     },
-    "chapters": "Chapters",
     "chapterNumber": "Ch. {n}",
     "oneshot": "Oneshot",
     "startReading": "Start reading",
-    "officialSite": "Official site",
     "noChapters": "No chapters in this language.",
     "translatedBy": "Translated by {groups}",
-    "by": "By {authors}",
     "earlier": "Show earlier results",
     "badge": "MangaDex",
     "unavailable": "Couldn't load titles from MangaDex right now."

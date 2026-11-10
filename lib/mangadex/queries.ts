@@ -1,6 +1,7 @@
 import type { GenreSlug, MangaStatusValue } from "@/lib/genres";
 import { DEFAULT_SORT, type SortValue } from "@/lib/search-filters";
 import { cleanSearchText, isUuid, mdFetch, type MdParams } from "./client";
+import { catalogueIds } from "./catalogue";
 import { GENRE_TAG_IDS } from "./genre-tags";
 import { sortChapters, toChapter, toManga, toMangaSummary } from "./map";
 import {
@@ -46,6 +47,9 @@ const ORDER: Record<SortValue, Record<string, string>> = {
 // One page of MangaDex titles for /search, under the same filters as
 // the site's own manga: search text, genre, status and sort, plus the
 // chapter language (which only MangaDex has).
+//
+// Only titles in the catalogue (./catalogue.ts) are ever listed: MangaDex
+// is asked for exactly those ids, with the filters narrowing them down.
 export async function listManga(a: {
   q: string;
   genre: GenreSlug | null;
@@ -54,7 +58,13 @@ export async function listManga(a: {
   lang: MdLanguageFilter;
   page: number;
   locale: MdLanguage;
+  // the titles to choose from; the catalogue's list for `lang` unless given
+  ids?: readonly string[];
 }): Promise<{ items: MdMangaSummary[]; total: number; hasMore: boolean }> {
+  // MangaDex takes at most 100 ids — and treats "no ids" as "everything"
+  const ids = (a.ids ?? catalogueIds(a.lang)).slice(0, 100);
+  if (ids.length === 0) return { items: [], total: 0, hasMore: false };
+
   const q = cleanSearchText(a.q);
   const page = Math.min(Math.max(Math.trunc(a.page) || 1, 1), MAX_PAGE);
   const offset = (page - 1) * MD_PAGE_SIZE;
@@ -66,6 +76,7 @@ export async function listManga(a: {
     ...(q ? { title: q } : {}),
     limit: MD_PAGE_SIZE,
     offset,
+    ids,
     includes: ["cover_art"],
     contentRating: MD_CONTENT_RATINGS,
     availableTranslatedLanguage: a.lang === "all" ? MD_LANGUAGES : [a.lang],

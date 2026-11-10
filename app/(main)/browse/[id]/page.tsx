@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { BookOpen, Languages } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import MangaBackground from "@/component/titles/MangaBackground";
 import MangaSynopsis from "@/component/titles/MangaSynopsis";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
-import { chipClass } from "@/component/manga/chip-class";
-import MdChapterList from "@/component/mangadex/MdChapterList";
+import MdChapterSection from "@/component/mangadex/MdChapterSection";
 import MdSourceCredit from "@/component/mangadex/MdSourceCredit";
 import { toMdLanguage } from "@/lib/mangadex/browse-params";
 import { isReadable } from "@/lib/mangadex/map";
@@ -21,8 +20,6 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-const LANGUAGE_NAMES: Record<MdLanguage, string> = { th: "ไทย", en: "English" };
 
 // A title that doesn't exist (or that the zone refuses to show) is a 404;
 // anything else — MangaDex down, rate limit — goes to browse/error.tsx.
@@ -51,64 +48,78 @@ export default async function BrowseTitlePage({ params, searchParams }: Props) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const locale = toMdLanguage(await getLocale());
   const manga = await loadManga(id, locale);
-  const t = await getTranslations("Browse");
+  const [t, tManga, tLanguage] = await Promise.all([
+    getTranslations("Browse"),
+    getTranslations("Manga"),
+    getTranslations("LanguageName"),
+  ]);
+
+  // Only chapters that can be read here are listed — ones that just link
+  // to an official site are left out. So a language counts only if it
+  // has such chapters (a title can be "available in Thai" on MangaDex
+  // with nothing but links).
+  const feeds = await Promise.all(
+    manga.languages.map(async (l) => ({ language: l, chapters: (await getChapterFeed(manga.id, l)).filter(isReadable) })),
+  );
+  const readable = feeds.filter((f) => f.chapters.length > 0);
+  const languages = readable.map((f) => f.language);
 
   // Which language's chapters to list: the one asked for, else the
-  // interface language if this title has it, else whatever it does have.
+  // interface language, else whatever there is.
   const asked = Array.isArray(sp.lang) ? sp.lang[0] : sp.lang;
   const language: MdLanguage =
-    manga.languages.find((l) => l === asked) ??
-    (manga.languages.includes(locale) ? locale : (manga.languages[0] ?? locale));
-
-  const feed = await getChapterFeed(manga.id, language);
-  const firstReadable = feed.find(isReadable);
-  const newestFirst = [...feed].reverse();
+    languages.find((l) => l === asked) ?? (languages.includes(locale) ? locale : (languages[0] ?? locale));
+  const chapters = readable.find((f) => f.language === language)?.chapters ?? [];
+  const firstChapter = chapters[0];
 
   return (
-    <div className="relative min-h-screen bg-bg px-6 sm:px-8 py-10 sm:py-12 md:py-16 flex justify-center">
+    // Laid out like the site's own title page (manga/titles/[id]): wide
+    // banner, then chapters on the left and the details in a right-hand
+    // column that sticks below the navbar; stacked on phones.
+    <div className="relative min-h-screen bg-bg px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center">
       <div className="hidden sm:block">
         <MangaBackground imageUrl="/mangabg.png" />
       </div>
 
       <div className="relative z-10 w-full max-w-350 text-fg">
-        <Link
-          href="/search"
-          className="inline-flex items-center gap-1.5 py-2 mb-4 text-sm text-fg-secondary sm:text-white/70 hover:text-fg sm:hover:text-white transition-colors duration-200"
-        >
-          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-          {t("backToBrowse")}
-        </Link>
+        {/* Banner. MangaDex has no wide banner art, only the cover — so
+            the cover is shown whole in the middle, over a blurred,
+            stretched copy of itself that fills the 32:9 box. */}
+        <div className="relative w-full aspect-32/9 rounded-none sm:rounded-md mb-6 sm:mb-14 overflow-hidden bg-surface">
+          {manga.coverUrl ? (
+            <>
+              {/* Plain <img>s: thumbnails from our own cached cover route
+                  (see MdMangaCard). */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={manga.coverUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl opacity-60"
+              />
+              <div className="absolute inset-0 bg-black/30" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={manga.coverUrl}
+                alt=""
+                className="absolute inset-y-0 left-1/2 -translate-x-1/2 h-full w-auto object-contain shadow-2xl"
+              />
+            </>
+          ) : (
+            <NoImagePlaceholder />
+          )}
+        </div>
 
-        {/* Same shape as our own title page: details in a right-hand
-            column that sticks below the navbar, chapters on the left;
-            stacked (details first) on phones. */}
         <div className="sm:flex sm:gap-8 sm:items-start">
-          <div className="mb-8 sm:mb-0 sm:order-2 sm:w-80 md:w-96 sm:shrink-0 sm:sticky sm:top-24 md:top-26">
-            <div className="flex gap-4 sm:block">
-              <div className="relative w-28 sm:w-48 shrink-0 aspect-2/3 rounded-lg overflow-hidden bg-surface sm:mb-5">
-                {manga.coverUrl ? (
-                  // Plain <img>: already a sized thumbnail from our own
-                  // cached cover route (see MdMangaCard).
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={manga.coverUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  <NoImagePlaceholder />
-                )}
-              </div>
+          <div className="px-6 sm:px-0 mb-8 sm:mb-0 sm:order-2 sm:w-80 md:w-96 sm:shrink-0 sm:sticky sm:top-24 md:top-26">
+            <h1 className="text-3xl sm:text-4xl leading-tight wrap-anywhere font-(family-name:--font-display)">
+              {manga.title}
+            </h1>
+            {manga.authors.length > 0 && (
+              <p className="text-fg-secondary text-base sm:text-lg mt-2 wrap-anywhere">{manga.authors.join(", ")}</p>
+            )}
 
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-4xl leading-tight wrap-anywhere font-(family-name:--font-display)">
-                  {manga.title}
-                </h1>
-                {manga.authors.length > 0 && (
-                  <p className="mt-2 text-fg-secondary text-sm sm:text-lg wrap-anywhere">
-                    {t("by", { authors: manga.authors.join(", ") })}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <ul className="flex flex-wrap items-center gap-2 mt-4">
+            <ul className="flex flex-wrap items-center gap-2 mt-4" aria-label={tManga("statusAndGenres")}>
               <li
                 className={
                   "text-xs font-semibold px-2.5 py-1 rounded-full " +
@@ -124,17 +135,35 @@ export default async function BrowseTitlePage({ params, searchParams }: Props) {
               ))}
             </ul>
 
-            <MdSourceCredit href={manga.mangadexUrl} className="mt-4" />
-
-            {firstReadable && (
-              <Link
-                href={`/read/${firstReadable.id}`}
-                className="flex items-center justify-center gap-2 h-11 px-4 mt-6 rounded-md bg-fg text-bg text-sm font-semibold hover:bg-fg-hover transition-colors duration-200"
-              >
-                <BookOpen className="w-4 h-4" aria-hidden="true" />
-                {t("startReading")}
-              </Link>
+            {languages.length > 0 && (
+              <p className="flex items-center gap-1.5 mt-3 text-sm text-fg-secondary">
+                <Languages className="w-4 h-4 shrink-0 text-fg-muted" aria-hidden="true" />
+                <span>
+                  {tManga.rich("availableIn", {
+                    languages: languages.map((l) => tLanguage(l)).join(" · "),
+                    strong: (chunks) => <span className="text-fg">{chunks}</span>,
+                  })}
+                </span>
+              </p>
             )}
+
+            <div className="flex gap-2 mt-6">
+              {firstChapter ? (
+                <Link
+                  href={`/read/${firstChapter.id}`}
+                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-fg text-bg text-sm font-semibold hover:bg-fg-hover transition-colors duration-200"
+                >
+                  <BookOpen className="w-4 h-4" aria-hidden="true" />
+                  {t("startReading")}
+                </Link>
+              ) : (
+                <span className="flex-1 flex items-center justify-center h-11 px-4 rounded-md border border-fg/15 text-fg-muted text-sm">
+                  {tManga("noChaptersYet")}
+                </span>
+              )}
+            </div>
+
+            <MdSourceCredit href={manga.mangadexUrl} className="mt-4" />
 
             {manga.synopsis && (
               <div className="mt-8 pt-6 border-t border-border whitespace-pre-line">
@@ -143,36 +172,16 @@ export default async function BrowseTitlePage({ params, searchParams }: Props) {
             )}
           </div>
 
-          <div className="sm:order-1 sm:flex-1 min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-              <h2 className="text-xl font-(family-name:--font-display)">
-                {t("chapters")}
-                <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
-                  {feed.length}
-                </span>
-              </h2>
-
-              {manga.languages.length > 1 && (
-                <nav aria-label={t("langLabel")}>
-                  <ul className="flex gap-2">
-                    {manga.languages.map((l) => (
-                      <li key={l}>
-                        <Link
-                          href={`/browse/${manga.id}?lang=${l}`}
-                          scroll={false}
-                          aria-current={l === language ? "true" : undefined}
-                          className={chipClass(l === language) + " inline-block" + (l === language ? "" : " bg-surface")}
-                        >
-                          {LANGUAGE_NAMES[l]}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              )}
-            </div>
-
-            <MdChapterList chapters={newestFirst} emptyText={t("noChapters")} />
+          <div className="px-6 sm:px-0 pb-8 sm:pb-0 sm:order-1 sm:flex-1 min-w-0">
+            <MdChapterSection
+              // a language switch starts the list (and its sort) afresh
+              key={language}
+              mangaId={manga.id}
+              chapters={chapters}
+              coverUrl={manga.coverUrl}
+              language={language}
+              languages={languages}
+            />
           </div>
         </div>
       </div>
