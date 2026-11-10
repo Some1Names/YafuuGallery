@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass, History, Library } from "lucide-react";
+import { Menu, X, Home, Heart, User, LogIn, LogOut, UserPlus, Search, Compass, History } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { formatUsername } from "@/lib/format-username";
 import ThemeToggle from "@/component/ThemeToggle";
@@ -27,15 +27,12 @@ const navItems = [
   // the search icon on the right goes to the same page, ready to type.
   { href: "/search", labelKey: "browse", icon: Compass },
   { href: "/favorites", labelKey: "favorites", icon: Heart },
-  // The MangaDex zone — manga fetched live from MangaDex, kept apart
-  // from the site's own (see app/(main)/browse).
-  { href: "/browse", labelKey: "mangadex", icon: Library },
 ] as const;
 
-// /browse also covers its title pages (/browse/[id]); the other items
-// are single pages.
+// Browse (/search) lists MangaDex titles too, so it stays lit on their
+// title pages (/browse/[id]); the other items are single pages.
 function isActiveItem(pathname: string, href: string) {
-  return href === "/browse" ? pathname === href || pathname.startsWith("/browse/") : pathname === href;
+  return href === "/search" ? pathname === href || pathname.startsWith("/browse/") : pathname === href;
 }
 
 // Dropdown rows match the bar's plain style: no hover/active background

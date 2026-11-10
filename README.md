@@ -19,7 +19,7 @@ A manga reading website built with **Next.js** — original manga and translatio
 * 🏠 Home page with an admin-curated featured carousel and the latest updates
 * 🔎 Search by title, author or chapter name, with genre and status filters and sorting
 * 🏷️ Genres and ongoing / completed status on every manga
-* 📚 MangaDex zone at `/browse` — search and read MangaDex titles in Thai or English, fetched live (nothing stored), with scanlation group credit
+* 📚 MangaDex titles in the same Browse list as the site's own — search, filter and read them in Thai or English, fetched live (nothing stored), with scanlation group credit
 
 ### Your account
 
@@ -192,14 +192,14 @@ Timestamps are stored without a time zone. Query them through Prisma: raw `pg` q
 
 ## 📚 MangaDex zone
 
-`/browse`, `/browse/[id]` and `/read/[chapterId]` show manga from [MangaDex](https://mangadex.org), kept apart from the site's own. Nothing is stored: titles, chapter lists and page addresses are fetched from MangaDex's API as each page renders (cached for a few minutes), covers pass through `/api/mangadex/cover/…`, and page images load in the reader's browser straight from MangaDex's image network. No environment variables are needed.
+Browse (`/search`) lists manga from [MangaDex](https://mangadex.org) in the same grid as the site's own — the site's first, then MangaDex's, each marked with a "MangaDex" tab — under the same search text, genre, status and sort, plus a chapter-language filter that applies to MangaDex only. A MangaDex title opens at `/browse/[id]` and reads at `/read/[chapterId]`. If MangaDex can't be reached, Browse still shows the site's own manga. Nothing is stored: titles, chapter lists and page addresses are fetched from MangaDex's API as each page renders (cached for a few minutes), covers pass through `/api/mangadex/cover/…`, and page images load in the reader's browser straight from MangaDex's image network. No environment variables are needed.
 
 Rules these pages must keep, from MangaDex's terms and this site's own choices:
 
 * No ads or paid access on these pages.
 * Every chapter shows the scanlation group that translated it, and links back to the title on MangaDex.
 * Only titles rated safe or suggestive, in Thai or English.
-* The pages are not indexed (`noindex`, and disallowed in robots.txt) and not in the sitemap.
+* Title and reader pages are not indexed (`noindex`, and disallowed in robots.txt) and not in the sitemap; cards on Browse link to them with `nofollow`. Browse itself is indexed, so MangaDex titles and covers do appear on an indexed page.
 
 A network that blocks MangaDex blocks the page images too, since the browser fetches them directly.
 

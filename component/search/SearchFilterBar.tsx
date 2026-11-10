@@ -2,12 +2,18 @@ import Link from "next/link";
 import { GENRES, MANGA_STATUSES } from "@/lib/genres";
 import ActiveChipScroller from "@/component/search/ActiveChipScroller";
 import SortDropdown from "@/component/search/SortDropdown";
-import { searchHref, type SearchFilters } from "@/lib/search-filters";
+import { MD_LANG_FILTERS, searchHref, type MdLangFilter, type SearchFilters } from "@/lib/search-filters";
 import { useTranslations } from "next-intl";
 
 interface SearchFilterBarProps {
   filters: SearchFilters;
+  // the MangaDex chapter language in effect (filters.lang, or the
+  // page's default when the URL doesn't set one)
+  mdLang: MdLangFilter;
 }
+
+// Language names in their own language, as in the reader's menus.
+const MD_LANG_LABELS: Record<Exclude<MdLangFilter, "all">, string> = { th: "ไทย", en: "English" };
 
 function chipClass(isOn: boolean) {
   return (
@@ -32,8 +38,9 @@ function segmentClass(isOn: boolean) {
 // off, and each view can be shared. Changing any filter drops ?page, so
 // the list starts again from the top. scroll={false} keeps the bar where
 // it is instead of jumping to the top of the page on every tap.
-export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
+export default function SearchFilterBar({ filters, mdLang }: SearchFilterBarProps) {
   const t = useTranslations("Search");
+  const tBrowse = useTranslations("Browse");
   const tGenre = useTranslations("Genres");
   const tStatus = useTranslations("Status");
   return (
@@ -77,7 +84,7 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
       {/* Status as a segmented pill on the left, sort as a dropdown on the
           right. Phones: the two don't fit on one line, so sort moves up
           beside the results heading instead (search/page.tsx). */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <nav
           aria-label={t("statusLabel")}
           className="flex items-center h-9 p-0.5 rounded-full border border-border bg-surface"
@@ -98,7 +105,34 @@ export default function SearchFilterBar({ filters }: SearchFilterBarProps) {
           })}
         </nav>
 
-        <div className="hidden sm:block">
+        {/* Which chapter language MangaDex titles must have. The site's
+            own manga are listed whatever their languages. */}
+        <nav
+          aria-label={tBrowse("langLabel")}
+          className="flex items-center h-9 p-0.5 rounded-full border border-border bg-surface"
+        >
+          {/* says what this second "All" is about — it sits right beside
+              the status pill, which starts with "All" too */}
+          <span aria-hidden="true" className="pl-3 pr-1.5 text-xs text-fg-muted whitespace-nowrap">
+            {tBrowse("badge")}
+          </span>
+          {MD_LANG_FILTERS.map((l) => {
+            const isOn = mdLang === l;
+            return (
+              <Link
+                key={l}
+                href={searchHref({ ...filters, lang: l })}
+                scroll={false}
+                aria-current={isOn ? "true" : undefined}
+                className={segmentClass(isOn)}
+              >
+                {l === "all" ? tBrowse("langAll") : MD_LANG_LABELS[l]}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="hidden sm:block sm:ml-auto">
           <SortDropdown filters={filters} />
         </div>
       </div>

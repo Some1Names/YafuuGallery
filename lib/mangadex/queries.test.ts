@@ -6,7 +6,7 @@ import {
   getChapterFeed,
   getChapterPages,
   getManga,
-  searchManga,
+  listManga,
 } from "./queries";
 import { MangaDexError } from "./types";
 
@@ -201,42 +201,94 @@ describe("getChapterPages", () => {
   });
 });
 
-describe("searchManga", () => {
-  it("omits title when q is empty and orders by follows", async () => {
-    fetchMock.mockResolvedValue(json(collection([], 0)));
-    await searchManga({ q: "", lang: "en", page: 1, locale: "en" });
-    const params = new URL(urls()[0]).searchParams;
-    expect(params.has("title")).toBe(false);
-    expect(params.get("order[followedCount]")).toBe("desc");
+describe("listManga", () => {
+  const base = { q: "", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en" } as const;
+  const paramsOf = (index = 0) => new URL(urls()[index]).searchParams;
+  const empty = () => fetchMock.mockImplementation(async () => json(collection([], 0)));
+
+  it("browsing: no title, newest chapters first", async () => {
+    empty();
+    await listManga(base);
+    expect(paramsOf().has("title")).toBe(false);
+    expect(paramsOf().get("order[latestUploadedChapter]")).toBe("desc");
+    expect(paramsOf().get("limit")).toBe("24");
   });
 
-  it("sends the title and orders by relevance", async () => {
-    fetchMock.mockResolvedValue(json(collection([], 0)));
-    await searchManga({ q: "one piece", lang: "all", page: 1, locale: "en" });
-    const params = new URL(urls()[0]).searchParams;
-    expect(params.get("title")).toBe("one piece");
-    expect(params.get("order[relevance]")).toBe("desc");
-    expect(params.getAll("availableTranslatedLanguage[]")).toEqual(["th", "en"]);
+  it("maps each sort to MangaDex's order", async () => {
+    empty();
+    await listManga({ ...base, sort: "new" });
+    await listManga({ ...base, sort: "views" });
+    await listManga({ ...base, sort: "title" });
+    expect(paramsOf(0).get("order[createdAt]")).toBe("desc");
+    expect(paramsOf(1).get("order[followedCount]")).toBe("desc");
+    expect(paramsOf(2).get("order[title]")).toBe("asc");
   });
 
-  it("sets hasMore from the total", async () => {
+  it("searching with the default sort orders by relevance", async () => {
+    empty();
+    await listManga({ ...base, q: "one piece" });
+    expect(paramsOf().get("title")).toBe("one piece");
+    expect(paramsOf().get("order[relevance]")).toBe("desc");
+  });
+
+  it("searching with a chosen sort keeps that sort", async () => {
+    empty();
+    await listManga({ ...base, q: "one piece", sort: "views" });
+    expect(paramsOf().get("order[followedCount]")).toBe("desc");
+    expect(paramsOf().has("order[relevance]")).toBe(false);
+  });
+
+  it("sends the genre as MangaDex's tag id", async () => {
+    empty();
+    await listManga({ ...base, genre: "action" });
+    await listManga({ ...base, genre: "school-life" });
+    expect(paramsOf(0).getAll("includedTags[]")).toEqual(["391b0423-d847-456f-aff0-8b0cfc03066b"]);
+    expect(paramsOf(1).getAll("includedTags[]")).toEqual(["caaa44eb-cd40-4177-b930-79d3ef2afe87"]);
+  });
+
+  it("sends no tag without a genre", async () => {
+    empty();
+    await listManga(base);
+    expect(paramsOf().has("includedTags[]")).toBe(false);
+  });
+
+  it("sends the status filter", async () => {
+    empty();
+    await listManga({ ...base, status: "completed" });
+    await listManga(base);
+    expect(paramsOf(0).getAll("status[]")).toEqual(["completed"]);
+    expect(paramsOf(1).has("status[]")).toBe(false);
+  });
+
+  it("sends the chapter language, both for 'all'", async () => {
+    empty();
+    await listManga({ ...base, lang: "th" });
+    await listManga({ ...base, lang: "all" });
+    expect(paramsOf(0).getAll("availableTranslatedLanguage[]")).toEqual(["th"]);
+    expect(paramsOf(1).getAll("availableTranslatedLanguage[]")).toEqual(["th", "en"]);
+  });
+
+  it("returns the items, the total and whether more remain", async () => {
     // a Response body reads once, so build a new one per call
     fetchMock.mockImplementation(async () => json(collection([manga().data], 25)));
-    expect((await searchManga({ q: "", lang: "th", page: 1, locale: "th" })).hasMore).toBe(true);
-    expect((await searchManga({ q: "", lang: "th", page: 2, locale: "th" })).hasMore).toBe(false);
+    const first = await listManga(base);
+    expect(first.items).toHaveLength(1);
+    expect(first.total).toBe(25);
+    expect(first.hasMore).toBe(true);
+    expect((await listManga({ ...base, page: 2 })).hasMore).toBe(false);
   });
 
   it("clamps the page to 400", async () => {
-    fetchMock.mockResolvedValue(json(collection([], 0)));
-    await searchManga({ q: "", lang: "en", page: 9999, locale: "en" });
-    expect(new URL(urls()[0]).searchParams.get("offset")).toBe("9576");
+    empty();
+    await listManga({ ...base, page: 9999 });
+    expect(paramsOf().get("offset")).toBe("9576");
   });
 });
 
 describe("content rating", () => {
   it("is exactly safe + suggestive on every list and feed request", async () => {
     fetchMock.mockImplementation(async () => json(collection([], 0)));
-    await searchManga({ q: "x", lang: "en", page: 1, locale: "en" });
+    await listManga({ q: "x", genre: null, status: null, sort: "updated", lang: "en", page: 1, locale: "en" });
     await getChapterFeed(MANGA_ID, "th");
     expect(fetchMock).toHaveBeenCalledTimes(2);
     for (const url of urls()) {

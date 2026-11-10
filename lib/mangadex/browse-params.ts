@@ -1,15 +1,6 @@
-import { cleanSearchText } from "./client";
 import type { MdLanguage } from "./types";
-import type { MdLanguageFilter } from "./queries";
 
-// /browse's URL parameters (?q=&lang=&page=), read and written in one
-// place so the page, the language links and "Show more" agree.
-
-type Param = string | string[] | undefined;
-const first = (value: Param) => (Array.isArray(value) ? value[0] : value);
-
-// MangaDex refuses results past 10,000 — 400 pages of 24.
-const MAX_PAGE = 400;
+// Paging and language helpers for the MangaDex results on /search.
 
 // "Show more" re-renders the grid with every page so far. To keep one
 // visit from firing dozens of requests at MangaDex, only the most recent
@@ -20,29 +11,6 @@ const MAX_PAGES_PER_VISIT = 5;
 // only ever en or th, but this guards the type.
 export function toMdLanguage(locale: string | undefined): MdLanguage {
   return locale === "th" ? "th" : "en";
-}
-
-export function parseBrowseParams(
-  sp: { q?: Param; lang?: Param; page?: Param },
-  locale: MdLanguage,
-): { q: string; lang: MdLanguageFilter; page: number } {
-  const lang = first(sp.lang);
-  const pageText = first(sp.page) ?? "";
-  const page = /^\d+$/.test(pageText) ? Number(pageText) : 1;
-
-  return {
-    q: cleanSearchText(first(sp.q)),
-    lang: lang === "all" || lang === "th" || lang === "en" ? lang : locale,
-    page: Math.min(Math.max(page, 1), MAX_PAGE),
-  };
-}
-
-export function browseHref(p: { q?: string; lang?: MdLanguageFilter; page?: number }): string {
-  const parts: string[] = [];
-  if (p.q) parts.push(`q=${encodeURIComponent(p.q)}`);
-  if (p.lang) parts.push(`lang=${p.lang}`);
-  if (p.page && p.page > 1) parts.push(`page=${p.page}`);
-  return "/browse" + (parts.length ? `?${parts.join("&")}` : "");
 }
 
 export function pagesToFetch(page: number): number[] {

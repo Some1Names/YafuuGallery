@@ -72,7 +72,7 @@ export default async function BrowseTitlePage({ params, searchParams }: Props) {
 
       <div className="relative z-10 w-full max-w-350 text-fg">
         <Link
-          href="/browse"
+          href="/search"
           className="inline-flex items-center gap-1.5 py-2 mb-4 text-sm text-fg-secondary sm:text-white/70 hover:text-fg sm:hover:text-white transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />

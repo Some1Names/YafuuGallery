@@ -1,6 +1,6 @@
 import { isGenreSlug, isMangaStatus, type GenreSlug, type MangaStatusValue } from "@/lib/genres";
 
-// /search's URL state: ?q=&genre=&status=&sort=&page=. Kept in the URL
+// /search's URL state: ?q=&genre=&status=&sort=&lang=&page=. Kept in the URL
 // (not client state) like the query itself, so every filtered view is a
 // plain shareable link and the page stays fully server-rendered.
 
@@ -16,11 +16,19 @@ export const SORTS = [
 export type SortValue = (typeof SORTS)[number]["value"];
 export const DEFAULT_SORT: SortValue = "updated";
 
+// Which chapter language MangaDex results must be available in. Only
+// MangaDex has it — the site's own manga are listed whatever their
+// languages.
+export const MD_LANG_FILTERS = ["all", "th", "en"] as const;
+export type MdLangFilter = (typeof MD_LANG_FILTERS)[number];
+
 export interface SearchFilters {
   q: string;
   genre: GenreSlug | null;
   status: MangaStatusValue | null;
   sort: SortValue;
+  // unset = the page's default (the interface language)
+  lang?: MdLangFilter;
 }
 
 function first(raw: string | string[] | undefined): string | undefined {
@@ -33,11 +41,13 @@ export function parseSearchFilters(params: Record<string, string | string[] | un
   const genre = first(params.genre);
   const status = first(params.status);
   const sort = first(params.sort);
+  const lang = first(params.lang);
   return {
     q: (first(params.q) ?? "").trim(),
     genre: isGenreSlug(genre) ? genre : null,
     status: isMangaStatus(status) ? status : null,
     sort: SORTS.some((s) => s.value === sort) ? (sort as SortValue) : DEFAULT_SORT,
+    ...(MD_LANG_FILTERS.some((l) => l === lang) ? { lang: lang as MdLangFilter } : {}),
   };
 }
 
@@ -50,6 +60,7 @@ export function searchHref(filters: Partial<SearchFilters>, page?: number): stri
   if (filters.genre) params.set("genre", filters.genre);
   if (filters.status) params.set("status", filters.status);
   if (filters.sort && filters.sort !== DEFAULT_SORT) params.set("sort", filters.sort);
+  if (filters.lang) params.set("lang", filters.lang);
   if (page && page > 1) params.set("page", String(page));
   const qs = params.toString();
   return qs ? `/search?${qs}` : "/search";

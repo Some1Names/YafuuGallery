@@ -30,7 +30,7 @@ export default function ReadError({ error, retry }: { error: Error & { digest?: 
         {tStatus("tryAgain")}
       </button>
       <Link
-        href="/browse"
+        href="/search"
         className="px-6 py-2 bg-white text-black rounded-md text-sm hover:bg-white/85 transition-colors duration-200"
       >
         {t("backToBrowse")}

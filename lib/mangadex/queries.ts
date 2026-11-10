@@ -1,4 +1,7 @@
+import type { GenreSlug, MangaStatusValue } from "@/lib/genres";
+import { DEFAULT_SORT, type SortValue } from "@/lib/search-filters";
 import { cleanSearchText, isUuid, mdFetch, type MdParams } from "./client";
+import { GENRE_TAG_IDS } from "./genre-tags";
 import { sortChapters, toChapter, toManga, toMangaSummary } from "./map";
 import {
   MD_CONTENT_RATINGS,
@@ -30,56 +33,56 @@ const CACHE = { lists: 300, manga: 3600, feed: 600, chapter: 3600 } as const;
 const FEED_PAGE_SIZE = 500;
 const FEED_MAX_REQUESTS = 10;
 
-function listParams(lang: MdLanguageFilter, limit: number, offset: number, order: Record<string, string>): MdParams {
-  return {
-    limit,
-    offset,
-    includes: ["cover_art"],
-    contentRating: MD_CONTENT_RATINGS,
-    availableTranslatedLanguage: lang === "all" ? MD_LANGUAGES : [lang],
-    hasAvailableChapters: "true",
-    order,
-  };
-}
+// /search's sort choices in MangaDex's terms. "views" has no equal
+// there (MangaDex doesn't publish view counts); follows is its measure
+// of popularity.
+const ORDER: Record<SortValue, Record<string, string>> = {
+  updated: { latestUploadedChapter: "desc" },
+  new: { createdAt: "desc" },
+  views: { followedCount: "desc" },
+  title: { title: "asc" },
+};
 
-export async function searchManga(a: {
+// One page of MangaDex titles for /search, under the same filters as
+// the site's own manga: search text, genre, status and sort, plus the
+// chapter language (which only MangaDex has).
+export async function listManga(a: {
   q: string;
+  genre: GenreSlug | null;
+  status: MangaStatusValue | null;
+  sort: SortValue;
   lang: MdLanguageFilter;
   page: number;
   locale: MdLanguage;
-}): Promise<{ items: MdMangaSummary[]; hasMore: boolean }> {
+}): Promise<{ items: MdMangaSummary[]; total: number; hasMore: boolean }> {
   const q = cleanSearchText(a.q);
   const page = Math.min(Math.max(Math.trunc(a.page) || 1, 1), MAX_PAGE);
   const offset = (page - 1) * MD_PAGE_SIZE;
+  // A search left on the default sort is ordered by how well titles
+  // match — "recently updated" would bury the title that was typed.
+  const order = q && a.sort === DEFAULT_SORT ? { relevance: "desc" } : ORDER[a.sort];
 
-  const res = await mdFetch<RawCollection<RawManga>>(
-    "/manga",
-    {
-      ...(q ? { title: q } : {}),
-      ...listParams(a.lang, MD_PAGE_SIZE, offset, q ? { relevance: "desc" } : { followedCount: "desc" }),
-    },
-    { revalidate: CACHE.lists },
-  );
+  const params: MdParams = {
+    ...(q ? { title: q } : {}),
+    limit: MD_PAGE_SIZE,
+    offset,
+    includes: ["cover_art"],
+    contentRating: MD_CONTENT_RATINGS,
+    availableTranslatedLanguage: a.lang === "all" ? MD_LANGUAGES : [a.lang],
+    hasAvailableChapters: "true",
+    ...(a.genre ? { includedTags: [GENRE_TAG_IDS[a.genre]] } : {}),
+    ...(a.status ? { status: [a.status] } : {}),
+    order,
+  };
+
+  const res = await mdFetch<RawCollection<RawManga>>("/manga", params, { revalidate: CACHE.lists });
+  const total = res.total ?? 0;
 
   return {
     items: (res.data ?? []).map((m) => toMangaSummary(m, a.locale)),
-    hasMore: page < MAX_PAGE && offset + MD_PAGE_SIZE < (res.total ?? 0),
+    total,
+    hasMore: page < MAX_PAGE && offset + MD_PAGE_SIZE < total,
   };
-}
-
-async function topManga(lang: MdLanguageFilter, locale: MdLanguage, order: Record<string, string>) {
-  const res = await mdFetch<RawCollection<RawManga>>("/manga", listParams(lang, 12, 0, order), {
-    revalidate: CACHE.lists,
-  });
-  return (res.data ?? []).map((m) => toMangaSummary(m, locale));
-}
-
-export function getPopular(lang: MdLanguageFilter, locale: MdLanguage): Promise<MdMangaSummary[]> {
-  return topManga(lang, locale, { followedCount: "desc" });
-}
-
-export function getLatest(lang: MdLanguageFilter, locale: MdLanguage): Promise<MdMangaSummary[]> {
-  return topManga(lang, locale, { latestUploadedChapter: "desc" });
 }
 
 function allowedRating(raw: RawManga): boolean {

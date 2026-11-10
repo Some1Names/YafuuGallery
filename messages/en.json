@@ -19,8 +19,7 @@
     "signOut": "Sign out",
     "menu": "Menu",
     "menuWithNew": "Menu ({count, plural, one {# new chapter} other {# new chapters}})",
-    "newChapters": "({count, plural, one {# new chapter} other {# new chapters}})",
-    "mangadex": "MangaDex"
+    "newChapters": "({count, plural, one {# new chapter} other {# new chapters}})"
   },
   "Theme": {
     "toLight": "Switch to light theme",
@@ -685,23 +684,12 @@
     "loadMoreFailed": "Couldn't load more — please try again."
   },
   "Browse": {
-    "title": "Browse MangaDex",
-    "description": "Search and read manga from MangaDex.",
-    "subtitle": "Manga from MangaDex, read here. Translations are the work of the groups credited on each chapter.",
-    "searchLabel": "Search MangaDex",
-    "searchPlaceholder": "Search MangaDex…",
-    "searchButton": "Search",
     "langLabel": "Chapter language",
     "langAll": "All",
-    "popular": "Popular",
-    "latest": "Latest updates",
-    "resultsFor": "Results for <q>“{query}”</q>",
-    "empty": "Nothing found.",
-    "emptyTryOther": "Try {language} instead.",
     "source": "Source: MangaDex",
     "errorTitle": "MangaDex is not responding",
     "errorMessage": "The rest of the site is fine. Try again in a moment.",
-    "backToBrowse": "Back to MangaDex",
+    "backToBrowse": "Back to Browse",
     "status": {
       "ongoing": "Ongoing",
       "completed": "Completed",
@@ -716,7 +704,9 @@
     "noChapters": "No chapters in this language.",
     "translatedBy": "Translated by {groups}",
     "by": "By {authors}",
-    "earlier": "Show earlier results"
+    "earlier": "Show earlier results",
+    "badge": "MangaDex",
+    "unavailable": "Couldn't load titles from MangaDex right now."
   },
   "MdReader": {
     "back": "Back to title",

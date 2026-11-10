@@ -19,8 +19,7 @@
     "signOut": "ออกจากระบบ",
     "menu": "เมนู",
     "menuWithNew": "เมนู (มีตอนใหม่ {count, number} ตอน)",
-    "newChapters": "(ตอนใหม่ {count, number} ตอน)",
-    "mangadex": "MangaDex"
+    "newChapters": "(ตอนใหม่ {count, number} ตอน)"
   },
   "Theme": {
     "toLight": "เปลี่ยนเป็นธีมสว่าง",
@@ -685,23 +684,12 @@
     "loadMoreFailed": "โหลดเพิ่มไม่สำเร็จ — โปรดลองอีกครั้ง"
   },
   "Browse": {
-    "title": "สำรวจ MangaDex",
-    "description": "ค้นหาและอ่านมังงะจาก MangaDex",
-    "subtitle": "มังงะจาก MangaDex อ่านได้ที่นี่ งานแปลเป็นผลงานของกลุ่มแปลที่ระบุไว้ในแต่ละตอน",
-    "searchLabel": "ค้นหาใน MangaDex",
-    "searchPlaceholder": "ค้นหาใน MangaDex…",
-    "searchButton": "ค้นหา",
     "langLabel": "ภาษาของตอน",
     "langAll": "ทั้งหมด",
-    "popular": "ยอดนิยม",
-    "latest": "อัปเดตล่าสุด",
-    "resultsFor": "ผลการค้นหา <q>“{query}”</q>",
-    "empty": "ไม่พบผลลัพธ์",
-    "emptyTryOther": "ลองค้นหาในภาษา{language}",
     "source": "ที่มา: MangaDex",
     "errorTitle": "MangaDex ไม่ตอบสนอง",
     "errorMessage": "ส่วนอื่นของเว็บยังใช้งานได้ ลองใหม่อีกครั้งในอีกสักครู่",
-    "backToBrowse": "กลับไปหน้า MangaDex",
+    "backToBrowse": "กลับไปหน้าสำรวจ",
     "status": {
       "ongoing": "ยังไม่จบ",
       "completed": "จบแล้ว",
@@ -716,7 +704,9 @@
     "noChapters": "ยังไม่มีตอนในภาษานี้",
     "translatedBy": "แปลโดย {groups}",
     "by": "โดย {authors}",
-    "earlier": "ดูผลลัพธ์ก่อนหน้า"
+    "earlier": "ดูผลลัพธ์ก่อนหน้า",
+    "badge": "MangaDex",
+    "unavailable": "โหลดรายการจาก MangaDex ไม่ได้ในขณะนี้"
   },
   "MdReader": {
     "back": "กลับไปหน้าเรื่อง",

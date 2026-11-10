@@ -70,3 +70,20 @@ describe("pagination", () => {
     expect(splitExtraRow([1, 2], 2)).toEqual({ items: [1, 2], hasMore: false });
   });
 });
+
+describe("lang (MangaDex chapter language)", () => {
+  it("is read when valid", () => {
+    expect(parseSearchFilters({ lang: "th" }).lang).toBe("th");
+    expect(parseSearchFilters({ lang: "all" }).lang).toBe("all");
+  });
+
+  it("is left unset when missing or unknown, so the page can use its default", () => {
+    expect(parseSearchFilters({}).lang).toBeUndefined();
+    expect(parseSearchFilters({ lang: "fr" }).lang).toBeUndefined();
+  });
+
+  it("is kept in links when set", () => {
+    expect(searchHref({ genre: "action", lang: "en" })).toBe("/search?genre=action&lang=en");
+    expect(searchHref({ lang: "all" }, 2)).toBe("/search?lang=all&page=2");
+  });
+});

@@ -94,6 +94,7 @@ export default function SearchInput({ initialQuery, filters }: SearchInputProps)
       {filters.genre && <input type="hidden" name="genre" value={filters.genre} />}
       {filters.status && <input type="hidden" name="status" value={filters.status} />}
       {filters.sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={filters.sort} />}
+      {filters.lang && <input type="hidden" name="lang" value={filters.lang} />}
       <div className="relative max-w-xl">
         <label htmlFor="search-input" className="sr-only">
           {t("inputLabel")}

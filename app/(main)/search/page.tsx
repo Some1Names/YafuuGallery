@@ -9,11 +9,13 @@ import SearchInput from "@/component/search/SearchInput";
 import SearchResultsRecorder from "@/component/search/SearchResultsRecorder";
 import { formatChapterBadge, getChapterDisplayNumbers } from "@/lib/chapter-number";
 import { parsePageCount, splitExtraRow } from "@/lib/pagination";
-import ShowMoreLink from "@/component/ShowMoreLink";
 import SearchFilterBar from "@/component/search/SearchFilterBar";
 import SortDropdown from "@/component/search/SortDropdown";
 import { parseSearchFilters, searchHref, type SortValue } from "@/lib/search-filters";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+import { MdSearchFallback, MdSearchResults, WithMdTotal, type MdSearchArgs } from "@/component/mangadex/MdSearchResults";
+import { toMdLanguage } from "@/lib/mangadex/browse-params";
 
 const RESULTS_PAGE_SIZE = 20;
 
@@ -51,7 +53,13 @@ export default async function SearchPage({
   const t = await getTranslations("Search");
   const tGenre = await getTranslations("Genres");
   const { q: query, genre, status, sort } = filters;
-  const filtersOnly = { genre, status, sort };
+  // MangaDex titles are listed in the same grid, after the site's own
+  // (component/mangadex/MdSearchResults). Their chapter language is the
+  // one filter the site's manga don't have: ?lang=, else the interface
+  // language.
+  const locale = toMdLanguage(await getLocale());
+  const mdLang = filters.lang ?? locale;
+  const filtersOnly = { genre, status, sort, lang: filters.lang };
   const page = params.page;
   const isSearching = query !== "";
   const isFiltered = genre !== null || status !== null;
@@ -97,6 +105,7 @@ export default async function SearchPage({
     prisma.manga.count({ where }),
   ]);
   const { items: mangaList, hasMore } = splitExtraRow(resultRows, resultsLimit);
+  const mdArgs: MdSearchArgs = { q: query, genre, status, sort, lang: mdLang, pageCount, locale };
 
   const showMoreHref = searchHref(filters, pageCount + 1);
   const clearFiltersHref = searchHref({ q: query, sort });
@@ -115,6 +124,48 @@ export default async function SearchPage({
       <SortDropdown filters={filters} />
     </div>
   );
+
+  // Shown in the grid's place when neither the site nor MangaDex has
+  // anything for these filters.
+  const emptyMessage = (
+    <p className="text-fg-secondary text-center mt-12 text-sm">
+      {isSearching ? (
+        isFiltered ? (
+          <>
+            {t("noResultsFiltered", { query })} {clearFiltersLink}
+          </>
+        ) : (
+          t("noResults", { query })
+        )
+      ) : isFiltered ? (
+        <>
+          {t("noMatchFilters")} {clearFiltersLink}
+        </>
+      ) : (
+        t("noneYet")
+      )}
+    </p>
+  );
+
+  // The line above the grid, for a given number of results. Nothing at
+  // zero: the grid shows the nothing-found message instead.
+  const heading = (count: number) =>
+    count === 0 ? null : isSearching ? (
+      <p className="min-w-0 text-sm text-fg-secondary wrap-anywhere">
+        {t.rich("resultsFor", {
+          count,
+          query,
+          q: (chunks) => <span className="text-fg">{chunks}</span>,
+        })}
+      </p>
+    ) : (
+      <h2 className="min-w-0 text-xl text-fg font-(family-name:--font-display)">
+        {genre ? tGenre(genre) : t("allManga")}
+        <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
+          {count.toLocaleString()}
+        </span>
+      </h2>
+    );
 
   const grid = (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
@@ -164,6 +215,25 @@ export default async function SearchPage({
           </div>
         );
       })}
+
+      {/* MangaDex titles for the same filters, streamed in after the
+          site's own. This also renders what closes the grid: "Show
+          more", and the nothing-found message when both are empty. */}
+      <Suspense
+        // a new search or filter shows the blank cards again instead of
+        // leaving the previous results up
+        key={searchHref(filters, pageCount) + mdLang}
+        fallback={<MdSearchFallback ownHasMore={hasMore} showMoreHref={showMoreHref} />}
+      >
+        <MdSearchResults
+          args={mdArgs}
+          ownCount={totalCount}
+          ownHasMore={hasMore}
+          showMoreHref={showMoreHref}
+          earlierHref={(page) => searchHref(filters, page)}
+          emptyMessage={emptyMessage}
+        />
+      </Suspense>
     </div>
   );
 
@@ -187,60 +257,18 @@ export default async function SearchPage({
 
         <RecentSearches query={query} filters={filtersOnly} />
 
-        <SearchFilterBar filters={filters} />
+        <SearchFilterBar filters={filters} mdLang={mdLang} />
 
-        {isSearching ? (
-          totalCount === 0 ? (
-            <p className="text-fg-secondary text-center mt-12 text-sm">
-              {isFiltered ? (
-                <>
-                  {t("noResultsFiltered", { query })} {clearFiltersLink}
-                </>
-              ) : (
-                t("noResults", { query })
-              )}
-            </p>
-          ) : (
-            <>
-              <div className="flex items-center justify-between gap-3 mb-5">
-                <p className="min-w-0 text-sm text-fg-secondary wrap-anywhere">
-                  {t.rich("resultsFor", {
-                    count: totalCount,
-                    query,
-                    q: (chunks) => <span className="text-fg">{chunks}</span>,
-                  })}
-                </p>
-                {phoneSort}
-              </div>
-              <SearchResultsRecorder query={query}>{grid}</SearchResultsRecorder>
-            </>
-          )
-        ) : totalCount === 0 ? (
-          <p className="text-fg-secondary text-center mt-12 text-sm">
-            {isFiltered ? (
-              <>
-                {t("noMatchFilters")} {clearFiltersLink}
-              </>
-            ) : (
-              t("noneYet")
-            )}
-          </p>
-        ) : (
-          <>
-            <div className="flex items-center justify-between gap-3 mb-5">
-              <h2 className="min-w-0 text-xl text-fg font-(family-name:--font-display)">
-                {genre ? tGenre(genre) : t("allManga")}
-                <span className="ml-2 align-middle text-xs text-fg-muted font-(family-name:--font-body) font-medium">
-                  {totalCount}
-                </span>
-              </h2>
-              {phoneSort}
-            </div>
-            {grid}
-          </>
-        )}
+        <div className="flex items-center justify-between gap-3 mb-5 min-h-7">
+          {/* The count covers both sources, so it waits for MangaDex's
+              total; until then it shows the site's own. */}
+          <Suspense key={searchHref(filters) + mdLang} fallback={heading(totalCount)}>
+            <WithMdTotal args={mdArgs}>{(mdTotal) => heading(totalCount + mdTotal)}</WithMdTotal>
+          </Suspense>
+          {phoneSort}
+        </div>
 
-        {hasMore && <ShowMoreLink href={showMoreHref} />}
+        {isSearching ? <SearchResultsRecorder query={query}>{grid}</SearchResultsRecorder> : grid}
       </div>
     </div>
   );
