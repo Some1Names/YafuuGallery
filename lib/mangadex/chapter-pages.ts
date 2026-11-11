@@ -2,7 +2,7 @@
 // series have hundreds of chapters; shown all at once the page runs on
 // for screens and the details column is left stranded at the top.
 
-export const CHAPTERS_PER_PAGE = 20;
+export const CHAPTERS_PER_PAGE = 10;
 
 // How many pages a list of `total` chapters takes. Never 0: an empty
 // list is still one (empty) page.
