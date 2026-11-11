@@ -703,7 +703,11 @@
     "translatedBy": "แปลโดย {groups}",
     "earlier": "ดูผลลัพธ์ก่อนหน้า",
     "badge": "MangaDex",
-    "unavailable": "โหลดรายการจาก MangaDex ไม่ได้ในขณะนี้"
+    "unavailable": "โหลดรายการจาก MangaDex ไม่ได้ในขณะนี้",
+    "pagerLabel": "หน้าของรายการตอน",
+    "pagePrev": "หน้าก่อนหน้า",
+    "pageNext": "หน้าถัดไป",
+    "pageN": "หน้า {n}"
   },
   "MdReader": {
     "back": "กลับไปหน้าเรื่อง",

@@ -703,7 +703,11 @@
     "translatedBy": "Translated by {groups}",
     "earlier": "Show earlier results",
     "badge": "MangaDex",
-    "unavailable": "Couldn't load titles from MangaDex right now."
+    "unavailable": "Couldn't load titles from MangaDex right now.",
+    "pagerLabel": "Chapter pages",
+    "pagePrev": "Previous page",
+    "pageNext": "Next page",
+    "pageN": "Page {n}"
   },
   "MdReader": {
     "back": "Back to title",
