@@ -12,6 +12,8 @@ import ShowMoreLink from "@/component/ShowMoreLink";
 import { GENRES } from "@/lib/genres";
 import { searchHref } from "@/lib/search-filters";
 import { getTranslations } from "next-intl/server";
+import { getImageProps } from "next/image";
+import { preload } from "react-dom";
 
 const LATEST_PAGE_SIZE = 10;
 // One row of the 5-column grid. The Popular row only shows once the
@@ -88,6 +90,19 @@ function SectionHeader({
   );
 }
 
+// A featured banner as the carousel should load it: through the image
+// optimizer, 1920px wide, instead of the original upload (banners are
+// uploaded up to 7680px wide and run to hundreds of KB). The carousel
+// paints banners as CSS backgrounds, which can't use next/image itself,
+// so this asks next/image for the URL it would have used.
+function heroBannerUrl(src: string | null): string | null {
+  if (!src) return null;
+  const { props } = getImageProps({ src, alt: "", width: 1920, height: 540 });
+  // srcSet is "<1920 url> 1x, <3840 url> 2x"; the 1x one is wide enough
+  // for a banner that is capped at the page's content width
+  return props.srcSet?.split(", ")[0]?.split(" ")[0] ?? props.src;
+}
+
 export default async function BrowsePage({
   searchParams,
 }: {
@@ -162,9 +177,16 @@ export default async function BrowsePage({
     id: m.id,
     title: m.manga_title,
     synopsis: m.manga_synopsis,
-    bannerImageUrl: m.banner_image_url,
+    bannerImageUrl: heroBannerUrl(m.banner_image_url),
     firstChapterId: m.chapters[0]?.id ?? null,
   }));
+  // The first banner is the biggest thing on the page, but as a CSS
+  // background the browser only finds it late and fetches it at low
+  // priority. Ask for it up front.
+  if (featuredSlides[0]?.bannerImageUrl) {
+    preload(featuredSlides[0].bannerImageUrl, { as: "image", fetchPriority: "high" });
+  }
+
 
   // Logged-in users with no history yet just skip the section entirely —
   // unlike the profile page's own "no history yet" placeholder, an empty
@@ -193,7 +215,7 @@ export default async function BrowsePage({
         <div
           className="hidden sm:block absolute inset-0 bg-cover bg-center opacity-20 [.light_&]:opacity-55 [.light_&]:mix-blend-multiply"
           style={{
-            backgroundImage: `url('/mangabg.png')`,
+            backgroundImage: `url('/mangabg.webp')`,
           }}
         />
 

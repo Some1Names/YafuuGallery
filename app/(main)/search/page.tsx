@@ -242,7 +242,7 @@ export default async function SearchPage({
       className="relative min-h-screen bg-bg px-6 sm:px-8 py-12"
     >
       <div className="hidden sm:block">
-        <MangaBackground imageUrl="/mangabg.png" />
+        <MangaBackground imageUrl="/mangabg.webp" />
       </div>
 
       <div className="relative z-10 max-w-350 mx-auto">

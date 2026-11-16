@@ -23,7 +23,7 @@ interface MangaBackgroundProps {
 // the page's own banner/art rather than a second busy image competing with
 // it. The black tint above it is unchanged — that's what keeps the white
 // page headers legible in both themes.
-export default function MangaBackground({ imageUrl = "/mangabg.png", fill = false }: MangaBackgroundProps) {
+export default function MangaBackground({ imageUrl = "/mangabg.webp", fill = false }: MangaBackgroundProps) {
   return (
     <div className={fill ? "absolute inset-0" : "absolute inset-x-0 top-0 h-125 md:h-150"}>
       <div

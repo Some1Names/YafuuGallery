@@ -229,7 +229,7 @@ export default async function MangaDetailPage({
             className="relative min-h-screen bg-bg px-0 sm:px-5 py-0 sm:py-12 md:py-20 flex justify-center"
         >
             <div className="hidden sm:block">
-                <MangaBackground imageUrl="/mangabg.png" />
+                <MangaBackground imageUrl="/mangabg.webp" />
             </div>
 
             <div className="relative z-10 w-full max-w-350 text-fg">
