@@ -174,6 +174,7 @@ Then open http://localhost:3000.
 The site runs on Vercel, which deploys every push to `master`.
 
 * Set the environment variables above in the Vercel project. Don't set `NODE_ENV` — Vercel manages it.
+* `vercel.json` runs the server code in Mumbai (`bom1`), the region the database is in (Supabase `ap-south-1`). Every page asks the database several times, so the two must sit together: in Vercel's default US region each of those questions crossed the world and back. If the database ever moves, move this with it.
 * The build doesn't run migrations. After changing `prisma/schema.prisma`, apply the new migration to the production database with `bunx prisma migrate deploy` before (or right as) the code that needs it goes live.
 * For Google sign-in, add `https://your-domain.com/api/auth/callback/google` as an authorized redirect URI in Google Cloud Console.
 
