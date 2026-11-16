@@ -9,7 +9,10 @@
   --color-fg: #ece6d8;
   --color-fg-hover: #f6f1f2;
   --color-fg-secondary: #b6b0a2;
-  --color-fg-muted: #6b655e;
+  /* 4.6:1 or better on bg, surface and surface-hover — it's used at
+     12px (dates, counts, hints), where WCAG AA asks for 4.5:1. The
+     old #6b655e managed only 2.8–3.4. */
+  --color-fg-muted: #918a80;
   --color-texture: #302e2a;
   --color-danger: #9c1d25;
   /* Red for TEXT and outlines. --color-danger is only 2.5:1 on the dark
@@ -313,5 +316,21 @@ input[type="search"]::-webkit-search-cancel-button {
   textarea,
   select {
     font-size: 16px;
+  }
+}
+
+/* Secondary text in a page header that sits on MangaBackground (the
+   banner behind "Browse", "Favorites", …). In the dark theme the banner
+   is dark and the usual secondary colour reads fine. In the light theme
+   the banner fades to a mid grey (about rgb 177,173,167) behind the
+   header, where the secondary colour gets only 2.7:1 — so there the
+   main text colour is used instead (7:1). The banner only exists from
+   sm up; below that the header is on the plain page background. */
+.banner-soft {
+  color: var(--color-fg-secondary);
+}
+@media (min-width: 640px) {
+  html.light .banner-soft {
+    color: var(--color-fg);
   }
 }

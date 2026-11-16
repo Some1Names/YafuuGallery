@@ -21,8 +21,10 @@ interface MangaBackgroundProps {
 //
 // The image itself is faded (opacity-40) so it reads as a texture behind
 // the page's own banner/art rather than a second busy image competing with
-// it. The black tint above it is unchanged — that's what keeps the white
-// page headers legible in both themes.
+// it. Page headers on top of it use the theme's own text colours, not
+// white: in the light theme the fade to the page background leaves a mid
+// grey behind the header, where white text measured about 2.2:1 (see
+// .banner-soft in globals.css for the secondary line).
 export default function MangaBackground({ imageUrl = "/mangabg.webp", fill = false }: MangaBackgroundProps) {
   return (
     <div className={fill ? "absolute inset-0" : "absolute inset-x-0 top-0 h-125 md:h-150"}>

@@ -29,8 +29,8 @@ export default function LegalPage({
 
       <div className="relative z-10 max-w-350 mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl text-fg sm:text-white font-(family-name:--font-display) mb-2">{title}</h1>
-          <p className="text-sm text-fg-secondary sm:text-white/70">{t("lastUpdated", { date: updated })}</p>
+          <h1 className="text-3xl text-fg font-(family-name:--font-display) mb-2">{title}</h1>
+          <p className="text-sm banner-soft">{t("lastUpdated", { date: updated })}</p>
         </div>
 
         <article className="max-w-3xl border border-border rounded-md bg-surface/60 p-5 sm:p-8 flex flex-col gap-8 text-fg-secondary leading-relaxed">

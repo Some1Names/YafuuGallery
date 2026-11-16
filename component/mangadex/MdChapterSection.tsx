@@ -121,11 +121,11 @@ export default function MdChapterSection({
           <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 bg-fg" />
         </h2>
 
-        <div className="flex items-center gap-4 pb-3">
+        <div className="flex items-center gap-2.5 pb-3">
           {/* Which translation to list — a link, since each language is
               its own set of chapters fetched by the page. */}
           {languages.length > 1 && (
-            <nav aria-label={tBrowse("langLabel")} className="flex gap-3 text-xs">
+            <nav aria-label={tBrowse("langLabel")} className="flex gap-1.5 text-xs">
               {languages.map((l) => (
                 <Link
                   key={l}
@@ -133,7 +133,8 @@ export default function MdChapterSection({
                   scroll={false}
                   aria-current={l === language ? "true" : undefined}
                   className={
-                    "transition-colors duration-200 " +
+                    // py/-my: a 40px-tall tap area without making the row taller
+                    "inline-flex items-center justify-center min-w-9 px-2 py-3 -my-3 transition-colors duration-200 " +
                     (l === language
                       ? "text-fg font-semibold underline underline-offset-4"
                       : "text-fg-secondary hover:text-fg")
@@ -153,7 +154,7 @@ export default function MdChapterSection({
               setPage(1);
             }}
             aria-label={sortOrder === "asc" ? t("oldestFirst") : t("newestFirst")}
-            className="flex items-center gap-1.5 text-xs text-fg-secondary hover:text-fg whitespace-nowrap transition-colors duration-200"
+            className="flex items-center gap-1.5 px-1.5 py-3 -my-3 text-xs text-fg-secondary hover:text-fg whitespace-nowrap transition-colors duration-200"
           >
             <ArrowDownUp className="w-3.5 h-3.5" />
             <span className="sm:hidden">{sortOrder === "asc" ? t("oldest") : t("newest")}</span>

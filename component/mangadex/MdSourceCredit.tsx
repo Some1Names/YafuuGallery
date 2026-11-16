@@ -21,7 +21,8 @@ export default function MdSourceCredit({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 underline underline-offset-4 hover:text-fg transition-colors duration-200"
+        // py/-my: a 40px-tall tap area in the same space
+        className="inline-flex items-center gap-1 py-2.5 -my-2.5 underline underline-offset-4 hover:text-fg transition-colors duration-200"
       >
         {t("source")}
         <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />

@@ -340,7 +340,12 @@ export default function FeaturedCarousel({ manga }: FeaturedCarouselProps) {
       {/* Scrim: guarantees text/button contrast no matter how bright the
           banner image is — a light banner would otherwise wash out the
           white text and the white "Start Reading" button */}
-      <div className="absolute inset-0 bg-linear-to-r from-black/70 to-transparent" />
+      {/* Darkest where the title, synopsis and buttons are (the left
+          half), clear by the right edge. Strong enough that text stays
+          readable over a banner with its own dark lettering or art on
+          the left — a plain black/70 fade let the synopsis collide with
+          it. */}
+      <div className="absolute inset-0 bg-linear-to-r from-black/85 via-black/60 via-45% to-transparent" />
 
       {/* Edge click zones to step through slides — desktop only, since
           swipe already covers this on touch. Sit above the scrim but

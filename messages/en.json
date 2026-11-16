@@ -166,8 +166,8 @@
     "description": "Read {badge} — {chapter} of {manga} on YafuuGallery."
   },
   "Search": {
-    "title": "Search",
-    "subtitle": "Find manga by title, author, or chapter name.",
+    "title": "Browse",
+    "subtitle": "Search and filter manga: the site's own, and well-known titles from MangaDex.",
     "metaQuery": "“{query}” – Search",
     "metaGenre": "{genre} manga",
     "inputLabel": "Search manga",

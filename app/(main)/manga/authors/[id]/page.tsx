@@ -84,14 +84,14 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-widest text-fg-secondary sm:text-white/70">{t("eyebrow")}</p>
-            <h1 className="text-3xl sm:text-4xl text-fg sm:text-white font-(family-name:--font-display) wrap-anywhere">
+            <p className="text-xs uppercase tracking-widest banner-soft">{t("eyebrow")}</p>
+            <h1 className="text-3xl sm:text-4xl text-fg font-(family-name:--font-display) wrap-anywhere">
               {name}
               {/* the tag tells apart two authors with the same name;
                   inline-block so it moves to the next line whole instead
                   of breaking mid-number ("#3" / "021") on a narrow phone */}
               {author.tag && (
-                <span className="inline-block ml-2 align-middle text-base text-fg-muted sm:text-white/50 font-(family-name:--font-body)">
+                <span className="inline-block ml-2 align-middle text-base banner-soft font-(family-name:--font-body)">
                   #{author.tag}
                 </span>
               )}

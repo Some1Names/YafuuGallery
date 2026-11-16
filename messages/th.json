@@ -166,8 +166,8 @@
     "description": "อ่าน {badge} — {chapter} ของ {manga} บน YafuuGallery"
   },
   "Search": {
-    "title": "ค้นหา",
-    "subtitle": "ค้นหามังงะจากชื่อเรื่อง ผู้เขียน หรือชื่อตอน",
+    "title": "สำรวจ",
+    "subtitle": "ค้นหาและกรองมังงะ ทั้งของเว็บเองและเรื่องดังจาก MangaDex",
     "metaQuery": "“{query}” – ค้นหา",
     "metaGenre": "มังงะแนว{genre}",
     "inputLabel": "ค้นหามังงะ",
