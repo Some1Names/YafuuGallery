@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDownUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import LocalDate from "@/component/LocalDate";
 import NoImagePlaceholder from "@/component/NoImagePlaceholder";
 import { pageCount, pageSlice, pagerItems } from "@/lib/mangadex/chapter-pages";
-import { chapterBadge } from "@/lib/mangadex/map";
+import { chapterBadge, chapterThumbPath } from "@/lib/mangadex/map";
 import type { MdChapter, MdLanguage } from "@/lib/mangadex/types";
 
 // The chapter list on a MangaDex title page, made to look like the one
@@ -15,15 +15,61 @@ import type { MdChapter, MdLanguage } from "@/lib/mangadex/types";
 // "Chapters" heading with its count on a ruled line, an oldest/newest
 // toggle on the right, and rows with a picture, "#012", date and name.
 //
-// Differences from the site's own rows, all because MangaDex has less to
-// offer or the feature isn't built for it yet: the picture is the
-// manga's cover (MangaDex has no per-chapter image), the last line names
-// the scanlation group instead of like/comment counts, and there is no
-// favorite heart or Arcs tab.
+// Each row's picture is the chapter's first page, as on the site's own
+// rows — made on demand by our thumbnail route, since nothing from
+// MangaDex is stored (see app/api/mangadex/thumb). Until it arrives, or
+// if it can't be made, the manga's cover shows instead.
+//
+// Differences from the site's own rows, because the feature isn't built
+// for MangaDex yet: the last line names the scanlation group instead of
+// like/comment counts, and there is no favorite heart or Arcs tab.
 //
 // The list is paged (lib/mangadex/chapter-pages.ts): long series have
 // hundreds of chapters. All of them are already here — the page sends
 // the whole list — so turning a page is instant and needs no request.
+
+// A row's picture: the chapter's first page over the manga's cover. The
+// cover is always underneath, so there is something to see while the
+// thumbnail is being made (the first request for a chapter takes a
+// moment) and whenever it can't be.
+function ChapterThumb({ chapterId, coverUrl }: { chapterId: string; coverUrl: string | null }) {
+  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement>(null);
+
+  // The first rows are in the server-rendered HTML and can fail before
+  // React is listening; an image's error event isn't replayed.
+  useEffect(() => {
+    const img = ref.current;
+    if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+  }, []);
+
+  if (!coverUrl && failed) return <NoImagePlaceholder />;
+
+  return (
+    <>
+      {/* Plain <img>s: both are small files from our own cached routes,
+          so the image optimizer would only re-encode them again. */}
+      {coverUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={coverUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+      )}
+      {!failed && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          ref={ref}
+          src={chapterThumbPath(chapterId)}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+          // the top of the page: that's where a first page has its title
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+      )}
+      <div className="absolute inset-0 bg-linear-to-r from-transparent via-surface/20 to-surface" />
+    </>
+  );
+}
 
 const LANGUAGE_NAMES: Record<MdLanguage, string> = { th: "ไทย", en: "English" };
 
@@ -131,24 +177,9 @@ export default function MdChapterSection({
                 className="relative h-24 sm:h-30 group flex items-center gap-3 sm:gap-8 cursor-pointer bg-surface/95 hover:bg-surface-hover border border-border hover:border-fg-hover has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-fg transition-colors duration-200"
               >
                 <div className="relative aspect-square min-[360px]:aspect-4/3 sm:aspect-auto w-auto sm:w-54 h-full overflow-hidden shrink-0 bg-surface">
-                  {coverUrl ? (
-                    <>
-                      {/* Plain <img>: a thumbnail from our own cached cover
-                          route (see MdMangaCard). The same file for every
-                          row, so the browser fetches it once. */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={coverUrl}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-r from-transparent via-surface/20 to-surface" />
-                    </>
-                  ) : (
-                    <NoImagePlaceholder />
-                  )}
+                  {/* keyed by chapter: a row reused for another chapter
+                      (page or sort change) starts its picture afresh */}
+                  <ChapterThumb key={chapter.id} chapterId={chapter.id} coverUrl={coverUrl} />
                 </div>
 
                 <div className="min-w-0 w-full pr-3 sm:pr-8">

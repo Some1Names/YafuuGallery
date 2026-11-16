@@ -249,3 +249,10 @@ export function chapterBadge(c: MdChapter, oneshot: string): string {
   const match = /^(\d+)(.*)$/.exec(c.number);
   return match ? `#${match[1].padStart(3, "0")}${match[2]}` : `#${c.number}`;
 }
+
+// A small picture of a chapter's first page, as a path on our own site
+// (app/api/mangadex/thumb) — what the chapter rows show, like the site's
+// own chapters show the first page of their PDF.
+export function chapterThumbPath(chapterId: string): string {
+  return `/api/mangadex/thumb/${chapterId}`;
+}

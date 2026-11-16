@@ -3,6 +3,7 @@ import {
   adjacentChapters,
   chapterBadge,
   chapterLabel,
+  chapterThumbPath,
   cleanSynopsis,
   coverPath,
   isReadable,
@@ -427,5 +428,13 @@ describe("chapterBadge", () => {
 
   it("is the oneshot word without a number", () => {
     expect(chapterBadge(ch({ number: null }), "Oneshot")).toBe("Oneshot");
+  });
+});
+
+describe("chapterThumbPath", () => {
+  it("is our thumbnail route for that chapter", () => {
+    expect(chapterThumbPath("0f8f4527-a542-40fa-8e62-ed343a4f36b0")).toBe(
+      "/api/mangadex/thumb/0f8f4527-a542-40fa-8e62-ed343a4f36b0",
+    );
   });
 });

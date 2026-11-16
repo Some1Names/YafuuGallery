@@ -27,6 +27,7 @@
     "react-hook-form": "^7.85.0",
     "react-pdf": "^10.4.1",
     "resend": "^6.28.0",
+    "sharp": "0.35.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
